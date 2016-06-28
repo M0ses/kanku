@@ -31,7 +31,7 @@ with 'Kanku::Cmd::Roles::RemoteCommand';
 sub abstract { "list guests on your remote kanku instance" }
 
 sub description { 
-  "list guests on your remote kanku instance"
+  "list guests on your remote kanku instance" . $_[0]->description_footer;
 }
 
 sub execute {
@@ -41,9 +41,8 @@ sub execute {
   if ( $self->list ) {
     $self->_list();
   } else {
-    $logger->warn("Please specify a command <--list>");
+    $logger->warn("Please specify a command. Run 'kanku help rguest' for further information.");
   }
-
 }
 
 sub _list {

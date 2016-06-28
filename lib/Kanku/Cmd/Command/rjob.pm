@@ -49,7 +49,7 @@ has name => (
 sub abstract { "show result of tasks from a specified remote job" }
 
 sub description { 
-  "show result of tasks from a specified job on your remote instance"
+  "show result of tasks from a specified job on your remote instance" . $_[0]->description_footer;
 }
 
 sub execute {
@@ -122,6 +122,8 @@ sub execute {
 		}
 	}
 	print Dumper($job_config);
+  } else {
+	$logger->warn("Please specify a command. Run 'kanku help rjob' for further information.");
   }
 }
 

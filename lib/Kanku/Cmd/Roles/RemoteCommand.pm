@@ -23,7 +23,7 @@ has list => (
   isa           => 'Bool',
   is            => 'rw',
   cmd_aliases    => 'l',
-  documentation => 'list <history|job|guest> overview',
+  documentation => '(*) list <history|job|guest> overview',
 );
 
 has details => (
@@ -31,7 +31,13 @@ has details => (
   isa           => 'Str',
   is            => 'rw',
   cmd_aliases   => 'd',
-  documentation => '- show details <job_id|job_name|guest_name>',
+  documentation => '(*) show details <job_id|job_name|guest_name>',
 );
+
+sub description_footer {
+ "
+All options marked with an asterisk (*) are subcommands.
+";   
+}
 
 1;

@@ -58,16 +58,19 @@ has page => (
 sub abstract { "list job history on your remote kanku instance" }
 
 sub description { 
-  "list job history on your remote kanku instance"
+  "list job history on your remote kanku instance" . $_[0]->description_footer;
 }
 
 sub execute {
   my $self  = shift;
+  my $logger  =	Log::Log4perl->get_logger;	
 
   if ( $self->list ) {
     $self->_list();
   } elsif ( $self->details ) {
     $self->_details();
+  } else {
+	$logger->warn("Please specify a command. Run 'kanku help rhistory' for further information.");
   }
 }
 
