@@ -47,7 +47,7 @@ sub prepare {
     for my $kf (
       "$ENV{HOME}/.ssh/id_dsa.pub",
       "$ENV{HOME}/.ssh/id_ecdsa.pub",
-      "$ENV{HOME}/.ssh/id_ecdsa.pub_sk",
+      "$ENV{HOME}/.ssh/id_ecdsa_sk.pub",
       "$ENV{HOME}/.ssh/id_ed25519.pub",
       "$ENV{HOME}/.ssh/id_ed25519_sk.pub",
       "$ENV{HOME}/.ssh/id_rsa.pub",
@@ -206,7 +206,10 @@ The following variables will be taken from the job context if not set explicitly
 =head1 DEFAULTS
 
 If neither public_keys nor public_key_files are given, 
-than the handler will check $HOME/.ssh for the id_rsa.pub and id_dsa.pub. 
+than the handler will check $HOME/.ssh and /etc/kanku/ssh
+for the following files:
+id_dsa.pub, id_ecdsa.pub, id_ecdsa_sk.pub,
+id_ed25519.pub, id_ed25519_sk.pub, and id_rsa.pub.
 
 The keys from the found files will be deployed on the system.
 
