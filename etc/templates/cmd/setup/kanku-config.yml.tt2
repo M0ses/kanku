@@ -76,12 +76,12 @@ Kanku::LibVirt::Network::OpenVSwitch:
     bridges:
       -
         bridge:           kanku-br0
-	vlan:             kanku-vlan0
-	host_ip:          [% ovs_ip_prefix %].1
-	network:          [% ovs_ip_prefix %].0/24
-	dhcp_range:       [% ovs_ip_prefix %].66,[% ovs_ip_prefix %].254
-	start_dhcp:       1
-	is_gateway:       1
+        vlan:             kanku-vlan0
+        host_ip:          [% ovs_ip_prefix %].1
+        network:          [% ovs_ip_prefix %].0/24
+        dhcp_range:       [% ovs_ip_prefix %].66,[% ovs_ip_prefix %].254
+        start_dhcp:       1
+        is_gateway:       1
 #  -
 #    name:                 ibsworker
 #    iptables_chain:       KANKU_HOSTS
