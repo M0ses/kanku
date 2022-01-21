@@ -12,30 +12,51 @@ sub list {
   my $opts;
   my $search = {};
   my $limit = $self->params->{limit} || 10;
+  my $jrs    = $self->rset('JobHistory');
+
+  # "id",
+  # "name",
+  # "state",
+  # "args",
+  # "result",
+  # "creation_time",
+  # "start_time",
+  # "end_time",
+  # "last_modified",
+  # "workerinfo",
+  # "masterinfo",
+  # "trigger_user",
+  # "pwrand",
+
+  my $states = ($self->params->{state}) 
+    ? $self->params->{state} 
+    : [qw/succeed running failed dispatching/];
+
 
   if ($self->params->{show_only_latest_results}) {
+    my @fields = qw/state name start_time end_time creation_time last_modified workerinfo trigger_user pwrand/;
     my $cfg = Kanku::Config->instance();
     $opts = {
-      order_by =>{-asc =>'name'},
+      # group_by => ['name'],
+      rows     => $limit,
+      page     => $self->params->{page} || 1,
+      select   => [{ max => 'id'}, @fields],
+      as       => ['id', @fields],
+      where    => {
+	name => {'-in' => [$cfg->job_list]},
+	state => {'-in' => $states},
+      },
       group_by => ['name'],
-      rows => $limit,
-      page => $self->params->{page} || 1,
-      where => { name => [$cfg->job_list]},
     };
-    if ($self->params->{state}) {
-      $search->{state} = $self->params->{state};
-    }
   } else {
     $opts = {
       order_by =>{-desc  =>'id'},
-      rows => $limit,
       page => $self->params->{page} || 1,
+      rows     => $limit,
+      where    => {
+	state => {'-in' => $states},
+      },
     };
-    if ($self->params->{state}) {
-      $search->{state} = $self->params->{state};
-    } else {
-      $search->{state} = [qw/succeed running failed dispatching/];
-    }
   }
 
 
@@ -50,7 +71,7 @@ sub list {
           $stmt  = "like";
         } elsif ($2) {
           $field = $2;
-          $stmt  = "in";
+          $stmt  = "-in";
           $val   = [split ',', $jn];
         }
 	$search->{$field}= { $stmt => $val };
