@@ -52,6 +52,13 @@ option 'ipaddress' => (
   documentation => 'IP address to connect to',
 );
 
+option 'execute' => (
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => 'e',
+  documentation => 'command to execute via ssh',
+);
+
 sub run {
   my ($self) = @_;
   my $cfg    = $self->cfg;
@@ -64,13 +71,14 @@ sub run {
   if ( $state eq 'on' ) {
     my $ip    = $self->ipaddress || $cfg->config->{ipaddress} || $vm->get_ipaddress;
     my $user  = $self->user;
+    my $cmd   = $self->execute || q{};
 
     $self->ipaddress($ip);
     $self->username($user);
     $self->job(Kanku::Job->new());
     $self->connect();
 
-    system "ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -l $user $ip";
+    system "ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -l $user $ip $cmd";
     exit 0;
   } elsif ($state eq 'off') {
     $self->logger->warn('VM is off - use \'kanku startvm\' to start VM and try again');
