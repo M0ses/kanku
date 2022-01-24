@@ -21,30 +21,26 @@ jobs:
     use_module: Kanku::Handler::OBSCheck
     options:
       api_url: https://api.opensuse.org/public/
-      # Please have a look at
-      # https://build.opensuse.org/project/show/home:M0ses:kanku:Images
-      # to find more official Images
-      project: home:M0ses:kanku:Images
-      repository: images_leap_42_3
-      package: openSUSE-Leap-42.3-JeOS
+      project: devel:kanku:images
+      package: openSUSE-Leap-15.4-JeOS
+      repository: images_leap_15_4
+      arch: x86_64
   -
     use_module: Kanku::Handler::ImageDownload
   -
     use_module: Kanku::Handler::CreateDomain
     options:
-      memory: 2097152
+      memory: 2G
       vcpu: 2
       use_9p: 1
-      #forward_port_list: tcp:22,tcp:443
   -
     use_module: Kanku::Handler::PrepareSSH
   -
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
-        #- zypper -n ar http://download.opensuse.org/repositories/Virtualization:/containers/openSUSE_Leap_42.3/ Virtualization:containers
-        #- zypper -n ar obs://devel:languages:python devel:languages:python
         - zypper -n --gpg-auto-import-keys ref -s
+        - zypper -n in python3
         - zypper -n in erlang-epmd
         # copy unit file for epmd.socket
         - cp /usr/lib/systemd/system/epmd.socket /etc/systemd/system/

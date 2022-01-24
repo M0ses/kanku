@@ -10,8 +10,8 @@
     options:
       api_url: https://api.opensuse.org/public
       project: devel:kanku:images
-      repository: images_leap_15_2
-      package: openSUSE-Leap-15.2-JeOS
+      repository: images_tumbleweed
+      package: openSUSE-Tumbleweed-JeOS:ext4
   -
     use_module: Kanku::Handler::ImageDownload
   -
@@ -34,11 +34,11 @@
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
-        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/perl/openSUSE_Leap_15.2/devel:kanku:perl.repo
-        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/staging/openSUSE_Leap_15.2/devel:kanku:staging.repo
+        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/perl/openSUSE_Tumbleweed/devel:kanku:perl.repo
+        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/staging/openSUSE_Tumbleweed/devel:kanku:staging.repo
         - zypper --gpg-auto-import-keys ref -s
         # Only for development
-        - zypper -n in vim-data curl make apache2 systemd-bash-completion sqlite3
+        - zypper -n in make apache2 sqlite3
   # Install kanku developer mode and run tests
   -
     use_module: Kanku::Handler::ExecuteCommandViaSSH

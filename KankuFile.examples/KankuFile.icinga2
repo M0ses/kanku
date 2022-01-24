@@ -25,8 +25,8 @@ jobs:
       # https://build.opensuse.org/project/show/devel:kanku:images
       # to find more official Images
       project: devel:kanku:images
-      repository: images_leap_15_3
-      package: openSUSE-Leap-15.3-JeOS
+      repository: images_leap_15_4
+      package: openSUSE-Leap-15.4-JeOS
       use_oscrc: 0
   -
     use_module: Kanku::Handler::ImageDownload
@@ -44,16 +44,8 @@ jobs:
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
-#        - zypper ar obs://devel:tools devel:tools
-#        - zypper ar obs://server:monitoring server:monitoring
-#        - zypper ar obs://home:M0ses:branches:server:monitoring home:M0ses:branches:server:monitoring
-#        - zypper ar obs://server:database   server:database
-        - zypper ar https://download.opensuse.org/repositories/devel:/tools/openSUSE_Leap_15.3/devel:tools.repo
-        - zypper ar https://download.opensuse.org/repositories/server:/monitoring/openSUSE_Leap_15.3/server:monitoring.repo
-        - zypper ar https://download.opensuse.org/repositories/server:/database/openSUSE_Leap_15.3/server:database.repo
-        - zypper -n --gpg-auto-import-keys ref -s
+        - zypper ar https://download.opensuse.org/repositories/server:/monitoring/15.4/server:monitoring.repo
         # packages for debugging only, could be removed in production env
-        - zypper -n in vim-data sudo
         # Install packages
         - zypper -n in apache2 icinga2 icingaweb2 icingacli php7-ldap php7-dom php7-imagick php7-pdo php7-curl php7-mysql php7-pgsql mariadb mariadb-client icinga2-ido-mysql monitoring-plugins monitoring-plugins-ping monitoring-plugins-procs monitoring-plugins-ssh monitoring-plugins-load monitoring-plugins-http monitoring-plugins-disk monitoring-plugins-users monitoring-plugins-swap influxdb grafana icingaweb2-module-grafana
         # Prepare apache

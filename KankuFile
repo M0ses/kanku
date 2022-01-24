@@ -5,6 +5,7 @@ Kanku::Util::IPTables:
 
 domain_name: kanku-devel
 default_job: devel
+ssh_user: root
 
 #qemu:
 #  user:

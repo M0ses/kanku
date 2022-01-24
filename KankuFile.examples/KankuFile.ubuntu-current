@@ -3,7 +3,7 @@ Kanku::Util::IPTables:
   start_port: 49001
 
 
-domain_name: ubuntu-devel
+domain_name: ubuntu-current
 default_job: kanku-job
 login_user: root
 login_pass: kankudai
@@ -18,32 +18,23 @@ jobs:
     use_module: Kanku::Handler::OBSCheck
     options:
       api_url: https://api.opensuse.org/public
-      # Please have a look at
-      # https://build.opensuse.org/project/show/devel:kanku:images
-      # to find more official Images
       project: devel:kanku:images
+      package: ubuntu-focal
       repository: images_ubuntu
-      package: ubuntu-JeOS
-      #project: Virtualization:Appliances:Images:Testing_x86
-      #repository: images
-      #package: test-image-ubuntu:Virtual
-      skip_all_checks: 1
-      use_oscrc: 0
+      arch: x86_64
   -
     use_module: Kanku::Handler::ImageDownload
   -
     use_module: Kanku::Handler::CreateDomain
     options:
-      memory: 2097152
+      memory: 2G
       vcpu: 2
       use_9p: 1
-      #forward_port_list: tcp:22,tcp:443
-      root_disk_size: 4294967296
   -
     use_module: Kanku::Handler::ExecuteCommandViaConsole
     options:
       commands:
-        - echo "deb http://archive.ubuntu.com/ubuntu bionic main universe" > /etc/apt/sources.list
+        - echo "deb http://archive.ubuntu.com/ubuntu focal main universe" > /etc/apt/sources.list
         - apt-get update
         - apt-get install -y parted openssh-server
         - /tmp/kanku/resize.sh /dev/sda 1 apply
