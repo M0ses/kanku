@@ -156,7 +156,7 @@ urlwrapper:
 	install -m 644 public/images/48/kanku.png $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/kanku.png
 	install -m 644 public/images/64/kanku.png $(DESTDIR)/usr/share/icons/hicolor/64x64/apps/kanku.png
 
-test-kankufiles: centos-current icinga openQA rabbitmq-opensuse simple multivm
+test-kankufiles: centos-current icinga openQA rabbitmq-opensuse simple multivm test-snapshot
 
 centos-current:
 	export KANKU_CONFIG=KankuFile.examples/KankuFile.centos-current && kanku destroy && kanku up && kanku destroy
@@ -171,6 +171,8 @@ simple:
 multivm:
 	export KANKU_CONFIG=KankuFile.examples/KankuFile.multivm && kanku destroy && kanku up && kanku destroy
 
+test-snapshot:
+	export KANKU_CONFIG=KankuFile.examples/KankuFile.test-snapshot && kanku destroy && kanku up && kanku destroy
 
 
 

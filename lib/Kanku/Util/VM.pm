@@ -38,7 +38,7 @@ has [qw/
       ipaddress     uri           disks_xml
       management_interface        management_network
       network_name  network_bridge
-      keep_volumes  pool_name
+      keep_volumes  pool_name     snapshot_name
     / ]  => ( is=>'rw', isa => 'Str');
 
 has job_id           => ( is => 'rw', isa => 'Int' );
@@ -50,6 +50,7 @@ has additional_disks => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has keep_volumes     => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has '+uri'           => ( default => 'qemu:///system');
 has '+template_file' => ( default => q{});
+has '+snapshot_name' => ( default => 'current');
 #has "+ipaddress"  => ( lazy => 1, default => sub { $self->get_ipaddress } );
 
 has vmm => (
@@ -565,28 +566,80 @@ sub list_all_volumes {
 
   return \@volumes;
 }
+
 sub search_volume {
   my ($self, %opts) = @_;
   my $vols;
+
   if ($self->domain_name) {
     $vols = $self->list_volumes;
   } else {
     $vols = $self->list_all_volumes;
   }
+
   for my $vol (@{$vols}) {
     return $vol if ($opts{name} && $opts{name} eq $vol->get_name);
     return $vol if ($opts{path} && $opts{path} eq $vol->get_path);
   }
-
+  return;
 }
 
 sub create_snapshot {
-  my $self    = shift;
+  my ($self)  = @_;
+  my $logger  = $self->logger;
   my $dom     = $self->dom;
 
-  my $disks   = $self->get_disk_list;
+  my $xml = '<domainsnapshot><name>'.$self->snapshot_name.'</name></domainsnapshot>';
+  my $flags;
 
+  try {
+    $dom->create_snapshot($xml, $flags);
+  } catch {
+    if ($_->message =~ /Error: Migration is disabled when VirtFS export path '.*' is mounted in the guest using mount_tag '(.*)'/) {
+      my $share = $1;
+      my $con = Kanku::Util::VM::Console->new(
+	domain_name => $self->domain_name,
+	login_user  => $self->login_user,
+	login_pass  => $self->login_pass,
+	job_id      => $self->job_id,
+	log_file    => $self->log_file,
+	log_stdout  => $self->log_stdout,
+	no_wait_for_bootloader => 1,
+      );
 
+      $con->init();
+      $con->login;
+      $logger->info("Umount $share");
+      $con->cmd("umount $share");
+      $logger->info("Retrying to create snapshot");
+      $dom->create_snapshot($xml, $flags);
+      $logger->info("Mount $share");
+      $con->cmd("mount $share");
+    } else {
+      die $_;
+    }
+
+  };
+  return;
+}
+
+sub remove_snapshot {
+  my $self    = shift;
+  my $dom     = $self->dom;
+  my $snap    = $dom->get_snapshot_by_name($self->snapshot_name);
+  $snap->delete();
+}
+
+sub revert_snapshot {
+  my $self    = shift;
+  my $dom     = $self->dom;
+  my $snap    = $dom->get_snapshot_by_name($self->snapshot_name);
+  $snap->revert_to();
+}
+
+sub list_snapshots {
+  my $self    = shift;
+  return ($self->dom->list_all_snapshots);
 }
 
 sub get_disk_list {

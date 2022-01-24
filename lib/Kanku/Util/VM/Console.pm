@@ -30,13 +30,14 @@ has ['domain_name','short_hostname','log_file','login_user','login_pass'] => (is
 has 'prompt' => (is=>'rw', isa=>'Str',default=>'Kanku-prompt: ');
 has 'prompt_regex' => (is=>'rw', isa=>'Object',default=>sub { qr/^Kanku-prompt: /m });
 has _expect_object  => (is=>'rw', isa => 'Object');
-has [qw/bootloader_seen grub_seen user_is_logged_in console_connected log_stdout/] => (is=>'rw', isa => 'Bool');
+has [qw/bootloader_seen grub_seen user_is_logged_in console_connected log_stdout no_wait_for_bootloader/] => (is=>'rw', isa => 'Bool');
 has 'connect_uri' => (is=>'rw', isa=>'Str', default=>'qemu:///system');
 has ['job_id'] => (is=>'rw', isa=>'Int|Undef');
 
 has ['cmd_timeout'] => (is=>'rw', isa=>'Int', default => 600);
 has ['login_timeout'] => (is=>'rw', isa=>'Int', default => 300);
 has '+log_stdout' => (default=>1);
+has '+no_wait_for_bootloader' => (default=>0);
 
 sub init {
   my $self = shift;
@@ -88,7 +89,9 @@ sub init {
       ]
   );
 
-  $exp->expect(
+  if (!$self->no_wait_for_bootloader) {
+    $logger->info('Waiting for bootloader');
+    $exp->expect(
       5,
       [
         qr/(Press any key to continue.|ISOLINUX|Automatic boot in|The highlighted entry will be executed automatically in)/ => sub {
@@ -100,7 +103,8 @@ sub init {
           }
         }
       ]
-  );
+    );
+  }
 
   if ( $self->grub_seen ) {
     $exp->send("\n\n");

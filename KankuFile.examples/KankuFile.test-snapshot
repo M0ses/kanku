@@ -1,0 +1,56 @@
+#
+domain_name: test-snapshot
+default_job: kanku-job
+login_user: root
+login_pass: kankudai
+
+jobs:
+ kanku-job:
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      host_interface: eth0
+      snapshot_name: fresh_install
+  -
+    use_module: Kanku::Handler::OBSCheck
+    options:
+      api_url: https://api.opensuse.org/public
+      # Please have a look at
+      # kanku lsi
+      # to find more official Images
+      project: devel:kanku:images
+      package: openSUSE-Leap-15.4-JeOS
+      repository: images_leap_15_4
+      arch: x86_64
+      use_oscrc: 0
+  -
+    use_module: Kanku::Handler::ImageDownload
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 2G
+      vcpu: 2
+      use_9p: 1
+
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::DomainSnapshot
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - touch test.snapshot
+  -
+    use_module: Kanku::Handler::DomainSnapshot
+    options:
+      action: revert
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - "test ! -f test.snapshot"
+  -
+    use_module: Kanku::Handler::DomainSnapshot
+    options:
+      action: remove
