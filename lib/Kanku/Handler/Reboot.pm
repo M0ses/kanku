@@ -41,21 +41,11 @@ has gui_config => (
   lazy => 1,
   default => sub {
       [
-#        {
-#          param => 'wait_for_network',
-#          type  => 'checkbox',
-#          label => 'Wait for network'
-#        },
         {
           param => 'wait_for_console',
           type  => 'checkbox',
           label => 'Wait for console'
         },
-#        {
-#          param => 'timout',
-#          type  => 'text',
-#          label => 'Timeout'
-#        },
       ];
   }
 );
@@ -87,6 +77,7 @@ sub execute {
       job_id      => $self->job->id,
       log_file    => $ctx->{log_file} || q{},
       log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
+      no_wait_for_bootloader => 1
   );
 
   my $con = $vm->console();

@@ -104,15 +104,15 @@ sub init {
         }
       ]
     );
-  }
 
-  if ( $self->grub_seen ) {
-    $exp->send("\n\n");
-    $exp->clear_accum();
-  } else {
-    $logger->warn("No bootloader seen - this might be a bug in your OS!");
-    $logger->warn("Try using a template with graphical console configured!");
-    $logger->warn("E.g. use 'template: with-spice' in your CreateDomain config section!");
+    if ( $self->grub_seen ) {
+      $exp->send("\n\n");
+      $exp->clear_accum();
+    } else {
+      $logger->warn("No bootloader seen - this might be a bug in your OS!");
+      $logger->warn("Try using a template with graphical console configured!");
+      $logger->warn("E.g. use 'template: with-spice' in your CreateDomain config section!");
+    }
   }
 
   die "Could not open virsh console within $timeout seconds" if ( ! ( $self->console_connected or $self->grub_seen ));
