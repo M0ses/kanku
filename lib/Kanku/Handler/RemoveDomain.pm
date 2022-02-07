@@ -97,10 +97,6 @@ sub execute {
     $self->logger->warn("Error while removing domain: ".$self->domain_name."\n$_");
   };
 
-  my $ipt = Kanku::Util::IPTables->new(domain_name=>$self->domain_name);
-
-  $ipt->cleanup_rules_for_domain();
-
   return {
     code    => 0,
     message => "Successfully removed domain " . $self->domain_name
