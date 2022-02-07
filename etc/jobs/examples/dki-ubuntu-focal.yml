@@ -8,8 +8,12 @@ tasks:
       domain_name: dki-ubuntu-focal
   -
     use_module: Kanku::Handler::RemoveDomain
+    options:
+      ignore_autostart: 1
   -
     use_module: Kanku::Handler::CleanupIPTables
+    options:
+      ignore_autostart: 1
   -
     use_module: Kanku::Handler::OBSCheck
     options:

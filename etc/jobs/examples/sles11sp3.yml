@@ -10,13 +10,12 @@ tasks:
     use_module: Kanku::Handler::ImageDownload
     options:
       url: <uri_to_download_from>
-
   -
     use_module: Kanku::Handler::RemoveDomain
   -
     use_module: Kanku::Handler::CreateDomain
     options:
-      memory: 2097152
+      memory: 2G
       vcpu: 2
       management_interface: eth0
       login_user: root

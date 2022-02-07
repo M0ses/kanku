@@ -61,17 +61,18 @@ tasks:
         - zypper -n in perl-Devel-Cover
   -
     use_module: Kanku::Handler::WaitForSystemd
-#  -
-#    use_module: Kanku::Handler::ExecuteCommandViaSSH
-#    options:
-#      commands:
-#        - echo -en "[client]\nuser = root\npassword = opensuse\n" > /root/.my.cnf
-#        - make -C  /tmp/open-build-service/dist test_system
-#        - make -C /tmp/open-build-service/src/backend test_unit
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - echo -en "[client]\nuser = root\npassword = opensuse\n" > /root/.my.cnf
+        - make -C  /tmp/open-build-service/dist test_system
+        - make -C /tmp/open-build-service/src/backend test_unit
   -
     use_module: Kanku::Handler::CleanupIPTables
   -
     use_module: Kanku::Handler::RemoveDomain
+
 # Please be aware that you have to have a working sendmail/postfix
 # for this feature
 #notifiers:

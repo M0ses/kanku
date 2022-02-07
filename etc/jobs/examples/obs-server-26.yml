@@ -17,6 +17,14 @@ tasks:
   -
     use_module: Kanku::Handler::RemoveDomain
     options:
+      ignore_autostart: 1
+  -
+    use_module: Kanku::Handler::CleanupIPTables
+    options:
+      ignore_autostart: 1
+  -
+    use_module: Kanku::Handler::RemoveDomain
+    options:
       uri: qemu:///system
   -
     use_module: Kanku::Handler::ImageDownload
@@ -51,6 +59,10 @@ tasks:
     options:
       commands:
         - echo -en "[client]\nuser = root\npassword = opensuse\n" > /root/.my.cnf
+  -
+    use_module: Kanku::Handler::CleanupIPTables
+  -
+    use_module: Kanku::Handler::RemoveDomain
 
 notifiers:
   - 
