@@ -55,7 +55,8 @@ has gui_config => (
 );
 
 sub execute {
-  my $self = shift;
+  my ($self) = @_;
+  my $ctx    = $self->job()->context();
 
   if ( $self->forward_port_list ) {
     my $ipt = Kanku::Util::IPTables->new(
