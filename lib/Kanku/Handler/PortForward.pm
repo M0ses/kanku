@@ -59,9 +59,10 @@ sub execute {
 
   if ( $self->forward_port_list ) {
     my $ipt = Kanku::Util::IPTables->new(
-      domain_name     => $self->domain_name,
-      host_interface  => $self->host_interface || '',
-      guest_ipaddress => $self->ipaddress
+      domain_name      => $self->domain_name,
+      host_interface   => $self->host_interface || '',
+      guest_ipaddress  => $self->ipaddress,
+      domain_autostart => $ctx->{domain_autostart},
     );
 
     $ipt->add_forward_rules_for_domain(

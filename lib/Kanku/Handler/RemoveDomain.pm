@@ -25,7 +25,7 @@ with 'Kanku::Roles::Handler';
 
 has [qw/uri domain_name/] => (is => 'rw',isa=>'Str');
 
-has [qw/disabled/] => (is => 'rw',isa=>'Bool');
+has [qw/disabled ignore_autostart/] => (is => 'rw',isa=>'Bool');
 has [qw/keep_volumes/] => (is => 'rw', isa => 'ArrayRef', lazy => 1, default => sub {[]});
 
 has gui_config => (
@@ -37,12 +37,17 @@ has gui_config => (
         {
           param => 'domain_name',
           type  => 'text',
-          label => 'Domain Name:'
+          label => 'Domain Name',
         },
         {
           param => 'disabled',
           type  => 'checkbox',
-          label => 'Disabled'
+          label => 'Disabled',
+        },
+        {
+          param => 'ignore_autostart',
+          type  => 'checkbox',
+          label => 'Ignore Autostart',
         },
       ];
   }
@@ -52,9 +57,8 @@ has gui_config => (
 sub distributable { 2 };
 
 sub execute {
-
-  my $self = shift;
-  my $ctx  = $self->job()->context();
+  my ($self) = @_;
+  my $ctx    = $self->job->context;
 
   $self->logger->trace("Domain name in context: $ctx->{domain_name}");
 
@@ -67,10 +71,17 @@ sub execute {
 
   $self->logger->info("Removing domain: ".$self->domain_name);
 
-  if ( $self->disabled ) {
+  if ($self->disabled) {
       return {
         code    => 0,
         message => "Skipped removing domain " . $self->domain_name ." because of disabled job"
+      }
+  }
+
+  if ($ctx->{domain_autostart} && !$self->ignore_autostart) {
+      return {
+        code    => 0,
+        message => "Skipped removing domain " . $self->domain_name ." because 'domain_autostart' is set in job context."
       }
   }
 
@@ -132,6 +143,8 @@ This handler removes VM and removes configured port forwarding rules.
 =head2 getters
 
  domain_name
+
+ domain_autostart
 
 =head2 setters
 

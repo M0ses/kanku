@@ -27,7 +27,7 @@ has domain_name => (
   isa  => 'Str',
 );
 
-has disabled => (is => 'rw',isa=>'Bool');
+has [qw/disabled ignore_autostart/] => (is => 'rw',isa=>'Bool');
 
 has gui_config => (
   is => 'ro',
@@ -38,12 +38,17 @@ has gui_config => (
         {
           param => 'domain_name',
           type  => 'text',
-          label => 'Domain Name:'
+          label => 'Domain Name',
         },
         {
           param => 'disabled',
           type  => 'checkbox',
-          label => 'Disabled'
+          label => 'Disabled',
+        },
+	{
+          param => 'ignore_autostart',
+          type  => 'checkbox',
+          label => 'Ignore Autostart',
         },
       ];
   }
@@ -51,25 +56,35 @@ has gui_config => (
 
 sub execute {
   my ($self) = @_;
+  my $ctx    = $self->job->context;
 
   $self->domain_name($self->job->context->{domain_name}) if (! $self->domain_name);
 
   confess "No domain_name given!\n" if (! $self->domain_name );
 
-  if ( $self->disabled ) {
+  my $domain_name = $self->domain_name;
+
+  if ($self->disabled) {
       return {
         code    => 0,
-        message => "Skipped cleanup of iptables rules for domain " . $self->domain_name ." because of disabled job"
+        message => "Skipped cleanup of iptables rules for domain $domain_name because of disabled job",
       }
   }
 
-  my $ipt = Kanku::Util::IPTables->new(domain_name=>$self->domain_name);
+  if ($ctx->{domain_autostart} && ! $self->ignore_autostart) {
+      return {
+        code    => 0,
+        message => "Skipped cleanup of iptables rules for domain $domain_name because domain_autostart is set",
+      }
+  }
+
+  my $ipt = Kanku::Util::IPTables->new(domain_name=>$domain_name);
 
   $ipt->cleanup_rules_for_domain();
 
   return {
     code    => 0,
-    message => "Successfully cleaned up iptables rules for domain " . $self->domain_name
+    message => "Successfully cleaned up iptables rules for domain $domain_name",
   }
 
 }
@@ -106,6 +121,8 @@ the specified domain on the master server.
 =head2 getters
 
  domain_name
+
+ domain_autostart
 
 =head2 setters
 

@@ -394,6 +394,15 @@ sub _setup_ovs_hooks {
 ");
 
   chmod oct(755), "/etc/libvirt/hooks/network";
+
+  file("/etc/libvirt/hooks/daemon")->spew('#!/bin/bash
+
+if [ "$2" == "shutdown" ];then
+  /usr/bin/perl /usr/lib/kanku/network-setup.pl - stopped
+fi
+');
+
+  chmod oct(755), "/etc/libvirt/hooks/daemon";
   $self->_run_system_cmd("systemctl", "restart", "libvirtd.service");
 }
 

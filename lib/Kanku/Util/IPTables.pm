@@ -17,8 +17,8 @@
 package Kanku::Util::IPTables;
 
 use Moose;
-use Data::Dumper;
 use File::Which;
+use JSON::MaybeXS;
 use Kanku::Config;
 
 with 'Kanku::Roles::Logger';
@@ -55,8 +55,6 @@ has host_ipaddress => (
     $_[0]->logger->debug("Executing command: '$cmd'");
     my @out = `$cmd`;
 
-    $_[0]->logger->trace(Dumper(\@out));
-
     for my $line (@out) {
       if ( $line =~ /^\s*inet\s+([0-9\.]*)(\/\d+)?\s.*/ ) {
         return $1
@@ -66,44 +64,34 @@ has host_ipaddress => (
   }
 );
 
+has 'domain_autostart' => (
+  is      => 'rw',
+  isa     => 'Bool',
+  default => 0,
+);
+
 sub get_forwarded_ports_for_domain {
   my $self        = shift;
   my $domain_name = shift || $self->domain_name;
   my $result      = { };
-  my $sudo        = $self->sudo();
-  my $cmd         = "";
 
   die "No domain_name given. Cannot procceed\n" if (! $domain_name);
 
-  my $re = '^DNAT.*\/\*\s*Kanku:host:'.$domain_name.'(:\w*)?\s*\*\/';
+  my @prerouting_rules = $self->_get_rules_from_chain('nat');
 
-  # prepare command to read PREROUTING chain
-  $cmd = $sudo . "LANG=C iptables -t nat -L PREROUTING -n";
-
-  # read PREROUTING rules
-  my @prerouting_rules = `$cmd`;
-
-  # check each PREROUTING rule if comment matches "/* Kanku:host:<domain_name>:<application_protocol> */"
-  # and push line number to rules ARRAY
   my %port2app = (
     22  => 'ssh',
     80  => 'http',
     443 => 'https',
   );
-  for my $line (@prerouting_rules) {
-      if ( $line =~ $re ) {
-        chomp $line;
-        # DNAT       tcp  --  0.0.0.0/0            10.160.67.4          tcp dpt:49002 /* Kanku:host:obs-server:<application_protocol> */ to:192.168.100.148:443
-        my($target,$prot,$opt,$source,$destination,@opts) = split(/\s+/,$line);
-        my ($host_port,$guest_port,$app);
-        for my $f (@opts) {
-          if ($f =~ /^Kanku:host:[^\s:]+:(\w+)$/ ) { $app = $1 }
-          if ($f =~ /^dpt:(\d+)$/ ) { $host_port = $1 }
-          if ($f =~ /^to:[\d\.]+:(\d+)$/ ) { $guest_port = $1 }
-        }
-        $app = $port2app{$guest_port} if (!$app && $port2app{$guest_port});
-        $result->{$destination}->{$host_port} = [$guest_port, $app];
-      }
+  for my $rule (@prerouting_rules) {
+    next if ($rule->{target} ne 'DNAT');
+    my $guest_port  = $rule->{to_port};
+    my $app         = $result->{application_protocol};
+    $app            = $port2app{$guest_port} if (!$app && $port2app{$guest_port});
+    my $host_port   =  $rule->{dpt};
+    my $destination = $rule->{dest};
+    $result->{$destination}->{$host_port} = [$guest_port, $app];
   }
 
   return $result;
@@ -112,36 +100,17 @@ sub get_forwarded_ports_for_domain {
 sub get_active_rules_for_domain {
   my $self        = shift;
   my $domain_name = shift || $self->domain_name;
-  my $result      = { filter => { $self->iptables_chain => [] }, nat => { PREROUTING => [] }  };
-  my $sudo        = $self->sudo();
-  my $cmd         = "";
+  my $result      = {
+    filter =>{$self->iptables_chain=>[]},
+    nat=>{$self->iptables_chain=>[]}
+  };
 
   die "No domain_name given. Cannot procceed\n" if (! $domain_name);
 
-  my $re = '^(\d+).*\/\*\s*Kanku:host:'.$domain_name.':\w* \s*\*\/';
-
-  # prepare command to read PREROUTING chain
-  $cmd = $sudo . "LANG=C iptables -t nat -v -L PREROUTING -n --line-numbers";
-
-  # read PREROUTING rules
-  my @prerouting_rules = `$cmd`;
-
-  # check each PREROUTING rule if comment matches "/* Kanku:host:<domain_name> */"
-  # and push line number to rules ARRAY
-  for my $line (@prerouting_rules) {
-    push(@{$result->{nat}->{PREROUTING}},$1) if ( $line =~ $re );
-  }
-
-  # prepare command to read FORWARD chain
-  $cmd = $sudo . "LANG=C iptables -v -L ".$self->iptables_chain." -n --line-numbers";
-
-  # read FORWARD rules
-  my @forward_rules = `$cmd`;
-
-  # check each FORWARD rule if comment matches "/* Kanku:host:<domain_name> */"
-  # and push line number to rules ARRAY
-  for my $line (@forward_rules) {
-    push (@{$result->{filter}->{$self->iptables_chain}},$1) if ( $line =~ $re);
+  for my $table ('nat', 'filter') {
+    for my $rule ($self->_get_rules_from_chain($table)) {
+      push(@{$result->{$table}->{$self->iptables_chain}},$rule->{line_number}) if ($rule->{domain_name} eq  $domain_name);
+    }
   }
 
   return $result;
@@ -212,10 +181,10 @@ sub add_forward_rules_for_domain {
   foreach my $port ( @{$portlist->{$proto}} ) {
     my $host_port = shift(@fw_ports);
 
-    my $comment = " -m comment --comment 'Kanku:host:".$self->domain_name.":$port->[1]'";
+    my $comment = " -m comment --comment 'Kanku:host:".$self->domain_name.":$port->[1]:".$self->domain_autostart."'";
 
     my @cmds = (
-      "iptables -t nat -I PREROUTING 1 -d $host_ip -p $proto --dport $host_port -j DNAT --to $guest_ip:$port->[0] $comment",
+      "iptables -t nat -I ".$self->iptables_chain." 1 -d $host_ip -p $proto --dport $host_port -j DNAT --to $guest_ip:$port->[0] $comment",
       "iptables -I ".$self->iptables_chain." 1 -d $guest_ip/32 -p $proto -m state --state NEW -m tcp --dport $port->[0] -j ACCEPT $comment"
     );
 
@@ -229,6 +198,122 @@ sub add_forward_rules_for_domain {
   }
 
 };
+
+sub store_iptables_autostart {
+  my ($self, $file) = @_;
+  my $rules2store = {nat=>[],filter=>[]};
+
+  for my $table (keys %$rules2store) {
+    my @rules =  $self->_get_rules_from_chain($table);
+    for my $rule (@rules) {
+      push @{$rules2store->{$table}}, $rule if $rule->{domain_autostart};
+    }
+  }
+  $self->logger->debug("Writing rules2store to $file");
+  open(my $fh, '>', $file) || die "Could not open $file: $!\n";
+  print $fh encode_json($rules2store);
+  close $fh;
+}
+
+sub restore_iptables_autostart {
+  my ($self, $file) = @_;
+  my $sudo = $self->sudo || q{};
+  my $lines;
+  if(-f $file) {
+    open(my $fh, '<', $file) || die "Could not open $file: $!\n";
+    $lines = <$fh>;
+    close $fh;
+  } else {
+    $self->logger->debug("$file not found");
+  }
+
+  my $restore = decode_json($lines);
+
+  for my $table (keys %{$restore}) {
+    for my $rule (@{$restore->{$table}}) {
+      my $cmd;
+      if ($rule->{target} eq 'DNAT') {
+        $cmd = "iptables -t $table -I ".$self->iptables_chain." 1 -d $rule->{dest}/32 -p $rule->{proto} --dport $rule->{dpt} -j DNAT --to $rule->{to_host}:$rule->{to_port} -m comment --comment \"$rule->{comment}\"";
+      } elsif ($rule->{target} eq 'ACCEPT'){
+        $cmd = "iptables -I ".$self->iptables_chain." 1 -d $rule->{dest}/32 -p $rule->{proto} -m state --state NEW -m tcp --dport $rule->{dpt} -j ACCEPT -m comment --comment \"$rule->{comment}\"";
+      }
+
+      $self->logger->debug("Executing command '$cmd'");
+      my @out = `$sudo$cmd 2>&1`;
+      if ($?) {
+	die "Error while adding rule by executing command: $?\n\t$cmd\n\n@out\n";
+      }
+    }
+  }
+}
+
+
+sub _get_rules_from_chain {
+  my ($self, $table, $chain) = @_;
+  my $sudo = $self->sudo();
+  my @rules;
+  $table  ||= 'filter';
+  $chain  ||= $self->iptables_chain;
+  my $cmd  = "$sudo LANG=C iptables -t $table -L $chain -v -n --line-numbers";
+
+  my @lines = `$cmd`;
+
+  die "Error while creating iptables chain($?):\n\t$cmd\n\n@lines\n" if $?;
+
+  # 1        0     0 ACCEPT     tcp  --  *      *       0.0.0.0/0            192.168.199.84       state NEW tcp dpt:443 /* Kanku:host:obs-server::1 */
+  my $re = qr/^
+    (\d+)\s+       # line-number
+    (\d+[KMG]?)\s+ # packets
+    (\d+[KMG]?)\s+ # bytes
+    ([^\s]+)\s+    # target
+    ([^\s]+)\s+    # proto
+    ([^\s]+)\s+    # opts
+    ([^\s]+)\s+    # in
+    ([^\s]+)\s+    # out
+    ([^\s]+)\s+    # source
+    ([^\s]+)\s*    # dest
+    (.*)           # info
+  $/x;
+
+  for my $l (splice @lines,2) {
+    chomp($l);
+    if ($l =~ $re) {
+      my $result = {
+        line_number => $1,
+	packets     => $2,
+	bytes       => $3,
+	target      => $4,
+	proto       => $5,
+	opts        => $6,
+	in          => $7,
+	out         => $8,
+	source      => $9,
+	dest        => $10,
+	_info       => $11,
+      };
+      $result->{state} = $1 if($result->{_info} =~ /state ([^\s]+)/);
+      $result->{dpt} = $1 if($result->{_info} =~ /(?:udp|tcp) dpt:(\d+)/);
+      if($result->{_info} =~ m#/\*\s+(Kanku:host:(.*):(.*):(.*))\s+\*/#) {
+        $result->{comment}              = $1;
+        $result->{domain_name}          = $2;
+        $result->{application_protocol} = $3;
+        $result->{domain_autostart}     = $4;
+      }
+      if($result->{_info} =~ m#\s+to:([0-9\.]+):(\d+)#) {
+        $result->{to_host} = $1;
+        $result->{to_port} = $2;
+      }
+      if($result->{_info} =~ m#/\*\s+(Kanku:net:(.*))\s+\*/#) {
+        $result->{comment}              = $1;
+        $result->{network_name}          = $2;
+      }
+      push @rules, $result;
+    } else {
+       $self->logger->warn("Could not parse line: '$l'")
+    }
+  }
+  return @rules;
+}
 
 sub _check_chain {
   my ($self) = @_;
@@ -276,13 +361,12 @@ has _used_ports => (
     my $cmd     = "";
     # TODO: make usable for tcp and udp
 
-    # prepare command to read PREROUTING chain
+    # prepare command to read used ports from host services
     my $bin = which 'ss';
     $bin = which 'netstat' unless $bin;
     if ($bin) {
       $cmd = $self->sudo . "LANG=C $bin -ltn";
 
-      # read PREROUTING rules
       foreach my $line (`$cmd`) {
 	chomp $line;
 	my @fields = split(/\s+/,$line);
@@ -298,19 +382,15 @@ has _used_ports => (
       }
     }
 
-    # prepare command to read PREROUTING chain
-    $cmd = $self->sudo . "LANG=C iptables -t nat -L PREROUTING -n";
-
-    # read PREROUTING rules
-    for my $line ( `$cmd` ) {
-      chomp $line;
-      my($target,$prot,$opt,$source,$destination,@opts) = split(/\s+/,$line);
-      next if ($target ne 'DNAT');
+    # read nat rules
+    for my $rule ( $self->_get_rules_from_chain('nat')) {
+      next if ($rule->{target} ne 'DNAT');
+      my $destination = $rule->{dest};
       if (
           $destination eq '0.0.0.0' or
           $destination eq $hostip
       ){
-        map { if ( $_ =~ /^dpt:(\d+)/ ) { $result->{$1} = 1 } } @opts;
+        $result->{$rule->{dpt}} = 1 if $rule->{dpt};
       }
     }
     return $result;

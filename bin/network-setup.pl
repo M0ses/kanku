@@ -21,7 +21,7 @@ my $current_network_name = $ARGV[0];
 my $action               = $ARGV[1];
 my $cfg                  = Kanku::YAML::LoadFile("/etc/kanku/kanku-config.yml");
 my @net_list;
-my $net_cfg;
+my @net_cfg;
 
 $logger->info("$0 started with network '$current_network_name' -> '$action'");
 
@@ -34,13 +34,17 @@ if (ref($cfg->{'Kanku::LibVirt::Network::OpenVSwitch'}) eq 'ARRAY') {
    exit 0;
 }
 
-for my $net (@net_list) {
-  next if ($net->{name} ne $current_network_name);
-  $net_cfg = $net;
+if ($current_network_name eq '-') {
+  @net_cfg = @net_list;
+} else {
+  for my $net (@net_list) {
+    next if ($net->{name} ne $current_network_name);
+    push @net_cfg, $net;
+  }
 }
 
-if ($net_cfg) {
-  my $setup = Kanku::Setup::LibVirt::Network->new(net_cfg=>$net_cfg,name=>$current_network_name);
+for my $ncfg (@net_cfg) {
+  my $setup = Kanku::Setup::LibVirt::Network->new(net_cfg=>$ncfg,name=>$current_network_name);
   try {
     if ( $action eq 'start' ) {
       $setup->prepare_ovs();
@@ -62,7 +66,6 @@ if ($net_cfg) {
     $logger->error($_);
     die "Died because of previous errors - have a look into /var/log/kanku/network-setup.log for detailed information.\n";
   };
-  exit 0;
 }
 
 $logger->info("Current network name ($current_network_name) did not found in our configs");

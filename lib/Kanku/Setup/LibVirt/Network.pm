@@ -8,6 +8,7 @@ use POSIX 'setsid';
 use IPC::Run qw/run/;
 use Carp qw/confess/;
 use Kanku::LibVirt::HostList;
+use Kanku::Util::IPTables;
 
 
 has cfg_file => (
@@ -50,6 +51,12 @@ has name => (
   is => 'rw',
   isa => 'Str',
   required => 1,
+);
+
+has iptables_autostart_json => (
+  is      => 'rw',
+  isa     => 'Str',
+  default => '/var/lib/kanku/iptables_autostart.json',
 );
 
 sub dnsmasq_cfg_file {
@@ -203,11 +210,12 @@ sub start_dhcp {
     if ($kid) {
       # Parent runs this block
       $self->logger->debug("Setting iptables commands");
-      system("iptables","-I","INPUT","1","-p","tcp","-i",$net_cfg->{bridge},"--dport","67","-j","ACCEPT");
-      system("iptables","-I","INPUT","1","-p","udp","-i",$net_cfg->{bridge},"--dport","67","-j","ACCEPT");
-      system("iptables","-I","INPUT","1","-p","tcp","-i",$net_cfg->{bridge},"--dport","53","-j","ACCEPT");
-      system("iptables","-I","INPUT","1","-p","udp","-i",$net_cfg->{bridge},"--dport","53","-j","ACCEPT");
-      system("iptables","-I","OUTPUT","1","-p","udp","-o",$net_cfg->{bridge},"--dport","68","-j","ACCEPT");
+      my @comment = ('-m','comment','--comment',"Kanku:net:$name");
+      system("iptables","-I","INPUT","1","-p","tcp","-i",$net_cfg->{bridge},"--dport","67","-j","ACCEPT",@comment);
+      system("iptables","-I","INPUT","1","-p","udp","-i",$net_cfg->{bridge},"--dport","67","-j","ACCEPT",@comment);
+      system("iptables","-I","INPUT","1","-p","tcp","-i",$net_cfg->{bridge},"--dport","53","-j","ACCEPT",@comment);
+      system("iptables","-I","INPUT","1","-p","udp","-i",$net_cfg->{bridge},"--dport","53","-j","ACCEPT",@comment);
+      system("iptables","-I","OUTPUT","1","-p","udp","-o",$net_cfg->{bridge},"--dport","68","-j","ACCEPT",@comment);
     } else {
       # Child runs this block
       setsid or die "Can't start a new session: $!";
@@ -226,7 +234,8 @@ sub start_dhcp {
 sub configure_iptables {
   my $self	= shift;
   my $net_cfg	= $self->net_cfg;
-  my $bridges = $self->bridges;
+  my $bridges   = $self->bridges;
+  my $name      = $self->name;
   my $forward;
   for my $ncfg (@$bridges) {
     $self->logger->debug("Starting configuration of iptables");
@@ -249,21 +258,26 @@ sub configure_iptables {
 
     $self->logger->debug("prefix: $prefix");
 
+    my @comment = ('-m','comment','--comment',"Kanku:net:$name");
     my $rules = [
       ["-X",$self->iptables_chain],
       ["-N",$self->iptables_chain],
-      ["-I",$self->iptables_chain, "-j","RETURN"],
-      ["-I","FORWARD","1","-i",$ncfg->{bridge},"-j","REJECT","--reject-with","icmp-port-unreachable"],
-      ["-I","FORWARD","1","-o",$ncfg->{bridge},"-j","REJECT","--reject-with","icmp-port-unreachable"],
-      ["-I","FORWARD","1","-i",$ncfg->{bridge},"-o","$ncfg->{bridge}","-j","ACCEPT"],
-      ["-I","FORWARD","1","-s",$prefix,"-i",$ncfg->{bridge},"-j","ACCEPT"],
-      ["-I","FORWARD","1","-j",$self->iptables_chain],
-      ["-I","FORWARD","1","-d",$prefix,"-o",$ncfg->{bridge},"-m","conntrack","--ctstate","RELATED,ESTABLISHED","-j","ACCEPT"],
-      ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-j","MASQUERADE"],
-      ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-p","udp","-j","MASQUERADE","--to-ports","1024-65535"],
-      ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-p","tcp","-j","MASQUERADE","--to-ports","1024-65535"],
-      ["-t","nat","-I","POSTROUTING","-s",$prefix,"-d","255.255.255.255/32","-j","RETURN"],
-      ["-t","nat","-I","POSTROUTING","-s",$prefix,"-d","224.0.0.0/24","-j","RETURN"],
+      ["-I",$self->iptables_chain, "-j","RETURN",@comment],
+      ['-t','nat','-X',$self->iptables_chain],
+      ['-t','nat','-N',$self->iptables_chain],
+      ['-t','nat','-I',$self->iptables_chain, "-j","RETURN",@comment],
+      ["-I","FORWARD","1","-i",$ncfg->{bridge},"-j","REJECT","--reject-with","icmp-port-unreachable",@comment],
+      ["-I","FORWARD","1","-o",$ncfg->{bridge},"-j","REJECT","--reject-with","icmp-port-unreachable",@comment],
+      ["-I","FORWARD","1","-i",$ncfg->{bridge},"-o","$ncfg->{bridge}","-j","ACCEPT",@comment],
+      ["-I","FORWARD","1","-s",$prefix,"-i",$ncfg->{bridge},"-j","ACCEPT",@comment],
+      ["-I","FORWARD","1","-j",$self->iptables_chain,@comment],
+      ["-I","FORWARD","1","-d",$prefix,"-o",$ncfg->{bridge},"-m","conntrack","--ctstate","RELATED,ESTABLISHED","-j","ACCEPT",@comment],
+      ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-j","MASQUERADE",@comment],
+      ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-p","udp","-j","MASQUERADE","--to-ports","1024-65535",@comment],
+      ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-p","tcp","-j","MASQUERADE","--to-ports","1024-65535",@comment],
+      ["-t","nat","-I","POSTROUTING","-s",$prefix,"-d","255.255.255.255/32","-j","RETURN",@comment],
+      ["-t","nat","-I","POSTROUTING","-s",$prefix,"-d","224.0.0.0/24","-j","RETURN",@comment],
+      ["-t","nat","-I","PREROUTING","1","-j",$self->iptables_chain,@comment],
     ];
 
     for my $rule (@{$rules}) {
@@ -279,6 +293,14 @@ sub configure_iptables {
   }
   system('sysctl net.ipv4.ip_forward=1') if $forward;
 
+  my $json_file = $self->iptables_autostart_json;
+  if (-f $json_file) {
+    my $ipt = Kanku::Util::IPTables->new;
+    $ipt->restore_iptables_autostart($json_file);
+    unlink $json_file;
+  } else {
+    $self->logger->debug("Could not find $json_file");
+  }
   return 0;
 }
 
@@ -297,112 +319,60 @@ sub kill_dhcp {
 sub cleanup_iptables {
   my ($self)  = @_;
   my $bridges = $self->bridges;
+  my $name    = $self->name;
+
+  my $ipt = Kanku::Util::IPTables->new;
+  $ipt->store_iptables_autostart($self->iptables_autostart_json);
+
   for my $ncfg (@$bridges) {
     my $ncfg = $self->net_cfg;
     my $rules_to_delete = {
       'filter' => {
-	'INPUT' 	=> [],
-	'OUTPUT'	=> [],
-	'FORWARD'	=> [],
+	'INPUT'               => [],
+	'OUTPUT'              => [],
+	'FORWARD'             => [],
+	$self->iptables_chain => [],
       },
       'nat' => {
-	'POSTROUTING'	=> [],
+	'PREROUTING'          => [],
+	'POSTROUTING'         => [],
+	$self->iptables_chain => [],
       }
     };
 
+    for my $table (keys %$rules_to_delete) {
+      for my $chain (keys %{$rules_to_delete->{$table}}) {
+	my @rules = $ipt->_get_rules_from_chain($table, $chain);
+	for my $rule (@rules) {
+	  $self->logger->debug("Cleaning chain $chain in table $table  $rule->{comment}");
+          push @{$rules_to_delete->{$table}->{$chain}}, $rule->{line_number} if $rule->{comment} eq "Kanku:net:$name";
+	}
+      }
+    }
+
     $self->logger->info("Cleaning iptables rules");
-    my @cmdout;
-    @cmdout = `iptables -L OUTPUT -n -v --line-numbers`;
-
-    for my $line (@cmdout ) {
-	    my @args = split(/\s+/,$line,10);
-	    # check if outgoing interface matches
-	    $self->logger->debug("Values: $args[7] eq $ncfg->{bridge}");
-	    if ( $args[7] eq $ncfg->{bridge} ) {
-		    # remember line numbers
-		    push(@{$rules_to_delete->{filter}->{OUTPUT}},$args[0]);
-	    }
-    }
-
-    @cmdout = `iptables -L INPUT -n -v --line-numbers`;
-
-    for my $line (@cmdout ) {
-	    my @args = split(/\s+/,$line,10);
-	    # check if incomming interface matches
-	    $self->logger->debug("Values: $args[6] eq $ncfg->{bridge}");
-	    if ( $args[6] eq $ncfg->{bridge} ) {
-		    # remember line numbers
-		    push(@{$rules_to_delete->{filter}->{INPUT}},$args[0]);
-	    }
-    }
-
-
-    my $ip = new Net::IP ($ncfg->{network});
-    if ( ! $ip ) {
-	    $self->logger->debug("Bad network configuration");
-	    next;
-    }
-
-    my $prefix = $ip->prefix;
-    my $netreg = qr/!?\Q$prefix\E/;
-    my $brreg  = $ncfg->{bridge};
-
-    @cmdout = `iptables -L FORWARD -n -v --line-numbers`;
-
-    for my $line (@cmdout ) {
-	    my @args = split(/\s+/,$line,11);
-	    # check if incomming interface matches
-	    $self->logger->debug("Values: $netreg -> $args[8] / $args[9]");
-	    if (
-		    $args[8] =~ $netreg
-		    || $args[9] =~ $netreg
-		    || $args[7] =~ /$brreg/
-		    || $args[6] =~ /$brreg/
-		    || $args[3] eq $self->iptables_chain
-	    ) {
-		    # remember line numbers
-		    push(@{$rules_to_delete->{filter}->{FORWARD}},$args[0]);
-	    }
-    }
-
-    @cmdout = `iptables -t nat -L POSTROUTING -n -v --line-numbers`;
-
-    for my $line (@cmdout ) {
-	    my @args = split(/\s+/,$line,11);
-	    # check if incomming interface matches
-	    $self->logger->debug("Values: $netreg -> $args[8] / $args[9]");
-	    if (
-		    $args[8] =~ $netreg
-		    || $args[9] =~ $netreg
-		    || $args[7] =~ /$brreg/
-		    || $args[6] =~ /$brreg/
-	    ) {
-		    # remember line numbers
-		    $self->logger->debug("Adding line $args[0]");
-		    push(@{$rules_to_delete->{nat}->{POSTROUTING}},$args[0]);
-	    }
-    }
-
     for my $table (keys(%{$rules_to_delete})) {
-	    for my $chain (keys(%{$rules_to_delete->{$table}}) ) {
-		    # cleanup from the highest number to keep numbers consistent
-		    $self->logger->debug("Cleaning chain $chain in table $table");
-		    for my $number ( reverse @{$rules_to_delete->{$table}->{$chain}} ) {
-			    $self->logger->debug("... deleting from chain $chain rule number $number");
-			    # security not relevant here because we have trusted input
-			    # from 'iptables -L ...'
-			    my @cmd_output = `iptables -t $table -D $chain $number 2>&1`;
-			    if ( $? ) {
-				    $self->logger->error("An error occured while deleting rule $number from chain $chain : @cmd_output");
-			    }
-		    }
-
-	    }
+      for my $chain (keys(%{$rules_to_delete->{$table}}) ) {
+	# cleanup from the highest number to keep numbers consistent
+	$self->logger->debug("Cleaning chain $chain in table $table");
+	for my $number ( reverse @{$rules_to_delete->{$table}->{$chain}} ) {
+	  $self->logger->debug("... deleting from chain $chain rule number $number");
+	  # security not relevant here because we have trusted input
+	  # from 'iptables -L ...'
+	  my @cmd_output = `iptables -t $table -D $chain $number 2>&1`;
+	  if ( $? ) {
+            $self->logger->error("An error occured while deleting rule $number from chain $chain : @cmd_output");
+	  }
+	}
+      }
     }
     my $chain = $self->iptables_chain;
     `iptables -F $chain`;
     `iptables -X $chain`;
+    `iptables -t nat -F $chain`;
+    `iptables -t nat -X $chain`;
   }
 }
+
 1;
 

@@ -41,6 +41,7 @@ has [qw/
   skip_check_package
   skip_download
   offline
+  domain_autostart
 /] => (is => 'ro', isa => 'Bool',default => 0 );
 
 has [qw/
@@ -53,50 +54,35 @@ has gui_config => (
   lazy => 1,
   default => sub {
       [
-#        {
-#          param => 'api_url',
-#          type  => 'text',
-#          label => 'API URL'
-#        },
-#        {
-#          param => 'skip_all_checks',
-#          type  => 'checkbox',
-#          label => 'Skip all checks'
-#        },
-#        {
-#          param => 'project',
-#          type  => 'text',
-#          label => 'Project'
-#        },
-#        {
-#          param => 'package',
-#          type  => 'text',
-#          label => 'Package'
-#        },
         {
           param => 'images_dir',
           type  => 'text',
-          label => 'Image Directory'
+          label => 'Image Directory',
         },
         {
           param => 'domain_name',
           type  => 'text',
-          label => 'Domain Name'
+          label => 'Domain Name',
         },
         {
           param => 'vm_template_file',
           type  => 'text',
-          label => 'VM Template File'
+          label => 'VM Template File',
         },
         {
           param => 'os_instance_name',
           type  => 'text',
-          label => 'Name for OpenStack instance'
+          label => 'Name for OpenStack instance',
         },
         {
           param => 'offline',
           type  => 'checkbox',
-          label => 'Offline Mode'
+          label => 'Offline Mode',
+        },
+        {
+          param => 'domain_autostart',
+          type  => 'checkbox',
+          label => 'Autostart domain',
         },
       ];
   }
@@ -110,7 +96,7 @@ sub execute {
     os_instance_name os_image_id login_user login_pass 
     privatekey_path publickey_path
     host_dir_9p accessmode_9p
-    vm_image_file management_interface snapshot_name
+    vm_image_file management_interface snapshot_name domain_autostart
   /) {
     if ($self->$var()){
       $self->logger->debug("Setting variable $var in context to ".$self->$var());
@@ -181,6 +167,7 @@ For further explaination of these options please have a look at the correspondin
 
       images_dir
 
+      domain_autostart
 
 
 =head1 CONTEXT

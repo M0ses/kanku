@@ -81,6 +81,7 @@ has [qw/
         skip_network
         skip_login
         skip_memory_checks
+	domain_autostart
 /]      => (is => 'rw',isa=>'Bool',default => 0);
 
 has "+images_dir"     => (default=>"/var/lib/libvirt/images");
@@ -145,6 +146,11 @@ has gui_config => (
           type  => 'text',
           label => 'Name of network bridge'
         },
+        {
+          param => 'domain_autostart',
+          type  => 'checkbox',
+          label => 'Set autostart for domain on host startup',
+        },
       ];
   }
 );
@@ -188,6 +194,7 @@ sub prepare {
   $self->host_dir_9p($ctx->{host_dir_9p})       if ( ! $self->host_dir_9p  && $ctx->{host_dir_9p});
   $self->accessmode_9p($ctx->{accessmode_9p})   if ( ! $self->accessmode_9p  && $ctx->{accessmode_9p});
   $self->cache_dir($ctx->{cache_dir})           if ($ctx->{cache_dir});
+  $self->domain_autostart(1)                    if ($ctx->{domain_autostart});
 
   $ctx->{management_interface} = $self->management_interface
     if $self->management_interface;
@@ -294,6 +301,11 @@ sub execute {
   $vm->template_file($self->template) if ($self->template);
 
   $vm->create_domain();
+
+  if ($self->domain_autostart) {
+    $vm->dom->set_autostart(1);
+    $ctx->{domain_autostart} = 1;
+  }
 
   $ctx->{tmp_image_file} = undef if exists $ctx->{tmp_image_file};
 
@@ -430,10 +442,11 @@ sub _prepare_vm_via_console {
 
     if ( $self->forward_port_list ) {
 	my $ipt = Kanku::Util::IPTables->new(
-	  domain_name     => $self->domain_name,
-	  host_interface  => $ctx->{host_interface} || '',
-	  guest_ipaddress => $ip,
-	  iptables_chain  => $cfg->{'Kanku::Util::IPTables'}->{iptables_chain}
+	  domain_name      => $self->domain_name,
+	  host_interface   => $ctx->{host_interface} || '',
+	  guest_ipaddress  => $ip,
+	  iptables_chain   => $cfg->{'Kanku::Util::IPTables'}->{iptables_chain},
+	  domain_autostart => $self->domain_autostart,
 	);
 
 	$ipt->add_forward_rules_for_domain(
@@ -725,11 +738,15 @@ If configured a port_forward_list, it tries to find the next free port and confi
 
  cache_dir
 
+ domain_autostart
+
 =head2 setters
 
  vm_image_file
 
  ipaddress
+
+ domain_autostart
 
 =head1 DEFAULTS
 
