@@ -193,7 +193,7 @@ common config and lib files used in kanku
 %tmpfiles_create %_tmpfilesdir/kanku.conf
 
 %files common
-%doc README.md RELEASE-NOTES-0.11.0.md
+%doc README.md RELEASE-NOTES-0.11.0.md RELEASE-NOTES-0.12.0.md
 
 %dir /usr/lib/kanku
 %dir /usr/lib/kanku/lib
