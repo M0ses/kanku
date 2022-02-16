@@ -1,0 +1,12 @@
+[Unit]
+Description=Restore and store kanku iptables rules
+After=local-fs.target network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/kanku/network-setup.pl - configure_iptables
+ExecStop=/usr/lib/kanku/network-setup.pl - cleanup_iptables
+
+[Install]
+WantedBy=multi-user.target

@@ -118,6 +118,7 @@ install_services: install_dirs
 	install -m 644 ./dist/systemd/kanku-triggerd.service $(DESTDIR)/usr/lib/systemd/system/kanku-triggerd.service
 	install -m 644 ./dist/systemd/kanku-web.service $(DESTDIR)/usr/lib/systemd/system/kanku-web.service
 	install -m 644 ./dist/systemd/kanku-dispatcher.service $(DESTDIR)/usr/lib/systemd/system/kanku-dispatcher.service
+	install -m 644 ./dist/systemd/kanku-iptables.service $(DESTDIR)/usr/lib/systemd/system/kanku-iptables.service
 
 install_docs:
 	install -m 644 README.md $(_DOCDIR)

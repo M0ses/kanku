@@ -35,16 +35,18 @@ if (ref($cfg->{'Kanku::LibVirt::Network::OpenVSwitch'}) eq 'ARRAY') {
 }
 
 if ($current_network_name eq '-') {
+  $logger->info("Adding all networks");
   @net_cfg = @net_list;
 } else {
   for my $net (@net_list) {
     next if ($net->{name} ne $current_network_name);
+    $logger->info("Adding network: $net->{name}");
     push @net_cfg, $net;
   }
 }
 
 for my $ncfg (@net_cfg) {
-  my $setup = Kanku::Setup::LibVirt::Network->new(net_cfg=>$ncfg,name=>$current_network_name);
+  my $setup = Kanku::Setup::LibVirt::Network->new(net_cfg=>$ncfg,name=>$ncfg->{name});
   try {
     if ( $action eq 'start' ) {
       $setup->prepare_ovs();
@@ -53,13 +55,19 @@ for my $ncfg (@net_cfg) {
     if ( $action eq 'started' ) {
       $setup->prepare_dns();
       $setup->start_dhcp();
-      $setup->configure_iptables();
     }
 
     if ( $action eq 'stopped' ) {
       $setup->kill_dhcp();
-      $setup->cleanup_iptables;
       $setup->bridge_down;
+    }
+
+    if ( $action eq 'cleanup_iptables' ) {
+      $setup->cleanup_iptables;
+    }
+
+    if ( $action eq 'configure_iptables' ) {
+      $setup->configure_iptables;
     }
   } catch {
     $logger->error("$0 $current_network_name $action failed:");
@@ -68,5 +76,4 @@ for my $ncfg (@net_cfg) {
   };
 }
 
-$logger->info("Current network name ($current_network_name) did not found in our configs");
 exit 0;

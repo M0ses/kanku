@@ -19,6 +19,8 @@ package Kanku::Util::IPTables;
 use Moose;
 use File::Which;
 use JSON::MaybeXS;
+use Carp;
+
 use Kanku::Config;
 
 with 'Kanku::Roles::Logger';
@@ -100,16 +102,16 @@ sub get_forwarded_ports_for_domain {
 sub get_active_rules_for_domain {
   my $self        = shift;
   my $domain_name = shift || $self->domain_name;
-  my $result      = {
-    filter =>{$self->iptables_chain=>[]},
-    nat=>{$self->iptables_chain=>[]}
-  };
+  my $chain       = $self->iptables_chain;
+  my $result      = {filter =>{$chain=>[]}, nat=>{$chain=>[]}};
 
   die "No domain_name given. Cannot procceed\n" if (! $domain_name);
 
   for my $table ('nat', 'filter') {
-    for my $rule ($self->_get_rules_from_chain($table)) {
-      push(@{$result->{$table}->{$self->iptables_chain}},$rule->{line_number}) if ($rule->{domain_name} eq  $domain_name);
+    if ($self->chain_exists($table)) {
+      for my $rule ($self->_get_rules_from_chain($table)) {
+        push(@{$result->{$table}->{$chain}},$rule->{line_number}) if ($rule->{domain_name} eq  $domain_name);
+      }
     }
   }
 
@@ -204,9 +206,11 @@ sub store_iptables_autostart {
   my $rules2store = {nat=>[],filter=>[]};
 
   for my $table (keys %$rules2store) {
-    my @rules =  $self->_get_rules_from_chain($table);
-    for my $rule (@rules) {
-      push @{$rules2store->{$table}}, $rule if $rule->{domain_autostart};
+    if ($self->chain_exists($table)) {
+      my @rules =  $self->_get_rules_from_chain($table);
+      for my $rule (@rules) {
+	push @{$rules2store->{$table}}, $rule if $rule->{domain_autostart};
+      }
     }
   }
   $self->logger->debug("Writing rules2store to $file");
@@ -247,6 +251,20 @@ sub restore_iptables_autostart {
   }
 }
 
+sub chain_exists {
+  my ($self, $table, $chain) = @_;
+  my $sudo = $self->sudo();
+  my @rules;
+  $table  ||= 'filter';
+  $chain  ||= $self->iptables_chain;
+  my $cmd  = "$sudo LANG=C iptables -t $table -L $chain";
+  my @lines = `$cmd`;
+
+  return 1 unless $?;
+
+  return 0;
+}
+
 
 sub _get_rules_from_chain {
   my ($self, $table, $chain) = @_;
@@ -258,7 +276,7 @@ sub _get_rules_from_chain {
 
   my @lines = `$cmd`;
 
-  die "Error while creating iptables chain($?):\n\t$cmd\n\n@lines\n" if $?;
+  confess "Error while creating iptables chain($?):\n\t$cmd\n\n@lines\n" if $?;
 
   # 1        0     0 ACCEPT     tcp  --  *      *       0.0.0.0/0            192.168.199.84       state NEW tcp dpt:443 /* Kanku:host:obs-server::1 */
   my $re = qr/^
