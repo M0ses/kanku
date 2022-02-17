@@ -55,6 +55,9 @@ a.faq {
   <li>
     <a href='#faq'                  id='faq-btn'                  class="btn_dark nav_btn"        onclick=switch_to('faq')>FAQ / Known Issues</a>
   </li>
+  <li>
+    <a href='#news'                  id='news-btn'                 class="btn_dark nav_btn"        onclick=switch_to('news')>NEWS</a>
+  </li>
 </ul>
 
 <!-- About --> 
@@ -283,6 +286,33 @@ kanku ssh -u root
       Please see the open issues on <a href=http://github.com/M0ses/kanku/issues>http://github.com/M0ses/kanku/issues</a>
 
 </div>
+<!-- NEWS --> 
+<div id="news-div"  class="hidden_content page_container">
+    <h1>
+      <a id="news-href" class="anchor" href="#news-href" aria-hidden="true">
+      <span aria-hidden="true" class="octicon octicon-link"></span></a>
+      NEWS
+    </h1>
+    <h2><a id="0.12.1" class="anchor" href="#0.12.1" aria-hidden="true">Release 0.12.1</a></h2>
+    <p>(17.02.2022)</p>
+    <p>
+      Release 0.12.1 containes a full functional version of the "Kanku VM Autostart" feature for kanku clusters.
+    </p>
+    <h3>Features</h3>
+    <ul>
+      <li>Restart VMs</li>
+      <li>Restore VMs iptable rules</li>
+    </ul>
+    <img class="orbit-image" src="images/screenshots/kanku_screenshot-feature-autostart_domain.png" alt="Autostart Domain">
+    <h2><a id="0.12.0" class="anchor" href="#0.12.0" aria-hidden="true">Release 0.12.0</a></h2>
+    <p>(09.02.2022)</p>
+    <p>
+    <a href="https://github.com/M0ses/kanku/blob/master/RELEASE-NOTES-0.12.0.md">SEE RELEASE NOTES</a>
+    </p>
+</div>
+<!-- /NEWS -->
+
+
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/M0ses/kanku">Kanku</a> is maintained by <a href="https://github.com/M0ses">M0ses</a>.</span>
 

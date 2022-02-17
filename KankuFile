@@ -1,7 +1,3 @@
-#
-#Kanku::Util::IPTables:
-#  start_port: 49001
-
 domain_name: kanku-gh-pages
 default_job: kanku-job
 login_user: root
@@ -16,13 +12,12 @@ jobs:
     use_module: Kanku::Handler::SetJobContext
     options:
       host_interface: eth0
-
   -
     use_module: Kanku::Handler::OBSCheck
     options:
       project: devel:kanku:images
-      repository: images_leap_15_1
-      package: openSUSE-Leap-15.1-JeOS
+      repository: images_tumbleweed
+      package: openSUSE-Tumbleweed-JeOS:ext4
   -
     use_module: Kanku::Handler::ImageDownload
     options:
@@ -30,12 +25,11 @@ jobs:
   -
     use_module: Kanku::Handler::CreateDomain
     options:
-      memory: 2097152
+      memory: 2G
       vcpu: 2
       use_9p: 1
       mnt_dir_9p: /srv/www/htdocs
       images_dir: /var/lib/libvirt/images
-      #forward_port_list: tcp:22,tcp:443
   -
     use_module: Kanku::Handler::PrepareSSH
 
