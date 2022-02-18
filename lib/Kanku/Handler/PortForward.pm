@@ -31,7 +31,14 @@ has '+domain_name' => (
 
 has '+host_interface' => (
   lazy => 1,
-  default => sub { $_[0]->job()->context()->{host_interface} || '' }
+  default => sub {
+    my $pkg = __PACKAGE__;
+    my $cfg = Kanku::Config->instance()->config();
+    return  
+     $_[0]->job()->context()->{host_interface} 
+     || $cfg->{$pkg}->{host_interface}
+     || '' 
+   },
 );
 
 has '+ipaddress' => (
