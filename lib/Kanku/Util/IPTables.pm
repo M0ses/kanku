@@ -88,10 +88,11 @@ sub get_forwarded_ports_for_domain {
   );
   for my $rule (@prerouting_rules) {
     next if ($rule->{target} ne 'DNAT');
+    next if ($rule->{domain_name} ne $domain_name);
     my $guest_port  = $rule->{to_port};
     my $app         = $result->{application_protocol};
     $app            = $port2app{$guest_port} if (!$app && $port2app{$guest_port});
-    my $host_port   =  $rule->{dpt};
+    my $host_port   = $rule->{dpt};
     my $destination = $rule->{dest};
     $result->{$destination}->{$host_port} = [$guest_port, $app];
   }
