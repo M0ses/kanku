@@ -1,4 +1,4 @@
-# kanku release notes 0.12.0
+# Release 0.12.0
 
 ## New Featues
 
