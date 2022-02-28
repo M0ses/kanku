@@ -272,7 +272,7 @@ sub _expand_raw_image {
     my $to_read = $final_size - $self->_total_sent;
     my $nbytes  = $self->_nbytes;
 
-    $self->logger->info("-- Sending another $to_read bytes");
+    $self->logger->info("-- Sending another $to_read bytes BufferSize");
 
     my $f = '/dev/zero';
 
@@ -302,7 +302,7 @@ sub _expand_raw_image {
 sub _simple_upload {
   my ($self, $f, $st) = @_;
   my $nbytes = $self->_nbytes;
-  $self->logger->info('-- _copy_volume -- Uploading file');
+  $self->logger->info("-- _copy_volume -- Uploading file (BufferSize: $nbytes)");
 
   open my $fh, '<', $f or croak("cannot open $f: $!");
 
@@ -334,15 +334,16 @@ sub _simple_upload {
 
 sub _extract_and_upload {
   my ($self, $f, $st) = @_;
+  my $nbytes = $self->_nbytes;
 
-  $self->logger->info('-- _copy_volume -- Uncompressing and uploading file');
+  $self->logger->info("-- _copy_volume -- Uncompressing and uploading file (BufferSize: $nbytes)");
 
   my $z = new IO::Uncompress::AnyUncompress $f
     or croak("IO::Uncompress::AnyUncompress failed: $AnyUncompressError\n");
 
   while (1) {
 	my $data;
-	my $rv = $z->read(\$data);
+	my $rv = $z->read(\$data, $nbytes);
 	if ($rv < 0) {
 	    croak("cannot read $f: $!");
 	}
