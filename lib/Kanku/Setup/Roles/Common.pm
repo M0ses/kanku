@@ -375,7 +375,6 @@ EOF
 
   if ($choice) {
     my $sudoers_file  = file('/etc/sudoers.d/kanku');
-    $self->_backup_config_file($sudoers_file);
     $logger->info("Adding commands for user $user in " . $sudoers_file->stringify);
     my @tcmd;
     for my $cmd (qw/iptables ss netstat/) {
