@@ -2,13 +2,8 @@
 Kanku::Util::IPTables:
   start_port: 49001
 
-
 domain_name: kanku-devel
 default_job: devel
-ssh_user: root
-
-#qemu:
-#  user:
 
 jobs:
 ###### JOB:
