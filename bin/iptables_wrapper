@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $rule  = $ARGV[0];
+die "No argument given!\n" unless $rule;
+my ($action, $table, $chain, $args) = split /:/, $rule, 4;
+die "Invalid table $table specified\n" unless $table =~ /^(nat|filter)$/;
+my @iptables = ('iptables','-t', $table);
+my @cmd;
+
+if ($action eq 'D') {
+  # D:<table>:<chain>:<line>
+  die "No valid line found" unless $args =~ /^\d+$/;
+  @cmd = (@iptables, '-D', $chain, $args);
+} elsif ($action eq 'I') {
+  if ($table eq 'nat') {
+    # I:<table>:<chain>:<dest>:<proto>:<dport>:<to_host>:<to_port>:<comment>
+    my ($dest, $proto, $dport, $to_host, $to_port, $comment) = split /:/, $args, 6;
+    @cmd = (@iptables, '-I', $chain, '1', '-d', $dest, '-p', $proto, '--dport', $dport, '-j', 'DNAT', '--to', "$to_host:$to_port",'-m', 'comment', '--comment', "$comment");
+  } elsif($table eq 'filter') {
+    # I:<table>:<chain>:<dest>:<proto>:<dport>:<comment>
+    my ($dest, $proto, $dport, $comment) = split /:/, $args, 4;
+    @cmd = (@iptables, '-I', $chain, '1', '-d', $dest, '-p', $proto, '--dport', $dport,'-m','state', '--state','NEW', '-j', 'ACCEPT','-m', 'comment', '--comment', "$comment");
+  } else {
+    die "Invalid table $table specified\n";
+  }
+} elsif ($action eq 'L') {
+  # L:<table>:<chain>
+  @cmd = (@iptables,'-t', $table, '-L', $chain, qw{-v -n --line-numbers});
+} elsif ($action eq 'N') {
+  # N:<table>:<chain>
+  @cmd = (@iptables,'-t',$table,'-N', $chain);
+} else {
+  die "No valid action!\n";
+}
+
+print "@cmd\n" if $::ENV{KANKU_DEBUG};
+system(@cmd);
+exit $? >> 8;

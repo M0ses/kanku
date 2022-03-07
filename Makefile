@@ -72,6 +72,8 @@ bin:
 	install -m 755 bin/network-setup.pl $(DESTDIR)/usr/lib/kanku/network-setup.pl
 	install -m 755 bin/kanku $(DESTDIR)/usr/bin/kanku
 	install -m 755 bin/kanku-app.psgi $(DESTDIR)/usr/lib/kanku/kanku-app.psgi
+	install -m 755 bin/ss_netstat_wrapper $(DESTDIR)/usr/lib/kanku/ss_netstat_wrapper
+	install -m 755 bin/iptables_wrapper $(DESTDIR)/usr/lib/kanku/iptables_wrapper
 
 sbin:
 	install -m 755 sbin/kanku-worker $(DESTDIR)/usr/sbin/kanku-worker

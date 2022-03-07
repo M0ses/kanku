@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+export LANG=C
+BIN=`type -p ss`
+if [ -z "$BIN" ];then
+  BIN=`type -p netstat`
+fi
+
+$BIN -ltn
+
+exit 0

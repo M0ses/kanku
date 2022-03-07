@@ -28,9 +28,10 @@ with 'Kanku::Roles::Logger';
 # For future use: we could also get the ip from the serial login
 # but therefore we need the domain_name
 has [qw/domain_name/] => (is=>'rw',isa=>'Str');
-has [qw/guest_ipaddress forward_port_list iptables_chain/] => (is=>'rw',isa=>'Str');
+has [qw/guest_ipaddress forward_port_list iptables_chain iptables_wrapper/] => (is=>'rw',isa=>'Str');
 has forward_ports => (is=>'rw',isa=>'ArrayRef',default=>sub { [] });
 has '+iptables_chain' => (lazy=>1, default => 'KANKU_HOSTS');
+has '+iptables_wrapper' => (lazy=>1, default => '/usr/lib/kanku/iptables_wrapper');
 
 has 'host_interface' => (
   is      => 'rw',
@@ -44,7 +45,7 @@ has host_ipaddress => (
   default =>sub {
     my $host_interface = $_[0]->host_interface;
     if (! $host_interface ) {
-      my $cfg  = Kanku::Config->instance()->config();
+      my $cfg  = Kanku::Config->instance->cf;
       $host_interface = $cfg->{'Kanku::Util::IPTables'}->{host_interface};
     }
 
@@ -124,11 +125,12 @@ sub cleanup_rules_for_domain {
   my $domain_name = shift || $self->domain_name;
   my $rules       = $self->get_active_rules_for_domain($domain_name);
   my $sudo        = $self->sudo();
+  my $wrapper     = $self->iptables_wrapper;
 
   foreach my $table (keys(%{$rules})) {
     foreach my $chain (keys(%{$rules->{$table}})) {
       foreach my $line_number (reverse(@{$rules->{$table}->{$chain}})) {
-        my $cmd = $sudo."iptables -t $table -D $chain $line_number";
+        my $cmd = $sudo."$wrapper D:$table:$chain:$line_number";
         my @out = `$cmd 2>&1`;
         if ($?) {
           die "Error while deleting rules by executing command: $?\n\t$cmd\n\n@out"
@@ -136,7 +138,7 @@ sub cleanup_rules_for_domain {
       }
     }
   }
-};
+}
 
 sub add_forward_rules_for_domain {
   my $self          = shift;
@@ -148,6 +150,8 @@ sub add_forward_rules_for_domain {
 
   my $portlist      = { tcp =>[],udp=>[] };
   my $host_ip       = $self->host_ipaddress;
+  my $wrapper       = $self->iptables_wrapper;
+  my $chain         = $self->iptables_chain;
 
   if (! $host_ip ) {
       $self->logger->warn("No ipaddress found for host_interface '".$self->host_interface."'");
@@ -167,7 +171,7 @@ sub add_forward_rules_for_domain {
       # ignore case for protocol TCP = tcp
       my $trans = lc($1);
       my $port  = $2;
-      my $app   = lc($4);
+      my $app   = lc($4||q{});
       push(@{$portlist->{$trans}}, [$port, $app]);
     } else {
       die "Malicious rule detected '$rule'\n";
@@ -184,11 +188,11 @@ sub add_forward_rules_for_domain {
   foreach my $port ( @{$portlist->{$proto}} ) {
     my $host_port = shift(@fw_ports);
 
-    my $comment = " -m comment --comment 'Kanku:host:".$self->domain_name.":$port->[1]:".$self->domain_autostart."'";
+    my $comment = "Kanku:host:".$self->domain_name.":$port->[1]:".$self->domain_autostart;
 
     my @cmds = (
-      "iptables -t nat -I ".$self->iptables_chain." 1 -d $host_ip -p $proto --dport $host_port -j DNAT --to $guest_ip:$port->[0] $comment",
-      "iptables -I ".$self->iptables_chain." 1 -d $guest_ip/32 -p $proto -m state --state NEW -m tcp --dport $port->[0] -j ACCEPT $comment"
+      "$wrapper I:nat:$chain:$host_ip:$proto:$host_port:$guest_ip:$port->[0]:$comment",
+      "$wrapper I:filter:$chain:$guest_ip/32:$proto:$port->[0]:$comment"
     );
 
     for my $cmd (@cmds) {
@@ -200,7 +204,7 @@ sub add_forward_rules_for_domain {
     }
   }
 
-};
+}
 
 sub store_iptables_autostart {
   my ($self, $file) = @_;
@@ -222,7 +226,9 @@ sub store_iptables_autostart {
 
 sub restore_iptables_autostart {
   my ($self, $file) = @_;
-  my $sudo = $self->sudo || q{};
+  my $sudo          = $self->sudo || q{};
+  my $wrapper       = $self->iptables_wrapper;
+  my $chain         = $self->iptables_chain;
   my $lines;
   if(-f $file) {
     open(my $fh, '<', $file) || die "Could not open $file: $!\n";
@@ -238,9 +244,9 @@ sub restore_iptables_autostart {
     for my $rule (@{$restore->{$table}}) {
       my $cmd;
       if ($rule->{target} eq 'DNAT') {
-        $cmd = "iptables -t $table -I ".$self->iptables_chain." 1 -d $rule->{dest}/32 -p $rule->{proto} --dport $rule->{dpt} -j DNAT --to $rule->{to_host}:$rule->{to_port} -m comment --comment \"$rule->{comment}\"";
+	$cmd = "$wrapper I:$table:$chain:$rule->{dest}/32:$rule->{proto}:$rule->{dpt}:$rule->{to_host}:$rule->{to_port}:$rule->{comment}";
       } elsif ($rule->{target} eq 'ACCEPT'){
-        $cmd = "iptables -I ".$self->iptables_chain." 1 -d $rule->{dest}/32 -p $rule->{proto} -m state --state NEW -m tcp --dport $rule->{dpt} -j ACCEPT -m comment --comment \"$rule->{comment}\"";
+	$cmd = "$wrapper I:$table:$chain:$rule->{dest}/32:$rule->{proto}:$rule->{dpt}:$rule->{comment}";
       }
 
       $self->logger->debug("Executing command '$cmd'");
@@ -254,11 +260,12 @@ sub restore_iptables_autostart {
 
 sub chain_exists {
   my ($self, $table, $chain) = @_;
-  my $sudo = $self->sudo();
+  my $sudo    = $self->sudo();
+  my $wrapper = $self->iptables_wrapper;
   my @rules;
   $table  ||= 'filter';
   $chain  ||= $self->iptables_chain;
-  my $cmd  = "$sudo LANG=C iptables -t $table -L $chain";
+  my $cmd  = "$sudo $wrapper L:$table:$chain";
   my @lines = `$cmd`;
 
   return 1 unless $?;
@@ -271,9 +278,10 @@ sub _get_rules_from_chain {
   my ($self, $table, $chain) = @_;
   my $sudo = $self->sudo();
   my @rules;
-  $table  ||= 'filter';
-  $chain  ||= $self->iptables_chain;
-  my $cmd  = "$sudo LANG=C iptables -t $table -L $chain -v -n --line-numbers";
+  $table    ||= 'filter';
+  $chain    ||= $self->iptables_chain;
+  my $wrapper = $self->iptables_wrapper;
+  my $cmd     = "$sudo $wrapper L:$table:$chain";
 
   my @lines = `$cmd`;
 
@@ -337,17 +345,20 @@ sub _get_rules_from_chain {
 sub _check_chain {
   my ($self) = @_;
 
-  my $sudo = $self->sudo();
-  my $cmd  = "LANG=C iptables -L ".$self->iptables_chain." -n";
+  my $wrapper = $self->iptables_wrapper;
+  my $sudo    = $self->sudo();
+  my $chain   = $self->iptables_chain;
+  my $cmd  = "$wrapper L:filter:$chain";
   my $out  = `$sudo$cmd 2>&1`;
   if ($out =~ /iptables: No chain\/target\/match by that name./ ) {
-    $cmd = "LANG=C iptables -N ".$self->iptables_chain;
+    $cmd = "$wrapper N:filter:$chain";
     $out  = `$sudo$cmd 2>&1`;
     if ($?) {
       die "Error while creating iptables chain($?):\n\t$cmd\n\n$out\n";
     }
   }
 }
+
 sub _find_free_ports {
   my $self        = shift;
   my $start_port  = shift;
@@ -367,24 +378,24 @@ sub _find_free_ports {
   }
 
   return @result;
-};
+}
 
 has _used_ports => (
   is      => 'rw',
   isa     => 'HashRef',
   lazy    => 1,
   default => sub {
+    # TODO: make usable for tcp and udp
     my $self    = shift;
     my $hostip  = $self->host_ipaddress;
     my $result  = {};
-    my $cmd     = "";
-    # TODO: make usable for tcp and udp
+    my $sudo    = $self->sudo;
+    my $lib_p   = '/usr/lib/kanku';
+    my $bin     = "$lib_p/ss_netstat_wrapper";
+    die "$bin not found" unless -f $bin;
 
-    # prepare command to read used ports from host services
-    my $bin = which 'ss';
-    $bin = which 'netstat' unless $bin;
     if ($bin) {
-      $cmd = $self->sudo . "LANG=C $bin -ltn";
+      my $cmd = $sudo.$bin;
 
       foreach my $line (`$cmd`) {
 	chomp $line;
@@ -417,15 +428,7 @@ has _used_ports => (
 );
 
 sub sudo {
-
-  my $sudo      = "";
-
-  # if EUID not root
-  if ( $> != 0 ) {
-    $sudo = "sudo -n ";
-  }
-
-  return $sudo;
+  return ($> != 0) ? "sudo -n " : q{};
 }
 
 __PACKAGE__->meta->make_immutable;
