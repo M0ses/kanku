@@ -67,25 +67,20 @@ has log_dir => (
   }
 );
 
-sub _build_config {
-    my $self    = shift;
-    return Kanku::YAML::LoadFile($self->file);
-}
+sub _build_config { return Kanku::YAML::LoadFile($_[0]->file) }
 
 around 'config' => sub {
   my ($orig, $self) = @_;
   my $cfg_file      = $self->file->stringify;
 
-  if ( ! -f $cfg_file ) {
-     die "Configuration file $cfg_file doesn`t exists\n";
-  }
+  die "Configuration file $cfg_file doesn`t exists\n" unless -f $cfg_file;
 
-  if (
-    $self->file->stat->mtime > $self->last_modified or
-    ! $self->$orig
-  ) {
-    if ( $self->last_modified ) {
-      $self->logger->debug("Modification of config file ($cfg_file) detected. Re-reading");
+  my $mtime = $self->file->stat->mtime;
+  my $ltime = $self->last_modified;
+
+  if ($mtime != $ltime) {
+    if ($ltime) {
+      $self->logger->debug("Modification of config file detected. Re-reading ($mtime/$ltime)");
     } else {
       $self->logger->debug("Initial read of config file '$cfg_file'");
     }

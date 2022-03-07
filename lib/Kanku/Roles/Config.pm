@@ -67,34 +67,6 @@ has cache_dir => (
   }
 );
 
-sub _build_config {
-  my ($self) = @_;
-  my $cfg = Kanku::YAML::LoadFile($_[0]->file);
-  $self->logger->debug('Config from file "'.$_[0]->file.'"');
-  $self->logger->debug(Dumper($cfg));
-  return $cfg;
-}
-
-around 'config' => sub {
-  my ($orig, $self) = @_;
-  my $cfg_file      = $self->file->stringify;
-  if ( ! -f $cfg_file ) {
-     die "Configuration file $cfg_file doesn`t exists\n";
-  }
-
-  if ( $self->file->stat->mtime > $self->last_modified ) {
-    if ( $self->last_modified ) {
-      $self->logger->debug("Modification of config file detected. Re-reading");
-    } else {
-      $self->logger->debug("Initial read of config file '$cfg_file'");
-    }
-    $self->last_modified($self->file->stat->mtime);
-    return $self->$orig( $self->_build_config() );
-  }
-
-  return $self->$orig();
-};
-
 sub job_config {
   my ($self, $job_name) = @_;
   my ($cfg, $yml);
