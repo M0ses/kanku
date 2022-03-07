@@ -293,6 +293,41 @@ kanku ssh -u root
       <span aria-hidden="true" class="octicon octicon-link"></span></a>
       NEWS
     </h1>
+
+    <!-- RELEASE 0.12.3 -->
+    <h2><a id="0.12.3" class="anchor" href="#0.12.3" aria-hidden="true">Release 0.12.3</a></h2>
+    <p>(07.03.2022)</p>
+    <p>
+      <b>ATTENTION:</b> If you run kanku in developer mode you should re-run <pre>kanku setup --devel</pre> 
+      because instead of using iptables/ss/netstat directly we now use wrapper scripts with need to be added to the sudoers file.
+    </p>
+    <h3>Fixes</h3>
+    <ul>
+      <li>fix config file change detection
+        <ul><li>cleanup duplicate methods</li></ul>
+      </li>
+      <li>improved iptables/ss/netstat handling
+      <ul>
+	<li>Fixes #boo 1196604</li>
+	<li>removed backup file creation in /etc/sudoers.d</li>
+	<li>create wrapper scripts for iptables/ss/netstat</li>
+	<li>changed setup to set wrapper scripts in sudoers file</li>
+      </ul></li>
+      <li>change default logging to stderr/journald</li>
+      <li>VM::Image - use new buffer size while uncompressing</li>
+      <li>fixed x-scheme-handler_kanku</li>
+      <li>central config for host_interfaces in PortForward</li>
+    </ul>
+
+    <!-- RELEASE 0.12.2 -->
+    <h2><a id="0.12.2" class="anchor" href="#0.12.2" aria-hidden="true">Release 0.12.2</a></h2>
+    <p>(18.02.2022)</p>
+    <h3>Fixes</h3>
+    <ul>
+      <li>Web UI Guests: filter iptable rules by domain name</li>
+    </ul>
+
+    <!-- RELEASE 0.12.1 -->
     <h2><a id="0.12.1" class="anchor" href="#0.12.1" aria-hidden="true">Release 0.12.1</a></h2>
     <p>(17.02.2022)</p>
     <p>
@@ -303,6 +338,8 @@ kanku ssh -u root
       <li>Restart VMs</li>
       <li>Restore VMs iptable rules</li>
     </ul>
+
+    <!-- RELEASE 0.12.0 -->
     <img class="orbit-image" src="images/screenshots/kanku_screenshot-feature-autostart_domain.png" alt="Autostart Domain">
     <h2><a id="0.12.0" class="anchor" href="#0.12.0" aria-hidden="true">Release 0.12.0</a></h2>
     <p>(09.02.2022)</p>
