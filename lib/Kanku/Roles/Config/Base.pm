@@ -30,6 +30,8 @@ requires "job_config";
 has config => (
   is      => 'rw',
   isa     => 'HashRef',
+  lazy    => 1,
+  default => sub { return Kanku::YAML::LoadFile($_[0]->file) },
 );
 
 has cf => (

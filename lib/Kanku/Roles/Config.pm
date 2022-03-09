@@ -41,11 +41,6 @@ sub file {
   }
 }
 
-has config => (
-  is      => 'rw',
-  isa     => 'HashRef',
-);
-
 has last_modified => (
   is        => 'rw',
   isa       => "Int",
