@@ -68,6 +68,15 @@ sub run {
         $logger->debug("$job - ok");
       }
     }
+    for my $job (sort Kanku::Config->instance()->job_group_list) {
+      eval { Kanku::Config->instance()->job_group_config($job); };
+      if($@) {
+        $logger->error("Failed to load job config $job:\n$@");
+        $result = 1;
+      } else {
+        $logger->debug("$job - ok");
+      }
+    }
   } elsif ($self->devel) {
     eval { 
       Kanku::Config->initialize(class=>'KankuFile'); 
