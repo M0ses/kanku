@@ -301,6 +301,7 @@ kanku ssh -u root
       <b>ATTENTION:</b> If you run kanku in developer mode you should re-run <pre>kanku setup --devel</pre> 
       because instead of using iptables/ss/netstat directly we now use wrapper scripts with need to be added to the sudoers file.
     </p>
+
     <h3>Fixes</h3>
     <ul>
       <li>fix config file change detection
@@ -317,6 +318,12 @@ kanku ssh -u root
       <li>VM::Image - use new buffer size while uncompressing</li>
       <li>fixed x-scheme-handler_kanku</li>
       <li>central config for host_interfaces in PortForward</li>
+      <li>job groups config changes are now detected by web ui</li>
+    </ul>
+
+    <h3>Features</h3>
+    <ul>
+      <li>[cli] check_configs command now also check job_group configs</li>
     </ul>
 
     <!-- RELEASE 0.12.2 -->
