@@ -3,7 +3,8 @@ Vue.component('job-group-card',{
   data: function() {
     this.restoreSettings();
     return {
-      allJobs: this.allJobs || [],
+      allJobs: this.allJobs || {jobs:[], digest:undefined},
+      digest: this.digest || "",
       showGroupList: 0
     }
   },
@@ -30,7 +31,10 @@ Vue.component('job-group-card',{
 	this.restoreDefaults();
       } else {
 	currentSettings = JSON.parse(currentSettingsString);
-        if (!currentSettings[this.job_group.name]) {
+        if (
+          !currentSettings[this.job_group.name] ||
+          currentSettings[this.job_group.name].digest != this.job_group.digest
+        ) {
           this.restoreDefaults();
         } else {
           this.allJobs = currentSettings[this.job_group.name];
@@ -41,7 +45,7 @@ Vue.component('job-group-card',{
     },
     restoreDefaults: function() {
       console.log("Started restoreDefaults");
-      this.allJobs = new Array();
+      this.allJobs = {jobs:[], digest:this.job_group.digest};
       console.log("Started restoreDefaults for "+this.job_group.name);
       console.log(this.job_group);
       var jgl =  Object.keys(this.job_group.groups).length;
@@ -50,11 +54,11 @@ Vue.component('job-group-card',{
       for (let i=0; i < jgl;i++) {
         console.log("blah (i): "+i);
         console.log(this.job_group.groups[i]);
-	this.allJobs[i]=new Array();
+	this.allJobs.jobs[i]=new Array();
 	var groups_count = this.job_group.groups[i].jobs.length;
 	for (let a=0; a < groups_count;a++) {
           console.log("blah (i)(a): "+a);
-	  this.allJobs[i][a]=true;
+	  this.allJobs.jobs[i][a]=true;
 	}
       }
       console.log("restoreDefaults this.allJobs:");
@@ -66,7 +70,7 @@ Vue.component('job-group-card',{
       var url    = uri_base + "/rest/job_group/trigger/"+this.job_group.name+".json";
       console.log(this.allJobs);
       this.saveSettings();
-      var data = this.allJobs;
+      var data = this.allJobs.jobs;
       axios.post(url, { data: data, is_admin: this.is_admin}).then(function(response) {
         show_messagebox(response.data.state, response.data.msg);
       });
@@ -90,7 +94,7 @@ Vue.component('job-group-card',{
     + '      <input type=hidden name="description" :value="group.description">'
     + '      <div class="form-group">'
     + '        <div v-for="(c,a) in group.jobs">'
-    + '         <input type=checkbox v-model="allJobs[i][a]"> <label>{{ c }}</label>'
+    + '         <input type=checkbox v-model="allJobs.jobs[i][a]"> <label>{{ c }}</label>'
     + '        </div>'
     + '     </div>'
     + '     </div>'

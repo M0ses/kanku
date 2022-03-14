@@ -12,6 +12,7 @@ use Sys::Virt;
 use Try::Tiny;
 use Session::Token;
 use Carp qw/longmess/;
+use Digest::SHA qw(sha512_base64);
 
 use Kanku::Config;
 use Kanku::Schema;
@@ -138,11 +139,12 @@ get '/gui_config/job_group.:format'  => requires_role Admin => sub {
   }
 
   foreach my $name (@_job_groups) {
-    my $job_group_config = { name => $name, groups => []};
+    my $job_group_config = { name => $name, groups => [], digest => undef};
     push @config , $job_group_config;
     my $job_group_cfg;
     try {
       $job_group_cfg = $cfg->job_group_config($name);
+      $job_group_config->{digest} = sha512_base64($cfg->job_group_config_plain($name));
     } catch {
       $job_group_cfg = $_;
     };
