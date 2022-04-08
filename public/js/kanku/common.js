@@ -108,7 +108,7 @@ Vue.component('show-details',{
 Vue.component('to-top-button',{
   methods: {
     toTop: function() {
-      this.$router.go(0);
+      window.scrollTo(0,0);
     }
   },
   template: ''
