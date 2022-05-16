@@ -422,18 +422,18 @@ Vue.component('job-retrigger-link',{
       var self = this;
       axios.post(url, {is_admin: this.is_admin}).then(function(response) {
         show_messagebox(response.data.state, response.data.msg);
-      var npage = self.$route.params.page;
-      var o_job_states = ['running', 'failed', 'succeed', 'dispatching', 'triggered'];
-      var o_query = { "job_states": o_job_states };
-      if (! self.$route.query.show_only_latest_results ) {
-        npage = 1;
-        o_query['show_only_latest_results'] = true;
-      }
-      self.$router.push({
-        name:   'job_history',
-        params: {page: npage},
-        query: o_query,
-      });
+        var npage = self.$route.params.page;
+        var o_job_states = ['running', 'failed', 'succeed', 'dispatching', 'triggered'];
+        var o_query = { "job_states": o_job_states };
+        if (! self.$route.query.show_only_latest_results ) {
+          npage = 1;
+          o_query['show_only_latest_results'] = true;
+        }
+        self.$router.push({
+          name:   'job_history',
+          params: {page: npage},
+          query: o_query,
+        });
       });
     },
   },
