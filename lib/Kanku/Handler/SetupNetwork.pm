@@ -106,7 +106,7 @@ sub execute {
       log_stdout           => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
     );
 
-    $ctx->{ipaddress} = $vm->get_ipaddress();
+    $ctx->{ipaddress} = $vm->get_ipaddress(mode=>'console');
   }
 
   $con->logout();
