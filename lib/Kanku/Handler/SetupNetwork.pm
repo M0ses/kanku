@@ -96,17 +96,7 @@ sub execute {
   $self->_configure_routes;
 
   if ($self->_get_ipaddress_required) {
-    my $vm = Kanku::Util::VM->new(
-      domain_name          => $self->domain_name,
-      job_id               => $self->job->id,
-      console              => $con,
-      running_remotely     => $self->running_remotely,
-      management_interface => $self->_management_interface,
-      log_file             => $ctx->{log_file} || q{},
-      log_stdout           => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
-    );
-
-    $ctx->{ipaddress} = $vm->get_ipaddress(mode=>'console');
+    $ctx->{ipaddress} = $con->get_ipaddress(interface=>$self->_management_interface);
   }
 
   $con->logout();
