@@ -264,11 +264,11 @@ sub configure_iptables {
 
     my @comment = ('-m','comment','--comment',"Kanku:net:$name");
     my $rules = [
-      ["-I","FORWARD","1","-i",$ncfg->{bridge},"-j","REJECT","--reject-with","icmp-port-unreachable",@comment],
-      ["-I","FORWARD","1","-o",$ncfg->{bridge},"-j","REJECT","--reject-with","icmp-port-unreachable",@comment],
-      ["-I","FORWARD","1","-i",$ncfg->{bridge},"-o","$ncfg->{bridge}","-j","ACCEPT",@comment],
-      ["-I","FORWARD","1","-s",$prefix,"-i",$ncfg->{bridge},"-j","ACCEPT",@comment],
-      ["-I","FORWARD","1","-d",$prefix,"-o",$ncfg->{bridge},"-m","conntrack","--ctstate","RELATED,ESTABLISHED","-j","ACCEPT",@comment],
+      ["-I","FORWARD","2","-i",$ncfg->{bridge},"-j","REJECT","--reject-with","icmp-port-unreachable",@comment],
+      ["-I","FORWARD","2","-o",$ncfg->{bridge},"-j","REJECT","--reject-with","icmp-port-unreachable",@comment],
+      ["-I","FORWARD","2","-i",$ncfg->{bridge},"-o","$ncfg->{bridge}","-j","ACCEPT",@comment],
+      ["-I","FORWARD","2","-s",$prefix,"-i",$ncfg->{bridge},"-j","ACCEPT",@comment],
+      ["-I","FORWARD","2","-d",$prefix,"-o",$ncfg->{bridge},"-m","conntrack","--ctstate","RELATED,ESTABLISHED","-j","ACCEPT",@comment],
       ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-j","MASQUERADE",@comment],
       ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-p","udp","-j","MASQUERADE","--to-ports","1024-65535",@comment],
       ["-t","nat","-I","POSTROUTING","-s",$prefix,"!","-d",$prefix,"-p","tcp","-j","MASQUERADE","--to-ports","1024-65535",@comment],
@@ -277,14 +277,14 @@ sub configure_iptables {
     ];
 
     if (!$ipt->chain_exists('filter', $chain)) {
-      push @$rules,
+      unshift @$rules,
         ["-N", $chain],
         ["-I", $chain, "-j", "RETURN", @comment],
         ["-I", "FORWARD", "1", "-j", $chain, @comment];
     }
 
     if (!$ipt->chain_exists('nat', $chain)) {
-      push @$rules,
+      unshift @$rules,
         ['-t', 'nat', '-N', $chain],
         ['-t', 'nat', '-I', $chain, "-j", "RETURN", @comment],
         ["-t", "nat", "-I", "PREROUTING", "1", "-j", $chain, @comment];
