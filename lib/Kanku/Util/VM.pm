@@ -332,10 +332,11 @@ sub _generate_disk_xml {
     my $drive = $disk_prefix . chr(97+$self->_unit()->{$disk_prefix});
     $self->_unit()->{$disk_prefix}++;
     my $tboot = ($boot) ? "<boot order='1'/>" : '';
+    my $cache = ($format eq 'vmdk') ? q{cache='unsafe'} : q{};
 
     return "
     <disk type='file' device='$device'>
-      <driver name='qemu' type='$format' cache='unsafe'/>
+      <driver name='qemu' type='$format' $cache/>
       <source file='$file'/>
       <target dev='$drive' bus='$bus'/>
       $readonly
