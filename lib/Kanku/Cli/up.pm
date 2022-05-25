@@ -79,6 +79,13 @@ option 'skip_check_package' => (
     documentation => 'Skip checks if package is ready when downloading from OBS',
 );
 
+option 'skip_check_domain' => (
+    isa           => 'Bool',
+    is            => 'rw',
+    documentation => 'Skip check if domain already exists',
+    default       => 0,
+);
+
 sub run {
   my ($self)  = @_;
   my $logger  = Log::Log4perl->get_logger;
@@ -98,10 +105,12 @@ sub run {
     log_stdout  => $self->log_stdout,
   );
 
-  $logger->debug("Searching for domain: $dn");
-  if ($vm->dom) {
-    $logger->fatal("Domain $dn already exists");
-    exit 1;
+  if (!$self->skip_check_domain) {
+    $logger->debug("Searching for domain: $dn");
+    if ($vm->dom) {
+      $logger->fatal("Domain $dn already exists");
+      exit 1;
+    }
   }
 
   $logger->debug('offline mode: ' . ($self->offline   || 0));
