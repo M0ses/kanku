@@ -26,7 +26,7 @@ with 'Kanku::Cli::Roles::Schema';
 with 'Kanku::Cli::Roles::VM';
 
 use Carp;
-
+use Log::Log4perl::Appender;
 use Kanku::Config;
 use Kanku::Job;
 use Kanku::JobList;
@@ -83,6 +83,7 @@ option 'skip_check_domain' => (
     isa           => 'Bool',
     is            => 'rw',
     documentation => 'Skip check if domain already exists',
+    cmd_aliases   => 'S',
     default       => 0,
 );
 
