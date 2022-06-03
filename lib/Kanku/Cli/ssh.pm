@@ -59,6 +59,13 @@ option 'execute' => (
   documentation => 'command to execute via ssh',
 );
 
+option 'agent_forward' => (
+  isa           => 'Bool',
+  is            => 'rw',
+  cmd_aliases   => 'A',
+  documentation => 'allow ssh agent forwarding',
+);
+
 sub run {
   my ($self) = @_;
   my $cfg    = $self->cfg;
@@ -77,8 +84,8 @@ sub run {
     $self->username($user);
     $self->job(Kanku::Job->new());
     $self->connect();
-
-    system "ssh -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -l $user $ip $cmd";
+    my $A = ($self->agent_forward) ? q{-A} : q{};
+    system "ssh $A -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -l $user $ip $cmd";
     exit 0;
   } elsif ($state eq 'off') {
     $self->logger->warn('VM is off - use \'kanku startvm\' to start VM and try again');
