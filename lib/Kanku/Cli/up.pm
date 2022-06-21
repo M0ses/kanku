@@ -128,8 +128,6 @@ sub run {
   } else {
     $jobs->[0] = $self->job_name;
   }
-use Data::Dumper;
-print Dumper($jobs);
   for my $jname (@$jobs) {
     next if ($jname == 1);
     my $ds = $schema->resultset('JobHistory')->create({
