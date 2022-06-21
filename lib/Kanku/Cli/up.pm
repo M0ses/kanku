@@ -45,10 +45,10 @@ option 'offline' => (
 );
 
 option 'job_name' => (
-    isa           => 'Str',
+    isa           => 'ArrayRef',
     is            => 'rw',
     cmd_aliases   => 'j',
-    documentation => 'job to run',
+    documentation => 'jobs to run',
 );
 
 option 'pool' => (
@@ -98,7 +98,7 @@ sub run {
 
   $logger->debug(__PACKAGE__ . '->execute()');
 
-  $self->job_name($cfg->config->{default_job}) if ! $self->job_name;
+  $self->job_name([$cfg->config->{default_job}]) if ! $self->job_name;
   my $dn = $self->domain_name;
   my $vm      = Kanku::Util::VM->new(
     domain_name => $dn,
@@ -120,54 +120,67 @@ sub run {
   my $job_config = $cfg->job_config($self->job_name);
 
   croak("No such job found\n") if ! $job_config;
-
-  my $ds = $schema->resultset('JobHistory')->create({
-      name          => $self->job_name,
-      creation_time => time,
-      last_modified => time,
-      state         => 'triggered',
-  });
-
-  my $job = Kanku::Job->new(
-        db_object => $ds,
-        id        => $ds->id,
-        state     => $ds->state,
-        name      => $ds->name,
-        skipped   => 0,
-        scheduled => 0,
-        triggered => 0,
-        context   => {
-          domain_name        => $dn,
-          login_user         => $cfg->config->{login_user},
-          login_pass         => $cfg->config->{login_pass},
-          offline            => $self->offline            || 0,
-          skip_all_checks    => $self->skip_all_checks    || 0,
-          skip_check_project => $self->skip_check_project || 0,
-          skip_check_package => $self->skip_check_package || 0,
-          log_file    => $self->log_file,
-          log_stdout  => $self->log_stdout,
-        },
-  );
-  @ARGV=(); ## no critic (Variables::RequireLocalizedPunctuationVars)
-  Kanku::Config->initialize();
-  if ($self->pool) {
-    Kanku::Config->instance->cf->{'Kanku::Handler::CreateDomain'}->{pool_name} = $self->pool;
-  }
-  my $dispatch = Kanku::Dispatch::Local->new(schema=>$schema);
-  my $result   = $dispatch->run_job($job);
-  my $ctx      = $job->context;
-  if ( $result->state eq 'succeed' ) {
-      $logger->info('domain_name : ' . ( $ctx->{domain_name} || q{}));
-      $logger->info('ipaddress   : ' . ( $ctx->{ipaddress}   || q{}));
-  } elsif ( $result->state eq 'skipped' ) {
-    $logger->warn('Job was skipped');
-    $logger->warn('Please see log to find out why');
+  my $jobs = [];
+  if ($self->job_name eq '__ALL__' && ref($cfg->config->{jobs}->{__ALL__}) eq 'ARRAY') {
+    $jobs = $cfg->config->{jobs}->{__ALL__};
+  } elsif (ref($self->job_name) eq 'ARRAY') {
+    $jobs = $self->job_name;
   } else {
-      $logger->error('Failed to create domain: ' . ( $ctx->{domain_name} || q{}));
-      $logger->error("ipaddress   : $ctx->{ipaddress}") if $ctx->{ipaddress};
-  };
+    $jobs->[0] = $self->job_name;
+  }
+use Data::Dumper;
+print Dumper($jobs);
+  for my $jname (@$jobs) {
+    next if ($jname == 1);
+    my $ds = $schema->resultset('JobHistory')->create({
+	name          => $jname,
+	creation_time => time,
+	last_modified => time,
+	state         => 'triggered',
+    });
 
-  return;
+    my $job = Kanku::Job->new(
+	  db_object => $ds,
+	  id        => $ds->id,
+	  state     => $ds->state,
+	  name      => $ds->name,
+	  skipped   => 0,
+	  scheduled => 0,
+	  triggered => 0,
+	  context   => {
+	    domain_name        => $dn,
+	    login_user         => $cfg->config->{login_user},
+	    login_pass         => $cfg->config->{login_pass},
+	    offline            => $self->offline            || 0,
+	    skip_all_checks    => $self->skip_all_checks    || 0,
+	    skip_check_project => $self->skip_check_project || 0,
+	    skip_check_package => $self->skip_check_package || 0,
+	    log_file    => $self->log_file,
+	    log_stdout  => $self->log_stdout,
+	  },
+    );
+    @ARGV=(); ## no critic (Variables::RequireLocalizedPunctuationVars)
+    Kanku::Config->initialize();
+    if ($self->pool) {
+      Kanku::Config->instance->cf->{'Kanku::Handler::CreateDomain'}->{pool_name} = $self->pool;
+    }
+    my $dispatch = Kanku::Dispatch::Local->new(schema=>$schema);
+    my $result   = $dispatch->run_job($job);
+    my $ctx      = $job->context;
+    if ( $result->state eq 'succeed' ) {
+	$logger->info('domain_name : ' . ( $ctx->{domain_name} || q{}));
+	$logger->info('ipaddress   : ' . ( $ctx->{ipaddress}   || q{}));
+    } elsif ( $result->state eq 'skipped' ) {
+      $logger->warn('Job was skipped');
+      $logger->warn('Please see log to find out why');
+    } else {
+	$logger->error('Failed to create domain: ' . ( $ctx->{domain_name} || q{}));
+	$logger->error("ipaddress   : $ctx->{ipaddress}") if $ctx->{ipaddress};
+	return 1;
+    };
+  }
+
+  return 0;
 }
 
 __PACKAGE__->meta->make_immutable;
