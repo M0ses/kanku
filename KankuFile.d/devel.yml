@@ -31,6 +31,12 @@
   -
     use_module: Kanku::Handler::PrepareSSH
   -
+    use_module: Kanku::Handler::CopyProfile
+    options:
+      users:
+        - root
+        - kanku
+  -
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:

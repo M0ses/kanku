@@ -145,4 +145,28 @@ Kanku::Daemon::TriggerD:
 [% ELSE %]
 # Kanku::Handler::CreateDomain:
 #   pool_name: mypool
+
+Kanku::Handler::CopyProfile:
+  user: kanku
+  tasks:
+    - cmd: cp
+      src: ~/.gitconfig
+    - cmd: cp
+      src: ~/.vimrc
+    - cmd: cp
+      src: ~/.vim/
+      recursive: 1
+    #- cmd: mkdir
+    #  path: ~/.config/
+    #- cmd: cp
+    #  src: ~/.config/osc/
+    #  dst: ~/.config/osc/
+    #  recursive: 1
+    #- cmd: chown
+    #  owner: kanku:users
+    #  recursive: 1
+    #  path: ~/.config/
+    #- cmd: chmod 
+    #  mode: 700
+    #  path: ~/.config/
 [% END %]
