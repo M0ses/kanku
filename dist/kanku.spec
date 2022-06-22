@@ -580,3 +580,7 @@ update-desktop-database
 /usr/share/icons/hicolor/64x64/apps/kanku.png
 
 %changelog
+
+%changelog cli
+
+%changelog common
