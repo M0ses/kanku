@@ -93,12 +93,12 @@ sub run {
   my $cfg     = $self->cfg;
 
   my $schema  = $self->schema;
-
   croak("Could not connect to database\n") if ! $schema;
+
+  Kanku::Config->initialize();
 
   $logger->debug(__PACKAGE__ . '->execute()');
 
-  $self->job_name([$cfg->config->{default_job}]) if ! $self->job_name;
   my $dn = $self->domain_name;
   my $vm      = Kanku::Util::VM->new(
     domain_name => $dn,
@@ -115,21 +115,25 @@ sub run {
   }
 
   $logger->debug('offline mode: ' . ($self->offline   || 0));
-  $logger->debug('job_name: '     . ($self->job_name  || q{}));
 
-  my $job_config = $cfg->job_config($self->job_name);
-
-  croak("No such job found\n") if ! $job_config;
   my $jobs = [];
-  if ($self->job_name eq '__ALL__' && ref($cfg->config->{jobs}->{__ALL__}) eq 'ARRAY') {
+
+  if ($self->job_name && ($self->job_name->[1]||q{}) eq '__ALL__' && ref($cfg->config->{jobs}->{__ALL__}) eq 'ARRAY') {
     $jobs = $cfg->config->{jobs}->{__ALL__};
   } elsif (ref($self->job_name) eq 'ARRAY') {
-    $jobs = $self->job_name;
+    for (my $i=0; $i <= @{$self->job_name}; $i++) {
+      push @$jobs, $self->job_name->[$i+1] if $self->job_name->[$i+1];
+      $i++;
+    }
   } else {
-    $jobs->[0] = $self->job_name;
+    $jobs->[0] = $cfg->config->{default_job} if ! $self->job_name;
   }
+
   for my $jname (@$jobs) {
-    next if ($jname == 1);
+    croak("Error in config for job '$jname'") unless ref($cfg->config->{jobs}->{$jname}) eq 'ARRAY';
+  }
+
+  for my $jname (@$jobs) {
     my $ds = $schema->resultset('JobHistory')->create({
 	name          => $jname,
 	creation_time => time,
@@ -158,7 +162,6 @@ sub run {
 	  },
     );
     @ARGV=(); ## no critic (Variables::RequireLocalizedPunctuationVars)
-    Kanku::Config->initialize();
     if ($self->pool) {
       Kanku::Config->instance->cf->{'Kanku::Handler::CreateDomain'}->{pool_name} = $self->pool;
     }
