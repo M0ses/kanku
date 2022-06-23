@@ -108,9 +108,9 @@ sub _calc_giturl {
   if ($giturl =~ m#^(https?)\://(.*)#) {
     my $proto   = "$1://";
     my $gitpass = '';
-    my $gituser = $self->gituser;
+    my $gituser = $self->gituser || q{};
     my $url     = $2;
-    $gituser .= ':'.$self->gitpass if ($self->gitpass);
+    $gituser .= ':'.$self->gitpass if ($gituser && $self->gitpass);
     $gituser .= '@' if ($gituser);
     return "$proto$gituser$url";
   }
