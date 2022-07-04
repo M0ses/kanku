@@ -66,35 +66,39 @@ option 'agent_forward' => (
   documentation => 'allow ssh agent forwarding',
 );
 
+option 'x11_forward' => (
+  isa           => 'Bool',
+  is            => 'rw',
+  cmd_aliases   => 'X',
+  documentation => 'allow X11 forwarding',
+);
+
 sub run {
   my ($self) = @_;
   my $cfg    = $self->cfg;
-  my $vm     = Kanku::Util::VM->new(
-                domain_name => $self->domain_name,
-                management_network  => $cfg->config->{management_network} || q{}
-              );
-  my $state = $vm->state;
-
-  if ( $state eq 'on' ) {
-    my $ip    = $self->ipaddress || $cfg->config->{ipaddress} || $vm->get_ipaddress;
-    my $user  = $self->user;
-    my $cmd   = $self->execute || q{};
-
-    $self->ipaddress($ip);
-    $self->username($user);
-    $self->job(Kanku::Job->new());
-    $self->connect();
-    my $A = ($self->agent_forward) ? q{-A} : q{};
-    system "ssh $A -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -l $user $ip $cmd";
-    exit 0;
-  } elsif ($state eq 'off') {
-    $self->logger->warn('VM is off - use \'kanku startvm\' to start VM and try again');
-    exit 1;
-  } else {
-    $self->logger->fatal('No VM found or VM in state \'unknown\'');
-    exit 2;
+  my $user   = $self->user;
+  my $ip     = $self->ipaddress;
+  my $A      = ($self->agent_forward) ? q{-A} : q{};
+  my $X      = ($self->x11_forward) ? q{-X} : q{};
+  my $cmd    = $self->execute || q{};
+  if (!$ip) {
+    my $vm     = Kanku::Util::VM->new(
+		  domain_name => $self->domain_name,
+		  management_network  => $cfg->config->{management_network} || q{}
+		);
+    my $state = $vm->state;
+    if ( $state eq 'on' ) {
+      $ip    = $cfg->config->{ipaddress} || $vm->get_ipaddress;
+    } elsif ($state eq 'off') {
+      $self->logger->warn('VM is off - use \'kanku startvm\' to start VM and try again');
+      exit 1;
+    } else {
+      $self->logger->fatal('No VM found or VM in state \'unknown\'');
+      exit 2;
+    }
   }
-
+  system "ssh $A $X -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -l $user $ip $cmd";
+  exit 0;
 }
 
 __PACKAGE__->meta->make_immutable;
