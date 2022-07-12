@@ -1,0 +1,110 @@
+<html><head><title>Kanku::Handler::OpenStack::CreateInstance        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/theme/css/normalize.css" />
+        <link rel="stylesheet" href="/theme/css/skeleton.css" />
+        <link rel="stylesheet" href="/theme/css/statocles-default.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
+        <meta name="generator" content="Statocles 0.098" />
+
+    <link rel="stylesheet" type="text/css" title="pod_stylesheet" href="../../theme/css/statocles-default.css">
+
+</head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+
+<a name='___top' class='dummyTopAnchor' ></a>
+
+<h1><a class='u'
+name="NAME"
+>NAME</a></h1>
+
+<p>Kanku::Handler::OpenStack::CreateInstance</p>
+
+<h1><a class='u'
+name="SYNOPSIS"
+>SYNOPSIS</a></h1>
+
+<p>Here is an example how to configure the module in your jobs file or KankuFile - use_module: Kanku::Handler::OpenStack::CreateInstance options: networks: - uuid: 8cce38fd-443f-4b87-8ea5-ad2dc184064f security_groups: - name: kanku flavorRef: 5 key_name: admin floating_network_id: 0d00a5bd-d07c-4206-b87d-807ca98b44b4 availability_zone: nova</p>
+
+<h1><a class='u'
+name="DESCRIPTION"
+>DESCRIPTION</a></h1>
+
+<p>This handler creates a new server instance in openstack.
+It uses the image from $job-&#62;context-&#62;{os_image_id}</p>
+
+<h1><a class='u'
+name="OPTIONS"
+>OPTIONS</a></h1>
+
+<h1><a class='u'
+name="CONTEXT"
+>CONTEXT</a></h1>
+
+<h2><a class='u'
+name="getters"
+>getters</a></h2>
+
+<pre>  os_instance_name
+
+  os_image_id
+
+  os_instance_id</pre>
+
+<h2><a class='u'
+name="setters"
+>setters</a></h2>
+
+<pre>  ipaddress: only set if floating_network_id is given</pre>
+
+<h1><a class='u'
+name="DEFAULTS"
+>DEFAULTS</a></h1>
+
+<p>NONE</p>
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+
+
+
+                </div>
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+    </body>
+</html>

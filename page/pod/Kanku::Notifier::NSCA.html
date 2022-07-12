@@ -1,0 +1,116 @@
+<html><head><title>Kanku::Notifier::NSCA        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/theme/css/normalize.css" />
+        <link rel="stylesheet" href="/theme/css/skeleton.css" />
+        <link rel="stylesheet" href="/theme/css/statocles-default.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
+        <meta name="generator" content="Statocles 0.098" />
+
+    <link rel="stylesheet" type="text/css" title="pod_stylesheet" href="../../theme/css/statocles-default.css">
+
+</head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+
+<a name='___top' class='dummyTopAnchor' ></a>
+
+<h1><a class='u'
+name="NAME"
+>NAME</a></h1>
+
+<p>Kanku::Notifier::NSCA - A kanku notification module for Nagios NSCA</p>
+
+<h1><a class='u'
+name="DESCRIPTION"
+>DESCRIPTION</a></h1>
+
+<p>Send a notification to a nagios NSCA daemon.</p>
+
+<h1><a class='u'
+name="CONFIGURATION"
+>CONFIGURATION</a></h1>
+
+<h2><a class='u'
+name="GLOBAL"
+>GLOBAL</a></h2>
+
+<p>in /etc/kanku/kanku-config.yml:</p>
+
+<pre> Kanku::Notifier::NSCA:
+   init:
+     encryption_password: ...
+     encryption_type: ...
+     remote_host: ...
+     remote_port: ...
+   send_report:
+     hostname: &#60;hostname_in_icinga&#62;</pre>
+
+<h2><a class='u'
+name="JOB_CONFIG_FILE"
+>JOB CONFIG FILE</a></h2>
+
+<pre>  notifiers:
+    -
+      use_module: Kanku::Notifier::NSCA
+      options:
+        send_report:
+          hostname: &#60;hostname_in_icinga&#62;
+          service:  &#60;servicename_in_icinga&#62;
+        state_map:         # optional
+          succeed: 0       # works with Int
+          failed: WARNING  # works with Strings (OK, WARNING, CRITICAL, UNKNOWN)
+          skipped: unknown # is case insensitive
+      states: failed,succeed</pre>
+
+<h1><a class='u'
+name="SEE_ALSO"
+>SEE ALSO</a></h1>
+
+<p><a href="https://metacpan.org/pod/Net%3A%3ANSCA%3A%3AClient" class="podlinkpod"
+>Net::NSCA::Client</a></p>
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+
+
+
+                </div>
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+    </body>
+</html>
