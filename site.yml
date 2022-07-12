@@ -39,7 +39,7 @@ site:
     #
     # If the base_url contains a path, all internal links will be
     # rewritten appropriately.
-    base_url: 'http://kanku-pages'
+    base_url: ''
 
     # apps: These are the applications in this site. The name of the app,
     # "blog", "page", or "static", is used to refer to it in commands.
