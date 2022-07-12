@@ -1,0 +1,232 @@
+<html><head><title>Kanku::Handler::CreateDomain        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/theme/css/normalize.css" />
+        <link rel="stylesheet" href="/theme/css/skeleton.css" />
+        <link rel="stylesheet" href="/theme/css/statocles-default.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
+        <meta name="generator" content="Statocles 0.098" />
+
+    <link rel="stylesheet" type="text/css" title="pod_stylesheet" href="../../theme/css/statocles-default.css">
+
+</head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+
+<a name='___top' class='dummyTopAnchor' ></a>
+
+<h1><a class='u'
+name="NAME"
+>NAME</a></h1>
+
+<p>Kanku::Handler::CreateDomain</p>
+
+<h1><a class='u'
+name="SYNOPSIS"
+>SYNOPSIS</a></h1>
+
+<p>Here is an example how to configure the module in your jobs file or KankuFile</p>
+
+<pre>  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      domain_name: kanku-vm-1
+      ....
+      installation:
+        -
+          expect: Install
+          send: yes
+          send_enter: 1
+        -
+          expect: Next Step
+          send_ctrl_c: 1
+        -
+          expect: Step 3
+          send_esc: 1
+      pwrand:                   # create randomized password
+        length: 16              # password length (default: 16 characters)
+        user:                   # list of users to
+          - root
+          - kanku
+        recipients:
+          - fschreiner@suse.de  # list of recipients to encrypt for
+                                # if not specified, clear text password will
+                                # be stored
+
+      additional_disks:         # list of additional disk images to use in VM
+        -
+          file: storage.qcow2   # filename for disk image
+          reuse: 1              # do not overwrite existing image in libvirt,
+                                # but reuse it in new VM</pre>
+
+<h1><a class='u'
+name="DESCRIPTION"
+>DESCRIPTION</a></h1>
+
+<p>This handler creates a new VM from the given template file and a image file.</p>
+
+<p>It will login into the VM and try to find out the ipaddress of the interface connected to the default route.</p>
+
+<p>If configured a port_forward_list, it tries to find the next free port and configure a port forwarding with iptables.</p>
+
+<h1><a class='u'
+name="OPTIONS"
+>OPTIONS</a></h1>
+
+<pre>    domain_name           : name of domain to create
+
+    vm_image_file         : image file to be used for domain creation
+
+    login_user            : user to be used to login via console
+
+    login_pass            : password to be used to login via console
+
+    images_dir            : directory where the images can be found
+
+    management_interface  : Primary network interface on guest.
+                            Used to get guest ip address via console.
+
+    management_network    : Name of virtual network on host.
+                            Used to get guest ip address from DHCP server.
+
+    network_name          : Name of virtual network on host (default: default)
+                            Used as domain.network_name in guests xml template
+
+    network_bridge        : Name of bridge interface on host (default: br0)
+                            Used as domain.network_bridge in guests xml template
+
+    forward_port_list     : list of ports to forward from host_interface`s IP to VM
+                            DONT USE IN DISTRIBUTED ENV - SEE Kanku::Handler::PortForward
+
+    memory                : memory in KB to be used by VM
+
+    vcpu                  : number of cpus for VM
+
+    use_9p                : create a share folder between host and guest using 9p
+
+    cache_dir             : set directory for caching images
+
+    mnt_dir_9p            : set diretory to mount current working directory in vm. Only used if use_9p is set to true. (default: &#39;/tmp/kanku&#39;)
+
+    noauto_9p             : set noauto option for 9p directory in fstab.
+
+    root_disk_size        : define size of root disk (WARNING: only availible with raw images)
+
+    empty_disks           : Array of empty disks to be created
+
+                            * name   - name of disk (required)
+
+                            * size   - size of disk (required)
+
+                            * pool   - name of pool (default: &#39;default&#39;)
+
+                            * format - format of new disk (default: &#39;qcow2&#39;)
+
+    installation          : array of expect commands for installation process
+
+    pool_name             : name of disk pool
+
+    root_disk_bus         : disk bus system for root device. Default: virtio
+
+                            Can be virtio, ide, sata or scsi.
+
+    template              : template xml to define VM (has precedence over job context)
+
+                            Can be virtio, ide, sata or scsi.
+
+    default_console_timeout : default timeout for console commands (default: 600 sec)
+
+    login_timeout         : timeout to wait from bootloader to login prompt (boot time) (default: 300 sec)</pre>
+
+<h1><a class='u'
+name="CONTEXT"
+>CONTEXT</a></h1>
+
+<h2><a class='u'
+name="getters"
+>getters</a></h2>
+
+<pre> domain_name
+
+ login_user
+
+ login_pass
+
+ vm_template_file
+
+ vm_image_file
+
+ host_interface
+
+ cache_dir
+
+ domain_autostart</pre>
+
+<h2><a class='u'
+name="setters"
+>setters</a></h2>
+
+<pre> vm_image_file
+
+ ipaddress
+
+ domain_autostart</pre>
+
+<h1><a class='u'
+name="DEFAULTS"
+>DEFAULTS</a></h1>
+
+<pre> images_dir     /var/lib/libvirt/images
+
+ vcpu           1
+
+ memory         1024 MB
+
+ use_9p         0
+
+ mnt_dir_9p     /tmp/kanku</pre>
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+
+
+
+                </div>
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+    </body>
+</html>

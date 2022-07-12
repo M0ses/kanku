@@ -1,0 +1,107 @@
+<html><head><title>        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/theme/css/normalize.css" />
+        <link rel="stylesheet" href="/theme/css/skeleton.css" />
+        <link rel="stylesheet" href="/theme/css/statocles-default.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
+        <meta name="generator" content="Statocles 0.098" />
+
+    <link rel="stylesheet" type="text/css" title="pod_stylesheet" href="../../theme/css/statocles-default.css">
+
+</head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+
+<a name='___top' class='dummyTopAnchor' ></a>
+
+<h1><a class='u'
+name="NAME"
+>NAME</a></h1>
+
+<pre> Kanku::NotifyQueue - A class to send notifications from daemons to rabbitmq</pre>
+
+<h1><a class='u'
+name="SYNOPSIS"
+>SYNOPSIS</a></h1>
+
+<pre>  my $notification = {
+    type    =&#62; ...,
+    message =&#62; &#39;...&#39;
+  };
+
+  my $nq = Kanku::NotifyQueue-&#62;new();
+  $nq-&#62;prepare();
+  $nq-&#62;send($notification);</pre>
+
+<h1><a class='u'
+name="ATTRIBUTES"
+>ATTRIBUTES</a></h1>
+
+<dl>
+<dt><a name="shutdown_file_-"
+>shutdown_file -</a></dt>
+</dl>
+
+<h1><a class='u'
+name="METHODS"
+>METHODS</a></h1>
+
+<h2><a class='u'
+name="prepare_-_create_Kanku::RabbitMQ_object_and_declare_exchange_if_needed"
+>prepare - create Kanku::RabbitMQ object and declare exchange if needed</a></h2>
+
+<pre> $nq-&#62;prepare();</pre>
+
+<h2><a class='u'
+name="send_-_send_a_notification_to_the_notify_exchange"
+>send - send a notification to the notify exchange</a></h2>
+
+<p>$notification can be a json string or a reference</p>
+
+<pre> $nq-&#62;send($notification);</pre>
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+
+
+
+                </div>
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+    </body>
+</html>

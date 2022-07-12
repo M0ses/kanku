@@ -1,0 +1,117 @@
+<html><head><title>Kanku::Handler::HTTPDownload        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/theme/css/normalize.css" />
+        <link rel="stylesheet" href="/theme/css/skeleton.css" />
+        <link rel="stylesheet" href="/theme/css/statocles-default.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
+        <meta name="generator" content="Statocles 0.098" />
+
+    <link rel="stylesheet" type="text/css" title="pod_stylesheet" href="../../theme/css/statocles-default.css">
+
+</head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+
+<a name='___top' class='dummyTopAnchor' ></a>
+
+<h1><a class='u'
+name="NAME"
+>NAME</a></h1>
+
+<p>Kanku::Handler::HTTPDownload</p>
+
+<h1><a class='u'
+name="SYNOPSIS"
+>SYNOPSIS</a></h1>
+
+<p>Here is an example how to configure the module in your jobs file or KankuFile</p>
+
+<pre>  -
+    use_module: Kanku::Handler::HTTPDownload
+    options:
+      url: http://example.com/path/to/image.qcow2
+      output_file: /tmp/mydomain.qcow2</pre>
+
+<h1><a class='u'
+name="DESCRIPTION"
+>DESCRIPTION</a></h1>
+
+<p>This handler downloads a file from a given url to an output_file or output_dir in the filesystem of the host.</p>
+
+<h1><a class='u'
+name="OPTIONS"
+>OPTIONS</a></h1>
+
+<pre>  url         : url to download file from
+
+  output_file : absolute path to output_file
+
+  output_dir  : absolute path to directory where file is stored (filename will be preserved).</pre>
+
+<h1><a class='u'
+name="CONTEXT"
+>CONTEXT</a></h1>
+
+<h2><a class='u'
+name="getters"
+>getters</a></h2>
+
+<p>NONE</p>
+
+<h2><a class='u'
+name="setters"
+>setters</a></h2>
+
+<pre>  vm_image_file</pre>
+
+<h1><a class='u'
+name="DEFAULTS"
+>DEFAULTS</a></h1>
+
+<p>NONE</p>
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+
+
+
+                </div>
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+    </body>
+</html>

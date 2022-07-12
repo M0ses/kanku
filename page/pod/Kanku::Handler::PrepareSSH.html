@@ -1,0 +1,141 @@
+<html><head><title>Kanku::Handler::PrepareSSH        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/theme/css/normalize.css" />
+        <link rel="stylesheet" href="/theme/css/skeleton.css" />
+        <link rel="stylesheet" href="/theme/css/statocles-default.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
+        <meta name="generator" content="Statocles 0.098" />
+
+    <link rel="stylesheet" type="text/css" title="pod_stylesheet" href="../../theme/css/statocles-default.css">
+
+</head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+
+<a name='___top' class='dummyTopAnchor' ></a>
+
+<h1><a class='u'
+name="NAME"
+>NAME</a></h1>
+
+<p>Kanku::Handler::PrepareSSH</p>
+
+<h1><a class='u'
+name="SYNOPSIS"
+>SYNOPSIS</a></h1>
+
+<p>Here is an example how to configure the module in your jobs file or KankuFile</p>
+
+<pre>  -
+    use_module: Kanku::Handler::PrepareSSH
+    options:
+      public_keys:
+        - ssh-rsa A....
+        - ssh-dsa B....
+      public_key_files:
+        - /home/myuser/.ssh/id_rsa.pub
+        - /home/myotheruser/.ssh/id_rsa.pub
+      domain_name: my-fancy-vm
+      login_user: root
+      login_pass: kankudai</pre>
+
+<h1><a class='u'
+name="DESCRIPTION"
+>DESCRIPTION</a></h1>
+
+<p>This handler deploys the given public keys for ssh for user root and kanku.</p>
+
+<p>The user kanku will be created if not already exists.</p>
+
+<p>The ssh daemon will be enabled and started.</p>
+
+<h1><a class='u'
+name="OPTIONS"
+>OPTIONS</a></h1>
+
+<pre>  public_keys       - An array of strings which include your public ssh key
+
+  public_key_files  - An array of files to get the public ssh keys from
+
+  domain_name       - name of the domain to prepare
+
+  login_user        - username to use when connecting domain via console
+
+  login_pass        - password to use when connecting domain via console</pre>
+
+<h1><a class='u'
+name="CONTEXT"
+>CONTEXT</a></h1>
+
+<h2><a class='u'
+name="getters"
+>getters</a></h2>
+
+<p>The following variables will be taken from the job context if not set explicitly</p>
+
+<dl>
+<dt><a name="domain_name"
+>domain_name</a></dt>
+
+<dd>
+<dt><a name="login_user"
+>login_user</a></dt>
+
+<dd>
+<dt><a name="login_pass"
+>login_pass</a></dt>
+</dl>
+
+<h1><a class='u'
+name="DEFAULTS"
+>DEFAULTS</a></h1>
+
+<p>If neither public_keys nor public_key_files are given, than the handler will check $HOME/.ssh and /etc/kanku/ssh for the following files: id_dsa.pub, id_ecdsa.pub, id_ecdsa_sk.pub, id_ed25519.pub, id_ed25519_sk.pub, and id_rsa.pub.</p>
+
+<p>The keys from the found files will be deployed on the system.</p>
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+
+
+
+                </div>
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+    </body>
+</html>

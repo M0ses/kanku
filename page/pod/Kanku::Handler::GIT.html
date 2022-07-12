@@ -1,0 +1,159 @@
+<html><head><title>Kanku::Handler::GIT        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/theme/css/normalize.css" />
+        <link rel="stylesheet" href="/theme/css/skeleton.css" />
+        <link rel="stylesheet" href="/theme/css/statocles-default.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
+        <meta name="generator" content="Statocles 0.098" />
+
+    <link rel="stylesheet" type="text/css" title="pod_stylesheet" href="../../theme/css/statocles-default.css">
+
+</head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+
+<a name='___top' class='dummyTopAnchor' ></a>
+
+<h1><a class='u'
+name="NAME"
+>NAME</a></h1>
+
+<p>Kanku::Handler::GIT - handle git repositories</p>
+
+<h1><a class='u'
+name="SYNOPSIS"
+>SYNOPSIS</a></h1>
+
+<p>Here is an example how to configure the module in your jobs file or KankuFile</p>
+
+<pre>  -
+    use_module: Kanku::Handler::GIT
+    options:
+      mirror:     1
+      giturl:     http://192.168.199.1/git/github.com/openSUSE/open-build-service.git
+      remote_url: https://github.com/openSUSE/open-build-service.git
+      destination: /root/kanku
+      revision: master
+      submodules : 1</pre>
+
+<h1><a class='u'
+name="DESCRIPTION"
+>DESCRIPTION</a></h1>
+
+<p>This handler logs into the guest os via ssh and clones/checks out a git repository.</p>
+
+<dl>
+<dt><a name="update_cached_git_repository_on_master_server_(only_in_mirror_mode)"
+>update cached git repository on master server (only in mirror mode)</a></dt>
+
+<dd>
+<dt><a name="login_into_guest_vm_and_clone_(from_master_cache_or_directly)"
+>login into guest vm and clone (from master cache or directly)</a></dt>
+
+<dd>
+<dt><a name="checkout_specific_revision"
+>checkout specific revision</a></dt>
+
+<dd>
+<dt><a name="update_submodules"
+>update submodules</a></dt>
+</dl>
+
+<h1><a class='u'
+name="OPTIONS"
+>OPTIONS</a></h1>
+
+<p>SEE ALSO <a href="./Kanku%3A%3ARoles%3A%3ASSH.html" class="podlinkpod"
+>Kanku::Roles::SSH</a></p>
+
+<pre>  mirror      : boolean, if set to 1, use mirror mode
+
+  giturl      : url to clone git repository from (in mirror mode use local cache)
+
+  gituser     : user for authentication
+
+  gitpass     : password for authentication
+
+  revision    : revision to checkout in git working copy
+
+  destination : path where working copy is checked out in VM&#39;s filesystem
+
+  submodules  : boolean, if set to 1, submodules will be initialized and updated
+
+  remote_url  : origin of cached git repository (only used in mirror mode)</pre>
+
+<h1><a class='u'
+name="CONTEXT"
+>CONTEXT</a></h1>
+
+<h2><a class='u'
+name="getters"
+>getters</a></h2>
+
+<p>SEE <a href="./Kanku%3A%3ARoles%3A%3ASSH.html" class="podlinkpod"
+>Kanku::Roles::SSH</a></p>
+
+<h2><a class='u'
+name="setters"
+>setters</a></h2>
+
+<p>NONE</p>
+
+<h1><a class='u'
+name="DEFAULTS"
+>DEFAULTS</a></h1>
+
+<p>NONE</p>
+
+<h1><a class='u'
+name="SEE_ALSO"
+>SEE ALSO</a></h1>
+
+<p><a href="./Kanku%3A%3ARoles%3A%3ASSH.html" class="podlinkpod"
+>Kanku::Roles::SSH</a></p>
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+
+
+
+                </div>
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+    </body>
+</html>
