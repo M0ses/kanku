@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/theme/css/normalize.css" rel="stylesheet">
+        <link href="/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+        <title>Kanku</title>
+        <meta content="Statocles 0.098" name="generator">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        <h1>Installation</h1>
+
+<h2>openSUSE</h2>
+
+<!--
+    <h2>
+    <a id="automatic-installation-with-yast-one-click-install" class="anchor" href="#automatic-installation-with-yast-one-click-install" aria-hidden="true">
+      <span aria-hidden="true" class="octicon octicon-link"></span></a>Automatic installation with yast one-click-install</h2>
+
+
+
+0c0f88080cb2494e730d4e08896006cb
+
+
+
+-->
+
+<pre><code>zypper ar obs://devel:kanku devel:kanku
+zypper ar obs://devel:kanku:perl devel:kanku:perl
+zypper ref -s
+zypper in kanku
+</code></pre>
+
+<h2>Fedora/RedHat</h2>
+
+<pre><code>curl https://download.opensuse.org/repositories/devel:/kanku/Fedora_Rawhide/devel:kanku.repo &gt; /etc/yum.repos.d/devel:kanku.repo
+curl https://download.opensuse.org/repositories/devel:/kanku:/perl/Fedora_Rawhide/devel:kanku:perl.repo &gt; /etc/yum.repos.d/devel:kanku:perl.repo
+dnf install kanku
+usermod -a -G wheel kanku
+usermod -a -G libvirt kanku
+</code></pre>
+
+<h2>Ubuntu/Debian</h2>
+
+<pre><code>sudo sh -c &#39;echo &quot;deb https://download.opensuse.org/repositories/devel:/kanku/xUbuntu_22.04/ ./&quot; &gt; /etc/apt/sources.list.d/kanku.list&#39;
+sudo sh -c &#39;echo &quot;deb https://download.opensuse.org/repositories/devel:/kanku:/perl:/deb/xUbuntu_22.04/ ./&quot; &gt;&gt; /etc/apt/sources.list.d/kanku.list&#39;
+curl https://download.opensuse.org/repositories/devel:/kanku:/perl:/deb/xUbuntu_22.04/Release.key |sudo apt-key add -
+curl https://download.opensuse.org/repositories/devel:/kanku:/staging/xUbuntu_22.04/Release.key   |sudo apt-key add -
+sudo apt update
+sudo apt install -y kanku
+</code></pre>
+
+<h2>Setup your environment</h2>
+
+<pre><code>sudo kanku setup --devel
+
+# if you would like to have more control about the modifications on your system
+# please use:
+# sudo kanku setup --devel --interactive
+
+sudo shutdown -r now
+</code></pre>
+
+<h3>Preparing a new Project</h3>
+
+<p>The command <code>kanku init</code> will create a default Kankufile 
+which should give you a good starting point.</p>
+
+<p>The option <code>--memory=...</code> defines the RAM of the virtual guest and is optional.
+Default is 2G of RAM.
+For more options SEE <code>kanku init --help</code></p>
+
+<pre><code># create directory
+mkdir MyProject
+
+# cd in project&#39;s directory
+cd MyProject
+
+kanku init --memory=2G --domain_name my-project
+</code></pre>
+
+<h3>Download, create and start a new guest</h3>
+
+<pre><code>kanku up
+</code></pre>
+
+<h3>Connect to new machine</h3>
+
+<p>Per default, if it exists, your ssh key is added to the authorized keys file</p>
+
+<p>Otherwise you can login as</p>
+
+<ul>
+<li>User: kanku / Password &quot;kankusho&quot;</li>
+<li>User: root / Pasword &quot;kankudai&quot;</li>
+</ul>
+
+<p><strong>Please change the passwords at first login</strong></p>
+
+<h4>Connect with user kanku</h4>
+
+<pre><code>kanku ssh
+</code></pre>
+
+<h4>Connect as user root</h4>
+
+<pre><code>kanku ssh -u root
+</code></pre>
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                    
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>

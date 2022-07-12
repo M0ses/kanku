@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/theme/css/normalize.css" rel="stylesheet">
+        <link href="/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+        <title>Kanku - Kanku</title>
+        <meta content="Statocles 0.098" name="generator">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        <h1>What is Kanku?</h1>
+
+<p>kanku is designed to give you a better integration of your 
+<a href="https://osinside.github.io/kiwi/">kiwi</a> images built by the 
+<a href="http://openbuildservice.org">Open Build Service</a> 
+in your development and testing workflow.</p>
+
+<p>You can find pre-build images for various linux distribution in 
+<a href="https://build.opensuse.org/project/show/devel:kanku:images">devel:kanku:images</a></p>
+
+<h2>Modes</h2>
+
+<p>kanku can run in two modes</p>
+
+<ul>
+<li><strong>Developer mode</strong> (on your laptop/workstation) while developing.</li>
+<li><strong>Server mode</strong> (on a dedicated Server for QA) to run jobs periodically or triggerd by e.g. events on a rabbitmq bus.</li>
+</ul>
+
+<h3>Developer mode</h3>
+
+<p>In a simple configuration file in YAML format you can specify the location of your kiwi image and actions to be executed after downloading the image and starting a Virtual Machine using the downloaded image.
+You can configure one or multiple jobs per project. 
+These jobs consists of one or more tasks which use a handler module and the given options.
+With the kanku command line tool you can easily</p>
+
+<ul>
+<li>create a new VM based on the configured image</li>
+<li>run commands on the VM via SSH or serial console</li>
+<li>use salt-ssh to configure your VM</li>
+<li>access the created VM via ssh</li>
+<li>share your project/source directory with the VM</li>
+</ul>
+
+<h3>Server mode</h3>
+
+<p>In server mode you have three ways to trigger a job:</p>
+
+<ul>
+<li>scheduled - kanku-scheduler triggers the job in a defined time period</li>
+<li>triggerd  - kanku-triggerd triggers the job at a defined event (e.g. via  rabbitmq)</li>
+<li>manually  - You can trigger a job via the WebUI</li>
+</ul>
+
+<p>As the job configuration is very similar to the developer mode,
+you can easily adopt the configurations used in developer mode.</p>
+
+<p>The results can be shown via WebUI or with the kanku command line tool in a terminal</p>
+
+<!--
+
+<div class="orbit" role="region" aria-label="Screenshots" data-orbit>
+
+
+99f6f4d093c47dd2e63f51c2e95d51a7
+
+
+
+  <nav class="orbit-bullets">
+    <button class="is-active" data-slide="0"><span class="show-for-sr">First slide details.</span><span class="show-for-sr">Current Slide</span></button>
+    <button data-slide="1"><span class="show-for-sr">Second slide details.</span></button>
+    <button data-slide="2"><span class="show-for-sr">Third slide details.</span></button>
+    <button data-slide="3"><span class="show-for-sr">Fourth slide details.</span></button>
+    <button data-slide="4"><span class="show-for-sr">Fifth slide details.</span></button>
+  </nav>
+</div>
+-->
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                    
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>

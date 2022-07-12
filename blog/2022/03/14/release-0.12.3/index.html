@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/theme/css/normalize.css" rel="stylesheet">
+        <link href="/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+        <title>RELEASE 0.12.3 - Kanku</title>
+        <meta content="Statocles 0.098" name="generator">
+        <link href="/blog/2022/05/06/release-0.12.4/index.html" rel="prev">
+        <link href="/blog/2022/02/18/release-0.12.2/index.html" rel="next">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        <header>
+    <h1>Release 0.12.3</h1>
+
+    <aside>
+        <time datetime="2022-03-14">
+            Posted on 2022-03-14
+        </time>
+    </aside>
+
+    <p class="tags">Tags:
+        <a href="/blog/tag/release/" rel="tag">release</a>
+    </p>
+
+
+</header>
+
+  <p>
+  </p><h2>ATTENTION:</h2>
+  because instead of using iptables/ss/netstat directly we now use 
+  wrapper scripts with need to be added to the sudoers file.
+
+<p>
+  If you run kanku in developer mode you should re-run
+</p>
+<code>kanku setup --devel</code>
+
+<h2>Features</h2>
+
+<ul>
+  <li>[cli] check_configs command now also check job_group configs</li>
+</ul>
+
+
+<h2>Bugfixes</h2>
+
+<ul>
+  <li>[web] fix outdated cached settings in &#39;Job Groups&#39;</li>
+  <li>[core] #boo 1196604 - wrapper scripts for iptables/ss/netstat</li>
+  <li>[dist] change default logging to stderr/journald</li>
+  <li>[util] VM::Image - use new buffer size while uncompressing</li>
+  <li>[urlwrapper] fixed x-scheme-handler_kanku</li>
+  <li>[handler] central config for host_interfaces for PortForward</li>
+  <li>[web] job groups config changes are now detected in web ui</li>
+</ul>
+
+
+<ul class="pager">
+    <li class="prev">
+            <a class="button button-primary" href="/blog/2022/02/18/release-0.12.2/index.html" rel="prev">
+                ← Older
+            </a>
+    </li>
+    <li class="next">
+            <a class="button button-primary" href="/blog/2022/05/06/release-0.12.4/index.html" rel="next">
+                Newer →
+            </a>
+    </li>
+</ul>
+
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                        <nav id="tags">
+        <h1>Tags</h1>
+        <ul class="list-inline">
+            <li><a href="/blog/tag/release/">release</a></li>
+        </ul>
+    </nav>
+
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>

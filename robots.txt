@@ -1,0 +1,5 @@
+Sitemap: http://kanku-pages/sitemap.xml
+User-Agent: *
+Disallow:
+
+

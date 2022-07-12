@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/theme/css/normalize.css" rel="stylesheet">
+        <link href="/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+        <title>Kanku</title>
+        <meta content="Statocles 0.098" name="generator">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        <h1>FAQ</h1>
+
+<h2>Where can I find kanku images?</h2>
+
+<p>Have a look at <a href="https://build.opensuse.org/project/show/devel:kanku:images">devel:kanku:images</a>
+to get an overview of pre-built kanku images or use <code>kanku lsi</code></p>
+
+<p>Keep in mind how to configure the selected image in kanku</p>
+
+<pre><code>-
+  use_module: Kanku::Handler::OBSCheck
+  options:
+    api_url: https://api.opensuse.org
+    project: devel:kanku:images
+    # package e.g. openSUSE-Tumbleweed-JeOS:ext4
+    package: &lt;package name&gt;
+    # e.g. images_leap_15_0
+    repository: &lt;repository name&gt;
+</code></pre>
+
+<h2>Where can I find further documentation?</h2>
+
+<ul>
+<li><code>perldoc Kanku</code></li>
+<li><a href="/pod/Kanku.html">Online POD Documentation</a></li>
+<li><a href="https://www.cheatography.com/m0ses/cheat-sheets/kanku/">Kanku Cheatsheet</a></li>
+</ul>
+
+<h2>KNOWN ISSUES</h2>
+
+<p>Please see the open issues on <a href="https://github.com/M0ses/kanku/issues">Github</a></p>
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                    
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Kanku</title>
+        <link>http://kanku-pages/blog/</link>
+        <atom:link href="http://kanku-pages/blog/index.rss" rel="self" type="application/rss+xml" />
+        <description>Blog feed of Kanku</description>
+        <generator>Statocles 0.098</generator>
+        <item>
+            <title>RELEASE 0.12.7</title>
+            <link>http://kanku-pages/blog/2022/06/23/release-0.12.7/</link>
+            <guid>http://kanku-pages/blog/2022/06/23/release-0.12.7/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Thu, 23 Jun 2022 18:51:02 +0000
+            </pubDate>
+        </item>
+        <item>
+            <title>RELEASE 0.12.6</title>
+            <link>http://kanku-pages/blog/2022/06/22/release-0.12.6/</link>
+            <guid>http://kanku-pages/blog/2022/06/22/release-0.12.6/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Wed, 22 Jun 2022 10:09:52 +0000
+            </pubDate>
+        </item>
+        <item>
+            <title>RELEASE 0.12.5</title>
+            <link>http://kanku-pages/blog/2022/06/03/release-0.12.5/</link>
+            <guid>http://kanku-pages/blog/2022/06/03/release-0.12.5/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Fri, 03 Jun 2022 17:02:45 +0000
+            </pubDate>
+        </item>
+        <item>
+            <title>RELEASE 0.12.4</title>
+            <link>http://kanku-pages/blog/2022/05/06/release-0.12.4/</link>
+            <guid>http://kanku-pages/blog/2022/05/06/release-0.12.4/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Fri, 06 May 2022 15:17:13 +0000
+            </pubDate>
+        </item>
+        <item>
+            <title>RELEASE 0.12.3</title>
+            <link>http://kanku-pages/blog/2022/03/14/release-0.12.3/</link>
+            <guid>http://kanku-pages/blog/2022/03/14/release-0.12.3/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Mon, 14 Mar 2022 08:43:00 +0000
+            </pubDate>
+        </item>
+    </channel>
+</rss>
+

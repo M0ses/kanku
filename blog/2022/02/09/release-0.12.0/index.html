@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/theme/css/normalize.css" rel="stylesheet">
+        <link href="/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+        <title>RELEASE 0.12.0 - Kanku</title>
+        <meta content="Statocles 0.098" name="generator">
+        <link href="/blog/2022/02/16/release-0.12.1/index.html" rel="prev">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        <header>
+    <h1>Release 0.12.0</h1>
+
+    <aside>
+        <time datetime="2022-02-09">
+            Posted on 2022-02-09
+        </time>
+    </aside>
+
+    <p class="tags">Tags:
+        <a href="/blog/tag/release/" rel="tag">release</a>
+    </p>
+
+
+</header>
+
+
+<h2>Features</h2>
+
+<ul>
+  <li>[web] new switch autostart to create persistent VM&#39;s</li>
+  <li>[web] added login route (for GET method)</li>
+  <li>[cli] new command <code>kanku snapshot ...</code></li>
+  <li>[cli] new option: <code>kanku ssh --ipaddress ...</code> - alias <code>-i</code></li>
+  <li>[cli] new option: <code>kanku ssh --execute ...</code> - alias <code>-e</code></li>
+  <li>[cli] use ssh_user from KankuFile for ssh command</li>
+  <li>[cli] new option: <code>--log_file/--log_stdout</code> for VM related commands</li>
+  <li>[cli] Suggest running ssh-add on auth fauilure when auth_type is &#39;agent&#39;</li>
+</ul>
+
+
+<h2>Bugfixes</h2>
+
+<ul>
+  <li>[web] fix &#39;show only latest&#39; in job history</li>
+  <li>[core] no_wait_for_bootloader for ExecuteCommandsViaConsole to avoid waiting for bootloader</li>
+  <li>[core] Fix ssh key filename: id_ecdsa.pub_sk -&gt; id_ecdsa_sk.pub</li>
+  <li>[core] various cleanups to avoid &#39;uninitialized value&#39;</li>
+  <li>[dist] fix tabs in default config template setup/kanku-config.yml.tt2</li>
+  <li>[handler] K:H:PrepareSSH: fix permissions for user kanku</li>
+  <li>[handler] K:H:CleanupIPTables: cleanup unused packages</li>
+  <li>[util] set default for running_remotely in VM to 0</li>
+  <li>[examples] updated to current opensuse</li>
+  <li>[examples] deleted broken examples</li>
+  <li>[examples] updated centos to latest version</li>
+  <li>[examples] renamed centos -&gt; centos-current</li>
+</ul>
+
+<h2>Examples</h2>
+
+<ul>
+    <p>This release containes a full functional version of the &quot;Kanku VM Autostart&quot; feature for kanku clusters.</p>
+<ul>
+  <li>Restart VMs</li>
+  <li>Restore VMs iptable rules</li>
+</ul>
+<img src="img/kanku_screenshot-feature-autostart_domain.png">
+</ul>
+
+<ul class="pager">
+    <li class="prev">
+            <button disabled>
+                ← Older
+            </button>
+    </li>
+    <li class="next">
+            <a class="button button-primary" href="/blog/2022/02/16/release-0.12.1/index.html" rel="next">
+                Newer →
+            </a>
+    </li>
+</ul>
+
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                        <nav id="tags">
+        <h1>Tags</h1>
+        <ul class="list-inline">
+            <li><a href="/blog/tag/release/">release</a></li>
+        </ul>
+    </nav>
+
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>
