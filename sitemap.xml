@@ -120,6 +120,12 @@
         <priority>0.5</priority>
         <lastmod>2022-07-12</lastmod>
     </url>
+    <url>
+        <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::CopyProfile.html</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.5</priority>
+        <lastmod>2022-07-12</lastmod>
+    </url>
 </urlset>
 
 
