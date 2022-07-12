@@ -111,9 +111,11 @@ theme:
 # deploy: These are the settings for the site's deploy. See Statocles::Deploy::File
 # for a full list of attributes and what they do.
 deploy:
-    $class: 'Statocles::Deploy::Git'
-    $class: 'Statocles::Deploy::Git'
-    branch: 'gh-pages'
+    class: 'Statocles::Deploy::Git'
+    args:
+      base_url: 'https://m0ses.github.io/kanku/'
+      path:   '.'
+      branch: 'gh-pages'
 
 #----------------------------------------------------------------------------
 # Applications
