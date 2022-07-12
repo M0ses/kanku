@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Kanku</title>
-        <link>http://kanku-pages/blog/</link>
-        <atom:link href="http://kanku-pages/blog/index.rss" rel="self" type="application/rss+xml" />
+        <link>/blog/</link>
+        <atom:link href="/blog/index.rss" rel="self" type="application/rss+xml" />
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
             <title>RELEASE 0.12.7</title>
-            <link>http://kanku-pages/blog/2022/06/23/release-0.12.7/</link>
-            <guid>http://kanku-pages/blog/2022/06/23/release-0.12.7/</guid>
+            <link>/blog/2022/06/23/release-0.12.7/</link>
+            <guid>/blog/2022/06/23/release-0.12.7/</guid>
             <description><![CDATA[
 
                     <p>Tags:
-                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                        <a href="/blog/tag/release/">release</a>
                     </p>
 
             ]]></description>
@@ -23,12 +23,12 @@
         </item>
         <item>
             <title>RELEASE 0.12.6</title>
-            <link>http://kanku-pages/blog/2022/06/22/release-0.12.6/</link>
-            <guid>http://kanku-pages/blog/2022/06/22/release-0.12.6/</guid>
+            <link>/blog/2022/06/22/release-0.12.6/</link>
+            <guid>/blog/2022/06/22/release-0.12.6/</guid>
             <description><![CDATA[
 
                     <p>Tags:
-                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                        <a href="/blog/tag/release/">release</a>
                     </p>
 
             ]]></description>
@@ -38,12 +38,12 @@
         </item>
         <item>
             <title>RELEASE 0.12.5</title>
-            <link>http://kanku-pages/blog/2022/06/03/release-0.12.5/</link>
-            <guid>http://kanku-pages/blog/2022/06/03/release-0.12.5/</guid>
+            <link>/blog/2022/06/03/release-0.12.5/</link>
+            <guid>/blog/2022/06/03/release-0.12.5/</guid>
             <description><![CDATA[
 
                     <p>Tags:
-                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                        <a href="/blog/tag/release/">release</a>
                     </p>
 
             ]]></description>
@@ -53,12 +53,12 @@
         </item>
         <item>
             <title>RELEASE 0.12.4</title>
-            <link>http://kanku-pages/blog/2022/05/06/release-0.12.4/</link>
-            <guid>http://kanku-pages/blog/2022/05/06/release-0.12.4/</guid>
+            <link>/blog/2022/05/06/release-0.12.4/</link>
+            <guid>/blog/2022/05/06/release-0.12.4/</guid>
             <description><![CDATA[
 
                     <p>Tags:
-                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                        <a href="/blog/tag/release/">release</a>
                     </p>
 
             ]]></description>
@@ -68,12 +68,12 @@
         </item>
         <item>
             <title>RELEASE 0.12.3</title>
-            <link>http://kanku-pages/blog/2022/03/14/release-0.12.3/</link>
-            <guid>http://kanku-pages/blog/2022/03/14/release-0.12.3/</guid>
+            <link>/blog/2022/03/14/release-0.12.3/</link>
+            <guid>/blog/2022/03/14/release-0.12.3/</guid>
             <description><![CDATA[
 
                     <p>Tags:
-                        <a href="http://kanku-pages/blog/tag/release/">release</a>
+                        <a href="/blog/tag/release/">release</a>
                     </p>
 
             ]]></description>

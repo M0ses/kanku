@@ -1,4 +1,4 @@
-Sitemap: http://kanku-pages/sitemap.xml
+Sitemap: /sitemap.xml
 User-Agent: *
 Disallow:
 
