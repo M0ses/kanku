@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://m0ses.github.io/kanku/blog/tag/news/</id>
+    <title>Kanku</title>
+    <updated>2022-07-12T00:00:00Z</updated>
+    <link href="https://m0ses.github.io/kanku/blog/tag/news.atom" rel="self" />
+    <link href="https://m0ses.github.io/kanku/blog/tag/news/" rel="alternate" />
+    <generator version="0.098">Statocles</generator>
+
+    <entry>
+        <id>https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/</id>
+        <title>Kanku Project Page refurbished</title>
+        <link href="https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/" rel="alternate" />
+        <content type="html"><![CDATA[
+	      <h2>Welcome to the new project page</h2>
+
+<p>The new page is built with <a href="http://preaction.me/statocles/">Statocles</a>.</p>
+
+<p>We decided to switch from plain HTML to a Static Site Generator for the following reasons:</p>
+
+<ul>
+<li>Make it easier to write content</li>
+<li>Use a framework to maintain a blog</li>
+<li>Make deployment easier and more flexible</li>
+</ul>
+
+<p>but the most important point:</p>
+
+<ul>
+<li>Generate Changelog, Release notes, etc. out of one source</li>
+</ul>
+
+<p>We will follow up with some blog posts about the the tools we create
+to auto-generate these documentationi.</p>
+
+<p>Stay tuned.</p>
+
+
+                <p>Tags:
+                    <a href="https://m0ses.github.io/kanku/blog/tag/news/">news</a>
+                </p>
+
+        ]]></content>
+        <updated>2022-07-12T00:00:00Z</updated>
+        <category term="news" />
+    </entry>
+</feed>
+

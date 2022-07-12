@@ -10,7 +10,7 @@
         <loc>https://m0ses.github.io/kanku/blog/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
-        <lastmod>2022-06-23</lastmod>
+        <lastmod>2022-07-12</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/blog/2022/02/09/release-0.12.0/</loc>
@@ -61,10 +61,22 @@
         <lastmod>2022-06-23</lastmod>
     </url>
     <url>
+        <loc>https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.5</priority>
+        <lastmod>2022-07-12</lastmod>
+    </url>
+    <url>
         <loc>https://m0ses.github.io/kanku/blog/page/2/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
-        <lastmod>2022-06-23</lastmod>
+        <lastmod>2022-07-12</lastmod>
+    </url>
+    <url>
+        <loc>https://m0ses.github.io/kanku/blog/tag/news/</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.3</priority>
+        <lastmod>2022-07-12</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/blog/tag/release/</loc>
