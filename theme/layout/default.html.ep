@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="/theme/css/skeleton.css" />
         <link rel="stylesheet" href="/theme/css/statocles-default.css" />
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
         <title><%== $self->title ? $self->title . ' - ' : '' %><%== $site->title %></title>
         % if ( my $author = $self->author ) {
         <meta name="author" content="<%== $author->name %>">
