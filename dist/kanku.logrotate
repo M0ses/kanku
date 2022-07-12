@@ -1,8 +1,0 @@
-/var/log/kanku/kanku.log 
-/var/log/kanku/kanku-web.log 
-{
-  daily
-  rotate 7
-  copytruncate
-  missingok
-}

@@ -48,7 +48,6 @@ install_arch_templates:
 	install -m 644 etc/templates/default-vm.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/default-vm.tt2
 
 install: install_dirs install_full_dirs install_services install_docs configs public views bashcomp urlwrapper install_arch_templates
-	install -m 644 ./dist/kanku.logrotate $(DESTDIR)/etc/logrotate.d/kanku-common
 	install -m 644 dist/profile.d-kanku.sh $(DESTDIR)/etc/profile.d/kanku.sh
 	install -m 644 dist/tmpfiles.d-kanku $(DESTDIR)/usr/lib/tmpfiles.d/kanku.conf
 	install -m 644 dist/_etc_apache2_conf.d_kanku-worker.conf $(DESTDIR)/etc/apache2/conf.d/kanku-worker.conf
@@ -96,7 +95,6 @@ lib:
 
 install_dirs:
 	[ -d $(DESTDIR)/etc/bash_completion.d/ ] || mkdir -p $(DESTDIR)/etc/bash_completion.d/
-	[ -d $(DESTDIR)/etc/logrotate.d/ ]       || mkdir -p $(DESTDIR)/etc/logrotate.d/
 	[ -d $(DESTDIR)/etc/apache2/conf.d ]     || mkdir -p $(DESTDIR)/etc/apache2/conf.d
 	[ -d $(DESTDIR)/etc/profile.d ]          || mkdir -p $(DESTDIR)/etc/profile.d
 	[ -d $(DESTDIR)/etc/kanku ]              || mkdir -p $(DESTDIR)/etc/kanku
