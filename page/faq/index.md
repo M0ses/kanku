@@ -21,7 +21,7 @@ Keep in mind how to configure the selected image in kanku
 ## Where can I find further documentation?
 
 * ```perldoc Kanku```
-* [Online POD Documentation](/pod/Kanku.html)
+* [Online POD Documentation](/page/pod/Kanku.html)
 * [Kanku Cheatsheet](https://www.cheatography.com/m0ses/cheat-sheets/kanku/)
 
 ## KNOWN ISSUES
