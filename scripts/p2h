@@ -40,7 +40,7 @@ my %files;
 my %podhtml_LOT;
 
 find({wanted => sub {
-  
+
   if ( $File::Find::name =~ m#$indir([^.].*)[.](pm|pod)# ) {
     my $p = $1;
     my $f = "$1.$2";
@@ -61,7 +61,7 @@ while (my ($package, $file) = each %files) {
 }
 
 if ($ARGV[1]) {
-  print "SKIP COMMIT BECAUSE DEBUG IS SET IN ENVi\n";
+  print "SKIP COMMIT BECAUSE DEBUG IS SET IN ENV\n";
 } else {
   @args = ('git', 'add', '--', $outdir);
   system(@args) == 0 || die "system @args failed: $?";
@@ -78,8 +78,74 @@ sub convert {
     my ($in_file, $out_file) = @_;
     my $p = Pod::Simple::HTML->new;
     $p->{podhtml_LOT} = \%podhtml_LOT;
+    $p->html_css('../../theme/css/statocles-default.css'),
     my $html;
     $p->output_string(\$html);
+    my $header = <<EOF;
+        </title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="/theme/css/normalize.css" />
+        <link rel="stylesheet" href="/theme/css/skeleton.css" />
+        <link rel="stylesheet" href="/theme/css/statocles-default.css" />
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+        <link rel="shortcut icon" type="image/x-icon" href="/page/favicon.ico">
+        <meta name="generator" content="Statocles 0.098" />
+
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+
+                </div>
+            </nav>
+
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+
+EOF
+    $p->html_header_after_title($header);
+    my $footer=<<EOF;
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+
+
+
+                </div>
+            </div>
+        </div>
+        <footer>
+
+        </footer>
+    </body>
+</html>
+EOF
+    $p->html_footer($footer);
+
     $p->parse_file($in_file);
     if ($html) {
       print "$out_file\n";
