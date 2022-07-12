@@ -30,7 +30,7 @@ my %opts = (
 my $path_spec = $ARGV[0] || 'master';
 my $outdir = "$FindBin::Bin/../page/pod";
 my $indir  = "$FindBin::Bin/../lib/";
-# FIXME: secure checkout parameters
+
 chdir "$FindBin::Bin/..";
 my @args = ('git', 'restore', '--source', $path_spec, '--', 'lib');
 
@@ -60,11 +60,15 @@ while (my ($package, $file) = each %files) {
   convert("$indir/$file", $of);
 }
 
-@args = ('git', 'add', '--', $outdir);
-system(@args) == 0 || die "system @args failed: $?";
+if ($ARGV[1]) {
+  print "SKIP COMMIT BECAUSE DEBUG IS SET IN ENVi\n";
+} else {
+  @args = ('git', 'add', '--', $outdir);
+  system(@args) == 0 || die "system @args failed: $?";
 
-@args = ('git', 'commit', '-m', "updated pod to $path_spec");
-system(@args) == 0 || die "system @args failed: $?";
+  @args = ('git', 'commit', '-m', "updated pod to $path_spec");
+  system(@args) == 0 || die "system @args failed: $?";
+}
 
 remove_tree($indir);
 
