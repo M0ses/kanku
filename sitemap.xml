@@ -1,109 +1,109 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>/</loc>
+        <loc>https://m0ses.github.io/kanku/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-07-12</lastmod>
     </url>
     <url>
-        <loc>/blog/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
         <lastmod>2022-06-23</lastmod>
     </url>
     <url>
-        <loc>/blog/2022/02/09/release-0.12.0/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/2022/02/09/release-0.12.0/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-02-09</lastmod>
     </url>
     <url>
-        <loc>/blog/2022/02/16/release-0.12.1/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/2022/02/16/release-0.12.1/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-02-16</lastmod>
     </url>
     <url>
-        <loc>/blog/2022/02/18/release-0.12.2/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/2022/02/18/release-0.12.2/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-02-18</lastmod>
     </url>
     <url>
-        <loc>/blog/2022/03/14/release-0.12.3/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/2022/03/14/release-0.12.3/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-03-14</lastmod>
     </url>
     <url>
-        <loc>/blog/2022/05/06/release-0.12.4/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/2022/05/06/release-0.12.4/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-05-06</lastmod>
     </url>
     <url>
-        <loc>/blog/2022/06/03/release-0.12.5/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/2022/06/03/release-0.12.5/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-06-03</lastmod>
     </url>
     <url>
-        <loc>/blog/2022/06/22/release-0.12.6/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/2022/06/22/release-0.12.6/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-06-22</lastmod>
     </url>
     <url>
-        <loc>/blog/2022/06/23/release-0.12.7/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/2022/06/23/release-0.12.7/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-06-23</lastmod>
     </url>
     <url>
-        <loc>/blog/page/2/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/page/2/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
         <lastmod>2022-06-23</lastmod>
     </url>
     <url>
-        <loc>/blog/tag/release/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/tag/release/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
         <lastmod>2022-06-23</lastmod>
     </url>
     <url>
-        <loc>/blog/tag/release/page/2/</loc>
+        <loc>https://m0ses.github.io/kanku/blog/tag/release/page/2/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
         <lastmod>2022-06-23</lastmod>
     </url>
     <url>
-        <loc>/page/about/</loc>
+        <loc>https://m0ses.github.io/kanku/page/about/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-07-12</lastmod>
     </url>
     <url>
-        <loc>/page/download/</loc>
+        <loc>https://m0ses.github.io/kanku/page/download/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-07-12</lastmod>
     </url>
     <url>
-        <loc>/page/faq/</loc>
+        <loc>https://m0ses.github.io/kanku/page/faq/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-07-12</lastmod>
     </url>
     <url>
-        <loc>/page/getting_started/</loc>
+        <loc>https://m0ses.github.io/kanku/page/getting_started/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-07-12</lastmod>
     </url>
     <url>
-        <loc>/page/overview/</loc>
+        <loc>https://m0ses.github.io/kanku/page/overview/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
         <lastmod>2022-07-12</lastmod>

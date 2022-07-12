@@ -1,4 +1,4 @@
-Sitemap: /sitemap.xml
+Sitemap: https://m0ses.github.io/kanku/sitemap.xml
 User-Agent: *
 Disallow:
 
