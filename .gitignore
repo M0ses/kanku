@@ -26,3 +26,4 @@ t/tmp.db
 .perlcritic.cache
 etc/rabbit.yml
 KankuFile.examples/rockrobo
+.statocles
