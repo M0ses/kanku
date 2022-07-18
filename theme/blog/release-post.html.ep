@@ -31,38 +31,32 @@
 </header>
 
 % if ($self->data->{warnings}) {
-  <%= $self->data->{warnings} %>
+<%= markdown $self->data->{warnings} %>
 % }
 
 % if ($self->data->{features}) {
-<h2>Features</h2>
+<h2>FEATURES</h2>
 
 <ul>
 %   for my $f (@{$self->data->{features}}) {
-  <li><%= $f %></li>
+  <li><%= markdown $f %></li>
 %   }
 </ul>
 % }
 
 
 % if ($self->data->{fixes}) {
-<h2>Bugfixes</h2>
+<h2>BUGFIXES</h2>
 
 <ul>
 %   for my $f (@{$self->data->{fixes}}) {
-  <li><%= $f %></li>
+  <li><%= markdown $f %></li>
 %   }
 </ul>
 % }
 
 % if ($self->data->{examples}) {
-<h2>Examples</h2>
-
-<ul>
-% if ($self->data->{examples}) {
-    <%= $self->data->{examples} %>
-% }
-</ul>
+<%= markdown $self->data->{examples} %>
 % }
 
 <ul class="pager">

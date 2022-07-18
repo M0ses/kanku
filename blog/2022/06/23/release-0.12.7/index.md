@@ -7,5 +7,5 @@ data:
   release: 0.12.7
   fixes:
     - "[handler] K:H:GIT - fixed gituser/gitpass handling"
-    - "[cli] up: fixed special job '__ALL__'"
+    - "[cli] up: fixed special job `__ALL__`"
 ---

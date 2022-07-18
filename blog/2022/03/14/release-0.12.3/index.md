@@ -6,15 +6,14 @@ template: blog/release-post.html
 data:
   release: 0.12.3
   warnings: |-
-            <p>
-              <h2>ATTENTION:</h2>
-              because instead of using iptables/ss/netstat directly we now use 
-              wrapper scripts with need to be added to the sudoers file.
-            </p>
-            <p>
-              If you run kanku in developer mode you should re-run
-            </p>
-            <code>kanku setup --devel</code>
+            ## ATTENTION:
+
+            because instead of using iptables/ss/netstat directly we now use
+            wrapper scripts with need to be added to the sudoers file.
+
+            If you run kanku in developer mode you should re-run
+
+            ```kanku setup --devel```
   features:
     - "[cli] check_configs command now also check job_group configs"
   fixes:

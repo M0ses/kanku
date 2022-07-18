@@ -8,16 +8,16 @@ data:
   features:
     - "[web] new switch autostart to create persistent VM's"
     - "[web] added login route (for GET method)"
-    - "[cli] new command <code>kanku snapshot ...</code>"
-    - "[cli] new option: <code>kanku ssh --ipaddress ...</code> - alias <code>-i</code>"
-    - "[cli] new option: <code>kanku ssh --execute ...</code> - alias <code>-e</code>"
+    - "[cli] new command ```kanku snapshot ...```"
+    - "[cli] new option: ```kanku ssh --ipaddress ...``` - alias ```-i```"
+    - "[cli] new option: ```kanku ssh --execute ...``` - alias ```-e```"
     - "[cli] use ssh_user from KankuFile for ssh command"
-    - "[cli] new option: <code>--log_file/--log_stdout</code> for VM related commands"
+    - "[cli] new option: ```--log_file/--log_stdout``` for VM related commands"
     - "[cli] Suggest running ssh-add on auth fauilure when auth_type is 'agent'"
   fixes:
     - "[web] fix 'show only latest' in job history"
     - "[core] no_wait_for_bootloader for ExecuteCommandsViaConsole to avoid waiting for bootloader"
-    - "[core] Fix ssh key filename: id_ecdsa.pub_sk -&gt; id_ecdsa_sk.pub"
+    - "[core] Fix ssh key filename: id_ecdsa.pub_sk -> id_ecdsa_sk.pub"
     - "[core] various cleanups to avoid 'uninitialized value'"
     - "[dist] fix tabs in default config template setup/kanku-config.yml.tt2"
     - "[handler] K:H:PrepareSSH: fix permissions for user kanku"
@@ -28,10 +28,12 @@ data:
     - "[examples] updated centos to latest version"
     - "[examples] renamed centos -> centos-current"
   examples: |-
-            <p>This release containes a full functional version of the "Kanku VM Autostart" feature for kanku clusters.</p>
-            <ul>
-              <li>Restart VMs</li>
-              <li>Restore VMs iptable rules</li>
-            </ul>
-            <img src="img/kanku_screenshot-feature-autostart_domain.png">
+            ## EXAMPLES
+
+            This release containes a full functional version of the "Kanku VM Autostart" feature for kanku clusters.
+
+            * Restart VMs
+            * Restore VMs iptable rules
+
+            ![Screenshot Autostart Domain](img/kanku_screenshot-feature-autostart_domain.png)
 ---

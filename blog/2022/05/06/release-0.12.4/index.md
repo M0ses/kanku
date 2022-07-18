@@ -6,6 +6,6 @@ template: blog/release-post.html
 data:
   release: 0.12.4
   fixes:
-    - "[util] improve vmdk performance (cache=unsafe in libvirt disk driver)"
+    - "[util] improve vmdk performance (`cache=unsafe` in libvirt disk driver)"
     - "[web] fixed 'To Top'-button"
 ---
