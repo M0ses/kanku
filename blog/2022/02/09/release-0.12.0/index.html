@@ -44,7 +44,8 @@
             <div class="row">
                 <div class="nine columns">
                     <main>
-                        <header>
+                        
+<header>
     <h1>Release 0.12.0</h1>
 
     <aside>
@@ -61,47 +62,54 @@
 </header>
 
 
-<h2>Features</h2>
+<h2>FEATURES</h2>
+
+<ul><li>[web]
+<ul><li>new switch autostart to create persistent VM&#39;s
+</li><li>added login route (for GET method)
+</li></ul></li><li>[cli]
+<ul><li>new command <code>kanku snapshot ...</code>
+</li><li>new options for <code>kanku ssh ...</code>:
+<ul><li><code>--ipaddress</code> to specify the ip address of the VM (alias <code>-i</code>)
+</li><li><code>--execute</code> to execute a single command via ssh (alias <code>-e</code>)
+</li></ul></li><li>use ssh_user from KankuFile for ssh command
+</li><li>new option: <code>--log_file/--log_stdout</code> for VM related commands
+</li><li>Suggest running ssh-add on auth fauilure when auth_type is &#39;agent&#39;
+</li></ul></li></ul>
+
+
+<h2>BUGFIXES</h2>
+
+<ul><li>[web]
+<ul><li>fix &#39;show only latest&#39; in job history
+</li></ul></li><li>[core]
+<ul><li>no_wait_for_bootloader for ExecuteCommandsViaConsole to avoid waiting for bootloader
+</li><li>Fix ssh key filename: id_ecdsa.pub_sk -&gt; id_ecdsa_sk.pub
+</li><li>various cleanups to avoid &#39;uninitialized value&#39;
+</li></ul></li><li>[dist]
+<ul><li>fix tabs in default config template setup/kanku-config.yml.tt2
+</li><li>K:H:PrepareSSH: fix permissions for user kanku
+</li><li>K:H:CleanupIPTables: cleanup unused packages
+</li></ul></li><li>[util]
+<ul><li>set default for running_remotely in VM to 0
+</li></ul></li><li>[examples] updated configs
+<ul><li>updated to current opensuse
+</li><li>deleted broken examples
+</li><li>updated centos to latest version
+</li><li>renamed centos -&gt; centos-current
+</li></ul></li></ul>
+
+<h2>EXAMPLES</h2>
+
+<p>This release containes a full functional version of the &quot;Kanku VM Autostart&quot; feature for kanku clusters.</p>
 
 <ul>
-  <li>[web] new switch autostart to create persistent VM&#39;s</li>
-  <li>[web] added login route (for GET method)</li>
-  <li>[cli] new command <code>kanku snapshot ...</code></li>
-  <li>[cli] new option: <code>kanku ssh --ipaddress ...</code> - alias <code>-i</code></li>
-  <li>[cli] new option: <code>kanku ssh --execute ...</code> - alias <code>-e</code></li>
-  <li>[cli] use ssh_user from KankuFile for ssh command</li>
-  <li>[cli] new option: <code>--log_file/--log_stdout</code> for VM related commands</li>
-  <li>[cli] Suggest running ssh-add on auth fauilure when auth_type is &#39;agent&#39;</li>
+<li>Restart VMs</li>
+<li>Restore VMs iptable rules</li>
 </ul>
 
+<p><img alt="Screenshot Autostart Domain" src="img/kanku_screenshot-feature-autostart_domain.png"></p>
 
-<h2>Bugfixes</h2>
-
-<ul>
-  <li>[web] fix &#39;show only latest&#39; in job history</li>
-  <li>[core] no_wait_for_bootloader for ExecuteCommandsViaConsole to avoid waiting for bootloader</li>
-  <li>[core] Fix ssh key filename: id_ecdsa.pub_sk -&gt; id_ecdsa_sk.pub</li>
-  <li>[core] various cleanups to avoid &#39;uninitialized value&#39;</li>
-  <li>[dist] fix tabs in default config template setup/kanku-config.yml.tt2</li>
-  <li>[handler] K:H:PrepareSSH: fix permissions for user kanku</li>
-  <li>[handler] K:H:CleanupIPTables: cleanup unused packages</li>
-  <li>[util] set default for running_remotely in VM to 0</li>
-  <li>[examples] updated to current opensuse</li>
-  <li>[examples] deleted broken examples</li>
-  <li>[examples] updated centos to latest version</li>
-  <li>[examples] renamed centos -&gt; centos-current</li>
-</ul>
-
-<h2>Examples</h2>
-
-<ul>
-    <p>This release containes a full functional version of the &quot;Kanku VM Autostart&quot; feature for kanku clusters.</p>
-<ul>
-  <li>Restart VMs</li>
-  <li>Restore VMs iptable rules</li>
-</ul>
-<img src="img/kanku_screenshot-feature-autostart_domain.png">
-</ul>
 
 <ul class="pager">
     <li class="prev">

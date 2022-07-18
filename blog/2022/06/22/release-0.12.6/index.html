@@ -45,7 +45,8 @@
             <div class="row">
                 <div class="nine columns">
                     <main>
-                        <header>
+                        
+<header>
     <h1>Release 0.12.6</h1>
 
     <aside>
@@ -62,24 +63,22 @@
 </header>
 
 
-<h2>Features</h2>
+<h2>FEATURES</h2>
 
-<ul>
-  <li>[cli] up: new special job &#39;__ALL__&#39; where a sequence of jobs can be defined in an array</li>
-  <li>[cli] up: multiple jobs can now be specified as options</li>
-  <li>[handler] new Kanku::Handler::CopyProfile</li>
-</ul>
-
+<ul><li>[cli] up: new special job <code>__ALL__</code> where a sequence of jobs can be defined in an array
+</li><li>[cli] up: multiple jobs can now be specified as options
+</li><li>[handler] new Kanku::Handler::CopyProfile
+</li></ul>
 
 
-<h2>Examples</h2>
 
-<ul>
-    <h4>CLI: up - special configuration &#39;__ALL__&#39;</h4>
+<h2>EXAMPLES</h2>
+
+<h4>CLI: up - special configuration <code>__ALL__</code></h4>
 
 <p>In KankuFile:</p>
-<pre><code>
-domain_name: saltmaster
+
+<pre><code>domain_name: saltmaster
 default_job: saltmaster
 
 jobs:
@@ -97,22 +96,22 @@ jobs:
     ...
   ...
 </code></pre>
+
 <p>On the cli:</p>
-<code>kanku up -j __ALL__ -S</code>
+
+<p><code>kanku up -j __ALL__ -S</code></p>
 
 <h4>CLI: up - specify multiple jobs in one command line</h4>
 
-<code>kanku up -j job1 -j job2</code>
+<p><code>kanku up -j job1 -j job2</code></p>
 
 <h4>Handler: Kanku::Handler::CopyProfile</h4>
 
 <p>To use this Handler you need a configuration section in your
-   ~/.kanku/kanku-config.yml like the following to specify the commands
-   which should be executed
-</p>
+~/.kanku/kanku-config.yml like the following to specify the commands
+which should be executed</p>
 
-<pre><code>
-Kanku::Handler::CopyProfile:
+<pre><code>Kanku::Handler::CopyProfile:
   user: kanku
   tasks:
     - cmd: cp
@@ -137,11 +136,10 @@ Kanku::Handler::CopyProfile:
       path: ~/.config/
 </code></pre>
 
-<p>And you need an entry in your KankuFile job, where you can specify the users 
-   for which this profile should be copied.
-</p>
-<pre><code>
-jobs:
+<p>And you need an entry in your KankuFile job, where you can specify the users
+for which this profile should be copied.</p>
+
+<pre><code>jobs:
   default_job:
     ...
     -
@@ -150,16 +148,17 @@ jobs:
         users:
           - root
           - kanku
- </code></pre>
+</code></pre>
 
- <p>ATM the following commands (cmd) are available:</p>
- <ul>
-   <li>mkdir</li>
-   <li>cp</li>
-   <li>chmod</li>
-   <li>chown</li>
- </ul>
+<p>ATM the following commands (cmd) are available:```</p>
+
+<ul>
+<li>mkdir</li>
+<li>cp</li>
+<li>chmod</li>
+<li>chown</li>
 </ul>
+
 
 <ul class="pager">
     <li class="prev">

@@ -45,7 +45,8 @@
             <div class="row">
                 <div class="nine columns">
                     <main>
-                        <header>
+                        
+<header>
     <h1>Release 0.12.3</h1>
 
     <aside>
@@ -61,34 +62,32 @@
 
 </header>
 
-  <p>
-  </p><h2>ATTENTION:</h2>
-  because instead of using iptables/ss/netstat directly we now use 
-  wrapper scripts with need to be added to the sudoers file.
+<h2>ATTENTION:</h2>
 
-<p>
-  If you run kanku in developer mode you should re-run
-</p>
-<code>kanku setup --devel</code>
+<p>because instead of using iptables/ss/netstat directly we now use
+wrapper scripts with need to be added to the sudoers file.</p>
 
-<h2>Features</h2>
+<p>If you run kanku in developer mode you should re-run</p>
 
-<ul>
-  <li>[cli] check_configs command now also check job_group configs</li>
-</ul>
+<p><code>kanku setup --devel</code></p>
 
 
-<h2>Bugfixes</h2>
+<h2>FEATURES</h2>
 
-<ul>
-  <li>[web] fix outdated cached settings in &#39;Job Groups&#39;</li>
-  <li>[core] #boo 1196604 - wrapper scripts for iptables/ss/netstat</li>
-  <li>[dist] change default logging to stderr/journald</li>
-  <li>[util] VM::Image - use new buffer size while uncompressing</li>
-  <li>[urlwrapper] fixed x-scheme-handler_kanku</li>
-  <li>[handler] central config for host_interfaces for PortForward</li>
-  <li>[web] job groups config changes are now detected in web ui</li>
-</ul>
+<ul><li>[cli] check_configs command now also check job_group configs
+</li></ul>
+
+
+<h2>BUGFIXES</h2>
+
+<ul><li>[web] fix outdated cached settings in &#39;Job Groups&#39;
+</li><li>[core] #boo 1196604 - wrapper scripts for iptables/ss/netstat
+</li><li>[dist] change default logging to stderr/journald
+</li><li>[util] VM::Image - use new buffer size while uncompressing
+</li><li>[urlwrapper] fixed x-scheme-handler_kanku
+</li><li>[handler] central config for host_interfaces for PortForward
+</li><li>[web] job groups config changes are now detected in web ui
+</li></ul>
 
 
 <ul class="pager">
