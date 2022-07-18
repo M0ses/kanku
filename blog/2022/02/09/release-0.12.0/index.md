@@ -6,27 +6,35 @@ template: blog/release-post.html
 data:
   release: 0.12.0
   features:
-    - "[web] new switch autostart to create persistent VM's"
-    - "[web] added login route (for GET method)"
-    - "[cli] new command ```kanku snapshot ...```"
-    - "[cli] new option: ```kanku ssh --ipaddress ...``` - alias ```-i```"
-    - "[cli] new option: ```kanku ssh --execute ...``` - alias ```-e```"
-    - "[cli] use ssh_user from KankuFile for ssh command"
-    - "[cli] new option: ```--log_file/--log_stdout``` for VM related commands"
-    - "[cli] Suggest running ssh-add on auth fauilure when auth_type is 'agent'"
+    - "[web]"
+    - - new switch autostart to create persistent VM's
+      - added login route (for GET method)
+    - "[cli]"
+    - - new command `kanku snapshot ...`
+      - "new options for `kanku ssh ...`:"
+      - - "`--ipaddress` to specify the ip address of the VM (alias `-i`)"
+        - "`--execute` to execute a single command via ssh (alias `-e`)"
+      - use ssh_user from KankuFile for ssh command
+      - "new option: `--log_file/--log_stdout` for VM related commands"
+      - Suggest running ssh-add on auth fauilure when auth_type is 'agent'
   fixes:
-    - "[web] fix 'show only latest' in job history"
-    - "[core] no_wait_for_bootloader for ExecuteCommandsViaConsole to avoid waiting for bootloader"
-    - "[core] Fix ssh key filename: id_ecdsa.pub_sk -> id_ecdsa_sk.pub"
-    - "[core] various cleanups to avoid 'uninitialized value'"
-    - "[dist] fix tabs in default config template setup/kanku-config.yml.tt2"
-    - "[handler] K:H:PrepareSSH: fix permissions for user kanku"
-    - "[handler] K:H:CleanupIPTables: cleanup unused packages"
-    - "[util] set default for running_remotely in VM to 0"
-    - "[examples] updated to current opensuse"
-    - "[examples] deleted broken examples"
-    - "[examples] updated centos to latest version"
-    - "[examples] renamed centos -> centos-current"
+    - "[web]"
+    - - fix 'show only latest' in job history
+    - "[core]"
+    - - no_wait_for_bootloader for ExecuteCommandsViaConsole to avoid waiting for bootloader
+      - "Fix ssh key filename: id_ecdsa.pub_sk -> id_ecdsa_sk.pub"
+      - various cleanups to avoid 'uninitialized value'
+    - "[dist]"
+    - - fix tabs in default config template setup/kanku-config.yml.tt2
+      - "K:H:PrepareSSH: fix permissions for user kanku"
+      - "K:H:CleanupIPTables: cleanup unused packages"
+    - "[util]"
+    - - set default for running_remotely in VM to 0
+    - "[examples] updated configs"
+    - - updated to current opensuse
+      - deleted broken examples
+      - updated centos to latest version
+      - renamed centos -> centos-current
   examples: |-
             ## EXAMPLES
 
