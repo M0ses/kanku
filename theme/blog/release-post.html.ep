@@ -1,3 +1,20 @@
+% sub gen_entries {
+%   my ($entry, $indent, $next) = @_;
+%   my $result;
+%   if ((ref($entry)||"") eq 'ARRAY') {
+%     $result = "<ul>";
+%     for (my $i=0; $i < scalar(@{$entry}); $i++) {
+%       $result .= gen_entries($entry->[$i], $indent+2, ref($entry->[$i+1]));
+%     }
+%     $result .= '</ul>'.(($indent)?'</li>':'');
+%   } else {
+%     my $text = markdown $entry;
+%     $text =~ s#^<p>(.*)</p>$#$1#; # Ugly but required - TODO: find better solution
+%     $result = "<li>".$text.(($next) ? '': '</li>');
+%   }
+%   return $result;
+% }
+
 <header>
     <h1>Release <%== $self->data->{release} %></h1>
 
@@ -37,23 +54,15 @@
 % if ($self->data->{features}) {
 <h2>FEATURES</h2>
 
-<ul>
-%   for my $f (@{$self->data->{features}}) {
-  <li><%= markdown $f %></li>
-%   }
-</ul>
-% }
+<%= gen_entries($self->data->{features}, 0, undef) %>
 
+%}
 
 % if ($self->data->{fixes}) {
 <h2>BUGFIXES</h2>
 
-<ul>
-%   for my $f (@{$self->data->{fixes}}) {
-  <li><%= markdown $f %></li>
-%   }
-</ul>
-% }
+<%= gen_entries($self->data->{fixes}, 0) %>
+%}
 
 % if ($self->data->{examples}) {
 <%= markdown $self->data->{examples} %>

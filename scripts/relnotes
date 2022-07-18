@@ -34,7 +34,7 @@ sub create_relnotes {
 
   for my $section ('features', 'fixes') {
     for my $entry (@{$data->{$section}||[]}) {
-      $content->{$section} .= "* $entry\n";
+      $content->{$section} .= gen_entries($entry, 0);
     }
   }
 
@@ -48,11 +48,25 @@ $content->{$section}
 EOF
     }
   }
-
-  print <<EOF;
+  my $relfile = "$FindBin::Bin/../RELEASE-NOTES-$release.md";
+  open(my $F, '>', $relfile)||die "Could not open $relfile: $!\n";
+  print $F <<EOF;
 # $yaml->{title}
 
 $content->{warnings}$content->{features}$content->{fixes}$content->{examples}
 EOF
+  close $F;
+}
 
+sub gen_entries {
+  my ($entry, $indent) = @_;
+  if ((ref($entry)||q{}) eq 'ARRAY') {
+    my $result = q{};
+    for my $sub_entry (@{$entry}) {
+      $result .= gen_entries($sub_entry, $indent+2);
+    }
+    return $result;
+  } else {
+    return q{ } x $indent . "* $entry\n";
+  }
 }
