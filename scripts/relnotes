@@ -1,0 +1,58 @@
+#!/usr/bin/perl
+
+use strict;
+
+use YAML::PP;
+use FindBin;
+use Data::Dumper;
+use Mojo::DOM::HTML;
+
+my $release = $ARGV[0];
+die "Please specify a release version as first parameter\n" unless $release;
+
+my $pattern = "$FindBin::Bin/../blog/*/*/*/release-$release/index.md";
+my @files = glob("$FindBin::Bin/../blog/*/*/*/release-$release/index.md");
+
+die "\nNo release blog post found for pattern '$pattern'\n\n" unless @files;
+die "\nAmbiguous files for release $release found:\n\n  ".join("\n  ",@files)."\n\n" if @files > 1;
+my $yaml = YAML::PP::LoadFile($files[0]);
+create_relnotes($yaml);
+
+exit 0;
+
+sub create_relnotes {
+  my ($yaml) = @_;
+  my $data   = $yaml->{data};
+  my $header = {
+    warnings => '',
+    features => 'FEATURES',
+    fixes    => 'BUGFIXES',
+    examples => '',
+  };
+
+  my $content = {warnings=>$data->{warnings},examples=>$data->{examples}};
+
+  for my $section ('features', 'fixes') {
+    for my $entry (@{$data->{$section}||[]}) {
+      $content->{$section} .= "* $entry\n";
+    }
+  }
+
+  for my $section ('warnings','features', 'fixes', 'examples') {
+    if ($content->{$section}) {
+      my $headline = ($header->{$section}) ? "## $header->{$section}\n" : q{};
+      $content->{$section} = <<EOF;
+$headline
+$content->{$section}
+
+EOF
+    }
+  }
+
+  print <<EOF;
+# $yaml->{title}
+
+$content->{warnings}$content->{features}$content->{fixes}$content->{examples}
+EOF
+
+}
