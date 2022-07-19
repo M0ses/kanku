@@ -8,6 +8,9 @@ use Data::Dumper;
 use Mojo::DOM::HTML;
 
 my $release = $ARGV[0];
+# CONFIG
+my $dst_branch = "master";
+
 die "Please specify a release version as first parameter\n" unless $release;
 
 my $pattern = "$FindBin::Bin/../blog/*/*/*/release-$release/index.md";
@@ -15,8 +18,12 @@ my @files = glob("$FindBin::Bin/../blog/*/*/*/release-$release/index.md");
 
 die "\nNo release blog post found for pattern '$pattern'\n\n" unless @files;
 die "\nAmbiguous files for release $release found:\n\n  ".join("\n  ",@files)."\n\n" if @files > 1;
+
 my $yaml = YAML::PP::LoadFile($files[0]);
+
 create_relnotes($yaml);
+
+stash_and_commit($release, $dst_branch);
 
 exit 0;
 
@@ -68,5 +75,21 @@ sub gen_entries {
     return $result;
   } else {
     return q{ } x $indent . "* $entry\n";
+  }
+}
+
+sub stash_and_commit {
+  my ($release, $dst_branch) = @_;
+  my $current_branch=`git branch --show-current`;
+  my $cmds=[
+    "git add RELEASE-NOTES-$release.md",
+    "git stash create -m '[doc] updated release notes $release'",
+    "git checkout $dst_branch",
+    "git commit -m '[doc] updated release notes $release'",
+    "git checkout $current_branch",
+
+  ];
+  for my $cmd (@{$cmds}) {
+    system($cmd);
   }
 }
