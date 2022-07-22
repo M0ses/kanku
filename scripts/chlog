@@ -1,0 +1,120 @@
+#!/usr/bin/perl
+
+use strict;
+
+BEGIN { push @::INC, '/usr/lib/build'; }
+
+use YAML::PP;
+use FindBin;
+use Build::Rpm;
+use Getopt::Long;
+
+our $dry_run;
+my $dst_branch = "master";
+
+GetOptions ('branch=s'=>\$dst_branch, 'dry-run'=>\$dry_run) or die("Error in command line arguments\n");
+
+my $pattern = '.*/release-(.*)/index.md';
+
+my @files  = glob("$FindBin::Bin/../blog/*/*/*/release-*/index.md");
+my %rnotes;
+
+for my $f (@files) {
+  if ( $f =~ m#$pattern#) {
+    $rnotes{$1} = $f;
+  }
+}
+
+my $verscmp     = \&Build::Rpm::verscmp;
+my @sorted_vers = sort { $verscmp->($a, $b) } keys %rnotes;
+
+my $header = {
+  features => 'FEATURES',
+  fixes    => 'BUGFIXES',
+};
+
+my @changelog=`git show $dst_branch:CHANGELOG.md`;
+my $revs = find_releases(\@changelog);
+
+my $log;
+my @new_revs;
+($verscmp->($_, $revs)>0) && push @new_revs, $_ for @sorted_vers;
+
+for my $ver (@new_revs) {
+  my $yaml = YAML::PP::LoadFile($rnotes{$ver});
+  my $d    = $yaml->{data};
+  my ($date, $time) = split(/\s+/, $yaml->{date});
+  my $news = "# [$d->{release}] - $date\n\n";
+  for my $section ('features', 'fixes') {
+    next unless @{$d->{$section}||[]};
+    $news .= "## $header->{$section}\n\n";
+    for my $entry (@{$d->{$section}||[]}) {
+      $news .= gen_entries($entry, 0);
+    }
+    $news .= "\n\n";
+  }
+  $log = $news . $log;
+}
+
+{
+  local $"=q{};
+  $log="$log@changelog";
+};
+
+if (!$dry_run) {
+  my $fn = "$FindBin::Bin/../CHANGELOG.md";
+  open(my $f, '>', $fn) || die "Cannot open $fn: $!\n";
+  print $f $log;
+  close $f;
+
+  stash_and_commit($dst_branch);
+} else {
+ print $log;
+}
+
+exit 0;
+################################################################################
+# Subroutines
+################################################################################
+
+sub get_unrelease_changes {
+  my ($rev, @sorted_vers) = @_;
+}
+
+sub gen_entries {
+  my ($entry, $indent) = @_;
+  if ((ref($entry)||q{}) eq 'ARRAY') {
+    my $result = q{};
+    for my $sub_entry (@{$entry}) {
+      $result .= gen_entries($sub_entry, $indent+2);
+    }
+    return $result;
+  } else {
+    return q{ } x $indent . "* $entry\n";
+  }
+}
+
+sub stash_and_commit {
+  my ($dst_branch) = @_;
+  my $current_branch=`git branch --show-current`;
+  my $message = '[doc] updated changelog';
+  my $cmds=[
+    "git add CHANGELOG.md",
+    "git stash create -m '$message'",
+    "git checkout $dst_branch",
+    "git commit -m '$message'",
+    "git checkout $current_branch",
+
+  ];
+  for my $cmd (@{$cmds}) {
+    system($cmd);
+  }
+}
+
+sub find_releases {
+  my ($changelog) = @_;
+  for my $line (@$changelog) {
+    return $+{release} if ($line =~ m/^# \[(?<release>\d+\.\d+\.\d+)\]/);
+  }
+}
+
