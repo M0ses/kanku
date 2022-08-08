@@ -25,25 +25,29 @@ use namespace::autoclean;
 with 'Kanku::Roles::Handler';
 with 'Kanku::Roles::Logger';
 
-has [qw/ipaddress publickey_path privatekey_path passphrase username/] => (is=>'rw',isa=>'Str');
-has states   => (is=>'rw',isa=>'ArrayRef',default=>sub { [] });
-has loglevel => (is=>'rw',isa=>'Str', default=> 'debug');
+has [qw/ipaddress publickey_path privatekey_path passphrase/] => (is=>'rw',isa=>'Str');
+has states     => (is=>'rw',isa=>'ArrayRef',default=>sub { [] });
+has loglevel   => (is=>'rw',isa=>'Str', default=> '');
+has config_dir => (is=>'rw',isa=>'Str',default=>'.');
+has username   => (is=>'rw',isa=>'Str',default=>'root');
+has minion     => (is=>'rw',isa=>'Str');
 
 sub execute {
   my $self    = shift;
   my $results = [];
   my $ctx     = $self->job->context;
   my $ip      = $ctx->{ipaddress};
-  my @cmd = (
-    "salt-ssh",
-      "-l",$self->loglevel,
-      "--roster","scan",$ip,
-      '-i',
-      'state.apply',join(',',@{$self->states})
-  );
+  my @cmd = ('salt-ssh');
+  push @cmd, ('-l', $self->loglevel) if $self->loglevel;
+  push @cmd, ($self->minion) ? $self->minion : $self->ipaddress;
+  push @cmd, '--no-host-keys';
+  push @cmd, ('--user', $self->username) if $self->username;
+  push @cmd, 'state.apply';
+  push @cmd, join(',',@{$self->states}) if $self->states;
 
   $self->logger->debug("COMMAND: '@cmd'");
   system(@cmd);
+  die "Error while executing '@cmd'\n" if $?;
   return {
     code        => 0,
     message     => "All commands on $ip executed successfully",
