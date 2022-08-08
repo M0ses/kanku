@@ -91,7 +91,7 @@ dbfiles:
 	cp -av share/fixtures $(DESTDIR)/usr/share/kanku/
 
 lib:
-	cp -av ./lib/ $(DESTDIR)/usr/lib/kanku/
+	cp -rv ./lib/ $(DESTDIR)/usr/lib/kanku/
 
 install_dirs:
 	[ -d $(DESTDIR)/etc/bash_completion.d/ ] || mkdir -p $(DESTDIR)/etc/bash_completion.d/
