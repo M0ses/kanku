@@ -34,6 +34,7 @@ has [qw/
 has [qw/wait_for_network wait_for_console/] => (is => 'rw',isa=>'Bool',lazy=>1,default=>1);
 has [qw/allow_ip_change/] => (is => 'rw',isa=>'Bool',lazy=>1,default=>0);
 has [qw/timeout/] => (is => 'rw',isa=>'Int',lazy=>1,default=>600);
+has [qw/login_timeout/] => (is => 'rw',isa=>'Int',lazy=>1,default=>0);
 
 has gui_config => (
   is => 'ro',
@@ -83,6 +84,7 @@ sub execute {
   my $con = $vm->console();
   $con->login();
   $con->cmd_timeout(-1);
+  $con->login_timeout($self->login_timeout) if $self->login_timeout;
   $con->cmd("reboot");
   $con->cmd_timeout($self->timeout);
   if ($self->wait_for_console) {
@@ -128,6 +130,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
       wait_for_console: 1
       wait_for_network: 1
       timeout:          600
+      login_timeout:    900
       allow_ip_change:  1
       ....
 
@@ -146,6 +149,8 @@ This handler reboots the VM and optional waits for network and console.
 
     allow_ip_change:   allow VM to change ip address on reboot
 
+    login_timeout:     console login timeout
+
 =head1 CONTEXT
 
 =head2 getters
@@ -163,6 +168,8 @@ This handler reboots the VM and optional waits for network and console.
     timeout          : 600 seconds
 
     allow_ip_change  : 0 (false)
+
+    login_timout     : defaults to Kanku::Util::VM::Console
 
 =cut
 
