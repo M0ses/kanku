@@ -62,7 +62,7 @@ configs:
 	done
 	#
 	for i in $(CONFIG_FILES);do \
-		cp -av ./etc/$$i $(DESTDIR)/etc/kanku/$$i ;\
+		cp -rv ./etc/$$i $(DESTDIR)/etc/kanku/$$i ;\
 	done
 
 install_full_dirs: lib dbfiles public views bin sbin
@@ -81,14 +81,14 @@ sbin:
 	install -m 755 sbin/kanku-triggerd $(DESTDIR)/usr/sbin/kanku-triggerd
 
 public:
-	cp -av public $(DESTDIR)/usr/share/kanku/
+	cp -rv public $(DESTDIR)/usr/share/kanku/
 
 views:
-	cp -av views $(DESTDIR)/usr/share/kanku/
+	cp -rv views $(DESTDIR)/usr/share/kanku/
 
 dbfiles:
-	cp -av share/migrations $(DESTDIR)/usr/share/kanku/
-	cp -av share/fixtures $(DESTDIR)/usr/share/kanku/
+	cp -rv share/migrations $(DESTDIR)/usr/share/kanku/
+	cp -rv share/fixtures $(DESTDIR)/usr/share/kanku/
 
 lib:
 	cp -rv ./lib/ $(DESTDIR)/usr/lib/kanku/
