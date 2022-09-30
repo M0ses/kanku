@@ -38,6 +38,7 @@ use Net::AMQP::RabbitMQ;
 use JSON::XS;
 use UUID ':all';
 use Try::Tiny;
+use Carp qw/longmess/;
 
 with 'Kanku::Roles::Logger';
 with 'Kanku::Roles::Helpers';
@@ -88,6 +89,13 @@ has shutdown_file => (
 	  isa	  => 'Object',
 );
 
+#around routing_key => sub {
+#        my $orig = shift;
+#        my $self = shift;
+#	$self->logger->debug(longmess("HERE  @_"));
+#        $self->$orig(@_);
+#};
+#
 =head1 METHODS
 
 =head2 connect - connect to a rabbitmq server
@@ -258,7 +266,7 @@ sub create_queue {
       )
   );
 
-  $self->logger->debug("Started consuming ".$self->queue_name."' as consumer_id ".$self->consumer_id);
+  $self->logger->debug("Started consuming ".$self->queue_name."' (".$self->routing_key.") as consumer_id ".$self->consumer_id);
 
   return $qn;
 }

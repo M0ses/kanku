@@ -220,10 +220,19 @@ sub start_dhcp {
       # Child runs this block
       setsid or die "Can't start a new session: $!";
       my $conf = $self->dnsmasq_cfg_file($name);
+      my $dhcp_script;
+      for my $f ('/usr/libexec/libvirt_leaseshelper', '/usr/lib64/libvirt/libvirt_leaseshelper') {
+        if (-x $f ) {
+          $dhcp_script = $f;
+          last;
+        }
+      }
+      confess("Could not find dhcp-script") unless $dhcp_script;
+
       my @cmd = ('/usr/sbin/dnsmasq',
 	         "--conf-file=$conf",
 		 "--leasefile-ro",
-		 "--dhcp-script=/usr/lib64/libvirt/libvirt_leaseshelper");
+		 "--dhcp-script=$dhcp_script");
       $self->logger->debug("@cmd");
       system(@cmd);
       exit 0;

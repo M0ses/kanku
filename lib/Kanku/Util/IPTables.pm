@@ -112,7 +112,7 @@ sub get_active_rules_for_domain {
   for my $table ('nat', 'filter') {
     if ($self->chain_exists($table)) {
       for my $rule ($self->_get_rules_from_chain($table)) {
-        push(@{$result->{$table}->{$chain}},$rule->{line_number}) if ($rule->{domain_name} eq  $domain_name);
+        push(@{$result->{$table}->{$chain}},$rule->{line_number}) if (($rule->{domain_name}||q{}) eq  $domain_name);
       }
     }
   }

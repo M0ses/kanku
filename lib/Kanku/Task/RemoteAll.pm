@@ -46,9 +46,9 @@ use Try::Tiny;
 use MIME::Base64;
 
 
-has kmq              => (is=>'rw',isa=>'Object');
+has kmq               => (is=>'rw',isa=>'Object');
 
-has local_job_queue_name              => (is=>'rw',isa=>'Str');
+has local_key_name    => (is=>'rw',isa=>'Str');
 
 has job               => (is=>'rw',isa=>'Object');
 
@@ -74,7 +74,7 @@ sub run {
   my $data = encode_json(
     {
       action => 'send_task_to_all_workers',
-      answer_queue => $self->local_job_queue_name,
+      answer_key => $self->local_key_name,
       task_args => {
         job       => {
           context     => $job->context,
@@ -86,6 +86,8 @@ sub run {
       }
     }
   );
+
+  $logger->debug(Dumper($data));
 
   $kmq->publish('kanku.to_all_hosts', $data);
 
@@ -179,16 +181,16 @@ sub _inspect_msg {
     $data = decode_json($body);
     try {
       $data->{result}->{result} = decode_base64($data->{result}->{result}) if ($data->{result}->{result});
-      $logger->debug("Got action '".$data->{action}."', answer_queue: '".$data->{answer_queue}."'" );
+      $logger->debug("Got action '".$data->{action}."', answer_key: '".$data->{answer_key}."'" );
     } catch {
       $logger->fatal("Error while decoding base64: $_");
       $logger->debug(Dumper($data));
       $data->{result} = "Error while decoding base64: $_";
     };
     if ( $data->{action} eq 'task_confirmation' ) {
-      $self->confirmations()->{$data->{answer_queue}} = $data;
+      $self->confirmations()->{$data->{answer_key}} = $data;
     } elsif ( $data->{action} eq 'finished_task' ) {
-      $self->results()->{$data->{answer_queue}} = $data;
+      $self->results()->{$data->{answer_key}} = $data;
     }
   } catch {
     $logger->debug("Error in JSON:\n$_\n$body\n");

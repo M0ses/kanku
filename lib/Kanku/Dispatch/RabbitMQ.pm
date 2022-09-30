@@ -49,6 +49,10 @@ has job => (is=>'rw',isa=>'Object');
 
 has job_queue => (is=>'rw',isa=>'Object');
 
+has job_remote_routing_key => (is=>'rw', isa=>'Str');
+
+has job_local_routing_key => (is=>'rw', isa=>'Str');
+
 has wait_for_workers => (is=>'ro',isa=>'Int',default=>1);
 
 has config => (
@@ -96,7 +100,6 @@ sub run {
     my $rmq = Kanku::RabbitMQ->new(%{$self->rabbit_config});
     $rmq->shutdown_file($self->shutdown_file);
     $rmq->connect() || die "Could not connect to rabbitmq\n";
-    $rmq->queue_name("dispatcher");
     $rmq->create_queue(routing_key=>'kanku.to_dispatcher');
     while (1) {
       my $msg = $rmq->recv(1000);
@@ -208,7 +211,7 @@ sub run_job {
   });
 
   my $logger       = $self->logger();
-  my $queue        = "job-queue-".$job->id;
+  $self->job_local_routing_key("kanku.job-".$job->id);
 
   # job definition should be parsed before advertising job
   # if no valid job definition it should not be advertised
@@ -218,8 +221,7 @@ sub run_job {
   my $rmq = Kanku::RabbitMQ->new(%{$self->rabbit_config});
   $rmq->shutdown_file($self->shutdown_file);
   $rmq->connect() || die "Could not connect to rabbitmq\n";
-  $rmq->queue_name($queue);
-  $rmq->create_queue(routing_key=>$queue);
+  $rmq->create_queue(routing_key=>$self->job_local_routing_key);
   $self->job_queue($rmq);
 
   my $applications={};;
@@ -228,7 +230,7 @@ sub run_job {
     $applications = $self->advertise_job(
       $rmq,
       {
-	 answer_queue	  => $queue,
+	 answer_key       => $self->job_local_routing_key,
 	 job_id	  	  => $job->id,
 	 arch             => $job_definition->{arch} || 'x86_64',
       }
@@ -240,11 +242,11 @@ sub run_job {
   $logger->trace("List of all applications:\n" . $self->dump_it($applications));
 
   # pa = prefered_application
-  my ($pa,$declined_applications) = $self->score_applications($applications);
+  my ($pa, $declined_applications) = $self->score_applications($applications);
 
   $self->decline_applications($declined_applications);
 
-  my $result = $self->send_job_offer($rmq,$pa);
+  my $result = $self->send_job_offer($rmq, $pa);
 
   $self->notify_queue->send({
     type          => 'job_change',
@@ -254,11 +256,11 @@ sub run_job {
     id             => $job->id
   });
 
-  my $aq = $pa->{answer_queue};
+  $self->job_remote_routing_key($pa->{answer_key});
 
   $self->start_job($job);
 
-  $job->workerinfo($pa->{worker_fqhn}.":".$pa->{worker_pid}.":".$aq);
+  $job->workerinfo($pa->{worker_fqhn}.":".$pa->{worker_pid}.":".$self->job_remote_routing_key);
   $logger->trace("Result of job offer:\n".$self->dump_it($result));
   $logger->trace("  -- args:\n".$self->dump_it($args));
 
@@ -267,6 +269,7 @@ sub run_job {
   try {
     foreach my $sub_task (@{$job_definition->{tasks}}) {
       my $task_args = shift(@$args) || {};
+      #$self->logger->debug("ROUTING_KEY: ".$rmq->routing_key." QUEUE: ".$rmq->queue_name);
       $last_task = $self->run_task(
 	job       => $job,
 	options   => $sub_task->{options} || {},
@@ -274,7 +277,7 @@ sub run_job {
 	scheduler => $self,
 	args      => $task_args,
 	kmq       => $rmq,
-	queue     => $aq
+	routing_key => $self->job_local_routing_key,
       );
 
       last if ( $last_task->state eq 'failed' or $job->skipped);
@@ -297,7 +300,7 @@ sub run_job {
     id            => $job->id
   });
 
-  $self->send_finished_job($aq,$job->id);
+  $self->send_finished_job($self->job_remote_routing_key, $job->id);
 
   $self->end_job($job,$last_task);
 
@@ -350,17 +353,20 @@ sub run_task {
       schema          => $self->schema
     );
   } elsif ( $distributable == 1 ) {
+    $logger->debug("--- Calling Kanku::Task::Remote - ".$self->job_queue->routing_key);
+    $logger->debug("--- Calling Kanku::Task::Remote - ".$opts{routing_key});
+    $self->job_queue->routing_key($self->job_remote_routing_key);
     $tr = Kanku::Task::Remote->new(
       %defaults,
-      job_queue => $self->job_queue,
-      queue     => $opts{queue},
-      daemon	=> $self,
+      job_queue  => $self->job_queue,
+      daemon	 => $self,
+      answer_key =>  $self->job_local_routing_key,
     );
   } elsif ( $distributable == 2 ) {
     $tr = Kanku::Task::RemoteAll->new(
       %defaults,
       kmq => $opts{kmq},
-      local_job_queue_name => $opts{kmq}->queue_name,
+      local_key_name => $opts{routing_key},
     );
   } else {
     croak("Unknown distributable value '$distributable' for module $mod\n");
@@ -401,13 +407,13 @@ sub send_job_offer {
   $logger->trace("\$prefered_application = ".$self->dump_it($prefered_application));
 
   $rmq->publish(
-    $prefered_application->{answer_queue},
-	encode_json(
-		{
-		  action			=> 'offer_job',
-		  answer_queue		=> $prefered_application->{answer_queue}
-		}
-	),
+    $prefered_application->{answer_key},
+    encode_json(
+      {
+        action			=> 'offer_job',
+        answer_key		=> $prefered_application->{answer_key}
+      }
+    ),
   );
 }
 
@@ -420,10 +426,12 @@ sub send_finished_job {
 
   $self->job_queue->publish(
     $aq,
-    encode_json({
-          action  => 'finished_job',
-          job_id  => $job_id
-    }),
+    encode_json(
+      {
+        action  => 'finished_job',
+        job_id  => $job_id
+      }
+    ),
   );
 }
 
@@ -453,18 +461,22 @@ sub advertise_job {
 
   my $data = encode_json({action => 'advertise_job', %$opts});
 
-  $logger->debug("creating new queue: ".$opts->{answer_queue}." (arch: ".$opts->{arch}.")");
-
   my $wcnt = 0;
 
   while(! %$all_applications ) {
+
+    $logger->debug('Publishing application: '.$self->dump_it($data));
 
     $rmq->publish(
       'kanku.to_all_workers',
       $data,
     );
 
+    $logger->debug('Wait for workers: '.$self->wait_for_workers);
+
     sleep($self->wait_for_workers);
+
+    $logger->debug('Looking for applications on : '.$rmq->queue_name);
 
     while ( my $msg = $rmq->recv(1000) ) {
       if ($msg ) {
@@ -474,7 +486,7 @@ sub advertise_job {
           try {
             $data = decode_json($body);
             $logger->debug("Incomming application for $data->{job_id} from $data->{worker_fqhn} ($data->{worker_pid}))");
-            $all_applications->{$data->{answer_queue}} = $data;
+            $all_applications->{$data->{answer_key}} = $data;
           } catch {
             $logger->debug("Error in JSON:\n$_\n$body\n");
           };

@@ -72,11 +72,6 @@ has final_args => (
   isa=>'HashRef',
 );
 
-has queue => (
-  is=>'rw',
-  isa=>'Str',
-);
-
 has rabbit_config => (
   is      => 'rw',
   isa     => 'HashRef',
@@ -84,6 +79,11 @@ has rabbit_config => (
   default => sub {
     Kanku::Config->instance->config->{'Kanku::RabbitMQ'} || {};
   },
+);
+
+has answer_key => (
+  is=>'rw',
+  isa=>'Str',
 );
 
 
@@ -100,7 +100,7 @@ sub run {
   my $data = encode_json(
     {
       action => 'task',
-      answer_queue => $self->job_queue->queue_name,
+      answer_key => $self->answer_key,
       job_id => $job->id,
       task_args => {
         job       => {
@@ -117,24 +117,24 @@ sub run {
   $logger->debug('Sending remote job: '.$self->module);
   $logger->debug(' - channel: '.$kmq->channel);
   $logger->debug(' - routing_key '.$kmq->routing_key);
-  $logger->debug(' - queue_name '.$self->queue);
+  $logger->debug(' - queue_name '.$kmq->queue_name);
   $logger->trace(Dumper($data));
 
-  $kmq->queue->publish(
-	$kmq->channel,
-	$self->queue,
+  $kmq->publish(
+	$kmq->routing_key,
 	$data,
   );
 
   $self->logger->debug('Waiting for result on queue: '.$self->job_queue->queue_name());
   # Wait for task results from worker
   my $result;
+  my $wait_for_answer = 10000;
   while (1){
-    my $msg = $self->job_queue->recv(10000);
+    my $msg = $self->job_queue->recv($wait_for_answer);
     if ( $msg ) {
       my $indata;
       $self->logger->debug('Incomming task result');
-      $self->logger->trace(Dumper($msg));
+      $self->logger->debug(Dumper($msg));
       my $body = $msg->{body};
 
       try {
@@ -171,7 +171,7 @@ sub run {
         my $rmq = Kanku::RabbitMQ->new(%{$self->rabbit_config});
         $rmq->connect(no_retry=>1) ||
             $logger->error('Could not connect to rabbitmq');
-        my $queue = $indata->{answer_queue};
+        my $queue = $indata->{answer_key};
         $rmq->queue_name($queue);
         $rmq->publish(
           $queue,
@@ -179,6 +179,7 @@ sub run {
         );
       }
     } else {
+      $self->logger->debug("Got no answer within $wait_for_answer msec");
       if ($self->daemon->detect_shutdown) {
 	croak('Job '.$job->id." aborted by dispatcher daemon shutdown\n");
       }

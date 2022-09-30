@@ -34,9 +34,8 @@ has worker_id             => (is=>'rw', isa => 'Str'
                               , default => sub {uuid()});
 
 has kmq                   => (is=>'rw', isa => 'Object');
-has job_queue_name        => (is=>'rw', isa => 'Str');
-has remote_job_queue_name => (is=>'rw', isa => 'Str');
-has local_job_queue_name  => (is=>'rw', isa => 'Str');
+has remote_key_name => (is=>'rw', isa => 'Str');
+has local_key_name  => (is=>'rw', isa => 'Str');
 
 has hostname              => (is=>'rw',
                               isa => 'Str',
@@ -71,9 +70,8 @@ sub run {
 
   if (! $pid ) {
     my $hn = $self->hostname;
-    $self->local_job_queue_name($hn) if ($hn);
+    $self->local_key_name($hn) if ($hn);
     $self->listen_on_queue(
-      queue_name     => "worker-to_all_hosts-". $self->worker_id,
       routing_key    => 'kanku.to_all_hosts',
     );
   } else {
@@ -85,7 +83,6 @@ sub run {
 
   if (! $pid ) {
     $self->listen_on_queue(
-      queue_name    => "worker-to_all_workers-" . $self->worker_id,
       routing_key   => 'kanku.to_all_workers'
     );
   } else {
@@ -128,11 +125,10 @@ sub listen_on_queue {
     $kmq = Kanku::RabbitMQ->new(%{$rabbit_config});
     $kmq->shutdown_file($self->shutdown_file);
     $kmq->connect();
-    my $qn = $kmq->create_queue(
-      queue_name    => $opts{queue_name},
+    $kmq->create_queue(
       routing_key   => $opts{routing_key},
     );
-    $self->local_job_queue_name($qn);
+    $self->local_key_name($opts{routing_key});
   } catch {
     $logger->error("Could not create queue for exchange $opts{exchange_name}: $_");
   };
@@ -157,18 +153,19 @@ sub listen_on_queue {
 	  my $answer = {
 	    action => 'task_confirmation',
 	    task_id => $data->{task_id},
-	    # answer_queue is needed on dispatcher side
+	    # answer_key is needed on dispatcher side
 	    # to distinguish the results per worker host
-	    answer_queue => $self->local_job_queue_name
+	    answer_key => $self->local_key_name
 	  };
-	  $self->remote_job_queue_name($data->{answer_queue});
+	  $logger->debug($self->dump_it($data));
+	  $self->remote_key_name($data->{answer_key});
 	  $kmq->publish(
-	    $self->remote_job_queue_name,
+	    $self->remote_key_name,
 	    encode_json($answer),
 	  );
 
 	  $self->handle_task($data,$kmq);
-          $self->remote_job_queue_name('');
+          $self->remote_key_name('');
 	} elsif ( $data->{action} eq 'advertise_job' ) {
           my @seen_already = grep { $data->{job_id} == $_ } @seen;
           if (! @seen_already) {
@@ -217,18 +214,17 @@ sub handle_advertisement {
   my $logger = $self->logger();
 
   $logger->debug("Starting to handle advertisement");
-  $logger->trace("\$data = ".$self->dump_it($data));
 
-  if ( $data->{answer_queue} ) {
-      $self->remote_job_queue_name($data->{answer_queue});
+  if ( $data->{answer_key} ) {
+      $logger->debug("\$data = ".$self->dump_it($data));
+      $self->remote_key_name($data->{answer_key});
       my $job_id = $data->{job_id};
-      $self->local_job_queue_name("job-$job_id-".$self->worker_id);
+      $self->local_key_name("job-$job_id-".$self->worker_id);
       my $answer = "Process '$$' is applying for job '$job_id'";
 
       my $job_kmq = Kanku::RabbitMQ->new(
         %{$kmq->connect_info},
-        queue_name  => $self->local_job_queue_name,
-        routing_key => $self->local_job_queue_name,
+        routing_key => $self->local_key_name,
       );
       $job_kmq->connect();
       $job_kmq->create_queue();
@@ -238,16 +234,16 @@ sub handle_advertisement {
         message	      => $answer ,
         worker_fqhn   => hostfqdn(),
         worker_pid    => $$,
-        answer_queue  => $self->local_job_queue_name,
+        answer_key    => $self->local_key_name,
         resources     => collect_resources(),
         action        => 'apply_for_job'
       };
-      $logger->debug("Sending application for job_id $job_id on queue ".$self->remote_job_queue_name);
+      $logger->debug("Sending application for job_id $job_id with routing_key ".$self->remote_key_name);
       $logger->trace("\$application =".$self->dump_it($application));
 
       my $json    = encode_json($application);
       $kmq->publish(
-        $self->remote_job_queue_name,
+        $self->remote_key_name,
         $json,
       );
 
@@ -258,15 +254,15 @@ sub handle_advertisement {
       if ( $msg ) {
         my $body = decode_json($msg->{body});
         if ( $body->{action} eq 'offer_job' ) {
-          $logger->info("Starting with job ");
+          $logger->info("Starting with job ".$job_id);
           $logger->trace("\$msg =".$self->dump_it($msg));
           $logger->trace("\$body =".$self->dump_it($body));
 
           $self->handle_job($job_id,$job_kmq);
         } elsif ( $body->{action} eq 'decline_application' ) {
           $logger->debug("Nothing to do - application declined");
-          $self->remote_job_queue_name('');
-          $self->local_job_queue_name('');
+          $self->remote_key_name('');
+          $self->local_key_name('');
           return;
         } else {
           $logger->error("Answer on application for job $job_id unknown");
@@ -298,10 +294,10 @@ sub handle_job {
         job_id        => $job_id,
     };
 
-    $logger->info("Sending 'aborted_job' because of TERM signal to '".$self->remote_job_queue_name);
+    $logger->info("Sending 'aborted_job' because of TERM signal to routing_key'".$self->remote_key_name);
 
     $job_kmq->publish(
-      $self->remote_job_queue_name,
+      $self->remote_key_name,
       encode_json($answer),
     );
 
@@ -309,8 +305,11 @@ sub handle_job {
   };
 
   try  {
+    my $task_wait = 10000;
+    $logger->debug("Waiting $task_wait msec for tasks on queue: ".$job_kmq->queue_name." with routing_key: ".$job_kmq->routing_key);
     while (1){
-      my $task_msg = $job_kmq->recv(10000);
+      my $task_msg = $job_kmq->recv($task_wait);
+      $logger->debug("ping");
       if ( $self->detect_shutdown ) {
 	my $answer = {
 	    action        => 'aborted_job',
@@ -318,10 +317,10 @@ sub handle_job {
             job_id        => $job_id,
 	};
 
-	$logger->info("Sending action 'aborted_job' because of daemon shutdown to '".$self->remote_job_queue_name);
+	$logger->info("Sending action 'aborted_job' because of daemon shutdown to routing_key '".$self->remote_key_name."'");
 
 	$job_kmq->publish(
-	  $self->remote_job_queue_name,
+	  $self->remote_key_name,
 	  encode_json($answer),
 	);
 
@@ -358,7 +357,7 @@ sub handle_job {
     $logger->error($e);
 
     $job_kmq->publish(
-      $self->remote_job_queue_name,
+      $self->remote_key_name,
       encode_json({
         action        => 'finished_task',
         error_message => $e
@@ -399,6 +398,7 @@ sub handle_task {
       error_message => $_
     };
   };
+  $self->logger->debug("XXXXX ".$job_kmq->routing_key.", $job, $result");
   $self->_send_task_result($job_kmq, $job, $result);
   return;
 }
@@ -407,22 +407,22 @@ sub _send_task_result {
   my ($self, $job_kmq, $job, $result) = @_;
   my $logger = $self->logger;
 
-  $logger->debug("Sending task result (state: $result->{state}) to ".$self->remote_job_queue_name);
+  $logger->debug("Sending task result (state: $result->{state}) to ".$self->remote_key_name." ROUTINGKEY: ".$job_kmq->routing_key);
 
   $result->{result} = encode_base64($result->{result}) if ($result->{result});
 
   my $answer = {
       action        => 'finished_task',
       result        => $result,
-      answer_queue  => $self->local_job_queue_name,,
+      answer_key    => $self->local_key_name,
       job           => $job->to_json
   };
 
-  $logger->trace("\$answer = ".$self->dump_it($answer));
+  $logger->debug("\$answer = ".$self->dump_it($answer));
 
 
   $job_kmq->publish(
-    $self->remote_job_queue_name,
+    $self->remote_key_name,
     encode_json($answer),
   );
 
