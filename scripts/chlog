@@ -20,6 +20,7 @@ my @files  = glob("$FindBin::Bin/../blog/*/*/*/release-*/index.md");
 my %rnotes;
 
 for my $f (@files) {
+  print STDERR "Found file: $f\n" if $::ENV{DEBUG};
   if ( $f =~ m#$pattern#) {
     $rnotes{$1} = $f;
   }
@@ -40,6 +41,8 @@ my $log;
 my @new_revs;
 ($verscmp->($_, $revs)>0) && push @new_revs, $_ for @sorted_vers;
 
+print "@new_revs\n" if $::ENV{DEBUG};
+
 for my $ver (@new_revs) {
   my $yaml = YAML::PP::LoadFile($rnotes{$ver});
   my $d    = $yaml->{data};
@@ -49,6 +52,7 @@ for my $ver (@new_revs) {
     next unless @{$d->{$section}||[]};
     $news .= "## $header->{$section}\n\n";
     for my $entry (@{$d->{$section}||[]}) {
+      print STDERR "$entry" if $::ENV{DEBUG};
       $news .= gen_entries($entry, 0);
     }
     $news .= "\n\n";
