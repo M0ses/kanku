@@ -71,7 +71,7 @@ if (!$dry_run) {
   print $f $log;
   close $f;
 
-  stash_and_commit($dst_branch);
+  stash_and_commit($dst_branch, "@new_revs");
 } else {
  print $log;
 }
@@ -99,9 +99,9 @@ sub gen_entries {
 }
 
 sub stash_and_commit {
-  my ($dst_branch) = @_;
+  my ($dst_branch, $new_revs) = @_;
   my $current_branch=`git branch --show-current`;
-  my $message = '[doc] updated changelog';
+  my $message = '[doc] updated changelog ver: '.$new_revs;
   my $cmds=[
     "git add CHANGELOG.md",
     "git stash create -m '$message'",
