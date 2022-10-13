@@ -8,10 +8,9 @@
         <link href="/kanku/theme/css/statocles-default.css" rel="stylesheet">
         <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 	<link href="/kanku/page/favicon.ico" rel="shortcut icon" type="image/x-icon">
-        <title>Kanku Project Page refurbished - Kanku</title>
+        <title>RELEASE 0.13.0 - Kanku</title>
         <meta content="Statocles 0.098" name="generator">
-        <link href="/kanku/blog/2022/10/10/release-0.13.0/index.html" rel="prev">
-        <link href="/kanku/blog/2022/06/23/release-0.12.7/index.html" rel="next">
+        <link href="/kanku/blog/2022/07/12/kanku-project-page-refurbished/index.html" rel="next">
         
     </head>
     <body>
@@ -45,57 +44,53 @@
             <div class="row">
                 <div class="nine columns">
                     <main>
-                        <header>
-    <h1>Kanku Project Page refurbished</h1>
+                        
+<header>
+    <h1>Release 0.13.0</h1>
 
     <aside>
-        <time datetime="2022-07-12">
-            Posted on 2022-07-12
+        <time datetime="2022-10-10">
+            Posted on 2022-10-10
         </time>
     </aside>
 
     <p class="tags">Tags:
-        <a href="/kanku/blog/tag/news/" rel="tag">news</a>
+        <a href="/kanku/blog/tag/release/" rel="tag">release</a>
     </p>
 
 
 </header>
-<section id="section-1">
-    <h2>Welcome to the new project page</h2>
 
-<p>The new page is built with <a href="http://preaction.me/statocles/">Statocles</a>.</p>
 
-<p>We decided to switch from plain HTML to a Static Site Generator for the following reasons:</p>
+<h2>FEATURES</h2>
 
-<ul>
-<li>Make it easier to write content</li>
-<li>Use a framework to maintain a blog</li>
-<li>Make deployment easier and more flexible</li>
-</ul>
+<ul><li>[core] refactored rabbmitmq handling in worker and dispatcher
+</li><li>[handler] Reboot: new option &#39;login_timeout&#39; to wait for console
+</li><li>[handler] SaltSSH: added multiple attributes
+</li><li>[dist] removed kanku-web.log from default logging conf
+</li><li>[dist] remove logrotate config - now done with journald
+</li><li>[cli] ssh: new parameter --x11_forward/-X to enable ssh x11 forwarding
+</li></ul>
 
-<p>but the most important point:</p>
 
-<ul>
-<li>Generate Changelog, Release notes, etc. out of one source</li>
-</ul>
 
-<p>We will follow up with some blog posts about the the tools we create
-to auto-generate these documentationi.</p>
+<h3>Examples</h3>
 
-<p>Stay tuned.</p>
+<h4>X-Forwarding for `kanku ssh`</h4>
 
-</section>
+<p><code>kanku ssh -X</code></p>
+
 
 <ul class="pager">
     <li class="prev">
-            <a class="button button-primary" href="/kanku/blog/2022/06/23/release-0.12.7/index.html" rel="prev">
+            <a class="button button-primary" href="/kanku/blog/2022/07/12/kanku-project-page-refurbished/index.html" rel="prev">
                 ← Older
             </a>
     </li>
     <li class="next">
-            <a class="button button-primary" href="/kanku/blog/2022/10/10/release-0.13.0/index.html" rel="next">
+            <button disabled>
                 Newer →
-            </a>
+            </button>
     </li>
 </ul>
 
