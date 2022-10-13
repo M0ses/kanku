@@ -52,7 +52,7 @@ for my $ver (@new_revs) {
     next unless @{$d->{$section}||[]};
     $news .= "## $header->{$section}\n\n";
     for my $entry (@{$d->{$section}||[]}) {
-      print STDERR "$entry" if $::ENV{DEBUG};
+      print STDERR "$entry\n" if $::ENV{DEBUG};
       $news .= gen_entries($entry, 0);
     }
     $news .= "\n\n";
@@ -111,7 +111,10 @@ sub stash_and_commit {
 
   ];
   for my $cmd (@{$cmds}) {
-    system($cmd);
+    print "Executing: $cmd\n";
+    my $r = system($cmd);
+    print "r: $r\n";
+    die "system '$cmd' failed: $?\n" if $?;
   }
 }
 
