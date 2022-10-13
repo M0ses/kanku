@@ -1,3 +1,15 @@
+# [0.13.0] - 2022-10-10
+
+## FEATURES
+
+* [core] refactored rabbmitmq handling in worker and dispatcher
+* [handler] Reboot: new option 'login_timeout' to wait for console
+* [handler] SaltSSH: added multiple attributes
+* [dist] removed kanku-web.log from default logging conf
+* [dist] remove logrotate config - now done with journald
+* [cli] ssh: new parameter --x11_forward/-X to enable ssh x11 forwarding
+
+
 # [0.12.7] - 2022-06-23
 
 ## BUGFIXES
