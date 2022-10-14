@@ -413,6 +413,7 @@ WebUI for kanku using perl Dancer
 /usr/lib/kanku/lib/Kanku.pm
 /usr/lib/kanku/lib/Kanku/REST.pm
 /usr/lib/kanku/lib/Kanku/REST
+/usr/lib/kanku/lib/Dancer2
 
 %package worker
 Summary:        Worker daemon for kanku
