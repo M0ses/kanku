@@ -7,6 +7,7 @@ use Dancer2::Plugin::REST;
 use Dancer2::Plugin::DBIC;
 use Dancer2::Plugin::Auth::Extensible;
 use Dancer2::Plugin::WebSocket;
+use Dancer2::Plugin::GitLab::Webhook;
 
 use Sys::Virt;
 use Try::Tiny;
@@ -102,7 +103,17 @@ del '/job/comment/:comment_id.:format' => require_any_role [qw/Admin User/] =>  
 
 # ROUTES FOR JOBGROUPS
 
-post '/job_group/trigger/:name.:format' => require_any_role [qw/Admin/] =>  sub {
+post '/job_group/trigger/:name.:format' => require_role Admin =>  sub {
+  my $jg = Kanku::REST::JobGroup->new(app_opts());
+  return $jg->trigger;
+};
+
+post '/job_group/trigger/:name.:format' => require_role Admin =>  sub {
+  my $jg = Kanku::REST::JobGroup->new(app_opts());
+  return $jg->trigger;
+};
+
+post '/job_group/webhook/:name.:format' => require_webhook_secret sub {
   my $jg = Kanku::REST::JobGroup->new(app_opts());
   return $jg->trigger;
 };

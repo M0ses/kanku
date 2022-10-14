@@ -10,7 +10,7 @@ use Kanku::Config;
 sub trigger {
   my ($self) = @_;
   my $name   = $self->params->{name};
-  my $data   = $self->params->{data};
+  my $data   = $self->params->{data} || [];
   my $cfg           = Kanku::Config->instance();
   my @job_groups    = $cfg->job_group_list;
   my $jg_cfg        = $cfg->job_group_config($name);
