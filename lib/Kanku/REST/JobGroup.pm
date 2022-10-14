@@ -10,10 +10,10 @@ use Kanku::Config;
 sub trigger {
   my ($self) = @_;
   my $name   = $self->params->{name};
-  my $data   = $self->params->{data} || [];
   my $cfg           = Kanku::Config->instance();
   my @job_groups    = $cfg->job_group_list;
   my $jg_cfg        = $cfg->job_group_config($name);
+  my $data   = $self->params->{data} || $self->_calc_default_data($name, $jg_cfg);
   my @jobs_to_trigger;
 
   for (my $g = 0; $g < @{$data}; $g++) {
@@ -43,6 +43,23 @@ sub trigger {
   }
 
   return {state => 'success', msg => "Successfully triggered job group '$name'"};
+}
+
+sub _calc_default_data {
+  my ($self, $name, $jg_cfg) = @_;
+  my $data          = [];
+
+  my $g = 0;
+
+  for my $group (@{$jg_cfg->{groups}}) {
+    my $j = 0;
+    for my $job (@{$jg_cfg->{groups}->[$g]->{jobs}}) {
+      $data->[$g]->[$j] = 1;
+      $j++;
+    }
+    $g++;
+  }
+  return $data;
 }
 
 __PACKAGE__->meta->make_immutable();
