@@ -76,8 +76,10 @@ sub run {
     } catch {
       exit 1;
     };
-    $logger->debug('- filter: '.$self->filter);
-    my $tmp_data = $kr->get_json( path => 'gui_config/job', params =>{filter => $self->filter});
+    $logger->debug('- filter: '.($self->filter||q{}));
+    my $params = {};
+    $params->{filter} = $self->filter if $self->{filter};
+    my $tmp_data = $kr->get_json( path => 'gui_config/job', params => $params);
 
     my @job_names = sort map { $_->{job_name} } @{$tmp_data->{config}} ;
     my $data = { job_names => \@job_names , errors => $tmp_data->{errors}};
