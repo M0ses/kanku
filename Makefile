@@ -30,6 +30,7 @@ CONFIG_DIRS		= \
 	etc/kanku/templates/cmd/setup/etc\
 	etc/kanku/templates/examples-vm/\
 	etc/kanku/jobs\
+	etc/kanku/job_groups\
 	etc/kanku/jobs/examples\
 	etc/kanku/logging
 ifeq ($(DOCDIR),)

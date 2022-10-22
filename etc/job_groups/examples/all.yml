@@ -1,0 +1,13 @@
+groups:
+  -
+    description: Test sles11sp3
+    jobs:
+      - sles11sp3
+  -
+    description: Test obs-server-26
+    jobs:
+      - obs-server-26
+  -
+    description: Test obs-server
+    jobs:
+      - obs-server
