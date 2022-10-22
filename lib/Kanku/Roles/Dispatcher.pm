@@ -306,15 +306,21 @@ sub end_job {
   $job->update_db();
 
   if ( $job->state eq 'failed') {
-    my $schema  = $self->schema;
-    my $rs = $schema->resultset('JobWaitFor')->search({wait_for_job_id=>$job->id});
-    my $todo = [];
-    while ( my $ds = $rs->next )   {
-      $ds->job->update({state=>'skipped'});
-    }
+    $self->clean_up_wait_for($job->id);
   }
 
   $self->logger->debug("Finished job: ".$job->name." (".$job->id.") with state '".$job->state."'");
+}
+
+sub clean_up_wait_for {
+  my ($self, $job_id) = @_;
+  my $schema  = $self->schema;
+  my $rs = $schema->resultset('JobWaitFor')->search({wait_for_job_id=>$job_id});
+  my $todo = [];
+  while ( my $ds = $rs->next )   {
+    $ds->job->update({state=>'skipped'});
+    $self->clean_up_wait_for($ds->job->id);
+  }
 }
 
 1;
