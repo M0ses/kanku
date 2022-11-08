@@ -199,6 +199,13 @@ sub prepare {
   $ctx->{management_interface} = $self->management_interface
     if $self->management_interface;
 
+  if (!$self->vm_image_file) {
+    croak(
+      'No vm_image_file defined. Either you specify it manually for local '.
+      'files or you need to run e.g. Kanku::Handler::ImageDownload before '.
+      'running '.__PACKAGE__.'!'
+    );
+  }
   $self->logger->debug("*** vm_image_file: ".$self->vm_image_file);
   $self->logger->debug("*** tmp_image_file: ".$ctx->{tmp_image_file}) if $ctx->{tmp_image_file};
 
