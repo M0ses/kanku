@@ -19,7 +19,7 @@ package Kanku::Roles::SSH;
 use Moose::Role;
 
 use Data::Dumper;
-use Net::SSH2;
+use Libssh::Session q(:all);
 use namespace::autoclean;
 use Carp;
 use Kanku::Config;
@@ -88,7 +88,7 @@ has 'connect_timeout' => (
   default => 300
 );
 
-has [ qw/job ssh2/ ] => (
+has [ qw/job ssh/ ] => (
   is => 'rw',
   isa => 'Object'
 );
@@ -143,13 +143,13 @@ sub get_defaults {
 }
 
 sub connect {
-  my $self    = shift;
+  my ($self)  = @_;
   my $logger  = $self->logger;
-  my $ssh2    = Net::SSH2->new(
-    strict_host_key_checking=>'no',
-    timeout => 1000 * 60 * 60 * 4 # default timeout 4 hours in milliseconds
-  );
-  $self->ssh2($ssh2);
+
+  my $ssh = Libssh::Session->new();
+  $ssh->options(Host => $self->ipaddress, Port => $self->port);
+
+  $self->ssh($ssh);
 
   my $results = [];
   my $ip      = $self->ipaddress;
@@ -158,7 +158,7 @@ sub connect {
 
   my $connect_count=0;
 
-  while (! $ssh2->connect($ip, $self->port)) {
+  while ($ssh->connect() != SSH_OK) {
     croak("Could not connect to $ip: $!") if ($connect_count > $self->connect_timeout);
     $connect_count++;
     $logger->trace("Trying to reconnect: connect_count: ".$connect_count." timeout: ".$self->connect_timeout);
@@ -167,7 +167,7 @@ sub connect {
 
   $logger->debug("Connected successfully to $ip after $connect_count retries.");
 
-  $logger->debug(' - ssh2: SSH_AUTH_SOCK: '.($::ENV{SSH_AUTH_SOCK} || q{}));
+  $logger->debug(' - SSH_AUTH_SOCK: '.($::ENV{SSH_AUTH_SOCK} || q{}));
   $logger->debug(
       "Using the following login data:\n" .
           "auth_type  : " . ( $self->auth_type || '' )        . "\n".
@@ -178,57 +178,55 @@ sub connect {
           "password   : " . ( $self->password || '' )         . "\n"
   );
 
-  if ( $self->auth_type eq 'publickey' ) {
-    $ssh2->auth_publickey(
+  $ssh->options(User=>$self->username) if $self->username;
+  $ssh->options(Identity=>$self->privatekey_path) if $self->privatekey_path;
+
+  my $auth_result;
+
+  if ( $self->auth_type eq 'publickey' or $self->auth_type eq 'agent' ) {
+    $auth_result = $ssh->auth_publickey_auto(
       $self->username,
       $self->publickey_path,
       $self->privatekey_path,
       $self->passphrase
     );
-  } elsif ( $self->auth_type eq 'agent' ) {
-    $ssh2->auth_agent($self->username);
   } elsif ( $self->auth_type eq 'password' ) {
-    $ssh2->auth_password($self->username, $self->password);
+    $auth_result = $ssh->auth_password($self->username, $self->password);
   } else {
     croak("ssh auth_type not known!\n");
   }
 
-  if ( ! $ssh2->auth_ok()  ) {
+  if ($auth_result != SSH_AUTH_SUCCESS) {
     my $msg = "";
-    my @err = $ssh2->error;
+    my @err = $ssh->error;
     if ( $self->auth_type eq 'agent' ) {
       $msg = " Have you added your ssh key to ssh-agent by running ssh-add?";
     }
     croak("Could not authenticate!$msg @err\n");
   }
 
-  return $ssh2;
+  return $ssh;
 }
 
 sub exec_command {
   my $self = shift;
   my $cmd  = shift;
-  my $ssh2 = $self->ssh2;
+  my $ssh  = $self->ssh;
 
-  my $chan = $ssh2->channel();
-  $chan->ext_data('merge');
   for my $key (keys(%{$self->ENV})) {
     my $val = $self->ENV->{$key};
     $cmd = "export $key='$val'; $cmd";
   }
 
   $self->logger->info("Executing command: $cmd");
-  $chan->exec($cmd);
 
-  my $out = undef;
-  my $buf = undef;
-  while ($chan->read($buf,1024)) {
-    $out .= $buf;
+  my $ret = $ssh->execute_simple(cmd=>$cmd, timeout=>$self->timeout);
+
+  if ($ret->{exit_code}) {
+    croak("Command '$cmd' failed:\n\nSTDOUT:\n".($ret->{stdout}|| q{})."\n".($ret->{stderr}|| q{})."\n");
   }
 
-  croak("Command '$cmd' failed:\n\n".($out || q{})."\n") if $chan->exit_status;
-
-  return $out;
+  return $ret;
 }
 
 1;
@@ -254,7 +252,8 @@ Kanku::Roles::SSH - A generic role for handling ssh connections using Net::SSH2
 
     $self->connect();
 
-    $self->exec_command("/bin/true");
+    # SEE Libssh::Session::execute_simple for further information
+    my $ret = $self->exec_command("/bin/true");
   }
 
 =head1 DESCRIPTION

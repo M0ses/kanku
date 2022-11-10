@@ -17,6 +17,7 @@
 package Kanku::Handler::ExecuteCommandViaSSH;
 
 use Moose;
+use Carp;
 use namespace::autoclean;
 
 with 'Kanku::Roles::Handler';
@@ -33,11 +34,12 @@ sub distributable { 1 }
 sub execute {
   my $self    = shift;
   my $results = [];
-  my $ssh2    = $self->connect();
-  my $ip      = $self->ipaddress;
-  my $ctx     = $self->job->context;
 
-  $ssh2->timeout(1000*$self->timeout) if ($self->timeout);
+  $self->connect();
+
+  my $ip      = $self->ipaddress;
+  my $ssh     = $self->ssh;
+  my $ctx     = $self->job->context;
 
   for my $env_var (keys(%{$self->context2env})) {
     # upper case environment variables are more shell
@@ -55,18 +57,17 @@ sub execute {
 
   foreach my $cmd ( @{$self->commands} ) {
 
-      my $out = $self->exec_command($cmd);
+      my $ret = $self->exec_command($cmd);
 
-      my @err = $ssh2->error();
-      if ($err[0]) {
-        $ssh2->disconnect();
-        die "Error while executing command via ssh '$cmd': $err[2]";
+      if ($ret->{exit_code}) {
+        $ssh->disconnect();
+        croak("Error while executing command via ssh '$cmd': $ret->{stderr}\nSTDOUT: $ret->{stdout}\n");
       }
 
       push @$results, {
         command     => $cmd,
         exit_status => 0,
-        message     => $out
+        message     => $ret->{stdout},
       };
 
   }

@@ -81,6 +81,7 @@ has gui_config => (
   }
 );
 
+has 'timeout' => (is=>'rw', isa=>'Int', default=>600);
 sub prepare {
   my $self = shift;
 
@@ -160,7 +161,8 @@ sub execute {
   # clone git repository
   try {
     my $cmd_clone = "git clone ".$self->_giturl.(( $self->destination ) ? " " . $self->destination : '');
-    $self->exec_command($cmd_clone);
+    my $ret = $self->exec_command($cmd_clone);
+    croak($ret->{stderr}) if $ret->{exit_code};
   } catch {
     my $err = $_;
     $err =~ s/$pass/<gitpass>/;
@@ -171,17 +173,19 @@ sub execute {
 
   # checkout specific revision if revision given
   if ( $self->revision ) {
-      my $cmd_checkout  = "git ".$git_dest." checkout " .  $self->revision;
-
-      $self->exec_command($cmd_checkout);
+    my $cmd_checkout  = "git ".$git_dest." checkout " .  $self->revision;
+    my $ret           = $self->exec_command($cmd_checkout);
+    croak($ret->{stderr}) if $ret->{exit_code};
   }
 
   if ( $self->submodules ) {
-      my $cmd_submodule_init = "git ".$git_dest." submodule init";
-      $self->exec_command($cmd_submodule_init);
+    my $cmd = "git ".$git_dest." submodule init";
+    my $ret = $self->exec_command($cmd);
+    croak($ret->{stderr}) if $ret->{exit_code};
 
-      my $cmd_submodule_update = "git ".$git_dest." submodule update";
-      $self->exec_command($cmd_submodule_update);
+    $cmd = "git ".$git_dest." submodule update";
+    $ret = $self->exec_command($cmd);
+    croak($ret->{stderr}) if $ret->{exit_code};
   }
 
   return {

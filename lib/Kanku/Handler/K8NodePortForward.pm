@@ -73,7 +73,8 @@ sub execute {
   foreach my $np ( @{$self->nodeports} ) {
       my $cmd = "kubectl get -o jsonpath='{.spec.ports[0].nodePort}' services -n $np->{namespace} $np->{service}";
       $self->logger->debug("COMMAND: $cmd");
-      my $out = $self->exec_command($cmd);
+      my $ret = $self->exec_command($cmd);
+      my $out = $ret->{stdout}
       $self->logger->debug("OUTPUT: $out");
 
       my @err = $ssh2->error();

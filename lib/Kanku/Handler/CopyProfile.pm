@@ -117,12 +117,13 @@ sub mkdir {
 sub _cmd {
   my ($self, $cmd) = @_;
   my $ssh2         = $self->connect;
-  my $out          = $self->exec_command($cmd);
+  my $ret          = $self->exec_command($cmd);
+  my $out          = $ret->{stdout};
 
   my @err = $ssh2->error();
-  if ($err[0]) {
+  if ($ret->{exit_code}) {
     $ssh2->disconnect();
-    die "Error while executing command via ssh '$cmd': $err[2]";
+    croak("Error while executing command via ssh '$cmd': $ret->{stderr}");
   }
 
   push @{$self->_results}, {
