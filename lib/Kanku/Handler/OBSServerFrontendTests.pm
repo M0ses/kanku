@@ -63,10 +63,8 @@ sub execute {
   my $results = [];
   my $ip      = $self->jump_host;
   $self->ipaddress($ip);
-  my $ssh2    = $self->connect();
+  my $ssh     = $self->connect();
   my $ctx     = $self->job->context;
-
-  $ssh2->timeout(1000*$self->timeout) if ($self->timeout);
 
   for my $env_var (keys(%{$self->context2env})) {
     # upper case environment variables are more shell
@@ -97,9 +95,9 @@ sub execute {
   foreach my $cmd ( @commands ) {
       my $ret = $self->exec_command($cmd);
       my $out = $ret->{stdout};
-      my @err = $ssh2->error();
+      my @err = $ssh->error();
       if ($ret->{exit_code}) {
-        $ssh2->disconnect();
+        $ssh->disconnect();
         croak("Error while executing command via ssh '$cmd': $ret->{stderr}\nSTDOUT: $ret->{stdout}");
       }
       push @$results, {
