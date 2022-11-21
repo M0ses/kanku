@@ -41,6 +41,10 @@ engines:
       end_tag:   '[% end_tag %]'
 
 plugins:
+#  GitLab::Webhook:
+#    routes:
+#      ^/job_group/webhook/kanku.json$:
+#        - ABCDEFG12345
   DBIC:
     default:
       dsn: [% dsn %]
