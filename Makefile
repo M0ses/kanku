@@ -24,6 +24,7 @@ CONFIG_FILES = \
 
 FULL_DIRS	= bin share/migrations share/fixtures
 CONFIG_DIRS		= \
+	etc/kanku/dancer\
 	etc/kanku/templates\
 	etc/kanku/templates/cmd\
 	etc/kanku/templates/cmd/setup\

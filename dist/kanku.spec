@@ -407,6 +407,7 @@ WebUI for kanku using perl Dancer
 %dir /etc/apache2/conf.d
 %ghost %config (noreplace) /etc/apache2/conf.d/kanku.conf
 %config /etc/kanku/jobs/remove-domain.yml
+%dir /etc/kanku/dancer
 
 # public contains css/js/bootstrap/jquery etc
 /usr/share/kanku/public/
