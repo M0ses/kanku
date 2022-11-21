@@ -31,17 +31,25 @@ use POSIX;
 use Try::Tiny;
 use JSON::XS;
 
-command_short_description  'trigger a remote job given by name';
+command_short_description  'trigger a remote job or job group';
 
 command_long_description
-  "trigger a specified job on your remote instance\n\n"
+  "Trigger a specified job or job group on your remote instance.\n".
+  "Either job name or job group name is required."
   . $_[0]->description_footer;
 
 option 'job' => (
   isa           => 'Str',
   is            => 'rw',
   cmd_aliases	=> 'j',
-  documentation => '(*) Remote job name - mandatory',
+  documentation => '(*) Remote job name',
+);
+
+option 'job_group' => (
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases	=> 'J',
+  documentation => '(*) Remote job group name',
 );
 
 option 'config' => (
@@ -75,8 +83,27 @@ sub run {
     );
 
     $self->view('rtrigger.tt', $rdata);
+  } elsif ( $self->job_group) {
+    my $kr;
+    try {
+      $kr = $self->connect_restapi();
+    } catch {
+      exit 1;
+    };
+    my $json = JSON::XS->new();
+    my $data = {
+      data     => $self->config || [],
+      is_admin => 1,
+    };
+    my $rdata = $kr->post_json(
+      # path is only subpath, rest is added by post_json
+      path => 'job_group/trigger/'.$self->job_group,
+      data => $json->encode($data),
+    );
+
+    $self->view('rtrigger.tt', $rdata);
   } else {
-	$logger->error('You must at least specify a job name to trigger');
+	$logger->error('You must at least specify a job name (<-j|--job>) or job group name (<-J|--job_group>) to trigger');
   }
 
   return;
