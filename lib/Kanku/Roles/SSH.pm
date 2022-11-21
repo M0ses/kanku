@@ -220,7 +220,7 @@ sub exec_command {
 
   $self->logger->info("Executing command: $cmd");
 
-  my $ret = $ssh->execute_simple(cmd=>$cmd, timeout=>$self->timeout);
+  my $ret = $ssh->execute_simple(cmd=>$cmd, timeout=>$self->timeout, timeout_nodata=>$self->timeout);
 
   if ($ret->{exit_code}) {
     croak("Command '$cmd' failed:\n\nSTDOUT:\n".($ret->{stdout}|| q{})."\n".($ret->{stderr}|| q{})."\n");
