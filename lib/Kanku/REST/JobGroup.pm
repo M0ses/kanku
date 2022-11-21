@@ -16,12 +16,13 @@ sub trigger {
   my $data   = $self->params->{data} || $self->_calc_default_data($name, $jg_cfg);
   my @jobs_to_trigger;
 
-  for (my $g = 0; $g < @{$data}; $g++) {
-     my $jobs = $jg_cfg->{groups}->[$g]->{jobs};
-     $jobs_to_trigger[$g] = {};
-     for (my $j=0; $j < @{$jobs}; $j++) {
-       $jobs_to_trigger[$g]->{$jobs->[$j]} = 1 if $data->[$g]->[$j];
-     }
+  for (my $g = 0; $g < @{$jg_cfg->{groups}}; $g++) {
+    my $jobs = $jg_cfg->{groups}->[$g]->{jobs};
+    $jobs_to_trigger[$g] = {};
+    for (my $j=0; $j < @{$jobs}; $j++) {
+      # The default for jobs is "enabled"
+      $jobs_to_trigger[$g]->{$jobs->[$j]} = (defined $data->[$g]->[$j] ) ? $data->[$g]->[$j] : 1;
+    }
   }
 
   my @prev_jobs;
