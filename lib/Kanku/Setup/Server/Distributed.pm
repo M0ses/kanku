@@ -207,7 +207,10 @@ sub _create_server_cert {
   my @cmd;
 
   # create key file
-  $self->keyfile(file($self->ca_path, "private/$hostname.key.pem")->stringify);
+  my $key_file = $self->keyfile(file($self->ca_path, "private/$hostname.key.pem")->stringify);
+
+  return if -f $key_file;
+
   @cmd = ('openssl', 'genrsa', '-out', $self->keyfile, '4096');
   $self->logger->debug("Command: '@cmd'");
   $self->_run_system_cmd(@cmd);
@@ -310,8 +313,12 @@ subjectAltName                  = @alt_names
   if ($self->_apache) {
     my $apachecrt = "/etc/apache2/ssl.crt/server.crt";
     my $apachekey = "/etc/apache2/ssl.key/server.key";
-    copy($self->certfile, $apachecrt) or die "Copy failed: $!";
-    copy($self->keyfile, $apachekey)  or die "Copy failed: $!";
+    if (! -f $apachecrt) {
+      copy($self->certfile, $apachecrt) or die "Copy failed: $!";
+    }
+    if (! -f $apachekey) {
+      copy($self->keyfile, $apachekey)  or die "Copy failed: $!";
+    }
     chmod oct(444), $apachecrt;
     chmod oct(440), $apachekey;
   }
@@ -319,11 +326,15 @@ subjectAltName                  = @alt_names
   my $dir = dir("/etc/rabbitmq/server");
   $dir->mkpath;
   my $ncert = $dir->stringify.'/'.file($self->certfile)->basename;
-  copy($self->certfile, $ncert) or die "Copy failed: $!";
+  if (! -f $ncert) {
+    copy($self->certfile, $ncert) or die "Copy failed: $!";
+  }
   $self->certfile($ncert);
 
   my $nkey = $dir->stringify.'/'.file($self->keyfile)->basename;
-  copy($self->keyfile, $nkey) or die "Copy failed: $!";
+  if (! -f $nkey) {
+    copy($self->keyfile, $nkey) or die "Copy failed: $!";
+  }
   $self->keyfile($nkey);
   chmod oct(440), $self->keyfile;
   my $gid = getgrnam('rabbitmq');
