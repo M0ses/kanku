@@ -3,6 +3,7 @@ var alert_map = {
   failed:      'alert-danger',
   running:     'alert-primary',
   dispatching: 'alert-primary',
+  skipped:     'alert-warning',
 };
 
 function show_messagebox(state, msg, timeout=10000) {
