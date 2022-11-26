@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 238,
+           job_id => 39,
+           name   => 'Kanku::Handler::RemoveDomain',
+           result => '{"prepare":{"code":0,"message":"Aggregated results:\\n*** Host: worker-to_all_hosts-e0554cdd-c268-40e1-b070-f3c19cd66dd8: ***\\nNothing to do!"},"execute":{"code":0,"message":"Aggregated results:\\n*** Host: worker-to_all_hosts-e0554cdd-c268-40e1-b070-f3c19cd66dd8: ***\\nSuccessfully removed domain dki-opensuse-15-3"},"finalize":{"code":0,"message":"Aggregated results:\\n*** Host: worker-to_all_hosts-e0554cdd-c268-40e1-b070-f3c19cd66dd8: ***\\nNothing to do!"}}',
+           state  => 'succeed'
+         };

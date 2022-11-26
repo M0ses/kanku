@@ -38,6 +38,7 @@ has [qw/creation_time start_time end_time last_modified/] => ( is  => 'rw', isa 
 has db_object => ( is => 'rw', isa => 'Object' );
 has '+workerinfo' => (default =>"localhost:$$:none");
 has 'pwrand' => (is=>'rw', isa=>'Str');
+has job_group_id => ( is => 'rw', isa => 'Int|Undef' );
 
 sub json_keys; # prototype to not break the requires in Kanku::Roles::Serialize
 has 'json_keys' => (
@@ -46,6 +47,7 @@ has 'json_keys' => (
   default => sub {[qw/
     name state result workerinfo skipped scheduled triggered creation_time
     start_time end_time last_modified id context masterinfo trigger_user pwrand
+    job_group_id
   /
   ]});
 
@@ -78,7 +80,7 @@ sub update_db {
 
   $self->pwrand($pwrand) if $pwrand;
 
-  foreach my $key ( qw/id name state start_time end_time result workerinfo masterinfo trigger_user pwrand/ ) {
+  foreach my $key ( qw/id name state start_time end_time result workerinfo masterinfo trigger_user pwrand job_group_id/ ) {
     my $value = $self->$key();
     $ds->{$key} = $value if ( $value );
   }

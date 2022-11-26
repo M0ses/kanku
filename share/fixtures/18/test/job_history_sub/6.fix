@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 6,
+           job_id => 1,
+           name   => 'Kanku::Handler::PrepareSSH',
+           result => '{"finalize":{"message":"Nothing to do!","code":0},"execute":{"message":"Successfully prepared obs-server for ssh connections\\n","code":0},"prepare":{"code":0,"message":"Successfully finished prepare and loaded keys from 1 files"}}',
+           state  => 'succeed'
+         };

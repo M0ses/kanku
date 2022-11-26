@@ -70,8 +70,12 @@ sub _create_ssh_keys {
 }
 
 sub _configure_apache_ssl {
-  my $self    = shift;
-  my $logger  = $self->logger;
+  my $self      = shift;
+  my $logger    = $self->logger;
+  my $data      = {};
+  my $chainfile = (-f '/etc/apache2/ssl.crt/chain.crt') ? '/etc/apache2/ssl.crt/chain.crt' : q{};
+
+  $data->{chainfile} = $chainfile;
 
   if (! $self->_ssl ) {
     $logger->debug("No SSL confguration requested");
@@ -81,9 +85,7 @@ sub _configure_apache_ssl {
   $self->_create_config_from_template(
     "kanku-vhost.conf.tt2",
     "/etc/apache2/vhosts.d/kanku-vhost.conf",
-    {
-      # data goes here
-    }
+    $data,
   );
 
 }

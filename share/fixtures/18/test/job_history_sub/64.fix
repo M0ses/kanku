@@ -1,0 +1,480 @@
+$HASH1 = {
+           id     => 64,
+           job_id => 7,
+           name   => 'Kanku::Handler::ExecuteCommandViaSSH',
+           result => "{\"finalize\":{\"code\":0,\"message\":\"Nothing to do!\"},\"execute\":{\"code\":0,\"m".
+	"essage\":\"All commands on 192.168.199.67 executed successfully\",\"subresul".
+	"ts\":[{\"message\":null,\"exit_status\":0,\"command\":\"echo -en \\\"[client]\\\\nus".
+	"er = root\\\\npassword = opensuse\\\\n\\\" > /root/.my.cnf\"},{\"command\":\"make ".
+	"-C  /tmp/open-build-service/dist test_system\",\"exit_status\":0,\"message\":".
+	"\"make: Entering directory '/tmp/open-build-service/dist'\\nprove -v t/*.t".
+	"s\\nt/0000-check_users_and_group.ts ....... \\n1..3\\nok 1 - Checking group".
+	" obsrun\\nok 2 - Checking user obsrun\\nok 3 - Checking user obsservicerun".
+	"\\nok\\nt/0060-check_required_services.ts ..... \\n1..27\\nok 1 - Checking i".
+	"f recommended systemd unit obsdispatcher.service is enabled\\nok 2 - Chec".
+	"king if recommended systemd unit obspublisher.service is enabled\\nok 3 -".
+	" Checking if recommended systemd unit obsrepserver.service is enabled\\no".
+	"k 4 - Checking if recommended systemd unit obsscheduler.service is enabl".
+	"ed\\nok 5 - Checking if recommended systemd unit obssrcserver.service is ".
+	"enabled\\nok 6 - Checking if recommended systemd unit mariadb.service is ".
+	"enabled\\nok 7 - Checking if recommended systemd unit apache2.service is ".
+	"enabled\\nok 8 - Checking recommended systemd unit 'obsdispatcher.service".
+	"' status\\nok 9 - Checking recommended systemd unit 'obspublisher.service".
+	"' status\\nok 10 - Checking recommended systemd unit 'obsrepserver.servic".
+	"e' status\\nok 11 - Checking recommended systemd unit 'obsscheduler.servi".
+	"ce' status\\nok 12 - Checking recommended systemd unit 'obssrcserver.serv".
+	"ice' status\\nok 13 - Checking recommended systemd unit 'mariadb.service'".
+	" status\\nok 14 - Checking recommended systemd unit 'apache2.service' sta".
+	"tus\\nok 15 - Checking recommended systemd unit 'obs-clockwork.service' s".
+	"tatus\\nok 16 - Checking recommended systemd unit 'obs-delayedjob-queue-c".
+	"onsistency_check.service' status\\nok 17 - Checking recommended systemd u".
+	"nit 'obs-delayedjob-queue-default.service' status\\nok 18 - Checking reco".
+	"mmended systemd unit 'obs-delayedjob-queue-issuetracking.service' status".
+	"\\nok 19 - Checking recommended systemd unit 'obs-delayedjob-queue-mailer".
+	"s.service' status\\nok 20 - Checking recommended systemd unit 'obs-delaye".
+	"djob-queue-project_log_rotate.service' status\\nok 21 - Checking recommen".
+	"ded systemd unit 'obs-delayedjob-queue-quick\@0.service' status\\nok 22 - ".
+	"Checking recommended systemd unit 'obs-delayedjob-queue-quick\@1.service'".
+	" status\\nok 23 - Checking recommended systemd unit 'obs-delayedjob-queue".
+	"-quick\@2.service' status\\nok 24 - Checking recommended systemd unit 'obs".
+	"-delayedjob-queue-releasetracking.service' status\\nok 25 - Checking reco".
+	"mmended systemd unit 'obs-delayedjob-queue-staging.service' status\\nok 2".
+	"6 - Checking recommended systemd unit 'obs-sphinx.service' status\\nok 27".
+	" - Checking recommended systemd unit 'obs-delayedjob-queue-scm.service' ".
+	"status\\nok\\nt/0070-check_recommended_services.ts .. \\n1..8\\nok 1 - Check".
+	"ing if recommended service obsdodup is enabled\\nok 2 - Checking if recom".
+	"mended service obssigner is enabled\\nok 3 - Checking if recommended serv".
+	"ice obsdeltastore is enabled\\nok 4 - Checking if recommended service obs".
+	"servicedispatch is enabled\\nok 5 - Checking recommended service 'obsdodu".
+	"p' status\\nok 6 - Checking recommended service 'obssigner' status\\nok 7 ".
+	"- Checking recommended service 'obsdeltastore' status\\nok 8 - Checking r".
+	"ecommended service 'obsservicedispatch' status\\nok\\nt/0080-check_ssl_cer".
+	"ts.ts ............. \\n1..5\\nWaiting for FQHOSTNAME (29)\\nok 1 - Checking".
+	" file server.crt\\nok 2 - Checking file server.key\\nok 3 - Checking file ".
+	"server.obs-server.created\\nok 4 - Checking file server.obs-server.crt\\no".
+	"k 5 - Checking https://localhost for SSL Certificate Errors\\nok\\nt/0090-".
+	"check_database.ts .............. \\n1..3\\nok 1 - Checking if database exi".
+	"sts\\nok 2 - Checking if tables in database api_production\\nok 3 - Checki".
+	"ng if database is started under /srv/obs/MySQL\\nok\\nt/0100-check_webserv".
+	"er_and_api.ts ..... \\n1..5\\nok 1 - Checking for xml converting error\\nok".
+	" 2 - Checking api about version\\nok 3 - Checking authorization for osc\\n".
+	"ok 4 - Checking for https://obs-server/apidocs/index\\nok 5 - Checking ht".
+	"tps://obs-server for http status code 200\\nok\\nAll tests successful.\\nFi".
+	"les=6, Tests=51,  4 wallclock secs ( 0.05 usr  0.02 sys +  0.89 cusr  0.".
+	"37 csys =  1.33 CPU)\\nResult: PASS\\nmake: Leaving directory '/tmp/open-b".
+	"uild-service/dist'\\n\"},{\"command\":\"make -C /tmp/open-build-service/src/b".
+	"ackend test_unit\",\"exit_status\":0,\"message\":\"make: Entering directory '/".
+	"tmp/open-build-service/src/backend'\\n[ -f ./BSConfig.pm ] || cp ./BSConf".
+	"ig.pm.template ./BSConfig.pm\\nrm -rf t/tmp/*\\nLANG=C prove -Ibuild -I. -".
+	"v t/*.t\\nt/0000-use.t ................................ \\nok 1 - require ".
+	"BSSched::BuildJob;\\nok 2 - require BSSched::BuildJob::DeltaRpm;\\nok 3 - ".
+	"require BSSched::EventHandler;\\nok 4 - require BSSched::EventSource::Dir".
+	"ectory;\\nok 5 - require BSSched::EventSource::Retry;\\nok 6 - require BSS".
+	"ched::BuildRepo;\\nok 7 - require BSSched::PublishRepo;\\nok 8 - require B".
+	"SSched::BuildResult;\\nok 9 - require BSSched::RPC;\\nok 10 - require BSSc".
+	"hed::Remote;\\n1..10\\nok\\nt/0001-BSVerify-verify_dod.t ................ \\".
+	"n1..6\\nok 1 - require BSVerify;\\nok 2 - Checking legal download 'HASH(0x".
+	"56515992fef8)'\\nok 3 - Checking illegal download 'HASH(0x56515995ad00)'\\".
+	"nok 4 - Checking illegal download 'HASH(0x56515995b048)'\\nok 5 - Checkin".
+	"g illegal download 'HASH(0x56515995b090)'\\nok 6 - Checking illegal downl".
+	"oad 'HASH(0x56515998d520)'\\nok\\nt/0001-BSVerify-verify_patchinfo.t .....".
+	"..... \\n1..13\\nok 1 - require BSVerify;\\nok 2 - Checking legal patchinfo".
+	" 'HASH(0x5618e6573d40)'\\nok 3 - Checking legal patchinfo 'HASH(0x5618e65".
+	"73e48)'\\nok 4 - Checking legal patchinfo 'HASH(0x5618e6573f50)'\\nok 5 - ".
+	"Checking legal patchinfo 'HASH(0x5618e6574058)'\\nok 6 - Checking legal p".
+	"atchinfo 'HASH(0x5618e6574100)'\\nok 7 - Checking legal patchinfo 'HASH(0".
+	"x5618e6574208)'\\nok 8 - Checking legal patchinfo 'HASH(0x5618e5fd2d18)'\\".
+	"nok 9 - Checking legal patchinfo 'HASH(0x5618e5fd2ee0)'\\nok 10 - Checkin".
+	"g illegal patchinfo 'HASH(0x5618e5fd3108)'\\nok 11 - Checking illegal pat".
+	"chinfo 'HASH(0x5618e5fd3228)'\\nok 12 - Checking illegal patchinfo 'HASH(".
+	"0x5618e5fd3348)'\\nok 13 - Checking illegal patchinfo 'HASH(0x5618e5fd34e".
+	"0)'\\nok\\nt/0001-BSVerify-verify_repo.t ............... \\n1..6\\nok 1 - re".
+	"quire BSVerify;\\nok 2 - Checking legal repository 'HASH(0x559caafd3e90)'".
+	"\\nok 3 - Checking illegal repository 'HASH(0x559caaa32e10)'\\nok 4 - Chec".
+	"king illegal repository 'HASH(0x559caaa33038)'\\nok 5 - Checking illegal ".
+	"repository 'HASH(0x559caaa331b8)'\\nok 6 - Checking illegal repository 'H".
+	"ASH(0x559caaa33338)'\\nok\\nt/0001-BSVerify.t ........................... ".
+	"\\n1..206\\nok 1 - require BSVerify;\\nok 2 - Checking legal project id 'op".
+	"enSUSE:test'\\nok 3 - Checking legal project id 'open SUSE:test'\\nok 4 - ".
+	"Checking legal project id 'open.SUSE:test'\\nok 5 - Checking illegal proj".
+	"ect id 'openSUSE:.test'\\nok 6 - Checking illegal project id '.test:openS".
+	"USE'\\nok 7 - Checking illegal project id '_test:openSUSE'\\nok 8 - Checki".
+	"ng illegal project id 'openSUSE::Test'\\nok 9 - Checking illegal project ".
+	"id 'opensuse/test'\\nok 10 - Checking illegal project id '\\\\n'\\nok 11 - C".
+	"hecking illegal project id ''\\nok 12 - Checking illegal project id 'xxxx".
+	"xxxxxxxxxxxxxxxxxxxxxxx...'\\nok 13 - Checking illegal project id 'undef'".
+	"\\nok 14 - Checking legal project kind 'standard'\\nok 15 - Checking legal".
+	" project kind 'maintenance'\\nok 16 - Checking legal project kind 'mainte".
+	"nance_incident'\\nok 17 - Checking legal project kind 'maintenance_releas".
+	"e'\\nok 18 - Checking illegal project kind 'foo'\\nok 19 - Checking illega".
+	"l project kind 'undef'\\nok 20 - Checking legal package id '_product'\\nok".
+	" 21 - Checking legal package id '_pattern'\\nok 22 - Checking legal packa".
+	"ge id '_project'\\nok 23 - Checking legal package id '_patchinfo'\\nok 24 ".
+	"- Checking legal package id '_product:foo'\\nok 25 - Checking legal packa".
+	"ge id '_patchinfo:bar'\\nok 26 - Checking legal package id 'foo.bar'\\nok ".
+	"27 - Checking illegal package id ''\\nok 28 - Checking illegal package id".
+	" '\\\\n'\\nok 29 - Checking illegal package id '_pattern:foo'\\nok 30 - Chec".
+	"king illegal package id '_project:foo'\\nok 31 - Checking illegal package".
+	" id 'foo:_foo'\\nok 32 - Checking illegal package id '_foo'\\nok 33 - Chec".
+	"king illegal package id '.test'\\nok 34 - Checking illegal package id '_p".
+	"roduct:.test'\\nok 35 - Checking illegal package id 'foo\\\\nfoo'\\nok 36 - ".
+	"Checking illegal package id 'foo\\\\n'\\nok 37 - Checking illegal package i".
+	"d 'xxxxxxxxxxxxxxxxxxxxxxxxxxx...'\\nok 38 - Checking illegal package id ".
+	"'0'\\nok 39 - Checking illegal package id 'undef'\\nok 40 - Checking legal".
+	" repository id 'foo'\\nok 41 - Checking legal repository id 'bar'\\nok 42 ".
+	"- Checking legal repository id 'foo_bar'\\nok 43 - Checking illegal repos".
+	"itory id ''\\nok 44 - Checking illegal repository id '\\\\n'\\nok 45 - Check".
+	"ing illegal repository id '_repo'\\nok 46 - Checking illegal repository i".
+	"d '.repo'\\nok 47 - Checking illegal repository id 'xxxxxxxxxxxxxxxxxxxxx".
+	"xxxxxx...'\\nok 48 - Checking illegal repository id 'undef'\\nok 49 - Chec".
+	"king legal job id 'foo'\\nok 50 - Checking legal job id 'foo:bar'\\nok 51 ".
+	"- Checking legal job id 'foo_bar'\\nok 52 - Checking illegal job id ''\\no".
+	"k 53 - Checking illegal job id '\\\\n'\\nok 54 - Checking illegal job id '.".
+	"job_fails'\\nok 55 - Checking illegal job id 'undef'\\nok 56 - Checking le".
+	"gal arch '%foo'\\nok 57 - Checking legal arch 'foo_bar'\\nok 58 - Checking".
+	" legal arch 'foo,bar'\\nok 59 - Checking illegal arch ''\\nok 60 - Checkin".
+	"g illegal arch '\\\\n'\\nok 61 - Checking illegal arch 'foo:bar'\\nok 62 - C".
+	"hecking illegal arch 'foo.bar'\\nok 63 - Checking illegal arch 'foo;bar'\\".
+	"nok 64 - Checking illegal arch 'xxxxxxxxxxxxxxxxxxxxxxxxxxx...'\\nok 65 -".
+	" Checking illegal arch 'undef'\\nok 66 - Checking legal package id and re".
+	"pository '_repository'\\nok 67 - Checking legal package id and repository".
+	" '_product'\\nok 68 - Checking legal package id and repository '_pattern'".
+	"\\nok 69 - Checking legal package id and repository '_project'\\nok 70 - C".
+	"hecking legal package id and repository '_patchinfo'\\nok 71 - Checking l".
+	"egal package id and repository '_product:foo'\\nok 72 - Checking legal pa".
+	"ckage id and repository '_patchinfo:bar'\\nok 73 - Checking legal package".
+	" id and repository 'foo.bar'\\nok 74 - Checking illegal package id and re".
+	"pository ''\\nok 75 - Checking illegal package id and repository '\\\\n'\\no".
+	"k 76 - Checking illegal package id and repository '_pattern:foo'\\nok 77 ".
+	"- Checking illegal package id and repository '_project:foo'\\nok 78 - Che".
+	"cking illegal package id and repository 'foo:_foo'\\nok 79 - Checking ill".
+	"egal package id and repository '_foo'\\nok 80 - Checking illegal package ".
+	"id and repository '.test'\\nok 81 - Checking illegal package id and repos".
+	"itory '_product:.test'\\nok 82 - Checking illegal package id and reposito".
+	"ry 'foo\\\\nfoo'\\nok 83 - Checking illegal package id and repository 'foo\\".
+	"\\n'\\nok 84 - Checking illegal package id and repository 'xxxxxxxxxxxxxxx".
+	"xxxxxxxxxxxx...'\\nok 85 - Checking illegal package id and repository '0'".
+	"\\nok 86 - Checking illegal package id and repository 'undef'\\nok 87 - Ch".
+	"ecking legal filename 'foo'\\nok 88 - Checking legal filename 'foo.bar'\\n".
+	"ok 89 - Checking legal filename 'foo,bar'\\nok 90 - Checking illegal file".
+	"name ''\\nok 91 - Checking illegal filename '\\\\n'\\nok 92 - Checking illeg".
+	"al filename '.foobar'\\nok 93 - Checking illegal filename 'undef'\\nok 94 ".
+	"- Checking legal filename in service 'HASH(0x561153a22dd8)'\\nok 95 - Che".
+	"cking legal filename in service 'HASH(0x561153a22e98)'\\nok 96 - Checking".
+	" legal filename in service 'HASH(0x561153a22fd0)'\\nok 97 - Checking lega".
+	"l filename in service 'HASH(0x561153a23108)'\\nok 98 - Checking illegal f".
+	"ilename in service 'HASH(0x561153a23150)'\\nok 99 - Checking illegal file".
+	"name in service 'HASH(0x561153a23198)'\\nok 100 - Checking illegal filena".
+	"me in service 'HASH(0x561153a231e0)'\\nok 101 - Checking legal url 'http:".
+	"//www.suse.de'\\nok 102 - Checking legal url 'https://suse.de?nana=lalal&".
+	"...'\\nok 103 - Checking illegal url ''\\nok 104 - Checking illegal url 'f".
+	"oog_llaal_anana'\\nok 105 - Checking illegal url 'http://nana\\\\nlala'\\nok".
+	" 106 - Checking legal md5 'dabfc3276eceae1e09f46bbfe41...'\\nok 107 - Che".
+	"cking illegal md5 'dabfc3276eceae1e09f46bbfe41...'\\nok 108 - Checking il".
+	"legal md5 'dabfc3276eceae1e09f46bbfe41...'\\nok 109 - Checking illegal md".
+	"5 ''\\nok 110 - Checking legal srcmd5 'dabfc3276eceae1e09f46bbfe41...'\\no".
+	"k 111 - Checking legal srcmd5 '240f1cee336fc58642ecf36a717...'\\nok 112 -".
+	" Checking illegal srcmd5 'dabfc3276eceae1e09f46bbfe41...'\\nok 113 - Chec".
+	"king illegal srcmd5 'dabfc3276eceae1e09f46bbfe41...'\\nok 114 - Checking ".
+	"illegal srcmd5 '240f1cee336fc58642ecf36a717...'\\nok 115 - Checking illeg".
+	"al srcmd5 ''\\nok 116 - Checking illegal srcmd5 'dabfc3276eceae1e09f46bbf".
+	"e41...'\\nok 117 - Checking illegal srcmd5 '240f1cee336fc58642ecf36a717..".
+	".'\\nok 118 - Checking illegal srcmd5 'undef'\\nok 119 - Checking legal re".
+	"v 'dabfc3276eceae1e09f46bbfe41...'\\nok 120 - Checking legal rev '240f1ce".
+	"e336fc58642ecf36a717...'\\nok 121 - Checking legal rev 'upload'\\nok 122 -".
+	" Checking legal rev 'build'\\nok 123 - Checking legal rev 'latest'\\nok 12".
+	"4 - Checking legal rev 'repository'\\nok 125 - Checking legal rev '12345'".
+	"\\nok 126 - Checking illegal rev ''\\nok 127 - Checking illegal rev 'dabfc".
+	"3276eceae1e09f46bbfe41...'\\nok 128 - Checking illegal rev 'dabfc3276ecea".
+	"e1e09f46bbfe41...'\\nok 129 - Checking illegal rev '240f1cee336fc58642ecf".
+	"36a717...'\\nok 130 - Checking illegal rev 'foo'\\nok 131 - Checking illeg".
+	"al rev 'bar'\\nok 132 - Checking illegal rev ''\\nok 133 - Checking illega".
+	"l rev 'undef'\\nok 134 - Checking legal linkrev 'dabfc3276eceae1e09f46bbf".
+	"e41...'\\nok 135 - Checking legal linkrev '240f1cee336fc58642ecf36a717...".
+	"'\\nok 136 - Checking legal linkrev 'upload'\\nok 137 - Checking legal lin".
+	"krev 'build'\\nok 138 - Checking legal linkrev 'latest'\\nok 139 - Checkin".
+	"g legal linkrev 'repository'\\nok 140 - Checking legal linkrev '12345'\\no".
+	"k 141 - Checking legal linkrev 'base'\\nok 142 - Checking illegal linkrev".
+	" ''\\nok 143 - Checking illegal linkrev 'dabfc3276eceae1e09f46bbfe41...'\\".
+	"nok 144 - Checking illegal linkrev 'dabfc3276eceae1e09f46bbfe41...'\\nok ".
+	"145 - Checking illegal linkrev '240f1cee336fc58642ecf36a717...'\\nok 146 ".
+	"- Checking illegal linkrev 'foo'\\nok 147 - Checking illegal linkrev 'bar".
+	"'\\nok 148 - Checking illegal linkrev ''\\nok 149 - Checking illegal linkr".
+	"ev 'undef'\\nok 150 - Checking legal port '1025'\\nok 151 - Checking legal".
+	" port '65535'\\nok 152 - Checking legal port '65536'\\nok 153 - Checking i".
+	"llegal port 'abc'\\nok 154 - Checking illegal port '1023'\\nok 155 - Check".
+	"ing illegal port ''\\nok 156 - Checking illegal port 'undef'\\nok 157 - Ch".
+	"ecking legal number '1234'\\nok 158 - Checking legal number '123456789012".
+	"34567890'\\nok 159 - Checking illegal number 'a'\\nok 160 - Checking illeg".
+	"al number '1a1'\\nok 161 - Checking illegal number '-1'\\nok 162 - Checkin".
+	"g illegal number ''\\nok 163 - Checking illegal number 'undef'\\nok 164 - ".
+	"Checking legal integer number '-1'\\nok 165 - Checking legal integer numb".
+	"er '1234'\\nok 166 - Checking legal integer number '12345678901234567890'".
+	"\\nok 167 - Checking illegal integer number 'a'\\nok 168 - Checking illega".
+	"l integer number '1a1'\\nok 169 - Checking illegal integer number ''\\nok ".
+	"170 - Checking illegal integer number 'undef'\\nok 171 - Checking legal b".
+	"oolean '0'\\nok 172 - Checking legal boolean '1'\\nok 173 - Checking illeg".
+	"al boolean 'a'\\nok 174 - Checking illegal boolean '-1'\\nok 175 - Checkin".
+	"g illegal boolean 'true'\\nok 176 - Checking illegal boolean 'false'\\nok ".
+	"177 - Checking illegal boolean 'n'\\nok 178 - Checking illegal boolean 'y".
+	"'\\nok 179 - Checking illegal boolean 'j'\\nok 180 - Checking illegal bool".
+	"ean ''\\nok 181 - Checking illegal boolean 'undef'\\nok 182 - Checking leg".
+	"al project and repository 'openSUSE:Test/foo'\\nok 183 - Checking legal p".
+	"roject and repository 'foo/bar'\\nok 184 - Checking illegal project and r".
+	"epository 'openSUSE:.Test/foo'\\nok 185 - Checking illegal project and re".
+	"pository 'foo/.bar'\\nok 186 - Checking illegal project and repository 'f".
+	"oo_bar'\\nok 187 - Checking illegal project and repository ''\\nok 188 - C".
+	"hecking legal project, repository and arch 'openSUSE:Test/foo/x86_64'\\no".
+	"k 189 - Checking legal project, repository and arch 'foo/bar/i586'\\nok 1".
+	"90 - Checking illegal project, repository and arch 'openSUSE:.Test/foo/x".
+	"86_64'\\nok 191 - Checking illegal project, repository and arch 'foo/.bar".
+	"/x86_64'\\nok 192 - Checking illegal project, repository and arch 'foo_ba".
+	"r/x86_64'\\nok 193 - Checking illegal project, repository and arch 'openS".
+	"USE:Test/foo/foo:bar'\\nok 194 - Checking illegal project, repository and".
+	" arch 'openSUSE:Test/foo/foo;bar'\\nok 195 - Checking illegal project, re".
+	"pository and arch ''\\nok 196 - Checking legal resultview 'status'\\nok 19".
+	"7 - Checking legal resultview 'binarylist'\\nok 198 - Checking legal resu".
+	"ltview 'stats'\\nok 199 - Checking legal resultview 'versrel'\\nok 200 - C".
+	"hecking illegal resultview 'foo'\\nok 201 - Checking illegal resultview '".
+	"bar'\\nok 202 - Checking illegal resultview ''\\nok 203 - Checking illegal".
+	" resultview 'undef'\\nok 204 - Checking legal disableenable 'HASH(0x56115".
+	"3a268b0)'\\nok 205 - Checking illegal disableenable 'HASH(0x561153a26aa8)".
+	"'\\nok 206 - Checking illegal disableenable 'HASH(0x561153a26c58)'\\nok\\nt".
+	"/0002-BSSched-ProjPacks.t .................. \\n1..4\\nok 1 - use BSSched:".
+	":ProjPacks;\\nok 2 - Checking getconfig with no path\\nok 3 - Checking get".
+	"config with empty gctx parameters\\nok 4 - Checking getconfig with projpa".
+	"cks\\nok\\nt/0003-BSSched-BuildResult.t ................ \\n1..1\\nok 1 - re".
+	"quire BSSched::BuildResult;\\nok\\nt/0004-BSUtil.t .......................".
+	"...... \\n1..50\\nok 1 - require BSUtil;\\nok 2 - Checking combination ( re".
+	"po:disabled / x86_64 / 0 )\\nok 3 - Checking combination ( repo:disabled ".
+	"/ x86_64 / 1 )\\nok 4 - Checking combination ( repo:disabled / i586 / 0 )".
+	"\\nok 5 - Checking combination ( repo:disabled / i586 / 1 )\\nok 6 - Check".
+	"ing combination ( repo:enabled / x86_64 / 0 )\\nok 7 - Checking combinati".
+	"on ( repo:enabled / x86_64 / 1 )\\nok 8 - Checking combination ( repo:ena".
+	"bled / i586 / 0 )\\nok 9 - Checking combination ( repo:enabled / i586 / 1".
+	" )\\nok 10 - Checking combination ( repo:disabled / x86_64 / 0 )\\nok 11 -".
+	" Checking combination ( repo:disabled / x86_64 / 1 )\\nok 12 - Checking c".
+	"ombination ( repo:disabled / i586 / 0 )\\nok 13 - Checking combination ( ".
+	"repo:disabled / i586 / 1 )\\nok 14 - Checking combination ( repo:enabled ".
+	"/ x86_64 / 0 )\\nok 15 - Checking combination ( repo:enabled / x86_64 / 1".
+	" )\\nok 16 - Checking combination ( repo:enabled / i586 / 0 )\\nok 17 - Ch".
+	"ecking combination ( repo:enabled / i586 / 1 )\\nok 18 - Checking combina".
+	"tion ( repo:disabled / x86_64 / 0 )\\nok 19 - Checking combination ( repo".
+	":disabled / x86_64 / 1 )\\nok 20 - Checking combination ( repo:disabled /".
+	" i586 / 0 )\\nok 21 - Checking combination ( repo:disabled / i586 / 1 )\\n".
+	"ok 22 - Checking combination ( repo:enabled / x86_64 / 0 )\\nok 23 - Chec".
+	"king combination ( repo:enabled / x86_64 / 1 )\\nok 24 - Checking combina".
+	"tion ( repo:enabled / i586 / 0 )\\nok 25 - Checking combination ( repo:en".
+	"abled / i586 / 1 )\\nok 26 - BSUtil testing identical comparsion\\nok 27 -".
+	" BSUtil testing unidentical comparsion\\nok 28 - creating test directory\\".
+	"nok 29 - BSUtil::touch /tmp/BSUtil_test/BSUtil_touch_test\\nok 30 - BSUti".
+	"l::writestr testing\\nok 31 - BSUtil::readstr testing\\nok 32 - BSUtil::ap".
+	"pendstr testing\\nok 33 - BSUtil::readstr checking content after append\\n".
+	"ok 34 - BSUtil::cp testing\\nok 35 - BSUtil::writexml writing xml test fi".
+	"le\\nok 36 - BSUtil testing xml conversion to perl struct\\nok 37 - BSUtil".
+	" testing perl struct conversion to xml\\nok 38 - BSUtil opened /tmp/BSUti".
+	"l_test/BSUtil_touch_test with LOCK_EX flock()\\nok 39 - closed /tmp/BSUti".
+	"l_test/BSUtil_touch_test and freed lock\\nok 40 - Checking the content of".
+	" /tmp/BSUtil_test/\\nok 41 - Checking the content of /tmp/BSUtil_test/ af".
+	"ter cleaning\\nok 42 - Checking if BSUtil spots m\303\207gtig as non-utf8\\nok 4".
+	"3 - Checking if BSUtil converts m\303\207gtig to m\303\203\302\207gtig\\nok 44 - BSUtil tes".
+	"ting the printlog function without loglevel\\nok 45 - BSUtil testing the ".
+	"printlog function wih level 0\\nok 46 - BSUtil testing the printlog funct".
+	"ion wih level 1\\nok 47 - BSUtil testing the printlog function wih level ".
+	"2\\nok 48 - BSUtil testing the printlog function wih level 3\\nok 49 - BSu".
+	"til printlog should not print level 4\\nok 50 - BSutil printlog should no".
+	"t print level 5\\nok\\nt/0005-BSFileDB.t ........................... \\n1..".
+	"23\\nok 1 - require BSFileDB;\\nok 2 - BSFileDB creating test file /tmp/te".
+	"st_file_db and adding data\\nok 3 - BSFileDB inspecting data in /tmp/test".
+	"_file_db\\nok 4 - BSFileDB adding multiple data structs\\nok 5 - BSFileDB ".
+	"testing search in /tmp/test_file_db\\nok 6 - BSFileDB testing ambiguous s".
+	"earch for first matching entry in /tmp/test_file_db\\nok 7 - BSFileDB tes".
+	"ting ambiguous search for last matching entry in /tmp/test_file_db\\nok 8".
+	" - BSFileDB getting last entry\\nok 9 - Getting all entries from /tmp/tes".
+	"t_file_db\\nok 10 - Checking order\\nok 11 - Getting just some entries fro".
+	"m /tmp/test_file_db based on code ref\\nok 12 - Checking reverse order\\no".
+	"k 13 - BSFileDB adding first incremental entry (function fdb_add_i)\\nok ".
+	"14 - BSFileDB adding second incremental entry (function fdb_add_i)\\nok 1".
+	"5 - BSFileDB adding third incremental entry (function fdb_add_i)\\nok 16 ".
+	"- BSFileDB checking last incremented value\\nok 17 - BSFileDB adding firs".
+	"t incremental entry (function fdb_add_i2)\\nok 18 - BSFileDB adding secon".
+	"d incremental entry (function fdb_add_i2)\\nok 19 - BSFileDB checking rev".
+	" of second entry\\nok 20 - BSFileDB checking rev of second entry\\nok 21 -".
+	" BSFileDB adding third incremental entry (function fdb_add_i2)\\nok 22 - ".
+	"BSFileDB checking rev of second entry\\nok 23 - BSFileDB checking rev of ".
+	"second entry\\nok\\nt/0007-XML-Structured.t ..................... \\n1..50\\".
+	"nok 1 - use XML::Structured;\\nok 2 - Checking XMLin on test case (tc) 0\\".
+	"nok 3 - Checking XMLout on test case (tc) 0\\nok 4 - Checking XMLin on te".
+	"st case (tc) 1\\nok 5 - Checking XMLout on test case (tc) 1\\nok 6 - Check".
+	"ing XMLin on test case (tc) 2\\nok 7 - Checking XMLout on test case (tc) ".
+	"2\\nok 8 - Checking XMLin on test case (tc) 3\\nok 9 - Checking XMLout on ".
+	"test case (tc) 3\\nok 10 - Checking XMLin on test case (tc) 4\\nok 11 - Ch".
+	"ecking XMLout on test case (tc) 4\\nok 12 - Checking XMLin on test case (".
+	"tc) 5\\nok 13 - Checking XMLout on test case (tc) 5\\nok 14 - Checking XML".
+	"in on test case (tc) 6\\nok 15 - Checking XMLout on test case (tc) 6\\nok ".
+	"16 - Checking XMLin on test case (tc) 7\\nok 17 - Checking XMLout on test".
+	" case (tc) 7\\nok 18 - Checking unknown attribute\\nok 19 - Checking dupli".
+	"cate attribute\\nok 20 - Checking unknown element\\nok 21 - Checking missi".
+	"ng attribute in dtd\\nok 22 - Checking missing _content in dtd\\nok 23 - C".
+	"hecking using infile\\nok 24 - Checking missing infile\\nok 25 - Checking ".
+	"XMLin on test case (tc) 8\\nok 26 - Checking XMLout on test case (tc) 8\\n".
+	"ok 27 - Checking XMLin on test case (tc) 9\\nok 28 - Checking XMLout on t".
+	"est case (tc) 9\\nok 29 - Checking XMLin on test case (tc) 10\\nok 30 - Ch".
+	"ecking XMLout on test case (tc) 10\\nok 31 - Checking XMLin on test case ".
+	"(tc) 11\\nok 32 - Checking XMLout on test case (tc) 11\\nok 33 - Checking ".
+	"XMLin on test case (tc) 12\\nok 34 - Checking XMLout on test case (tc) 12".
+	"\\nok 35 - Checking XMLin on test case (tc) 13\\nok 36 - Checking XMLout o".
+	"n test case (tc) 13\\nok 37 - Checking XMLin on test case (tc) 14\\nok 38 ".
+	"- Checking XMLout on test case (tc) 14\\nok 39 - Checking XMLin on test c".
+	"ase (tc) 15\\nok 40 - Checking XMLout on test case (tc) 15\\nok 41 - Check".
+	"ing unknown attribute\\nok 42 - Checking duplicate attribute\\nok 43 - Che".
+	"cking unknown element\\nok 44 - Checking missing attribute in dtd\\nok 45 ".
+	"- Checking missing _content in dtd\\nok 46 - Checking using infile\\nok 47".
+	" - Checking missing infile\\nok 48 - Checking XMLout without data hash\\no".
+	"k 49 - Checking XMLout with empty data and dtd\\nok 50 - Checking XMLout ".
+	"with empty dtd and to much data keys\\nok\\nt/0008-XML-Structured-_choosep".
+	"arser-1.t ..... \\n1..1\\nok 1 - Checking _chooseparser with XML::SAX\\nok\\".
+	"nt/0008-XML-Structured-_chooseparser-2.t ..... \\n1..1\\nok 1 - Checking w".
+	"ithout parser module\\nok\\nt/0008-XML-Structured-_chooseparser-3.t ..... ".
+	"\\n1..1\\nok 1 - Checking _chooseparser with XML::Parser\\nok\\nt/0010-BSSch".
+	"ed-BuildRepo.t .................. \\n1..5\\nok 1 - require BSSched::BuildR".
+	"epo;\\nok 2 - Checking without fctx\\nok 3 - Checking empty lastmeta\\nok 4".
+	" - Checking non existent\\nok 5 - Checking lastmeta with content\\nok\\nt/0".
+	"013-BSSched-Checker.t .................... \\n1..1\\nok 1 - use BSSched::C".
+	"hecker;\\nok\\nt/0014-BSSched-EventHandler.t ............... \\n1..1\\nok 1 ".
+	"- use BSSched::EventHandler;\\nok\\nt/0015-BSSched-EventSource-Directory.t".
+	" ...... \\n1..16\\nok 1 - use BSSched::EventSource::Directory;\\nok 2 - Che".
+	"cking sendevent for x86_64\\nok 3 - Checking sendevent for i586\\nok 4 - C".
+	"hecking error message for broken xml\\nok 5 - Checking readevents (arch: ".
+	"x86_64)\\nok 6 - Checking if broken file was delete\\nok 7 - Checking read".
+	"events (arch: i586)\\nok 8 - Checking ping for x86_64\\nok 9 - Checking pi".
+	"ng for i586\\nok 10 - Checking sendevent for broken_ping_arch\\nok 11 - Ch".
+	"ecking sendevent for broken_ping_arch with overlength event name\\nok 12 ".
+	"- Checking sendrepochangeevent without type\\nok 13 - Checking sendrepoch".
+	"angeevent\\nok 14 - Checking sendunblockedevent\\nok 15 - Checking sendpub".
+	"lishevent\\nok 16 - Checking sendimportevent\\nok\\nt/0016-BSSched-EventSou".
+	"rce-Retry.t .......... \\n1..21\\nok 1 - use BSSched::EventSource::Retry;\\".
+	"nok 2 - Checking queue initialization\\nok 3 - Checking events method\\nok".
+	" 4 - Checking with event type repository (home:M0ses/openSUSE_13.2)\\nok ".
+	"5 - Checking with event type recheck (home:M0ses/openSUSE_13.2)\\nok 6 - ".
+	"Checking with event type recheck (home:M0ses:new/openSUSE_13.2)\\nok 7 - ".
+	"Retrying with event type recheck (home:M0ses:new/openSUSE_13.2)\\nok 8 - ".
+	"Checking with event type repository (home:M0ses:perl/openSUSE_13.2)\\nok ".
+	"9 - Retrying with event type repository (home:M0ses:perl/openSUSE_13.2)\\".
+	"nok 10 - Checking with event type package (home:M0ses:perl/openSUSE_13.2".
+	")\\nok 11 - Retrying with event type package (home:M0ses:perl/openSUSE_13".
+	".2)\\nok 12 - Checking with event type foo (home:M0ses:perl/openSUSE_13.2".
+	")\\nok 13 - Retrying with event type foo (home:M0ses:perl/openSUSE_13.2)\\".
+	"nok 14 - Checking with event type repository (home:M0ses:perl/openSUSE_L".
+	"eap_42.1)\\nok 15 - Retrying with event type repository (home:M0ses:perl/".
+	"openSUSE_Leap_42.1)\\nok 16 - Checking with event type package (home:M0se".
+	"s:perl/openSUSE_Leap_42.1)\\nok 17 - Retrying with event type package (ho".
+	"me:M0ses:perl/openSUSE_Leap_42.1)\\nok 18 - Checking with event type pack".
+	"age (home:M0ses:perl/openSUSE_Leap_42.1)\\nok 19 - Retrying with event ty".
+	"pe package (home:M0ses:perl/openSUSE_Leap_42.1)\\nok 20 - Checking due me".
+	"thod\\nok 21 - Checking that due method removed entries from the queue\\no".
+	"k\\nt/0017-BSSched-EventQueue.t ................. \\n1..13\\nok 1 - use BSS".
+	"ched::EventQueue;\\nok 2 - Creating EventQueue\\nok 3 - Testing return val".
+	"ue of add_events\\nok 4 - Testing return value of method order\\nok 5 - Ch".
+	"ecking sorted events\\nok 6 - Checking counter of events in queue\\nok 7 -".
+	" Checking if queue is empty after processing\\nok 8 - Checking output one".
+	" unknown event\\nok 9 - Checking empty event queue\\nok 10 - Checking outp".
+	"ut of process_one with empty event\\nok 11 - Checking output of one unkno".
+	"wn event on initialstartup\\nok 12 - Checking output of exit event on ini".
+	"tialstartup\\nok 13 - Checking output of exitcomplete event on initialsta".
+	"rtup\\nok\\nt/0018-BSSched-EventQueue-real_data.t ....... \\n1..2\\nok 1 - u".
+	"se BSSched::EventQueue;\\nok 2 - Checking number of events in queue\\nok\\n".
+	"t/0020-BSXPath.t ............................ \\n1..34\\nok 1 - 4*1024\\nok".
+	" 2 - 5 < 1\\nok 3 - (4 + 5) * 2 = 18\\nok 4 - 5 or 0\\nok 5 - 5 and 0\\nok 6".
+	" - not(\\\"\\\")\\nok 7 - not(\\\"foo\\\")\\nok 8 - 0 or 3\\nok 9 - 2 or 3\\nok 10 -".
+	" 0 or 0\\nok 11 - 2 or 0\\nok 12 - \\\"\\\" or \\\"foo\\\"\\nok 13 - \\\"bar\\\" or \\\"f".
+	"oo\\\"\\nok 14 - 0 and 3\\nok 15 - 2 and 3\\nok 16 - 0 and 0\\nok 17 - 2 and 0".
+	"\\nok 18 - \\\"\\\" and \\\"foo\\\"\\nok 19 - \\\"bar\\\" and \\\"foo\\\"\\nok 20 - 1 or 2 ".
+	"and 0\\nok 21 - 1 - 1 - 1\\nok 22 - 1 + 2 * 3\\nok 23 - 2 * -2\\nok 24 - 7 =".
+	" 1 + 2 * 3\\nok 25 - 5 mod 2\\nok 26 - string(1 and 0)\\nok 27 - number(1 a".
+	"nd 0)\\nok 28 - concat(\\\"foo\\\", \\\"bar\\\", \\\"baz\\\")\\nok 29 - fruits/fruit[n".
+	"ame=\\\"grape\\\"]/color=\\\"green\\\"\\nok 30 - fruits/fruit[name=\\\"grape\\\"]/col".
+	"or!=\\\"green\\\"\\nok 31 - fruits/fruit[starts-with(name,\\\"a\\\")]/name\\nok 32".
+	" - fruits/fruit[not(xxx)]/name\\nok 33 - fruits/fruit[starts-with(name,\\\"".
+	"a\\\") and not(contains(name,\\\"as\\\"))]/name\\nok 34 - string(fruits/fruit[n".
+	"ame=\\\"grape\\\"]/color)\\nok\\nt/0021-BSXPathKeys.t ........................".
+	" \\n1..5\\nok 1 - fruits/fruit[name=\\\"grape\\\"]/color=\\\"green\\\"\\nok 2 - fru".
+	"its/fruit[name=\\\"grape\\\"]/color!=\\\"green\\\"\\nok 3 - fruits/fruit[starts-w".
+	"ith(name,\\\"a\\\")]/name\\nok 4 - fruits/fruit[not(xxx)]/name\\nok 5 - fruits".
+	"/fruit[starts-with(name,\\\"a\\\") and not(contains(name,\\\"as\\\"))]/name\\nok\\".
+	"nt/0100-BSSched-BuildJob.t ................... \\n1..13\\nok 1 - require B".
+	"SSched::BuildJob;\\nok 2 - Checking content in packstatus.finished\\nok 3 ".
+	"- Checking content in packstatus.finished\\nok 4 - Checking sortedmd5tore".
+	"ason\\nok 5 - Checking sortedmd5toreason\\nok 6 - Checking sortedmd5toreas".
+	"on\\nok 7 - Checking testcase 1 TODO: better description\\nok 8 - Checking".
+	" with _obsrepositories and prpsearchpath\\nok 9 - Checking with _obsrepos".
+	"itories w/o prpsearchpath\\nok 10 - Checking empty \$info->{path} element\\".
+	"nok 11 - Checking jobname normal length\\nok 12 - Checking jobname oversi".
+	"zed packid\\nok 13 - Checking jobname oversized prp\\nok\\nt/0110-BSSched-B".
+	"uildJob-Aggregate.t ......... \\n1..1\\nok 1 - use BSSched::BuildJob::Aggr".
+	"egate;\\nok\\nt/0120-BSSched-BuildJob-Channel.t ........... \\n1..1\\nok 1 -".
+	" use BSSched::BuildJob::Channel;\\nok\\nt/0130-BSSched-BuildJob-DeltaRpm.t".
+	" .......... \\n1..1\\nok 1 - use BSSched::BuildJob::DeltaRpm;\\nok\\nt/0140-".
+	"BSSched-BuildJob-Import.t ............ \\n1..1\\nok 1 - use BSSched::Build".
+	"Job::Import;\\nok\\nt/0150-BSSched-BuildJob-KiwiImage.t ......... \\n1..1\\n".
+	"ok 1 - use BSSched::BuildJob::KiwiImage;\\nok\\nt/0160-BSSched-BuildJob-Ki".
+	"wiProduct.t ....... \\n1..7\\nok 1 - use BSSched::BuildJob::KiwiProduct;\\n".
+	"2021-10-24 06:19:43: [4094]  calculating project dependencies...\\nsortin".
+	"g projects and repositories...\\nhave 3 related prp dependencies\\nsetup_p".
+	"rojects done, 0.000s + 0.001s + 0.006s\\nget_projpacks_postprocess done, ".
+	"0.007s + 0.000s\\nok 2 - checker setup call\\nok 3 - checker preparepool c".
+	"all\\nok 4 - expander\\nok 5 - check call\\nok 6 - build call\\nok 7 - kiwi ".
+	"product build job\\nok\\nt/0170-BSSched-BuildJob-Package.t ........... \\n1".
+	"..9\\nok 1 - use BSSched::BuildJob::Package;\\nok 2 - use BSSched::ProjPac".
+	"ks;\\n2021-10-24 06:19:44: [4106]  calculating project dependencies...\\ns".
+	"orting projects and repositories...\\nsetup_projects done, 0.000s + 0.000".
+	"s + 0.000s\\nget_projpacks_postprocess done, 0.000s + 0.000s\\nok 3 - chec".
+	"ker setup call\\nok 4 - checker preparepool call\\nok 5 - expander\\nok 6 -".
+	" check call\\nok 7 - build call\\nok 8 - buildinfo for screen\\nok 9 - reas".
+	"on for build\\nok\\nt/0180-BSSched-BuildJob-Patchinfo.t ......... \\n1..1\\n".
+	"ok 1 - use BSSched::BuildJob::Patchinfo;\\nok\\nt/0190-BSSched-BuildJob-Pr".
+	"eInstallImage.t ... \\n1..1\\nok 1 - use BSSched::BuildJob::PreInstallImag".
+	"e;\\nok\\nt/0200-BSSched-BuildJob-SimpleImage.t ....... \\n1..1\\nok 1 - use".
+	" BSSched::BuildJob::SimpleImage;\\nok\\nt/0210-BSSched-BuildJob-Unknown.t ".
+	"........... \\n1..5\\nok 1 - require BSSched::BuildJob::Unknown;\\nok 2 - C".
+	"hecking object generation with new\\nok 3 - Checking result of \$job->chec".
+	"k()\\nok 4 - Checking result of \$job->build()\\nok 5 - Checking result of ".
+	"\$job->expand()\\nok\\nt/0220-BSSched-BuildJob-Upload.t ............ \\n1..1".
+	"\\nok 1 - use BSSched::BuildJob::Upload;\\nok\\nt/0230-BSDispatcher-Constra".
+	"ints.t ........... \\n1..8\\nok 1 - use BSDispatcher::Constraints;\\nok 2 -".
+	" use BSXML;\\nok 3 - use BSUtil;\\nok 4 - Testing non compliant worker\\nok".
+	" 5 - Testing compliant worker\\nok 6 - Testing real MB size calculation\\n".
+	"ok 7 - Checking list2struct conversion\\nok 8 - Checking constraint mergi".
+	"ng\\nok\\nt/0300-BSRepServer.t ........................ \\n1..1\\nok 1 - use".
+	" BSRepServer;\\nok\\nt/0310-BSRepServer-BuildInfo_use.t .......... \\n1..1\\".
+	"nok 1 - require BSRepServer::BuildInfo;\\nok\\nt/0320-BSRepServer-Checker.".
+	"t ................ \\n1..1\\nok 1 - require BSRepServer::Checker;\\nok\\nt/0".
+	"360-BSRepServer-BuildInfo-Package.t ...... \\n1..3\\nok 1 - use BSRepServe".
+	"r::BuildInfo;\\nok 2 - buildinfo for screen\\nfetching remote repository s".
+	"tate for openSUSE.org:OBS:Server:Unstable/openSUSE_42.1/x86_64\\nfetching".
+	" remote repository state for openSUSE.org:openSUSE:Leap:42.1/standard/x8".
+	"6_64\\nok 3 - buildinfo for regular Package with remotemap\\nok\\nt/0370-BS".
+	"RepServer-BuildInfo-KiwiImage.t .... \\n1..3\\nok 1 - use BSRepServer::Bui".
+	"ldInfo;\\nok 2 - buildinfo for Kiwi Image\\nfetching remote repository sta".
+	"te for openSUSE.org:openSUSE:Leap:42.1:Update/standard/x86_64\\nfetching ".
+	"remote repository state for openSUSE.org:openSUSE:Leap:42.1/standard/x86".
+	"_64\\nok 3 - buildinfo for Kiwi Image with remotemap\\nok\\nt/0380-BSRepSer".
+	"ver-BuildInfo-KiwiProduct.t .. \\n1..2\\nok 1 - use BSRepServer::BuildInfo".
+	";\\nfetching remote repository state for openSUSE.org:OBS:Server:2.7/open".
+	"SUSE_42.1/x86_64\\nfetching remote repository state for openSUSE.org:open".
+	"SUSE:Tools/openSUSE_42.1/x86_64\\nfetching remote repository state for op".
+	"enSUSE.org:openSUSE:Leap:42.1/standard/x86_64\\nfetching remote project b".
+	"inary state for openSUSE.org:OBS:Server:2.7/openSUSE_42.1/x86_64\\nfetchi".
+	"ng remote project binary state for openSUSE.org:openSUSE:Tools/openSUSE_".
+	"42.1/x86_64\\nfetching remote project binary state for openSUSE.org:openS".
+	"USE:Leap:42.1/standard/x86_64\\nok 2 - buildinfo for Kiwi Product with re".
+	"motemap\\nok\\nt/0500-BSSrcServer-Partition.t .............. \\n1..3\\nok 1 ".
+	"- use BSSrcServer::Partition;\\nok 2 - Check die if partition cannot be d".
+	"etermined\\nok 3 - Check if checkpartition runs without errors\\nok\\nt/090".
+	"0-BSUrlmapper.t ........................ \\n1..2\\nok 1 - use BSUrlmapper;".
+	"\\nok 2 - Checking download url\\nok\\nAll tests successful.\\nFiles=44, Tes".
+	"ts=537,  8 wallclock secs ( 0.24 usr  0.08 sys +  6.72 cusr  1.04 csys =".
+	"  8.08 CPU)\\nResult: PASS\\nmake: Leaving directory '/tmp/open-build-serv".
+	"ice/src/backend'\\n\"}]},\"prepare\":{\"code\":0,\"message\":\"Nothing to do!\"}}",
+           state  => 'succeed'
+         };

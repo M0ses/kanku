@@ -1,0 +1,54 @@
+tasks:
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      domain_name: kanku-devel-fedora
+      login_user: root
+      login_pass: kankudai
+      host_interface: eth0
+  -
+    use_module: Kanku::Handler::OBSCheck
+    options:
+      api_url: https://api.opensuse.org/public
+      project: devel:kanku:images
+      repository: images_fedora_34
+      package: Fedora-34
+  -
+    use_module: Kanku::Handler::ImageDownload
+  -
+    use_module: Kanku::Handler::CleanupIPTables
+  -
+    use_module: Kanku::Handler::RemoveDomain
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 4G
+      vcpu: 2
+      use_9p: 1
+      management_interface: lan0
+      installation:
+        -
+          expect: Fedora
+          send_enter: 1
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::PortForward
+    options:
+      forward_port_list: tcp:22
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - ip link set lan0 mtu 1450
+        - echo -en "DEVICE=lan0\nBOOTPROTO=dhcp\nONBOOT=yes\nMTU=1450\n" >> /etc/sysconfig/network-scripts/ifcfg-lan0
+        - curl https://download.opensuse.org/repositories/devel:/kanku:/staging/Fedora_34/devel:kanku:staging.repo > /etc/yum.repos.d/devel:kanku:staging.repo
+        - curl https://download.opensuse.org/repositories/devel:/kanku:/perl/Fedora_34/devel:kanku:perl.repo > /etc/yum.repos.d/devel:kanku:perl.repo
+        - dnf -y update
+        - dnf -y install kanku
+        - rm  /etc/libvirt/qemu/networks/autostart/default.xml
+        - kanku setup --devel --user kanku --apiurl https://api.opensuse.org/public/
+  -
+    use_module: Kanku::Handler::CleanupIPTables
+  -
+    use_module: Kanku::Handler::RemoveDomain

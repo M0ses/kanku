@@ -1,0 +1,6 @@
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - ip link set eth0 mtu 1450
+        - echo "MTU=1450" >> /etc/sysconfig/network/ifcfg-eth0
+        - netconfig update -f

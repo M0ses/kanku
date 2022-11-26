@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 9,
+           job_id => 2,
+           name   => 'Kanku::Handler::OBSCheck',
+           result => '{"execute":{"state":"succeed","code":0,"message":"Sucessfully checked project OBS:Server:Unstable under url https://api.opensuse.org/public\\n (vm_image_url: http://download.opensuse.org/repositories/OBS:/Server:/Unstable/images/obs-server.x86_64-2.10.51-qcow2-Build12.846.qcow2, obs_direct_url: https://api.opensuse.org/public/build/OBS:Server:Unstable/images/x86_64/OBS-Appliance:qcow2?view=cpio)"},"finalize":{"message":"Nothing to do!","code":0},"prepare":{"message":"Preparation finished successfully","state":"succeed"}}',
+           state  => 'succeed'
+         };

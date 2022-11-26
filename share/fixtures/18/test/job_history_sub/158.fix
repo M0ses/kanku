@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 158,
+           job_id => 21,
+           name   => 'Kanku::Handler::CreateDomain',
+           result => '{"prepare":{"message":"Nothing todo","code":0},"finalize":{"message":"Nothing to do!","code":0},"execute":{"message":"Create domain dki-opensuse-15-3 (192.168.199.144) successfully","code":0}}',
+           state  => 'succeed'
+         };

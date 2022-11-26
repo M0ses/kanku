@@ -1,0 +1,21 @@
+$HASH1 = {
+           args     => undef,
+           creation_time
+                    => 1635159703,
+           end_time => 1635159909,
+           id       => 34,
+           last_modified
+                    => 1635159754,
+           masterinfo
+                    => 6245,
+           name     => 'dki-opensuse-15_0',
+           pwrand   => undef,
+           result   => undef,
+           start_time
+                    => 0,
+           state    => 'failed',
+           trigger_user
+                    => undef,
+           workerinfo
+                    => 'localhost:6240:none'
+         };

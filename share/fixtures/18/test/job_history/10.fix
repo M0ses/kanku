@@ -1,0 +1,21 @@
+$HASH1 = {
+           args     => undef,
+           creation_time
+                    => 1635142931,
+           end_time => 1635143004,
+           id       => 10,
+           last_modified
+                    => 1635143004,
+           masterinfo
+                    => 21901,
+           name     => 'test',
+           pwrand   => undef,
+           result   => '{"error_message":"Can\'t read /etc/kanku/jobs/test.yml: No such file or directory at /usr/lib/kanku/lib/Kanku/Roles/Config.pm line 146.\\n"}',
+           start_time
+                    => 0,
+           state    => 'failed',
+           trigger_user
+                    => undef,
+           workerinfo
+                    => 'localhost:1102:none'
+         };

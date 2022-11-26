@@ -53,6 +53,16 @@ __PACKAGE__->table("job_history_sub");
   data_type: 'text'
   is_nullable: 1
 
+=head2 start_time
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=head2 end_time
+
+  data_type: 'integer'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -66,6 +76,10 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "result",
   { data_type => "text", is_nullable => 1 },
+  "start_time",
+  { data_type => "integer", is_nullable => 1 },
+  "end_time",
+  { data_type => "integer", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY

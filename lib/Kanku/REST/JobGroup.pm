@@ -25,6 +25,12 @@ sub trigger {
     }
   }
 
+  my $jgd = {
+    name => $name,
+    creation_time  => time(),
+  };
+  my $job_group = $self->rset('JobGroup')->create($jgd);
+
   my @prev_jobs;
   my $jg_count=0;
   for my $jg (@jobs_to_trigger) {
@@ -36,6 +42,7 @@ sub trigger {
         state         => 'triggered',
         creation_time => time(),
 	wait_for      => \@wait_for,
+	job_group_id  => $job_group->id,
       };
       my $job_id = $self->rset('JobHistory')->create($jd);
       push @$pj, $job_id;

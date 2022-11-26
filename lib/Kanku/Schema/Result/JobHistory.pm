@@ -85,6 +85,13 @@ __PACKAGE__->table("job_history");
 
 =cut
 
+=head2 job_group_id
+
+  data_type: 'integer'
+  is_nullable: 1
+
+=cut
+
 __PACKAGE__->add_columns(
   "id",
   { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
@@ -112,6 +119,8 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "pwrand",
   { data_type => "text", is_nullable => 1 },
+  "job_group_id",
+  { data_type => "integer", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -159,10 +168,17 @@ __PACKAGE__->has_many(
   { "foreign.job_id" => "self.id" },
 );
 
+__PACKAGE__->belongs_to(
+  "job_group",
+  "Kanku::Schema::Result::JobGroup",
+  { "foreign.id" => "self.job_group_id" },
+);
+
+
 sub TO_JSON {
   my $self = shift;
   my $rv = {};
-  for my $col (qw/id name state args result creation_time start_time end_time last_modified workerinfo masterinfo/) {
+  for my $col (qw/id name state args result creation_time start_time end_time last_modified workerinfo masterinfo job_group_id/) {
     $rv->{$col} = $self->$col();
   }
 

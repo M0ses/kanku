@@ -84,6 +84,8 @@ sub list {
 
   while ( my $ds = $rs->next ) {
     my $data = $ds->TO_JSON();
+use Data::Dumper;
+$self->log('debug', Dumper($data));
 
     if ($allow_comments) {
       $data->{comments} = [];

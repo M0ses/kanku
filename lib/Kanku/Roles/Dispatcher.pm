@@ -254,8 +254,16 @@ sub get_todo_list {
   my $self    = shift;
   my $schema  = $self->schema;
   my $todo = [];
+  my $job_groups = {};
+  my $job_groups_id = {};
   my $rs = $schema->resultset('JobHistory')->search({state=>['scheduled','triggered']},{ order_by => { -asc => 'creation_time' }} );
+  my $groups = $schema->resultset('JobGroup')->search({start_time=>{'>'=>0},end_time=>0},{ order_by => { -asc => 'creation_time' }} );
 
+  while (my $group = $groups->next) {
+    $job_groups->{$group->name} = [] unless  $job_groups->{$group->name};
+    push @{$job_groups->{$group->name}}, $group->id;
+    $job_groups_id->{$group->id} = $group->name;
+  }
 
   JOB: while ( my $ds = $rs->next )   {
     my @awf; # all wait for
@@ -266,6 +274,14 @@ sub get_todo_list {
         $self->logger->debug("Job ".$ds->id." is still waiting for Job ".$njwf->id);
 	next JOB;
       }
+    }
+    my $jg_id = $ds->job_group_id;
+    if ($jg_id) {
+      my $jg_name = $ds->job_group->name;
+      $self->logger->debug("Job Group Name: $jg_name");
+      my @running_groups = grep { $_ != $jg_id } @{$job_groups->{$jg_name}};
+      $self->logger->debug("Running Groups: @running_groups");
+      next JOB if (@running_groups);
     }
     push (
       @$todo,
@@ -278,6 +294,7 @@ sub get_todo_list {
         scheduled    => ( $ds->state eq 'scheduled' ) ? 1 : 0,
         triggered    => ( $ds->state eq 'triggered' ) ? 1 : 0,
         trigger_user => $ds->trigger_user,
+	job_group_id => $ds->job_group_id,
       )
     );
   }
@@ -289,10 +306,20 @@ sub start_job {
   my ($self,$job) = @_;
 
   $self->logger->debug("Starting job: ".$job->name." (".$job->id.")");
-
-  $job->start_time(time());
+  my $stime = time();
+  $job->start_time($stime);
   $job->state("running");
   $job->update_db();
+  if (my $jgid = $job->job_group_id) {
+    my $group = $self->schema->resultset('JobGroup')->find({id=>$jgid});
+    if (!$group->start_time) {
+      $self->logger->debug("Setting Job Group start_time to $stime");
+      $group->start_time($stime);
+      $group->update;
+    }
+  } else {
+    $self->logger->debug("No Job Group found");
+  }
 }
 
 sub end_job {
@@ -310,6 +337,25 @@ sub end_job {
   }
 
   $self->logger->debug("Finished job: ".$job->name." (".$job->id.") with state '".$job->state."'");
+  my $jgid = $job->job_group_id;
+  if ($jgid) {
+     my $schema  = $self->schema;
+     my $remaining_jobs = $schema->resultset('JobHistory')->search(
+       { 
+	 job_group_id => $job->job_group_id,
+	 state=>{-not_in=>['succeed','failed','skipped']},
+       }
+     );
+     if (! $remaining_jobs->count) {
+       my $group = $schema->resultset('JobGroup')->find({id=>$job->job_group_id});
+       $group->end_time(time());
+       $group->update;
+     } else {
+       $self->logger->debug("Found Remaining Jobs: ".$remaining_jobs->count);
+     }
+  } else{
+    $self->logger->debug("No Job Group ID found");
+  }
 }
 
 sub clean_up_wait_for {

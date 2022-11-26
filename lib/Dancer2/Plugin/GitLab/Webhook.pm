@@ -19,14 +19,15 @@ plugin_keywords 'require_webhook_secret';
 sub require_webhook_secret {
     my $plugin  = shift;
     my $coderef = pop;
-    my $routes  = $plugin->routes() || $plugin->dsl->log( error => 'No routes given!' );
+    my $routes  = $plugin->routes();
+    $plugin->dsl->log( error => 'No routes given! Check your dancer config.yml' ) unless $routes;
 
     return sub {
         my $x_gitlab_token = $plugin->dsl->request_header('X-Gitlab-Token')
             or return $plugin->dsl->send_error( "No X-Gitlab-Token found", 403 );
 
 	my $path = $plugin->app->request->path;
-	for my $exp (keys %{$routes}) {
+	for my $exp (keys %{$routes||{}}) {
 	  if ($path =~ /$exp/ ) {
 	    my @tokens = (ref $routes->{$exp} eq 'ARRAY') ? @{$routes->{$exp}} : ($routes->{$exp});
 	    for my $token (@tokens) {

@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 63,
+           job_id => 7,
+           name   => 'Kanku::Handler::WaitForSystemd',
+           result => '{"execute":{"code":0,"message":"Startup of systemd successfully finished on domain obs-server"},"prepare":{"message":"Using login_user: root","code":0},"finalize":{"message":"Nothing to do!","code":0}}',
+           state  => 'succeed'
+         };

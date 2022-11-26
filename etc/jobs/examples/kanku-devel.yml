@@ -1,0 +1,56 @@
+tasks:
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      domain_name: kanku-devel
+      login_user: root
+      login_pass: kankudai
+      host_interface: eth0
+  -
+    use_module: Kanku::Handler::OBSCheck
+    options:
+      api_url: https://api.opensuse.org/public
+      project: devel:kanku:images
+      repository: images_leap_15_4
+      package: openSUSE-Leap-15.4-JeOS
+  -
+    use_module: Kanku::Handler::ImageDownload
+  -
+    use_module: Kanku::Handler::RemoveDomain
+  -
+    use_module: Kanku::Handler::CleanupIPTables
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 2G
+      vcpu: 2
+      use_9p: 1
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::PortForward
+    options:
+      forward_port_list: tcp:22
+  - !include include.d/mtu-1450.yml
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - zypper -n ar https://download.opensuse.org/distribution/leap/15.4/repo/oss/ openSUSE:Leap:OSS
+        - zypper -n ar https://download.opensuse.org/update/leap/15.4/oss/openSUSE:Leap:15.4:Update.repo
+        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/perl/15.4/devel:kanku:perl.repo
+        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/staging/15.4/devel:kanku:staging.repo
+        - zypper -n --gpg-auto-import-keys ref -s
+        - zypper -n in kanku-cli
+        - kanku setup --devel --user kanku --apiurl https://api.opensuse.org/public/ --osc_user admin --osc_pass admin
+  -
+    use_module: Kanku::Handler::CleanupIPTables
+  -
+    use_module: Kanku::Handler::RemoveDomain
+notifiers:
+  -
+    use_module: Kanku::Notifier::NSCAng
+    options:
+      send_report:
+        service: kanku-devel
+    states: failed,succeed

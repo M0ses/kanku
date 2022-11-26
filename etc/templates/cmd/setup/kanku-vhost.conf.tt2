@@ -7,7 +7,9 @@
         SSLEngine on
         SSLCertificateFile /etc/apache2/ssl.crt/server.crt
         SSLCertificateKeyFile /etc/apache2/ssl.key/server.key
-#        SSLCertificateChainFile /etc/apache2/ssl.crt/chain.crt
+[% IF chainfile %]
+        SSLCertificateChainFile [% chainfile %]
+[% END %]
         CustomLog /var/log/apache2/ssl_request_log   ssl_combined
 </VirtualHost>
 </IfDefine>

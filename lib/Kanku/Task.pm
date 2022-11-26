@@ -102,9 +102,10 @@ sub run {
                     );
 
   my $task = $schema->resultset('JobHistorySub')->create({
-    job_id  => $job->id,
-    name    => $handler,
-    state   => 'running'
+    job_id     => $job->id,
+    name       => $handler,
+    state      => 'running',
+    start_time => time(),
   });
 
 
@@ -166,8 +167,9 @@ sub run {
   };
 
   $task->update({
-    state => $state,
-    result => $result
+    state    => $state,
+    result   => $result,
+    end_time => time(),
   });
 
   $job->update_db();
