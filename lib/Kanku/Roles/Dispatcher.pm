@@ -257,17 +257,11 @@ sub get_todo_list {
   my $job_groups = {};
   my $job_groups_id = {};
   my $rs = $schema->resultset('JobHistory')->search({state=>['scheduled','triggered']},{ order_by => { -asc => 'creation_time' }} );
-  my $groups = $schema->resultset('JobGroup')->search({start_time=>{'>'=>0},end_time=>0},{ order_by => { -asc => 'creation_time' }} );
-
-  while (my $group = $groups->next) {
-    $job_groups->{$group->name} = [] unless  $job_groups->{$group->name};
-    push @{$job_groups->{$group->name}}, $group->id;
-    $job_groups_id->{$group->id} = $group->name;
-  }
 
   JOB: while ( my $ds = $rs->next )   {
     my @awf; # all wait for
     my $wait_for = $ds->wait_for();
+
     while (my $jwf = $wait_for->next) {
       my $njwf = $jwf->wait_for;
       if ($njwf->state =~ /^(scheduled|triggered|running|dispatching)$/) {
@@ -275,14 +269,27 @@ sub get_todo_list {
 	next JOB;
       }
     }
+
+    # Check if another job_group is running with the same job group
+    # name
     my $jg_id = $ds->job_group_id;
     if ($jg_id) {
-      my $jg_name = $ds->job_group->name;
-      $self->logger->debug("Job Group Name: $jg_name");
-      my @running_groups = grep { $_ != $jg_id } @{$job_groups->{$jg_name}};
-      $self->logger->debug("Running Groups: @running_groups");
-      next JOB if (@running_groups);
+      my $current_group = $schema->resultset('JobGroup')->find($jg_id);
+      my $groups = $schema->resultset('JobGroup')->search(
+        {
+          id         => {"!=" => $jg_id},
+          name       => $current_group,
+          start_time => {'>'=>0},
+          end_time   => 0,
+        },
+        {
+          order_by => { -asc => 'creation_time' }
+        },
+      );
+
+      next JOB if ($groups->count);
     }
+
     push (
       @$todo,
       Kanku::Job->new(
