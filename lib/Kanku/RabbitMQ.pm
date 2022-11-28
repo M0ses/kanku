@@ -318,7 +318,7 @@ sub reconnect {
 
   $self->connect;
 
-  $self->queue_name(q{}) if $self->queue_name =~ /^amq\./;
+  $self->queue_name(q{}) if (($self->queue_name||q{}) =~ /^amq\./);
 
   try {
     $self->create_queue;
