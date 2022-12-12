@@ -5,6 +5,7 @@ use Net::AMQP::RabbitMQ;
 use Data::Dumper;
 use JSON::XS;
 use Log::Log4perl;
+use Try::Tiny;
 use Kanku::Config;
 
 with 'Kanku::Roles::Logger';
@@ -121,41 +122,54 @@ sub wait_for_events {
   my $wait_for_publisher = {};
   my $triggers = $self->normalize_trigger_config();
 
-  $logger->info("Waiting for events.");
+  $logger->info("Waiting for events with routing_prefix $routing_prefix.");
 
   $mq->consume($channel, $qname);
 
   while (1) {
-    while (my $message = $mq->recv(1000)) {
-      if ( $message->{routing_key} eq "$routing_prefix.package.build_success" ) {
-	 my $body = decode_json($message->{body});
-	 my $package_key = $body->{project}.'/'.$body->{package}.'/'.$body->{repository}.'/'.$body->{arch};
-	 $logger->trace("package_key: $qname - $package_key");
-	 my $cfg = $triggers->{'package.build_success'}->{$package_key};
-	 if ($cfg) {
-	   $logger->debug(" - found in cfg");
+    my $delay = 2;
+    try {
+      while (my $message = $mq->recv(1000)) {
+	$delay = 2;
+	if ( $message->{routing_key} eq "$routing_prefix.package.build_success" ) {
+	   my $body = decode_json($message->{body});
+	   my $package_key = $body->{project}.'/'.$body->{package}.'/'.$body->{repository}.'/'.$body->{arch};
+	   $logger->trace("package_key: $qname - $package_key");
+	   my $cfg = $triggers->{'package.build_success'}->{$package_key};
+	   if ($cfg) {
+	     $logger->debug(" - found in cfg");
 
-	   if ($cfg->{wait_for_publish}) {
-	     $logger->debug(" -- adding to wait_for_publish");
-	     my $repo_key = $body->{project}.'/'.$body->{repository};
-	     $wait_for_publisher->{$repo_key} ||= [];
-	     push(@{$wait_for_publisher->{$repo_key}},@{$cfg->{jobs}});
-	   } else {
-	     $self->trigger_jobs($cfg->{jobs});
-	   }
+	     if ($cfg->{wait_for_publish}) {
+	       $logger->debug(" -- adding to wait_for_publish");
+	       my $repo_key = $body->{project}.'/'.$body->{repository};
+	       $wait_for_publisher->{$repo_key} ||= [];
+	       push(@{$wait_for_publisher->{$repo_key}},@{$cfg->{jobs}});
+	     } else {
+	       $self->trigger_jobs($cfg->{jobs});
+	     }
+	  }
+	}
+	if ( $message->{routing_key} eq "$routing_prefix.repo.published" ) {
+	  my $body = decode_json($message->{body});
+	  my $repo_key = $body->{project}.'/'.$body->{repo};
+	  $logger->trace("repo_key: $qname - $repo_key");
+	  if ($wait_for_publisher->{$repo_key}) {
+	    $logger->debug(" - found in wait_for_publisher");
+	    $self->trigger_jobs($wait_for_publisher->{$repo_key});
+	    $wait_for_publisher->{$repo_key}=undef;
+	  }
 	}
       }
-      if ( $message->{routing_key} eq "$routing_prefix.repo.published" ) {
-	my $body = decode_json($message->{body});
-	my $repo_key = $body->{project}.'/'.$body->{repo};
-	$logger->trace("repo_key: $qname - $repo_key");
-	if ($wait_for_publisher->{$repo_key}) {
-	  $logger->debug(" - found in wait_for_publisher");
-	  $self->trigger_jobs($wait_for_publisher->{$repo_key});
-	  $wait_for_publisher->{$repo_key}=undef;
-	}
-      }
-    }
+    } catch {
+      $logger->debug("Waiting $delay secconds to reconnect");
+      sleep $delay;
+      $delay = $delay*$delay;
+      try {
+        $mq->reconnect;
+      } catch {
+	$logger->warning("Reconnect to message queue failed");
+      };
+    };
   }
 }
 
