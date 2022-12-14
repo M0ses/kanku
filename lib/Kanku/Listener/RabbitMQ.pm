@@ -167,7 +167,7 @@ sub wait_for_events {
       try {
         $mq->reconnect;
       } catch {
-	$logger->warning("Reconnect to message queue failed");
+	$logger->warn("Reconnect to message queue failed");
       };
     };
   }
