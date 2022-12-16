@@ -32,6 +32,8 @@ has [qw/
 	privatekey_path publickey_path
         ipaddress
         host_dir_9p	accessmode_9p   snapshot_name
+	gituser         gitpass         giturl
+	git_revision
     /
 ] => (is=>'rw',isa=>'Str');
 
@@ -97,6 +99,7 @@ sub execute {
     privatekey_path publickey_path
     host_dir_9p accessmode_9p
     vm_image_file management_interface snapshot_name domain_autostart
+    gituser gitpass giturl git_revision
   /) {
     if ($self->$var()){
       $self->logger->debug("Setting variable $var in context to ".$self->$var());

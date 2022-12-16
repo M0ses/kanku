@@ -83,7 +83,12 @@ has gui_config => (
 
 has 'timeout' => (is=>'rw', isa=>'Int', default=>600);
 sub prepare {
-  my $self = shift;
+  my ($self) = @_;
+  my $ctx    = $self->job->context;
+
+  if (!$self->giturl && $ctx->{giturl}) {
+    $self->giturl($ctx->{giturl});
+  }
 
   die "No giturl given"  if (! $self->giturl );
 
@@ -92,6 +97,14 @@ sub prepare {
     $self->_giturl($self->giturl);
   } else {
     $self->_giturl($self->_calc_giturl($self->giturl));
+  }
+
+
+  $self->logger->info("revision: ".($self->revision||q{}));
+  $self->logger->info("git_revision: ".($ctx->{git_revision}||q{}));
+
+  if (!$self->revision) {
+    $self->revision($ctx->{git_revision}) if ($ctx->{git_revision});
   }
 
   # inherited by Kanku::Roles::SSH
@@ -155,8 +168,9 @@ sub execute {
   my $results = [];
   my $ssh2    = $self->connect();
   my $ip      = $self->ipaddress;
-  my $pass    = $self->gitpass;
-  my $user    = $self->gituser;
+  my $ctx     = $self->job->context;
+  my $pass    = $ctx->{gitpass} || $self->gitpass;
+  my $user    = $ctx->{gituser} || $self->gituser;
   
   # clone git repository
   try {
@@ -258,6 +272,14 @@ SEE ALSO L<Kanku::Roles::SSH>
 =head2 getters
 
 SEE L<Kanku::Roles::SSH>
+
+  gituser
+
+  gitpass
+
+  giturl
+
+  git_revision
 
 =head2 setters
 

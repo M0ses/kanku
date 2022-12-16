@@ -5,6 +5,7 @@ use Moose;
 with 'Kanku::Roles::REST';
 
 use Try::Tiny;
+use JSON::XS;
 use Kanku::Config;
 
 sub trigger {
@@ -33,6 +34,7 @@ sub trigger {
 
   my @prev_jobs;
   my $jg_count=0;
+  my $json = JSON::XS->new();
   for my $jg (@jobs_to_trigger) {
     my $pj = $prev_jobs[$jg_count+1] = [];
     for my $job_name (keys %{$jg}) {
@@ -44,6 +46,7 @@ sub trigger {
 	wait_for      => \@wait_for,
 	job_group_id  => $job_group->id,
       };
+      $jd->{args} = $json->encode($jg->{$job_name}) if (ref($jg->{$job_name}) eq 'ARRAY');
       my $job_id = $self->rset('JobHistory')->create($jd);
       push @$pj, $job_id;
     }
