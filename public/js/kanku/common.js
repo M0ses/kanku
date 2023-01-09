@@ -44,6 +44,8 @@ function calc_additional_job_parameters(job) {
         var r = calc_job_start_and_end(job.start_time, job.end_time);
         job.start_time_formatted = r[0];
         job.duration             = r[1];
+        var ct = new Date(1000 * job.creation_time);
+        job.creation_time_formatted = ct.toLocaleString();
 };
 
 Vue.component('help-button',{
@@ -138,7 +140,7 @@ Vue.component('head-line', {
 });
 
 Vue.component('worker-info',{
-  props: ['worker', 'result'],
+  props: ['worker', 'result', 'ct'],
   computed: {
     jobError: function() {
       if (this.result) {
@@ -172,6 +174,14 @@ Vue.component('worker-info',{
     + '    </div>'
     + '    <div class="col-md-10">'
     + '      {{ worker.queue }}'
+    + '    </div>'
+    + '  </div>'
+    + '  <div class="row">'
+    + '    <div class="col-md-2">'
+    + '      Job created'
+    + '    </div>'
+    + '    <div class="col-md-10">'
+    + '      {{ ct }}'
     + '    </div>'
     + '  </div>'
     + '  <div class="row" v-show="worker.error">'
@@ -249,6 +259,7 @@ Vue.component('task-list',{
       isShown: 0,
       count: 0,
       jobData: {},
+      ct: '',
     }
   },
   updated: function() {
@@ -261,11 +272,12 @@ Vue.component('task-list',{
     this.$parent.job.state_class          = this.jobData.state_class;
     this.$parent.job.start_time_formatted = this.jobData.start_time_formatted;
     this.$parent.job.duration             = this.jobData.duration;
-    this.$parent.workerInfo.host          = this.jobData.workerhost
+    this.$parent.workerInfo.host          = this.jobData.workerhost;
+    this.ct = this.jobData.creation_time_formatted;
   },
   template: ''
     + '<div class="card-body">'
-    + ' <worker-info :worker="workerinfo" :result="result"></worker-info>'
+    + ' <worker-info :worker="workerinfo" :result="result" :ct="ct"></worker-info>'
     + ' <job-history-task-card v-bind:key="task.id" v-bind:task="task" v-for="task in jobData.subtasks"></job-history-task-card>'
     +'</div>'
 });
