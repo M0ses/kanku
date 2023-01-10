@@ -8,10 +8,9 @@
         <link href="/kanku/theme/css/statocles-default.css" rel="stylesheet">
         <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 	<link href="/kanku/page/favicon.ico" rel="shortcut icon" type="image/x-icon">
-        <title>RELEASE 0.13.0 - Kanku</title>
+        <title>RELEASE 0.14.0 - Kanku</title>
         <meta content="Statocles 0.098" name="generator">
-        <link href="/kanku/blog/2023/01/10/release-0.14.0/index.html" rel="prev">
-        <link href="/kanku/blog/2022/07/12/kanku-project-page-refurbished/index.html" rel="next">
+        <link href="/kanku/blog/2022/10/10/release-0.13.0/index.html" rel="next">
         
     </head>
     <body>
@@ -47,11 +46,11 @@
                     <main>
                         
 <header>
-    <h1>Release 0.13.0</h1>
+    <h1>Release 0.14.0</h1>
 
     <aside>
-        <time datetime="2022-10-10">
-            Posted on 2022-10-10
+        <time datetime="2023-01-10">
+            Posted on 2023-01-10
         </time>
     </aside>
 
@@ -62,36 +61,61 @@
 
 </header>
 
+<h2>Attention:</h2>
+
+<p>An update of the database schema (version 18) is required with the new release.<br>
+   <strong>Don&#39;t forget to update your database.</strong><br>
+</p>
+
+<p>For developer mode use:</p>
+
+<p><code>kanku db --upgrade</code></p>
+
+<p>For server mode use:</p>
+
+<p><code>kanku db --upgrade --server</code></p>
+
 
 <h2>FEATURES</h2>
 
-<ul><li>[core] refactored rabbmitmq handling in worker and dispatcher
-</li><li>[handler] Reboot: new option &#39;login_timeout&#39; to wait for console
-</li><li>[handler] SaltSSH: added multiple attributes
-</li><li>[dist] removed kanku-web.log from default logging conf
-</li><li>[dist] remove logrotate config - now done with journald
-</li><li>[cli] ssh: new parameter --x11_forward/-X to enable ssh x11 forwarding
+<ul><li>[web] first working version of job_group triggers via token auth
+</li><li>[web] creation time in job info
+</li><li>[core] configurable git parameters for job groups
+</li><li>[dispatcher] locking for job groups
+</li><li>[cli] rtrigger: added trigger for job_group&#39;s
+</li><li>[dist] added GitLab::WebHook example to dancer config template
+</li><li>[core] replaced Net::SSH2 with Libssh::Session
+</li><li>[examples] install job group examples in sostw job in KankuFile
+</li><li>[handler] PreparSSH: global config for &#39;public_key_files&#39; in kanku-config.yml
+</li><li>[core] dispatcher cleanup jobs waiting for recursivly
 </li></ul>
 
 
+<h2>BUGFIXES</h2>
 
-<h3>Examples</h3>
-
-<h4>X-Forwarding for `kanku ssh`</h4>
-
-<p><code>kanku ssh -X</code></p>
+<ul><li>[core] catch rabbitmq connection error and reconnect
+</li><li>[dispatcher] fix data caching issues with job groups
+</li><li>[core] fix &#39;uninitialized value&#39; issues
+</li><li>[web] skipped jobs showed as warnings
+</li><li>[setup] copy certs only if dest does not exists
+</li><li>[web] automatically enable all jobs in job_group which are not exlicitly disabled
+</li><li>[core] added timeout_nodata for SSH
+</li><li>[handler] OBSServerFrontendTests: fix timeout problem
+</li><li>[handler] CreateDomain: die if no vm_image_file in ctx
+</li><li>[cli] avoid &#39;uninitialized&#39; warnings in rjob when no filter is set
+</li></ul>
 
 
 <ul class="pager">
     <li class="prev">
-            <a class="button button-primary" href="/kanku/blog/2022/07/12/kanku-project-page-refurbished/index.html" rel="prev">
+            <a class="button button-primary" href="/kanku/blog/2022/10/10/release-0.13.0/index.html" rel="prev">
                 ← Older
             </a>
     </li>
     <li class="next">
-            <a class="button button-primary" href="/kanku/blog/2023/01/10/release-0.14.0/index.html" rel="next">
+            <button disabled>
                 Newer →
-            </a>
+            </button>
     </li>
 </ul>
 
