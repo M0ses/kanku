@@ -31,6 +31,7 @@ with 'Kanku::Roles::SSH';
 has [qw/  giturl          revision    destination
           remote_url      cache_dir
 	  gituser         gitpass     _giturl
+	  gitlab_merge_request_id
     /] => (is=>'rw',isa=>'Str');
 
 has [ 'submodules' , 'mirror' ] => (is=>'rw',isa=>'Bool');
@@ -77,11 +78,17 @@ has gui_config => (
           type   => 'text',
           label  => 'Remote Url (only for mirror mode)',
         },
+        {
+          param  => 'gitlab_merge_request_id',
+          type   => 'text',
+          label  => 'Gitlab Merge Request ID (requires manual fetch)',
+        },
       ];
   }
 );
 
 has 'timeout' => (is=>'rw', isa=>'Int', default=>600);
+
 sub prepare {
   my ($self) = @_;
   my $ctx    = $self->job->context;
@@ -92,9 +99,16 @@ sub prepare {
 
   die "No giturl given"  if (! $self->giturl );
 
-  if ( $self->mirror ) {
-    $self->_prepare_mirror;
-    $self->_giturl($self->giturl);
+  $self->gitlab_merge_request_id($ctx->{gitlab_merge_request_id}) if $ctx->{gitlab_merge_request_id};
+
+  if ( $self->mirror) {
+    if (!$self->gitlab_merge_request_id) {
+      $self->_prepare_mirror;
+      $self->_giturl($self->giturl);
+    } else {
+      $self->logger->info('Mirror mode disabled becaus gitlab_merge_request_id is set!');
+      $self->_giturl($self->_calc_giturl($self->giturl));
+    }
   } else {
     $self->_giturl($self->_calc_giturl($self->giturl));
   }
@@ -106,6 +120,7 @@ sub prepare {
   if (!$self->revision) {
     $self->revision($ctx->{git_revision}) if ($ctx->{git_revision});
   }
+
 
   # inherited by Kanku::Roles::SSH
   $self->get_defaults();
@@ -185,19 +200,27 @@ sub execute {
   };
   my $git_dest  = ( $self->destination ) ? "-C " . $self->destination : '';
 
+  if ($self->gitlab_merge_request_id) {
+    my $branch_name = "gl-mr-". $self->gitlab_merge_request_id;
+    my $cmd = "git $git_dest fetch origin merge-requests/".$self->gitlab_merge_request_id."/head:$branch_name";
+    my $ret = $self->exec_command($cmd);
+    croak($ret->{stderr}) if $ret->{exit_code};
+    $self->revision($branch_name);
+  }
+
   # checkout specific revision if revision given
   if ( $self->revision ) {
-    my $cmd_checkout  = "git ".$git_dest." checkout " .  $self->revision;
+    my $cmd_checkout  = "git $git_dest checkout " .  $self->revision;
     my $ret           = $self->exec_command($cmd_checkout);
     croak($ret->{stderr}) if $ret->{exit_code};
   }
 
   if ( $self->submodules ) {
-    my $cmd = "git ".$git_dest." submodule init";
+    my $cmd = "git $git_dest submodule init";
     my $ret = $self->exec_command($cmd);
     croak($ret->{stderr}) if $ret->{exit_code};
 
-    $cmd = "git ".$git_dest." submodule update";
+    $cmd = "git $git_dest submodule update";
     $ret = $self->exec_command($cmd);
     croak($ret->{stderr}) if $ret->{exit_code};
   }

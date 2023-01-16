@@ -33,7 +33,7 @@ has [qw/
         ipaddress
         host_dir_9p	accessmode_9p   snapshot_name
 	gituser         gitpass         giturl
-	git_revision
+	git_revision    gitlab_merge_request_id
     /
 ] => (is=>'rw',isa=>'Str');
 
@@ -86,6 +86,11 @@ has gui_config => (
           type  => 'checkbox',
           label => 'Autostart domain',
         },
+        {
+          param  => 'gitlab_merge_request_id',
+          type   => 'text',
+          label  => 'Gitlab Merge Request ID (requires manual fetch)',
+        },
       ];
   }
 );
@@ -99,7 +104,7 @@ sub execute {
     privatekey_path publickey_path
     host_dir_9p accessmode_9p
     vm_image_file management_interface snapshot_name domain_autostart
-    gituser gitpass giturl git_revision
+    gituser gitpass giturl git_revision gitlab_merge_request_id
   /) {
     if ($self->$var()){
       $self->logger->debug("Setting variable $var in context to ".$self->$var());
