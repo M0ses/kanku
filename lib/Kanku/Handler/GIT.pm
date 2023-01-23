@@ -34,7 +34,7 @@ has [qw/  giturl          revision    destination
 	  gitlab_merge_request_id
     /] => (is=>'rw',isa=>'Str');
 
-has [ 'submodules' , 'mirror' ] => (is=>'rw',isa=>'Bool');
+has ['submodules' , 'mirror', 'recursive'] => (is=>'rw',isa=>'Bool');
 
 has gui_config => (
   is => 'ro',
@@ -82,6 +82,16 @@ has gui_config => (
           param  => 'gitlab_merge_request_id',
           type   => 'text',
           label  => 'Gitlab Merge Request ID (requires manual fetch)',
+        },
+        {
+          param  => 'submodules',
+          type   => 'checkbox',
+          label  => 'Init and checkout submodules',
+        },
+        {
+          param  => 'recursive',
+          type   => 'checkbox',
+          label  => 'Clone recursivly (including submodules)',
         },
       ];
   }
@@ -160,6 +170,7 @@ sub _prepare_mirror {
 
   my $remote_uri = URI->new($self->remote_url);
   my $mirror_dir = dir($self->cache_dir(),'git',$remote_uri->host,$remote_uri->path);
+  my $recursive  = ($self->recursive) ? '--recursive' : q{};
 
   my @io;
   my @cmd;
@@ -171,7 +182,7 @@ sub _prepare_mirror {
       $self->logger->info(sprintf("Creating parent for mirror dir '%s'",$mirror_dir->parent));
       $mirror_dir->parent->mkpath;
     }
-    @cmd = ( 'git', 'clone', '--mirror', $self->_calc_giturl($remote_uri->as_string), $mirror_dir->stringify );
+    @cmd = ( 'git', 'clone', $recursive, '--mirror', $self->_calc_giturl($remote_uri->as_string), $mirror_dir->stringify );
   }
 
   $self->logger->info("Running command '@cmd'");
@@ -186,16 +197,18 @@ sub execute {
   my $ctx     = $self->job->context;
   my $pass    = $ctx->{gitpass} || $self->gitpass;
   my $user    = $ctx->{gituser} || $self->gituser;
+
+  my $recursive = ($self->recursive) ? '--recursive' : q{};
   
   # clone git repository
   try {
-    my $cmd_clone = "git clone ".$self->_giturl.(( $self->destination ) ? " " . $self->destination : '');
+    my $cmd_clone = "git clone $recursive ".$self->_giturl.(( $self->destination ) ? " " . $self->destination : '');
     my $ret = $self->exec_command($cmd_clone);
     croak($ret->{stderr}) if $ret->{exit_code};
   } catch {
     my $err = $_;
-    $err =~ s/$pass/<gitpass>/;
-    $err =~ s/$user/<gituser>/;
+    $err =~ s/$pass/<gitpass>/g;
+    $err =~ s/$user/<gituser>/g;
     die "$err";
   };
   my $git_dest  = ( $self->destination ) ? "-C " . $self->destination : '';
