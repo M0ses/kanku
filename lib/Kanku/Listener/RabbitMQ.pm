@@ -14,6 +14,8 @@ has config => ( is => 'rw', isa => 'HashRef');
 
 has daemon => ( is => 'rw', isa => 'Object');
 
+has connect_opts => ( is => 'rw', isa => 'ArrayRef');
+
 sub connect_listener {
   my ($self) = @_;
   my $config = $self->config;
@@ -41,7 +43,7 @@ sub connect_listener {
   my $mq = Net::AMQP::RabbitMQ->new();
 
   $logger->debug("Connecting to $host");
-  my $c_opts = [
+  $self->connect_opts([
     $host,
     {
        port            => $port,
@@ -52,12 +54,12 @@ sub connect_listener {
        ssl_verify_host => $ssl_verify_host,
        ssl_cacert      => $ssl_cacert
     }
-  ];
-  if ($logger->is_trace) {
-    $logger->trace(" Using the following options (password suppressed for security reasons");
-    $logger->trace("  - c_opts -> $_ : $c_opts->[1]->{$_}") for (grep { $_ ne 'password' } keys(%{$c_opts->[1]}));
-  }
-  $mq->connect(@$c_opts);
+  ]);
+  #if ($logger->is_trace) {
+  #  $logger->trace(" Using the following options (password suppressed for security reasons");
+  #  $logger->trace("  - c_opts -> $_ : $c_opts->[1]->{$_}") for (grep { $_ ne 'password' } keys(%{$c_opts->[1]}));
+  #}
+  $mq->connect(@{$self->connect_opts});
 
   $SIG{TERM} = $SIG{INT} = sub {
     $logger->debug("Got signal to exit. Disconnecting from rabbitmq");
@@ -126,8 +128,9 @@ sub wait_for_events {
 
   $mq->consume($channel, $qname);
 
+  my $delay = 1;
+
   while (1) {
-    my $delay = 2;
     try {
       while (my $message = $mq->recv(1000)) {
 	$delay = 2;
@@ -163,11 +166,11 @@ sub wait_for_events {
     } catch {
       $logger->debug("Waiting $delay secconds to reconnect");
       sleep $delay;
-      $delay = $delay*$delay;
+      $delay = $delay*2;
       try {
-        $mq->reconnect;
+        $mq->connect(@{$self->connect_opts});
       } catch {
-	$logger->warn("Reconnect to message queue failed");
+	$logger->warn("Reconnect to message queue failed: $_");
       };
     };
   }
