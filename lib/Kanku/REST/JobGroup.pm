@@ -46,6 +46,7 @@ sub trigger {
 	wait_for      => \@wait_for,
 	job_group_id  => $job_group->id,
       };
+      return {state=>'error', msg=>"Wrong data used for job"} if (ref($jg->{$job_name}) eq 'HASH');
       $jd->{args} = $json->encode($jg->{$job_name}) if (ref($jg->{$job_name}) eq 'ARRAY');
       my $job_id = $self->rset('JobHistory')->create($jd);
       push @$pj, $job_id;
