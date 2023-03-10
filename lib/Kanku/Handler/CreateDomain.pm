@@ -151,6 +151,16 @@ has gui_config => (
           type  => 'checkbox',
           label => 'Set autostart for domain on host startup',
         },
+        {
+          param => 'vcpu',
+          type  => 'text',
+          label => 'Number of CPUs for new domain',
+        },
+        {
+          param => 'memory',
+          type  => 'text',
+          label => 'Memory size for new domain',
+        },
       ];
   }
 );
