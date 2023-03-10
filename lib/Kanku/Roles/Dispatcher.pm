@@ -255,7 +255,6 @@ sub get_todo_list {
   my $schema  = $self->schema;
   my $todo = [];
   my $job_groups = {};
-  my $job_groups_id = {};
   my $rs = $schema->resultset('JobHistory')->search({state=>['scheduled','triggered']},{ order_by => { -asc => 'creation_time' }} );
 
   JOB: while ( my $ds = $rs->next )   {
@@ -275,10 +274,11 @@ sub get_todo_list {
     my $jg_id = $ds->job_group_id;
     if ($jg_id) {
       my $current_group = $schema->resultset('JobGroup')->find($jg_id);
+      my $jg_name = $current_group->name;
       my $groups = $schema->resultset('JobGroup')->search(
         {
           id         => {"!=" => $jg_id},
-          name       => $current_group,
+          name       => $jg_name,
           start_time => {'>'=>0},
           end_time   => 0,
         },
@@ -286,8 +286,15 @@ sub get_todo_list {
           order_by => { -asc => 'creation_time' }
         },
       );
-
-      next JOB if ($groups->count);
+      my $gcount = $groups->count;
+      $self->logger->debug(" -- gcount for '$jg_name': $gcount $jg_id");
+      if ($gcount || $job_groups->{$jg_name}) {
+        $self->logger->debug(" -- Found already running job group $jg_name");
+        next JOB;
+      } else {
+        $job_groups->{$jg_name}++;
+        $self->logger->debug(" -- Found no running job group $jg_name");
+      }
     }
 
     push (
@@ -305,7 +312,6 @@ sub get_todo_list {
       )
     );
   }
-
   return $todo;
 }
 
@@ -317,16 +323,6 @@ sub start_job {
   $job->start_time($stime);
   $job->state("running");
   $job->update_db();
-  if (my $jgid = $job->job_group_id) {
-    my $group = $self->schema->resultset('JobGroup')->find({id=>$jgid});
-    if (!$group->start_time) {
-      $self->logger->debug("Setting Job Group start_time to $stime");
-      $group->start_time($stime);
-      $group->update;
-    }
-  } else {
-    $self->logger->debug("No Job Group found");
-  }
 }
 
 sub end_job {

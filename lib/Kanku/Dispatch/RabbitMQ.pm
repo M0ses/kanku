@@ -196,11 +196,22 @@ sub run {
 sub run_job {
   my ($self, $job) = @_;
 
+  my $logger       = $self->logger();
+
   $self->job($job);
 
   $job->masterinfo($$);
   $job->state('dispatching');
   $job->update_db();
+
+  if (my $jgid = $job->job_group_id) {
+    my $group = $self->schema->resultset('JobGroup')->find({id=>$jgid});
+    if (!$group->start_time) {
+      $logger->debug("Setting start_time for job_group_id: $jgid");
+      $group->start_time(time());
+      $group->update;
+    }
+  }
 
   $self->notify_queue->send({
     type           => 'job_change',
@@ -210,7 +221,6 @@ sub run_job {
     id             => $job->id
   });
 
-  my $logger       = $self->logger();
   $self->job_local_routing_key("kanku.job-".$job->id);
 
   # job definition should be parsed before advertising job
