@@ -282,9 +282,11 @@ Here is an example how to configure the module in your jobs file or KankuFile
     use_module: Kanku::Handler::SetupNetwork
     options:
       interfaces:
-        eth0:
+        -
+          ifname: eth0
           BOOTPROTO: dhcp
-        eth1:
+        -
+          ifname: eth1
 	  rename: newdev
           BOOTPROTO: static
           IPADDR: 192.168.122.22/24
