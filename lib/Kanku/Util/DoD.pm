@@ -223,6 +223,7 @@ sub check_before_download {
                                 $self->api_url,);
         croak("Project '$p' on '$u' not ready yet.\n"
              ."Please check 'osc r $p -a $a -r $r'\n"
+	     ."Or use '--skip_all_checks' option\n"
         );
       }
   }
@@ -245,6 +246,7 @@ sub check_before_download {
                                      $self->package,);
         croak("Package '$p/$pkg' not ready yet\n"
              ."Please check 'osc r $p $pkg -a $a -r $r'\n"
+	     ."Or use '--skip_all_checks' option\n"
         );
       }
   }
