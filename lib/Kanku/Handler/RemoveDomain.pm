@@ -60,7 +60,7 @@ sub execute {
   my ($self) = @_;
   my $ctx    = $self->job->context;
 
-  $self->logger->trace("Domain name in context: $ctx->{domain_name}");
+  $self->logger->trace("Domain name in context: ".($ctx->{domain_name}||q{}));
 
   if ( ! $self->domain_name && $ctx->{domain_name} ) {
     $self->logger->debug("Using domain name from context: $ctx->{domain_name}");
