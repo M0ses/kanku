@@ -96,7 +96,7 @@ sub execute {
   $self->_configure_routes;
 
   if ($self->_get_ipaddress_required) {
-    $ctx->{ipaddress} = $con->get_ipaddress(interface=>$self->_management_interface);
+    $ctx->{ipaddress} = $con->get_ipaddress(interface=>$self->_management_interface,timeout=>60);
   }
 
   $con->logout();
@@ -283,10 +283,10 @@ Here is an example how to configure the module in your jobs file or KankuFile
     options:
       interfaces:
         -
-          ifname: eth0
+          if_name: eth0
           BOOTPROTO: dhcp
         -
-          ifname: eth1
+          if_name: eth1
 	  rename: newdev
           BOOTPROTO: static
           IPADDR: 192.168.122.22/24
