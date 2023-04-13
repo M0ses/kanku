@@ -264,7 +264,7 @@ sub get_todo_list {
     while (my $jwf = $wait_for->next) {
       my $njwf = $jwf->wait_for;
       if ($njwf->state =~ /^(scheduled|triggered|running|dispatching)$/) {
-        $self->logger->debug("Job ".$ds->id." is still waiting for Job ".$njwf->id);
+        $self->logger->trace("Job ".$ds->id." is still waiting for Job ".$njwf->id);
 	next JOB;
       }
     }
@@ -287,9 +287,9 @@ sub get_todo_list {
         },
       );
       my $gcount = $groups->count;
-      $self->logger->debug(" -- gcount for '$jg_name': $gcount $jg_id");
+      $self->logger->trace(" -- gcount for '$jg_name': $gcount $jg_id");
       if ($gcount || $job_groups->{$jg_name}) {
-        $self->logger->debug(" -- Found already running job group $jg_name");
+        $self->logger->trace(" -- Found already running job group $jg_name");
         next JOB;
       } else {
         $job_groups->{$jg_name}++;
