@@ -50,30 +50,5 @@ jobs:
       commands:
         - zypper ar obs://devel:openQA devel:openQA
         - zypper --gpg-auto-import-keys ref -s
-        - zypper -n in apache2 openQA openQA-worker postgresql-server sudo qemu-kvm jq
-        - a2enmod headers
-        - a2enmod proxy
-        - a2enmod proxy_http
-        - a2enmod proxy_wstunnel
-        - a2enmod rewrite
-        - /usr/share/openqa/script/fetchneedles
-        - cp /etc/apache2/vhosts.d/openqa.conf.template /etc/apache2/vhosts.d/openqa.conf
-        - cp /tmp/kanku/KankuFile.examples/configs/openQA/_etc_openqa_client.conf /etc/openqa/client.conf
-        - perl -p -i -e 's/^\s*#?\s*httpsonly\s*=\s*/httpsonly = 0/' /etc/openqa/openqa.ini
-        - perl -p -i -e 's/^# method = Fake.*/method = Fake/' /etc/openqa/openqa.ini
-        - systemctl start postgresql
-        - su -c "createdb openqa" postgres
-        - su -c "createuser -w geekotest" postgres
-        - systemctl start openqa-gru
-        - systemctl start openqa-webui
-        # openSUSE
-        - systemctl enable apache2
-        - systemctl restart apache2
-        - sleep 10
-        - curl http://localhost/login
-        - systemctl enable openqa-worker@1
-        - systemctl start openqa-worker@1
-        - systemctl enable openqa-scheduler
-        - systemctl start openqa-scheduler
-        - chmod 777 /var/lib/openqa/factory/other
-        - bash -x /tmp/kanku/KankuFile.examples/scripts/openQA/start_test
+        - zypper -n in openQA-bootstrap
+        - /usr/share/openqa/script/openqa-bootstrap
