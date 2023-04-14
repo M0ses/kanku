@@ -39,12 +39,6 @@ jobs:
   -
     use_module: Kanku::Handler::PrepareSSH
   -
-    use_module: Kanku::Handler::GIT
-    options:
-      giturl:     https://github.com/M0ses/kanku.git
-      destination: /tmp/kanku
-      revision: master
-  -
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
