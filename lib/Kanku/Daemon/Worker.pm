@@ -94,6 +94,14 @@ sub run {
   $kmq->shutdown_file($self->shutdown_file);
   $kmq->connect();
 
+  $kmq->publish(
+    'kanku.to_dispatcher',
+    encode_json({
+      action        => 'started_worker',
+      hostname      => $self->hostname,
+    }),
+  );
+
   while (@childs) {
     @childs = grep { waitpid($_,WNOHANG) == 0 } @childs;
     $logger->trace("Active Childs: (@childs)");
@@ -111,6 +119,16 @@ sub run {
 
     sleep(1);
   }
+
+  $kmq->publish(
+    'kanku.to_dispatcher',
+    encode_json({
+      action        => 'shutdown_worker',
+      hostname      => $self->hostname,
+    }),
+  );
+
+  $kmq->queue->disconnect;
 
   $logger->info("No more childs running, returning from Daemon->run()!");
   return;
@@ -150,6 +168,7 @@ sub listen_on_queue {
 	};
 
 	if ( $data->{action} eq 'send_task_to_all_workers' ) {
+          $logger->debug('$data ='.$self->dump_it($data));
 	  my $answer = {
 	    action => 'task_confirmation',
 	    task_id => $data->{task_id},
@@ -190,7 +209,7 @@ sub listen_on_queue {
       }
     } catch {
       $logger->error($_);
-      $self->airbrake->notify_with_backtrace($_, {context=>{pid=>$$,worker_id=>$self->worker_id}});
+      #$self->airbrake->notify_with_backtrace($_, {context=>{pid=>$$,worker_id=>$self->worker_id}});
       if ($_ =~ /^(recv: a SSL error occurred|AMQP socket not connected)/) {
         try {
           $kmq->reconnect;
@@ -271,13 +290,12 @@ sub handle_advertisement {
         }
       } else {
           $logger->error("Got no answer for application (job_id: $job_id)");
-          $self->airbrake->notify_with_backtrace(
-            "Got no answer for application (job_id: $job_id)"
-          );
+          #$self->airbrake->notify_with_backtrace("Got no answer for application (job_id: $job_id)");
       }
       $job_kmq->destroy_queue();
   } else {
-    $logger->error("No answer queue found. Ignoring advertisement");
+    $logger->error('No answer queue found. Ignoring advertisement');
+    $logger->debug($self->dump_it($data));
   }
 
   return;
