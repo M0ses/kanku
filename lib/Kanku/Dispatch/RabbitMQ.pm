@@ -115,6 +115,8 @@ sub run {
 	      delete $data->{action};
 	      my $hn = delete $data->{hostname};
 	      $self->active_workers->{$hn} = $data;
+	    } elsif ($data->{action} eq "started_worker" or $data->{action} eq "shutdown_worker") {
+              $self->cleanup_dead_jobs($data->{hostname});
 	    } else {
 	      $logger->error("Unknown action recived: $data->{action}");
 	    }

@@ -179,7 +179,7 @@ sub run {
         );
       }
     } else {
-      $self->logger->debug("Got no answer within $wait_for_answer msec");
+      $self->logger->trace("Got no answer within $wait_for_answer msec");
       if ($self->daemon->detect_shutdown) {
 	croak('Job '.$job->id." aborted by dispatcher daemon shutdown\n");
       }

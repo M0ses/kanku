@@ -123,18 +123,37 @@ sub run {
 
 
 sub cleanup_dead_jobs {
-  my ($self) = @_;
+  my ($self, $worker_name) = @_;
   my $logger = $self->logger;
 
-  $logger->debug("Cleaning up dead jobs");
+  if ($worker_name) {
+    $logger->debug("Cleaning up dead jobs ($worker_name)");
+  } else {
+    $logger->debug('Cleaning up dead jobs');
+  }
+
+  my %worker_filter;
+  if ($worker_name) {
+    %worker_filter = (workerinfo=>{like=>"$worker_name:%"});
+  }
 
   my $dead_jobs = $self->schema->resultset('JobHistory')->search(
-    { state => ['running','dispatching'] }
+    { state => ['running','dispatching'], %worker_filter }
   );
   $dead_jobs->update({ state => 'failed', end_time => time()});
+  my %job_filter;
+  if ($worker_name) {
+    my @job_ids;
+    while (my $job = $dead_jobs->next) {
+      push @job_ids, $job->id;
+    }
+    if (@job_ids) {
+      %job_filter = (job_id => {'-in'=>\@job_ids})
+    }
+  }
 
   my $dead_tasks = $self->schema->resultset('JobHistorySub')->search(
-    { state => ['running'] }
+    { state => ['running'], %job_filter }
   );
 
   $dead_tasks->update({ state => 'failed'});
