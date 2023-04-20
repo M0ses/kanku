@@ -286,20 +286,23 @@ sub destroy_queue {
     join("','",$self->channel,($self->queue_name ||''),$self->exchange_name,($self->queue_name||'')).
     "')"
   );
+  try {
+    $mq->queue_unbind(
+      $self->channel,
+      $self->queue_name,
+      $self->exchange_name,
+      $self->routing_key,
+      {}
+    );
 
-  $mq->queue_unbind(
-    $self->channel,
-    $self->queue_name,
-    $self->exchange_name,
-    $self->routing_key,
-    {}
-  );
-
-  $mq->queue_delete(
-    $self->channel,
-    $self->queue_name,
-    {if_empty => 0, if_unused => 0}
-  );
+    $mq->queue_delete(
+      $self->channel,
+      $self->queue_name,
+      {if_empty => 0, if_unused => 0}
+    );
+  } catch {
+    $self->logger->warning("An error occurred while destroying queue: $_");
+  };
 }
 
 =head2 reconnect - Try to disconnect and reconnect to rabbitmq

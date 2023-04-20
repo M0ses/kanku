@@ -385,12 +385,13 @@ sub handle_job {
     my $task_body = decode_json($task_msg->{body});
     if ( $task_body->{action} eq 'finished_job' and $task_body->{job_id} == $job_id) {
       $logger->debug("Got finished_job for job_id: $job_id");
-      return;
     } else {
       $logger->debug("Unknown answer when waitingin for finish_job:");
       $logger->trace("\$task_body =".$self->dump_it($task_body));
     }
   };
+
+  $logger->debug("Exiting handle_job for job_id: $job_id");
 
   return;
 }
