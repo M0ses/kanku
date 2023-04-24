@@ -282,7 +282,6 @@ sub handle_advertisement {
           $logger->debug("Nothing to do - application declined");
           $self->remote_key_name('');
           $self->local_key_name('');
-          return;
         } else {
           $logger->error("Answer on application for job $job_id unknown");
           $logger->trace("\$msg =".$self->dump_it($msg));
