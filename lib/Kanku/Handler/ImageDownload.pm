@@ -136,7 +136,7 @@ sub execute {
 
   return {
     state => 'succeed',
-    message => "Sucessfully downloaded image to $tmp_file"
+    message => 'Downloading '.$curl->url." to $tmp_file succeed"
   };
 }
 
