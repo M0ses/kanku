@@ -189,7 +189,7 @@ sub recv {
     $msg = $self->queue->recv(@opts);
     $logger->trace("Recieved data:".$self->dump_it($msg)) if $msg;
   } catch {
-    $logger->error('Error while receiving message on queue "'.$self->queue_name.'": '.$_);
+    $logger->error('Error while receiving message on queue "'.$self->queue_name.'/'.$self->routing_key.'": '.$_);
     $self->reconnect();
   };
   return $msg;
