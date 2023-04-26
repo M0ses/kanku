@@ -326,7 +326,7 @@ sub handle_job {
     $logger->debug("Waiting $task_wait msec for tasks on queue: ".$job_kmq->queue_name." with routing_key: ".$job_kmq->routing_key);
     while (1){
       my $task_msg = $job_kmq->recv($task_wait);
-      $logger->debug("ping");
+      $logger->debug("Waiting for new task for job $job_id");
       if ( $self->detect_shutdown ) {
 	my $answer = {
 	    action        => 'aborted_job',
