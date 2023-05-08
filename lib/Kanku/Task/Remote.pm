@@ -134,7 +134,7 @@ sub run {
     if ( $msg ) {
       my $indata;
       $self->logger->debug('Incomming task result');
-      $self->logger->debug(Dumper($msg));
+      $self->logger->trace(Dumper($msg));
       my $body = $msg->{body};
 
       try {
