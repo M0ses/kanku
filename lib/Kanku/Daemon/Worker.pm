@@ -436,7 +436,7 @@ sub _send_task_result {
       job           => $job->to_json
   };
 
-  $logger->debug("\$answer = ".$self->dump_it($answer));
+  $logger->trace("\$answer = ".$self->dump_it($answer));
 
 
   $job_kmq->publish(
