@@ -125,7 +125,7 @@ sub run {
 	$data,
   );
 
-  $self->logger->debug('Waiting for result on queue: '.$self->job_queue->queue_name());
+  $self->logger->debug('Waiting for result on queue: '.$self->job_queue->queue_name.'/'.$self->job_queue->routing_key);
   # Wait for task results from worker
   my $result;
   my $wait_for_answer = 10000;
@@ -134,7 +134,7 @@ sub run {
     if ( $msg ) {
       my $indata;
       $self->logger->debug('Incomming task result');
-      $self->logger->debug(Dumper($msg));
+      $self->logger->trace(Dumper($msg));
       my $body = $msg->{body};
 
       try {
@@ -152,7 +152,7 @@ sub run {
 	  croak($indata->{error_message});
 	} else {
 	  my $jobd = decode_json($indata->{job});
-          $logger->debug('Content of $indata->result: '.Dumper($indata->{result}));
+          $logger->trace('Content of $indata->result: '.Dumper($indata->{result}));
 
           try {
             $indata->{result}->{result} = decode_base64($indata->{result}->{result}) if ($indata->{result}->{result});
