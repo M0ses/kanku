@@ -438,7 +438,6 @@ sub _send_task_result {
 
   $logger->trace("\$answer = ".$self->dump_it($answer));
 
-
   $job_kmq->publish(
     $self->remote_key_name,
     encode_json($answer),
