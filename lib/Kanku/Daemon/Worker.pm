@@ -347,6 +347,7 @@ sub handle_job {
         $logger->trace("\$task_msg = $task_msg");
         my $task_body = decode_json($task_msg->{body});
         $logger->debug("Got new message while waiting for tasks");
+        $logger->debug("task action/job_id: $task_body->{action}/$task_body->{job_id}");
         if (
            $task_body->{action} eq 'task' and $task_body->{job_id} == $job_id
         ){
