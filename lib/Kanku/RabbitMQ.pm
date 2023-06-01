@@ -108,6 +108,8 @@ sub connect {
   my ($self, %opts) = @_;
   my $logger = $self->logger;
 
+  $SIG{PIPE} = 'IGNORE';
+
   $logger->debug(__PACKAGE__."->connect to opts:".$self->dump_it(\%opts));
   $self->queue(Net::AMQP::RabbitMQ->new());
 

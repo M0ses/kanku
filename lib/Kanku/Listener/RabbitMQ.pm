@@ -28,7 +28,7 @@ sub connect_listener {
   my $port           = $lcfg->{port} || 5671;
   my $user           = $lcfg->{user};
   my $password       = $lcfg->{password};
-  my $heartbeat      = $lcfg->{heartbeat} || 5;
+  #my $heartbeat      = $lcfg->{heartbeat} || 5;
   my $channel        = $lcfg->{channel} ||1;
   my $exchange_name  = $lcfg->{exchange_name} || 'pubsub';
   my $routing_key    = $lcfg->{routing_key} || '#';
@@ -49,7 +49,7 @@ sub connect_listener {
        port            => $port,
        user            => $user,
        password        => $password,
-       heartbeat       => $heartbeat,
+       #heartbeat       => $heartbeat,
        ssl             => $ssl,
        ssl_verify_host => $ssl_verify_host,
        ssl_cacert      => $ssl_cacert
