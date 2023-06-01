@@ -167,8 +167,10 @@ sub listen_on_queue {
 	  die("Error in JSON:\n$_\n$body\n");
 	};
 
+        $logger->debug('Got action from msg: ' . ($data->{action}||q{}));
+
 	if ( $data->{action} eq 'send_task_to_all_workers' ) {
-          $logger->debug('$data ='.$self->dump_it($data));
+          $logger->trace('$data ='.$self->dump_it($data));
 	  my $answer = {
 	    action => 'task_confirmation',
 	    task_id => $data->{task_id},
@@ -347,7 +349,7 @@ sub handle_job {
         $logger->trace("\$task_msg = $task_msg");
         my $task_body = decode_json($task_msg->{body});
         $logger->debug("Got new message while waiting for tasks");
-        $logger->debug("task action/job_id: $task_body->{action}/$task_body->{job_id}");
+        $logger->debug("task action/job_id: $task_body->{action}/".($task_body->{job_id}||'undef'));
         if (
            $task_body->{action} eq 'task' and $task_body->{job_id} == $job_id
         ){
