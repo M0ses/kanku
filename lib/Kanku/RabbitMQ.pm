@@ -152,7 +152,7 @@ sub connect {
 
   $self->queue->channel_open($self->channel);
 
-  return 1;
+  return $self->queue;
 }
 
 =head2 connect_info - return a hash ref containing config for connect
@@ -217,11 +217,13 @@ sub publish {
   $logger->trace("  opts       : '" . $self->dump_it($opts) . "'");
 
   try {
-    $self->queue->publish($self->channel, $self->routing_key, $data, $opts);
+    my $mq = Net::AMQP::RabbitMQ->new();
+    $mq->connect($self->host, $self->connect_info);
+    $mq->publish($self->channel, $self->routing_key, $data, $opts);
+    $mq->disconnect;
   } catch {
     $logger->error('Error while publishing message (routing_key: '.$self->routing_key.'): '.$_);
-    $self->reconnect();
-    $self->queue->publish($self->channel, $self->routing_key, $data, $opts);
+    publish(@_);
   };
 }
 
