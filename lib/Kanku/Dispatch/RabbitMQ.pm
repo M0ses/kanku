@@ -477,7 +477,7 @@ sub advertise_job {
 
   while(! %$all_applications ) {
 
-    $logger->debug('Publishing application: '.$self->dump_it($data));
+    $logger->debug('Publishing application (routing key: kanku.to_all_workers): '.$self->dump_it($data));
 
     $rmq->publish(
       'kanku.to_all_workers',

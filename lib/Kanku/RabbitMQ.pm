@@ -217,13 +217,11 @@ sub publish {
   $logger->trace("  opts       : '" . $self->dump_it($opts) . "'");
 
   try {
-    my $mq = Net::AMQP::RabbitMQ->new();
-    $mq->connect($self->host, $self->connect_info);
-    $mq->publish($self->channel, $self->routing_key, $data, $opts);
-    $mq->disconnect;
+    $self->queue->publish($self->channel, $self->routing_key, $data, $opts);
   } catch {
     $logger->error('Error while publishing message (routing_key: '.$self->routing_key.'): '.$_);
-    publish(@_);
+    $self->reconnect();
+    $self->queue->publish($self->channel, $self->routing_key, $data, $opts);
   };
 }
 

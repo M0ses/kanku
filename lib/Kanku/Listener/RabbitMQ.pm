@@ -164,10 +164,12 @@ sub wait_for_events {
 	}
       }
     } catch {
+      $logger->debug($_);
       $logger->debug("Waiting $delay secconds to reconnect");
       sleep $delay;
-      $delay = $delay*2;
+      $delay = $delay*2 if ($delay < 300);
       try {
+        $mq = Net::AMQP::RabbitMQ->new();
         $mq->connect(@{$self->connect_opts});
       } catch {
 	$logger->warn("Reconnect to message queue failed: $_");
