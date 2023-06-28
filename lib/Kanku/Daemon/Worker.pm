@@ -336,10 +336,10 @@ sub handle_job {
             job_id        => $job_id,
 	};
 
-	$logger->info("Sending action 'aborted_job' because of daemon shutdown to routing_key '".$self->remote_key_name."'");
+	$logger->info("Sending action 'aborted_job' because of daemon shutdown to routing_key '".$job_kmq->routing_key."'");
 
 	$job_kmq->publish(
-	  $self->remote_key_name,
+	  $job_kmq->routing_key,
 	  encode_json($answer),
 	);
 
