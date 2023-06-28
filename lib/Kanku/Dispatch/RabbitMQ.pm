@@ -517,10 +517,12 @@ sub advertise_job {
 
 sub cleanup_on_startup {
   my ($self) = @_;
+  $self->cleanup_dead_job_groups;
 }
 
 sub cleanup_on_exit {
   my ($self) = @_;
+  $self->cleanup_dead_job_groups;
 }
 
 sub initialize {
@@ -528,6 +530,21 @@ sub initialize {
   my $rmq = Kanku::RabbitMQ->new(%{$self->rabbit_config});
   $rmq->shutdown_file($self->shutdown_file);
   $rmq->connect() || die "Could not connect to rabbitmq\n";
+}
+
+sub cleanup_dead_job_groups {
+  my ($self) = @_;
+  my $logger = $self->logger;
+  my @dead_job_groups = $self->schema->resultset('JobGroup')->search({
+    start_time  => { '>', 0},
+    end_time    => 0,
+  });
+  for my $jg (@dead_job_groups) {
+    $logger->warn("Found dead job_group with id ".$jg->id);
+    $jg->end_time(time());
+    $jg->update();
+  }
+
 }
 
 1;

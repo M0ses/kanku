@@ -419,7 +419,7 @@ sub handle_task {
       error_message => $_
     };
   };
-  $self->logger->debug("XXXXX ".$job_kmq->routing_key.", $job, $result");
+  $self->logger->debug('Sending Task Result for job '.$job->id ." to routing_key ".$job_kmq->routing_key);
   $self->_send_task_result($job_kmq, $job, $result);
   return;
 }

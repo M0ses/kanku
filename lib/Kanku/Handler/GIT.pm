@@ -170,7 +170,6 @@ sub _prepare_mirror {
 
   my $remote_uri = URI->new($self->remote_url);
   my $mirror_dir = dir($self->cache_dir(),'git',$remote_uri->host,$remote_uri->path);
-  my $recursive  = ($self->recursive) ? '--recursive' : q{};
 
   my @io;
   my @cmd;
@@ -182,11 +181,15 @@ sub _prepare_mirror {
       $self->logger->info(sprintf("Creating parent for mirror dir '%s'",$mirror_dir->parent));
       $mirror_dir->parent->mkpath;
     }
-    @cmd = ( 'git', 'clone', $recursive, '--mirror', $self->_calc_giturl($remote_uri->as_string), $mirror_dir->stringify );
+    @cmd = ( 'git', 'clone');
+    push @cmd, '--recursive' if $self->recursive;
+    push @cmd, '--mirror', $self->_calc_giturl($remote_uri->as_string), $mirror_dir->stringify;
   }
 
   $self->logger->info("Running command '@cmd'");
   run \@cmd , \$io[0], \$io[1], \$io[2] || die "git $?\n";
+  $self->logger->debug("STDOUT: $io[1]");
+  $self->logger->debug("STDERR: $io[2]");
 }
 
 sub execute {
@@ -207,8 +210,8 @@ sub execute {
     croak($ret->{stderr}) if $ret->{exit_code};
   } catch {
     my $err = $_;
-    $err =~ s/$pass/<gitpass>/g;
-    $err =~ s/$user/<gituser>/g;
+    $err =~ s/$pass/<gitpass>/g if $pass;
+    $err =~ s/$user/<gituser>/g if $user;
     die "$err";
   };
   my $git_dest  = ( $self->destination ) ? "-C " . $self->destination : '';
