@@ -434,7 +434,12 @@ Vue.component('job-retrigger-link',{
       var url  = uri_base + "/rest/job/retrigger/" + this.id + ".json";
       var self = this;
       axios.post(url, {is_admin: this.is_admin}).then(function(response) {
-        show_messagebox(response.data.state, response.data.msg);
+        console.log(response.data);
+        if (response.data.errors) {
+          response.data.errors.forEach(msg => show_messagebox('danger', msg));
+        } else {
+          show_messagebox(response.data.state, response.data.msg);
+        }
         var npage = self.$route.params.page;
         var o_job_states = ['running', 'failed', 'succeed', 'dispatching', 'triggered'];
         var o_query = { "job_states": o_job_states };

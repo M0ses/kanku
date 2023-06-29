@@ -289,7 +289,7 @@ post '/login.:format' => sub {
 };
 
 get 'login' => sub {
-  return {
+  send_as JSON => {
     errors        => ['Your are not logged in!'],
   };
 };
