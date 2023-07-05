@@ -53,6 +53,7 @@
 <script src="[% request.uri_base %]/js/kanku/index.js"></script>
 <script src="[% request.uri_base %]/js/kanku/pwreset.js"></script>
 <script src="[% request.uri_base %]/js/kanku/signup.js"></script>
+<script src="[% request.uri_base %]/js/kanku/signin.js"></script>
 
 </head>
 <body>

@@ -8,7 +8,8 @@ var alert_map = {
 
 function show_messagebox(state, msg, timeout=10000) {
   var elem = $("#messagebox");
-  var div = $('<div class="alert-' + state +' kanku_alert alert-dismissible fade show" role=alert></div>').append(msg);
+  var div = $('<div class="alert-' + state +' kanku_alert alert-dismissible fade show" role=alert></div>');
+  div.append(msg);
   div.append('<button type="button" class="close" data-dismiss="alert">&times;</button>');
   elem.append(div);
   if(timeout) {
@@ -431,10 +432,9 @@ Vue.component('job-retrigger-link',{
   props: ['id', 'is_admin'],
   methods: {
     retriggerJob: function() {
-      var url  = uri_base + "/rest/job/retrigger/" + this.id + ".json";
+      var url  = uri_base + "/rest/job/retrigger/" + this.id + ".json?return_url="+this.$route.path;
       var self = this;
       axios.post(url, {is_admin: this.is_admin}).then(function(response) {
-        console.log(response.data);
         if (response.data.errors) {
           response.data.errors.forEach(msg => show_messagebox('danger', msg));
         } else {
@@ -576,11 +576,6 @@ Vue.component('job-history-header', {
 
 Vue.component('navigation-dropdown', {
   props: ['user_id', 'user_label', 'is_admin'],
-  methods: {
-    onLogin: function() {
-      this.$emit('login');
-    },
-  },
   template: ''
     + '<ul class="navbar-nav ml-auto">'
     + ' <li class="nav-item active dropdown">'
@@ -602,25 +597,43 @@ Vue.component('navigation-dropdown', {
     + '     <router-link class="dropdown-item" to="/admin"   >Administration</router-link>'
     + '    </div>'
     + '   </div>'
-    + '   <div v-else>'
-    + '    <form @submit.prevent="onLogin">'
-    + '      <input type=hidden name=return_url value="uri_base + request_path">'
-    + '      <label for="username" class=sr-only>Login Name</label>'
-    + '      <input style="margin-bottom: 5px" id="username" name=username class="form-control" placeholder="Login Name" required autofocus>'
-    + '      <label for="password" class=sr-only>Password</label>'
-    + '      <input style="margin-bottom: 5px;" type="password" name=password id="password" class="form-control" placeholder="Password" required>'
-    + '      <input class="btn btn-success btn-block" type="submit" value="Sign in">'
-    + '    </form>'
-    + '    <hr/>'
-    + '    <router-link class="btn btn-primary btn-block" to="/signup">Sign Up</router-link>'
-    + '    <router-link class="dropdown-item"  to="/pwreset">Forgot password?</router-link>'
-    + '   </div>'
+    + '   <signin_form @login="$emit(\'login\')" v-else :form_id=0></signin_form>'
     + '   <a class="dropdown-item" href="https://m0ses.github.io/kanku/" target=_blank>About Kanku</a>'
     + '   <a class="dropdown-item" href="https://github.com/M0ses/kanku" target=_blank>Code on github</a>'
     + '  </div>'
     + ' </li>'
     + '</ul>'
 });
+
+Vue.component('signin_form', {
+  props: ['form_id'],
+  data: function() {
+    return {
+      username:   "username"+this.form_id,
+      password:   "password"+this.form_id,
+    };
+  },
+  methods: {
+    onLogin: function() {
+      this.$emit('login');
+    },
+  },
+  template: ''
+    + '<div>'
+    + '    <form @submit.prevent="onLogin">'
+    + '      <input type=hidden name=return_url value="uri_base + request_path">'
+    + '      <label for="username" class=sr-only>Login Name</label>'
+    + '      <input style="margin-bottom: 5px" :id="username" name=username class="form-control" placeholder="Login Name" required autofocus>'
+    + '      <label for="password" class=sr-only>Password</label>'
+    + '      <input style="margin-bottom: 5px;" type="password" name=password :id="password" class="form-control" placeholder="Password" required>'
+    + '      <input class="btn btn-success btn-block" type="submit" value="Sign in">'
+    + '    </form>'
+    + '    <hr/>'
+    + '    <router-link class="btn btn-primary btn-block" to="/signup">Sign Up</router-link>'
+    + '    <router-link class="dropdown-item"  to="/pwreset">Forgot password?</router-link>'
+    + '</div>'
+});
+
 
 Vue.component('navigation', {
   props: ['active_roles', 'request_path', 'user_label', 'roles', 'user_id', 'is_admin'],
@@ -648,8 +661,8 @@ Vue.component('navigation', {
     },
     login: function() {
       var req = {
-        username: $('#username').val(),
-        password: $('#password').val(),
+        username: $('#username0').val(),
+        password: $('#password0').val(),
       };
       var url = uri_base + "/rest/login.json";
       var self = this;

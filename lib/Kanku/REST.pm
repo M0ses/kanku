@@ -289,8 +289,9 @@ post '/login.:format' => sub {
 };
 
 get 'login' => sub {
+  my $return_url= params->{'return_url'};
   send_as JSON => {
-    errors        => ['Your are not logged in!'],
+    errors        => ['Your are not logged in! Please <a href="#/signin/?return_url='.$return_url.'">login</a>!'],
   };
 };
 
