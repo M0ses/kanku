@@ -24,7 +24,6 @@ Kanku::RabbitMQ - A helper class for Net::AMQP::RabbitMQ
     my $kmq = Kanku::RabbitMQ->new(%{ $config || {}});
     $kmq->shutdown_file($self->shutdown_file);
     $kmq->connect() or die "Could not connect to rabbitmq\n";
-    $kmq->setup_worker();
     $kmq->create_queue(
       queue_name    => $self->worker_id,
       routing_key   =>'kanku.to_all_workers'
@@ -334,7 +333,6 @@ sub reconnect {
       # the connection gets automatically disconnect if exchange does not
       # exists, thats why we force connect here
       $self->connect;
-      $self->setup_worker;
       $self->create_queue;
     } else {
       die $_;
