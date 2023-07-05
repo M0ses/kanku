@@ -93,7 +93,7 @@ sub run {
           @child_pids = grep { waitpid($_,WNOHANG) == 0 } @child_pids;
           last if ( $self->detect_shutdown );
           sleep(1);
-          $logger->trace("ChildPids: (@child_pids) max_processes: ".$self->max_processes."\n");
+          $logger->debug("ChildPids: (@child_pids) max_processes: ".$self->max_processes."\n");
         }
       }
       last if ( $self->detect_shutdown );

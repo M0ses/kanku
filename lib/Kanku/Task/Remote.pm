@@ -93,7 +93,7 @@ sub run {
   my $all_workers = {};
   my $logger      = $self->logger;
 
-  $self->logger->debug('Starting new remote task');
+  $logger->debug('Starting new remote task');
 
   my $job = $self->job;
 
@@ -125,7 +125,7 @@ sub run {
 	$data,
   );
 
-  $self->logger->debug('Waiting for result on queue: '.$self->job_queue->queue_name.'/'.$self->job_queue->routing_key);
+  $logger->debug('Waiting for result on queue: '.$self->job_queue->queue_name.'/'.$self->job_queue->routing_key);
   # Wait for task results from worker
   my $result;
   my $wait_for_answer = 10000;
@@ -133,15 +133,17 @@ sub run {
     my $msg = $self->job_queue->recv($wait_for_answer);
     if ( $msg ) {
       my $indata;
-      $self->logger->debug('Incomming task result');
-      $self->logger->trace(Dumper($msg));
+      $logger->debug('Incoming task result');
+      $logger->trace(Dumper($msg));
       my $body = $msg->{body};
 
       try {
 	$indata = decode_json($body);
       } catch {
-	$self->logger->debug("Error in JSON:\n$_\n$body\n");
+	$logger->debug("Error in JSON:\n$_\n$body\n");
       };
+
+      $logger->debug("Received $indata->{action}");
 
       if (
 	$indata->{action} eq 'finished_task' or
@@ -179,7 +181,7 @@ sub run {
         );
       }
     } else {
-      $self->logger->trace("Got no answer within $wait_for_answer msec");
+      $logger->trace("Got no answer within $wait_for_answer msec");
       if ($self->daemon->detect_shutdown) {
 	croak('Job '.$job->id." aborted by dispatcher daemon shutdown\n");
       }
