@@ -415,7 +415,7 @@ sub send_job_offer {
   my ($self,$rmq,$prefered_application)=@_;
   my $logger = $self->logger;
 
-  $logger->debug("Offering job for prefered_application");
+  $logger->debug("Offering job for prefered_application $prefered_application->{worker_fqhn}");
   $logger->trace("\$prefered_application = ".$self->dump_it($prefered_application));
 
   $rmq->publish(
