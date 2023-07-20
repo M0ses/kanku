@@ -9,6 +9,7 @@ use Try::Tiny;
 use Kanku::Config;
 
 with 'Kanku::Roles::Logger';
+with 'Kanku::Roles::Helpers';
 
 has config => ( is => 'rw', isa => 'HashRef');
 
@@ -22,18 +23,16 @@ sub connect_listener {
 
   my $logger = $self->daemon->logger;
 
-  $logger->info("Starting ...");
   my $lcfg = $config;
   my $host           = $lcfg->{host} || 'localhost';
-  my $port           = $lcfg->{port} || 5671;
   my $user           = $lcfg->{user};
   my $password       = $lcfg->{password};
-  #my $heartbeat      = $lcfg->{heartbeat} || 5;
   my $channel        = $lcfg->{channel} ||1;
   my $exchange_name  = $lcfg->{exchange_name} || 'pubsub';
   my $routing_key    = $lcfg->{routing_key} || '#';
   my $routing_prefix = $lcfg->{routing_prefix} || "opensuse.obs";
   my $ssl            = exists($lcfg->{ssl}) ? $lcfg->{ssl} : 1;
+  my $port           = $lcfg->{port} || ($ssl) ? 5671 : 5672;
   my $ssl_cacert      |= '';
   my $ssl_verify_host |= 0;
   if ($ssl) {
@@ -42,7 +41,6 @@ sub connect_listener {
   };
   my $mq = Net::AMQP::RabbitMQ->new();
 
-  $logger->debug("Connecting to $host");
   $self->connect_opts([
     $host,
     {
@@ -55,10 +53,9 @@ sub connect_listener {
        ssl_cacert      => $ssl_cacert
     }
   ]);
-  #if ($logger->is_trace) {
-  #  $logger->trace(" Using the following options (password suppressed for security reasons");
-  #  $logger->trace("  - c_opts -> $_ : $c_opts->[1]->{$_}") for (grep { $_ ne 'password' } keys(%{$c_opts->[1]}));
-  #}
+
+  $logger->debug('Starting listner with the following options: '.$self->dump_it($self->connect_opts));
+
   $mq->connect(@{$self->connect_opts});
 
   $SIG{TERM} = $SIG{INT} = sub {
@@ -132,8 +129,8 @@ sub wait_for_events {
 
   while (1) {
     try {
+      $delay = 1;
       while (my $message = $mq->recv(1000)) {
-	$delay = 2;
 	if ( $message->{routing_key} eq "$routing_prefix.package.build_success" ) {
 	   my $body = decode_json($message->{body});
 	   my $package_key = $body->{project}.'/'.$body->{package}.'/'.$body->{repository}.'/'.$body->{arch};
@@ -165,12 +162,12 @@ sub wait_for_events {
       }
     } catch {
       $logger->debug($_);
-      $logger->debug("Waiting $delay secconds to reconnect");
+      $logger->debug("Waiting $delay seconds to reconnect");
       sleep $delay;
       $delay = $delay*2 if ($delay < 300);
       try {
-        $mq = Net::AMQP::RabbitMQ->new();
-        $mq->connect(@{$self->connect_opts});
+        ($mq, undef) = $self->connect_listener;
+        $logger->debug("Reconnected!");
       } catch {
 	$logger->warn("Reconnect to message queue failed: $_");
       };
