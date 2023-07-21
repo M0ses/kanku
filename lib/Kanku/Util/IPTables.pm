@@ -188,7 +188,7 @@ sub add_forward_rules_for_domain {
   foreach my $port ( @{$portlist->{$proto}} ) {
     my $host_port = shift(@fw_ports);
 
-    my $comment = "Kanku:host:".$self->domain_name.":$port->[1]:".$self->domain_autostart;
+    my $comment = "Kanku:host:".$self->domain_name.":".($port->[1]||q{}).":".($self->domain_autostart||0);
 
     my @cmds = (
       "$wrapper I:nat:$chain:$host_ip:$proto:$host_port:$guest_ip:$port->[0]:$comment",
