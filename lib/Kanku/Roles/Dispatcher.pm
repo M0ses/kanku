@@ -125,6 +125,11 @@ sub run {
 sub cleanup_dead_jobs {
   my ($self, $worker_name) = @_;
   my $logger = $self->logger;
+  my $result = {
+   execute  => {message=>"Cleanup dead jobs"},
+   finalize => {message=>"Cleanup dead jobs"},
+   prepare  => {message=>"Cleanup dead jobs"},
+  };
 
   if ($worker_name) {
     $logger->debug("Cleaning up dead jobs ($worker_name)");
@@ -140,23 +145,33 @@ sub cleanup_dead_jobs {
   my $dead_jobs = $self->schema->resultset('JobHistory')->search(
     { state => ['running','dispatching'], %worker_filter }
   );
-  $dead_jobs->update({ state => 'failed', end_time => time()});
+
   my %job_filter;
   if ($worker_name) {
     my @job_ids;
     while (my $job = $dead_jobs->next) {
       push @job_ids, $job->id;
+      my $pid = $job->masterinfo;
+      $logger->debug("Killing: $pid");
+      kill('TERM', $pid);
+      waitpid($pid, WIFEXITED);
+      $logger->debug("Killed: $pid");
     }
     if (@job_ids) {
       %job_filter = (job_id => {'-in'=>\@job_ids})
     }
   }
 
+  $dead_jobs->update({ state => 'failed', end_time => time()});
+
   my $dead_tasks = $self->schema->resultset('JobHistorySub')->search(
     { state => ['running'], %job_filter }
   );
 
-  $dead_tasks->update({ state => 'failed'});
+  $dead_tasks->update({
+    state  => 'failed',
+    result => encode_json($result),
+  });
 
 
   $logger->debug("Cleaning up dead jobs finished");
@@ -363,7 +378,7 @@ sub end_job {
   if ($jgid) {
      my $schema  = $self->schema;
      my $remaining_jobs = $schema->resultset('JobHistory')->search(
-       { 
+       {
 	 job_group_id => $job->job_group_id,
 	 state=>{-not_in=>['succeed','failed','skipped']},
        }
