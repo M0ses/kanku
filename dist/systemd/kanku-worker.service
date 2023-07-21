@@ -9,6 +9,7 @@ Type=forking
 PIDFile=/run/kanku/kanku-worker.pid
 ExecStart=/usr/sbin/kanku-worker
 ExecStop=/usr/sbin/kanku-worker --stop
+TimeoutStopSec=90
 
 [Install]
 WantedBy=multi-user.target
