@@ -80,16 +80,20 @@ sub execute {
     $self->ENV->{$n_env_var} = $ctx->{$env_var};
   }
 
+  $self->ENV->{SMOKETEST_HOST} = 'https://'.$ctx->{ipaddress};
+
   my @commands = (
-    'export TMPDIR=`mktemp -d` &&'.
-    'cd $TMPDIR &&'.
-    'git clone '.$self->git_url.' &&'.
-    'cd open-build-service/dist/t &&'.
-    'git checkout '.$self->git_revision.' &&'.
-    'bundle.ruby'.$self->ruby_version.' install ;'.
-    'bundle.ruby'.$self->ruby_version.' exec rspec > /tmp/obs-server-frontend-$$.log 2>&1 ||'.
-    'cat /tmp/obs-server-frontend-$$.log ;'.
-    'rm -rf $TMPDIR',
+    'export TMPDIR=`mktemp -d` && '.
+    'cd $TMPDIR && '.
+    'git clone '.$self->git_url.' && '.
+    'cd open-build-service/dist/t && '.
+    'git checkout '.($self->git_revision||'master').' && '.
+    'bundle.ruby'.$self->ruby_version.' install ; '.
+    'bundle.ruby'.$self->ruby_version.' exec rspec > /tmp/obs-server-frontend-$$.log 2>&1 || '.
+    '{ cat /tmp/obs-server-frontend-$$.log ; '.
+    '  rm -rf $TMPDIR;'.
+    ' exit 1;'.
+    '}',
   );
 
   foreach my $cmd ( @commands ) {
