@@ -154,7 +154,10 @@ sub cleanup_dead_jobs {
       my $pid = $job->masterinfo;
       $logger->debug("Killing: $pid");
       kill('TERM', $pid);
-      waitpid($pid, WIFEXITED);
+      my $kid;
+      do {
+        $kid = waitpid($pid, WNOHANG);
+      } while $kid > 0;
       $logger->debug("Killed: $pid");
     }
     if (@job_ids) {
