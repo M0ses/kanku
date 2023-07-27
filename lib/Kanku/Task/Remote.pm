@@ -118,6 +118,7 @@ sub run {
   $logger->debug(' - channel: '.$kmq->channel);
   $logger->debug(' - routing_key '.$kmq->routing_key);
   $logger->debug(' - queue_name '.$kmq->queue_name);
+  $logger->debug(' - answer_key '.$self->answer_key);
   $logger->trace(Dumper($data));
 
   $kmq->publish(
