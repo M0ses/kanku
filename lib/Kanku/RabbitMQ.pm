@@ -38,6 +38,7 @@ use JSON::XS;
 use UUID ':all';
 use Try::Tiny;
 use Carp qw/longmess/;
+use Data::Dumper;
 
 with 'Kanku::Roles::Logger';
 with 'Kanku::Roles::Helpers';
@@ -216,7 +217,8 @@ sub publish {
   $logger->trace("  opts       : '" . $self->dump_it($opts) . "'");
 
   try {
-    $self->queue->publish($self->channel, $self->routing_key, $data, $opts);
+    my $ans = $self->queue->publish($self->channel, $self->routing_key, $data, $opts);
+    $logger->debug(Dumper($ans));
   } catch {
     $logger->error('Error while publishing message (routing_key: '.$self->routing_key.'): '.$_);
     $self->reconnect();

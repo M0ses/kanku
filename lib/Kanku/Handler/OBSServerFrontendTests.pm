@@ -85,7 +85,7 @@ sub execute {
   my @commands = (
     'export TMPDIR=`mktemp -d` && '.
     'cd $TMPDIR && '.
-    'git clone '.$self->git_url.' && '.
+    'git clone '.($self->git_url||'https://github.com/openSUSE/open-build-service.git').' && '.
     'cd open-build-service/dist/t && '.
     'git checkout '.($self->git_revision||'master').' && '.
     'bundle.ruby'.$self->ruby_version.' install ; '.
