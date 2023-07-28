@@ -18,6 +18,7 @@ package Kanku::Handler::OBSServerFrontendTests;
 
 use Moose;
 use namespace::autoclean;
+use File::Temp;
 
 with 'Kanku::Roles::Handler';
 with 'Kanku::Roles::SSH';
@@ -81,19 +82,24 @@ sub execute {
   }
 
   $self->ENV->{SMOKETEST_HOST} = 'https://'.$ctx->{ipaddress};
+  my $job_id       = $self->job->id;
+  my $ruby_version = $self->ruby_version || '2.5';
+  my $git_revision = $self->git_revision||'master';
+  my $git_url      = $self->git_url||'https://github.com/openSUSE/open-build-service.git';
+  my $tmp_dir      = File::Temp->new->filename;
+  my $log_to_file  = "> /tmp/obs-server-frontend-$job_id.log 2>&1 ||".
+    '{'.
+    "  cat /tmp/obs-server-frontend-$job_id.log ; ".
+    "  rm -rf $tmp_dir;".
+    ' exit 1;'.
+    '}';
 
   my @commands = (
-    'export TMPDIR=`mktemp -d` && '.
-    'cd $TMPDIR && '.
-    'git clone '.($self->git_url||'https://github.com/openSUSE/open-build-service.git').' && '.
-    'cd open-build-service/dist/t && '.
-    'git checkout '.($self->git_revision||'master').' && '.
-    'bundle.ruby'.$self->ruby_version.' install ; '.
-    'bundle.ruby'.$self->ruby_version.' exec rspec > /tmp/obs-server-frontend-$$.log 2>&1 || '.
-    '{ cat /tmp/obs-server-frontend-$$.log ; '.
-    '  rm -rf $TMPDIR;'.
-    ' exit 1;'.
-    '}',
+    "mkdir -p $tmp_dir",
+    "git clone $git_url $tmp_dir/",
+    "git -C $tmp_dir checkout $git_revision",
+    "cd $tmp_dir/dist/t && bundle.ruby$ruby_version install $log_to_file",
+    "cd $tmp_dir/dist/t && bundle.ruby$ruby_version exec rspec $log_to_file",
   );
 
   foreach my $cmd ( @commands ) {
@@ -139,6 +145,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
       jump_host: 192.168.199.17
       git_url: https://github.com/M0ses/open-build-service
       git_revision: fix_foobar
+      ruby_version: 3.1
 
 =head1 DESCRIPTION
 
@@ -148,7 +155,13 @@ frontend test suite (smoketests)
 
 =head1 OPTIONS
 
-      commands          : array of commands to execute
+    jump_host:      <ip_of_execution_host>
+
+    git_url:        <url to pull open-build-serivce sources>
+
+    git_revision:   <revision/tag/branch to checkout>
+
+    ruby_version:   <ruby version to use>
 
 
 SEE ALSO Kanku::Roles::SSH, Kanku::Handler::ExecuteCommandViaSSH
