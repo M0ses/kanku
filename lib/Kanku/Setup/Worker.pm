@@ -1,6 +1,7 @@
 package Kanku::Setup::Worker;
 
 use Moose;
+use Carp;
 use File::Copy;
 use Path::Class qw/file dir/;
 use Net::Domain qw/hostfqdn/;
@@ -9,13 +10,114 @@ with 'Kanku::Setup::Roles::Common';
 #with 'Kanku::Setup::Roles::Server';
 with 'Kanku::Roles::Logger';
 
+has [qw/mq_host mq_vhost mq_user mq_pass/] => (is=>'ro','isa'=>'Str');
+
+has 'host' => (
+  is      =>'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  default => sub {
+     hostfqdn() || $ENV{HOSTNAME};
+  }
+);
+
+has 'master' => (
+  is      =>'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  default => q{},
+);
+
+has _dbfile => (
+        isa     => 'Str',
+        is      => 'rw',
+        lazy    => 1,
+        default => "/var/lib/kanku/db/kanku-schema.db",
+);
+
 sub setup {
   my ($self)    = @_;
   my $logger  = $self->logger;
-  $logger->info("Starting worker setup");
+  $logger->info('Starting worker setup (master: '.$self->master.')');
+  if(!$self->master) {
+    $logger->error('No master specified!');
+    return 1;
+  }
+
+  $self->user("kankurun");
+
+  $self->_setup_database();
+
+  $self->_configure_libvirtd_access();
+
+  $self->_set_sudoers();
+
+  $self->_create_ssh_keys;
+
+  #$self->_setup_rabbitmq;
+
+  $self->_setup_nested_kvm;
+
+  my $gconf = "/etc/kanku/kanku-config.yml";
+
+  $self->_backup_config_file($gconf);
+
+  $self->_create_config_from_template(
+    "kanku-config.yml.tt2",
+    $gconf,
+    {
+       db_file        => $self->_dbfile,
+       use_publickey  => 1,
+       distributed    => 1,
+       rabbitmq_user  => $self->mq_user,
+       rabbitmq_pass  => $self->mq_pass,
+       rabbitmq_vhost => $self->mq_vhost,
+       rabbitmq_host  => $self->mq_host || 'localhost',
+       #cacertfile     => $self->cacertfile,
+       #ovs_ip_prefix  => $self->ovs_ip_prefix,
+       cache_dir      => '/var/cache/kanku',
+    }
+  );
+
+  $logger->info("Created $gconf!");
+
+  #$self->_create_default_pool;
+
+  #$self->_create_default_network;
+
+  $self->_setup_ovs_hooks;
+
+  $logger->info("Server mode setup successfully finished!");
+  $logger->info("To make sure libvirtd is coming up properly we recommend a reboot");
+
+  #$self->logger->fatal("PLEASE REMEMBER YOUR CA PASSWORD: ".$self->ca_pass) if $self->ca_pass;
+  $logger->warn('TODO: create kanku-config.yml');
+  $logger->warn('TODO: get ovs networks from master');
+  $logger->warn('TODO: install keys in /root/.ssh/authorized keys');
+  $logger->warn('TODO: configure openvswitch');
+  $logger->error('Not implemented yet!');
 }
 
 1;
+
+sub _setup_ovs_hooks {
+  my ($self) = @_;
+
+  # Install openvswitch and openvswitch-switch
+  #
+  # '''zypper -n in openvswitch openvswitch-switch'''
+  $self->_run_system_cmd("systemctl", "start", "openvswitch");
+  $self->_run_system_cmd("systemctl", "enable", "openvswitch");
+
+  file("/etc/libvirt/hooks/network")->spew("#!/bin/bash
+
+/usr/bin/perl /usr/lib/kanku/network-setup.pl \$@
+");
+
+  chmod oct(755), "/etc/libvirt/hooks/network";
+  $self->_run_system_cmd("systemctl", "restart", "libvirtd.service");
+}
+
 __END__
 
 has [qw/mq_host mq_vhost mq_user mq_pass/] => (is=>'ro','isa'=>'Str');
@@ -25,15 +127,6 @@ has 'ca_path' => (
   lazy    => 1,
   default => sub {
     dir('/etc/kanku/ca');
-  }
-);
-
-has 'host' => (
-  is      =>'rw',
-  isa     =>'Str',
-  lazy    => 1,
-  default => sub {
-     hostfqdn() || $ENV{HOSTNAME};
   }
 );
 
@@ -385,24 +478,6 @@ sub _setup_rabbitmq {
   $self->_run_system_cmd("rabbitmqctl","add_user", $self->mq_user, $self->mq_pass) if $result->{stdout} !~ m#kanku#;
 
   $self->_run_system_cmd("rabbitmqctl","set_permissions", "-p", $self->mq_vhost, $self->mq_user, '.*', '.*', '.*');
-}
-
-sub _setup_ovs_hooks {
-  my ($self) = @_;
-
-  # Install openvswitch and openvswitch-switch
-  #
-  # '''zypper -n in openvswitch openvswitch-switch'''
-  $self->_run_system_cmd("systemctl", "start", "openvswitch");
-  $self->_run_system_cmd("systemctl", "enable", "openvswitch");
-
-  file("/etc/libvirt/hooks/network")->spew("#!/bin/bash
-
-/usr/bin/perl /usr/lib/kanku/network-setup.pl \$@
-");
-
-  chmod oct(755), "/etc/libvirt/hooks/network";
-  $self->_run_system_cmd("systemctl", "restart", "libvirtd.service");
 }
 
 1;

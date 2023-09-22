@@ -126,7 +126,7 @@ sub connect {
     }
   );
 
-  $logger->debug("Trying to connect to rabbitmq with the folloing options: ".$self->dump_it(\@connect_opts));
+  $logger->debug("Trying to connect to rabbitmq with the following options: ".$self->dump_it(\@connect_opts));
 
   my $connect_success = 0;
   while (! $connect_success ) {

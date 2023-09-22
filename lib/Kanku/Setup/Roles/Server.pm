@@ -58,17 +58,6 @@ sub _configure_apache {
   }
 }
 
-sub _create_ssh_keys {
-  my ($self)  = @_;
-  my $ssh_dir = '/etc/kanku/ssh';
-  my $id_rsa  = "$ssh_dir/id_rsa";
-  if (! -f $id_rsa ) {
-    -d $ssh_dir || mkdir $ssh_dir;
-    `ssh-keygen -b 2048 -t rsa -f $id_rsa -q -N ""`
-  }
-  $self->_chown($id_rsa, "$id_rsa.pub");
-}
-
 sub _configure_apache_ssl {
   my $self      = shift;
   my $logger    = $self->logger;

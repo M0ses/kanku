@@ -185,6 +185,12 @@ option 'ovs_ip_prefix' => (
     documentation => 'IP network prefix for openVSwitch setup (default 192.168.199)',
 );
 
+option 'master' => (
+    isa           => 'Str|Undef',
+    is            => 'rw',
+    documentation => 'IP address of the master server',
+);
+
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
@@ -229,6 +235,7 @@ sub run {
     );
   } elsif ($self->worker) {
     $setup = Kanku::Setup::Worker->new(
+      master          => $self->master,
 #      user            => $self->user,
 #      images_dir      => $self->images_dir,
 #      apiurl          => $self->apiurl,
