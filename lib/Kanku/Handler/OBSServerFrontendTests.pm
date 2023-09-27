@@ -64,6 +64,7 @@ sub execute {
   my $results = [];
   my $ip      = $self->jump_host;
   $self->ipaddress($ip);
+  $self->username('kanku');
   my $ssh     = $self->connect();
   my $ctx     = $self->job->context;
 
@@ -87,10 +88,10 @@ sub execute {
   my $git_revision = $self->git_revision||'master';
   my $git_url      = $self->git_url||'https://github.com/openSUSE/open-build-service.git';
   my $tmp_dir      = File::Temp->new->filename;
-  my $log_to_file  = "> /tmp/obs-server-frontend-$job_id.log 2>&1 ||".
+  my $log_to_file  = ">> /tmp/obs-server-frontend-$job_id.log 2>&1 ||".
     '{'.
     "  cat /tmp/obs-server-frontend-$job_id.log ; ".
-    "  rm -rf $tmp_dir;".
+    #"  rm -rf $tmp_dir;".
     ' exit 1;'.
     '}';
 
@@ -98,6 +99,7 @@ sub execute {
     "mkdir -p $tmp_dir",
     "git clone $git_url $tmp_dir/",
     "git -C $tmp_dir checkout $git_revision",
+    "cd $tmp_dir/dist/t && bundle.ruby$ruby_version config set --local path 'vendor/bundle' $log_to_file",
     "cd $tmp_dir/dist/t && bundle.ruby$ruby_version install $log_to_file",
     "cd $tmp_dir/dist/t && bundle.ruby$ruby_version exec rspec $log_to_file",
   );
