@@ -13,7 +13,7 @@ jobs:
   -
     use_module: Kanku::Handler::OBSCheck
     options:
-      api_url: https://api.opensuse.org/public
+      api_url: [% apiurl %]
       # Please have a look at
       # kanku lsi
       # to find more official Images

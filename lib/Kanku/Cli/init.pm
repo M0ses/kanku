@@ -123,7 +123,7 @@ option 'output' => (
     isa           => 'Str',
     is            => 'rw',
     documentation => 'Name of output file',
-    cmd_aliases   => ['o'],
+    cmd_aliases   => ['o', 'F'],
     lazy          => 1,
     default       => 'KankuFile',
 );
@@ -139,6 +139,15 @@ option 'pool' => (
       return $cfg->cf->{'Kanku::Handler::CreateDomain'}->{pool_name} || '';
    },
 );
+
+option 'apiurl' => (
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => 'a',
+  documentation => 'OBS api url',
+  default       => 'https://build.opensuse.org/public',
+);
+
 
 sub run {
   my ($self)  = @_;
@@ -178,6 +187,7 @@ sub run {
         package       => $self->package,
         repository    => $self->repository,
         pool          => $self->pool,
+	apiurl        => $self->apiurl,
         arch          => Kanku::Config->instance->cf->{'arch'},
   };
 

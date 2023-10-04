@@ -36,15 +36,34 @@ option 'name' => (
   default       => '',
 );
 
+option 'apiurl' => (
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => 'a',
+  documentation => 'OBS api url',
+  default       => 'https://build.opensuse.org/public',
+);
+
+option 'project' => (
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => 'p',
+  documentation => 'Project name',
+  default       => 'devel:kanku:images',
+);
+
 
 sub run {
   my $self    = shift;
   my $pkg     = __PACKAGE__;
   Kanku::Config->initialize();
-  my $prj_name = Kanku::Config->instance->cf->{$pkg}->{project_name} || 'devel:kanku:images';
+  my $cf = Kanku::Config->instance->cf;
+  my $prj_name = $self->project || $cf->{$pkg}->{project_name};
+  my $apiurl   = $self->apiurl;
+
   my $prj = Net::OBS::Client::Project->new(
     name     => $prj_name,
-    apiurl   => 'https://build.opensuse.org/public',
+    apiurl   => $apiurl,
   );
 
   my $res  = $prj->fetch_resultlist;
@@ -57,7 +76,7 @@ sub run {
 	print <<EOF
 
     # --- $pkg->{package}
-      ## kanku init --project $prj_name --package $pkg->{package} --repository $tmp->{repository}
+      ## kanku init --apiurl $apiurl --project $prj_name --package $pkg->{package} --repository $tmp->{repository}
       ## state: $pkg->{code}
       project: $prj_name
       package: $pkg->{package}
