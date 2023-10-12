@@ -198,8 +198,6 @@ sub get_from_history {
 
   die "Could not find result for vm_image_url: $ctx->{vm_image_url}\n" unless $rs;
 
-  $self->logger->debug($rs->vm_image_file);
-
   $ctx->{vm_image_file} = $rs->vm_image_file;
 
   return {
