@@ -157,7 +157,7 @@ has accessmode_9p => (
   is      => 'rw',
   isa     => 'Str',
   lazy    => 1,
-  default => 'passthrough',
+  default => 'squash',
 );
 
 has '_unit' => (
