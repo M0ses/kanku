@@ -43,14 +43,14 @@
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
+        - rcnetwork restart
         - zypper -n in rabbitmq-server rabbitmq-server-plugins openvswitch kanku
         - make -C /tmp/kanku install 2>&1 |tee /tmp/make.log
         - /usr/bin/kanku setup --apache --distributed --ssl 2>&1 |tee /tmp/setup-server.log
-        - cp /tmp/kanku/etc/jobs/examples/* /etc/kanku/jobs/
+        - cp -r /tmp/kanku/etc/jobs/examples/* /etc/kanku/jobs/
         - cp /tmp/kanku/etc/job_groups/examples/* /etc/kanku/job_groups/
         - systemctl enable --now kanku-iptables
         - systemctl enable --now kanku-web
-        - systemctl enable --now kanku-worker
         - systemctl enable --now kanku-dispatcher
         - systemctl enable --now kanku-triggerd
         - systemctl enable --now kanku-scheduler
@@ -58,4 +58,5 @@
         - kanku login -a http://localhost:5000/kanku -u admin -p opensuse
         - /tmp/kanku/contrib/set_ip
         - rcapache2 restart
+        - systemctl enable --now kanku-worker
         - /tmp/kanku/contrib/wait_for_job.sh
