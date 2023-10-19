@@ -1,20 +1,31 @@
 ---
-title: RELEASE 0.12.4
-date: 2022-05-06 00:00:00
+title: RELEASE <%= $version %>
+date: <%= $date %>
 tags: release
 template: blog/release-post.html
 data:
-  release: 0.12.4
+  release: <%= $version %>
   warnings: |-
             <h2>Attention:</h2>
             <p></p>
             <code></code>
   features:
-    - "[core|web|util|handler|cli] "
+% for my $entry (@{$logs->{features}}) {
+    - "<%= $entry %>"
+% }
   fixes:
-    - "[core|web|util|handler|cli] "
+% for my $entry (@{$logs->{fixes}}) {
+    - |-
+      <%= $entry %>
+% }
+  unsorted:
+% for my $entry (@{$logs->{''}}) {
+    - |-
+      <%= $entry %>
+% }
   examples: |-
             <h3>Example 1</h3>
             <img src="img/kanku-1.jpg" alt="Image 1">
             <code>command</code>
+
 ---

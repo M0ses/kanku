@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use FindBin;
+use JavaScript::Minifier::XS qw{minify};
+
+my @scripts = qw{
+common.js
+help.js
+admin.js
+guest.js
+job_history.js
+job.js
+job_group.js
+job_result.js
+notify.js
+settings.js
+worker.js
+index.js
+pwreset.js
+signup.js
+};
+
+my $js;
+for my $file (@scripts) {
+  open(my $fh, '<'. "$FindBin::Bin/../public/js/kanku/$file") || die $!;
+  $js .= $_ while <$fh>;
+  close $fh;
+}
+
+my $minified = minify($js);
+
+open(my $fh, '>', "$FindBin::Bin/../public/js/kanku_bundle.js") || die $!;
+print $fh $minified;
+close $fh;
+
+exit 0;

@@ -64,6 +64,12 @@
 <%= gen_entries($self->data->{fixes}, 0) %>
 %}
 
+% if ($self->data->{unsorted}) {
+<h2>UNSORTED</h2>
+
+<%= gen_entries($self->data->{unsorted}, 0) %>
+%}
+
 % if ($self->data->{examples}) {
 <%= markdown $self->data->{examples} %>
 % }

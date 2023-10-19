@@ -1,0 +1,235 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use FindBin;
+
+BEGIN { push @::INC, "/usr/lib/build" };
+
+use File::Basename;
+use File::Temp qw/tempfile/;
+use File::Copy;
+use File::Path qw/make_path/;
+use DateTime;
+use Data::Dumper;
+use Build::Rpm;
+use Statocles::Template;
+
+
+my $version = $ARGV[0];
+my $ver_regex = qr/^\d+\.\d+\.\d+$/;
+my $branch = 'master';
+my $retag=0;
+
+if (!$version) {
+  print_usage();
+  exit 1;
+}
+
+sanitize_version($version);
+
+
+my $tag_hash = `git log -1 $version --pretty=%H`;
+my $branch_hash = `git log -1 $branch --pretty=%H`;
+chomp($tag_hash,$branch_hash);
+
+if ($tag_hash && $tag_hash ne $branch_hash) {
+  print "Tag $version is not latest commit on branch '$branch' ($tag_hash/$branch_hash)!\n";
+  print "Current tag    ($version) commit: $tag_hash\n";
+  print "Current branch ($branch)  commit: $tag_hash\n";
+  my $diff = `git diff --color $tag_hash..$branch_hash`;
+  my $hl = "#" x 79;
+  print "\n#$hl\n";
+  print "# DIFF:\n";
+  print "#$hl\n";
+  print $diff;
+  print "#$hl\n\n";
+  print "Would you like to recreate the tag? [yN]\n";
+  my $ans = <STDIN>;
+  chomp $ans;
+  if ($ans =~ /^y(es)?$/i) {
+    $retag = 1;
+    system("git tag -d $version");
+  }
+}
+
+
+if (!tag_for_version_exists($version)) {
+  if (!$retag) {
+    print "No tag for version $version found.\n";
+    print "Should we create a new tag (for current $branch)? [Y|n]\n";
+    my $answer = <STDIN>;
+    chomp $answer;
+    if ($answer !~ /^y(es)?$/i) {
+      print "Cannot proceed withou existing tag. Exiting!\n";
+      exit 1;
+    }
+  }
+  create_tag_for_version($version);
+}
+
+verify_tag($version);
+
+my ($dt_path, $dt_time) = query_release_datetime();
+
+my $prev_version = find_previous_version($version);
+
+my @logs = create_log_history($prev_version, $version);
+
+my $log_by_categories = categorize_log_entries(\@logs);
+for my $key (keys %{$log_by_categories}) {
+  chomp @{$log_by_categories->{$key}};
+}
+
+my $templ = Statocles::Template->new(path=>"$FindBin::Bin/../blog/release-template.tt2");
+my $yaml = $templ->render(
+  version=> $version, 
+  date => $dt_time,
+  logs => $log_by_categories,
+);
+
+my $outfile = "$FindBin::Bin/../blog/$dt_path/release-$version/index.md";
+if ( -f $outfile ) {
+  print "$outfile already exists. Overwrite? [yN] ";
+  my $res = <STDIN>;
+  exit 1 unless $res =~ /^y(es)?$/i;
+}
+
+my ($fh, $filename) = tempfile();
+print "Writing temp file $filename\n";
+print $fh $yaml;
+system("$::ENV{'EDITOR'} $filename");
+
+print "Really create file $outfile? [yN] ";
+my $ans=<STDIN>;
+chomp($ans);
+if ($ans =~ /y(es)/i) {
+  my $dir = dirname($outfile);
+  make_path($dir) unless -d $dir;
+  print "Copying $filename -> $outfile\n";
+  copy($filename, $outfile) || warn "Copying failed: $!";
+} else {
+  print "Skipped creation of $outfile!\n";
+}
+
+system("git add $outfile");
+system("git commit -m 'added release notes for $version'");
+system("statocles build");
+print "Would you like to start preview? [Yn] ";
+$ans = <STDIN>;
+if ( $ans !~ /^n/i ) {
+  system("statocles daemon");
+  print "HERRE\n";
+}
+
+my $cmd_deploy = "statocles deploy";
+
+print "Finished!\n";
+
+exit 0;
+
+###############################################################################
+sub categorize_log_entries {
+  my ($log) =  @_;
+  my $result = {
+      warnings => [],
+      features => [],
+      fixes    => [],
+      examples => [],
+      ''       => [],
+  };
+  for my $log_entry (@$log) {
+    my @ll = split(/\n/, $log_entry);
+    my $cat = q{};
+    my $cat_final;
+    for my $line (@ll) {
+      $cat = 'fixes' if (!$cat_final && $line =~ /fix(ed|es)?/i);
+      $cat = $2 if ( $line =~ /^cat(egory)?: (fixes|examples|features|warnings)/i);
+    }
+    push @{$result->{$cat}}, $log_entry;
+  }
+  return $result;
+}
+
+sub create_log_history {
+   my ($from, $to) = @_;
+   my $cmd = "git log $from..$to";
+   my @log = `$cmd`;
+   my $in=0;
+   my $sec=0;
+   my @msgs=();
+   my $msg;
+   for my $ll (@log) {
+     if ($ll =~ /^    /) { $in || $sec++;$in = 1 };
+     if ($ll =~ /^\S/) { push @msgs, $msg if $msg; $in = 0 ; $msg = q{} };
+     $msg .= substr($ll,4) if ($in && $ll && length($ll)>4);
+   }
+   return @msgs;
+}
+sub find_previous_version {
+  my ($version) = @_;
+  my $cmd = "git tag --merged $branch";
+  my @tags = `$cmd`;
+  chomp(@tags);
+  if ($?) {
+    print "Failed to list tags for branch '$branch'\n";
+    print "Used command: $cmd\n";
+    print "Cannot proceed without a list of tags. Exiting!\n";
+    exit 1;
+  }
+  my $verscmp = \&Build::Rpm::verscmp;
+  my @sorted  = sort { $verscmp->($a, $b) } @tags;
+  #print Dumper(\@sorted);
+  return $sorted[-2];
+}
+
+sub sanitize_version {
+  my ($version) = @_;
+  die "Incorrect version format\n" if $version !~ $ver_regex;
+}
+
+sub query_release_datetime {
+   my $now = DateTime->now();
+   print "\nDefault release time/date: ".$now->datetime(q{ })."\n";
+   print "Please enter the correct release date/time in the given format.\n";
+   print "Or press ENTER to accept the default.\n\n";
+   my $answer = <STDIN>;
+   chomp $answer;
+   return ($now->ymd('/'), $now->datetime) unless $answer;
+
+   return (undef, undef);
+}
+sub verify_tag {
+  my ($version) = @_;
+  my $cmd = "git tag -v $version";
+  my @out = $cmd;
+  if ($?) {
+    print "Failed to verify annotated tag '$version'\n";
+    print "Used command: $cmd\n";
+    print "Cannot proceed without a verified tag. Exiting!\n";
+    exit 1;
+  }
+}
+
+sub create_tag_for_version {
+  my ($version) = @_;
+  my $cmd = "git tag -a -s -m 'Bump to version $version' $version master";
+  my @out = `$cmd`;
+  if ($?) {
+    print "An error occured while executing command '$cmd'.\n";
+    exit 1;
+  }
+}
+
+sub tag_for_version_exists {
+  my ($version) = @_;
+  my @out = `git tag -l $version`;
+  return 1 if (@out == 1 && $out[0] eq "$version\n");
+  return;
+}
+
+sub print_usage {
+  my $bn = basename($0);
+  print STDERR "$bn <version>\n";
+}
