@@ -28,6 +28,7 @@ use Carp;
 use File::HomeDir;
 
 use Kanku::Config;
+use Kanku::Config::Defaults;
 use Kanku::Util::VM;
 use Kanku::Util::VM::Image;
 use Kanku::Util::IPTables;
@@ -48,22 +49,14 @@ has 'network_name' => (
   is     => 'rw',
   isa    =>'Str',
   lazy   => 1,
-  default => sub {
-    my $cfg = Kanku::Config->instance->cf;
-    my $pkg = __PACKAGE__;
-    return $cfg->{$pkg}->{network_name} || 'kanku-devel';
-  },
+  default => sub { Kanku::Config::Defaults->get(__PACKAGE__,'network_name') },
 );
 
 has 'pool_name' => (
   is     => 'rw',
   isa    =>'Str',
   lazy   => 1,
-  default => sub {
-    my $cfg = Kanku::Config->instance->cf;
-    my $pkg = __PACKAGE__;
-    return $cfg->{$pkg}->{pool_name} || 'default';
-  },
+  default => sub { Kanku::Config::Defaults->get(__PACKAGE__,'pool_name') },
 );
 
 has '+memory'         => ( default => 1024*1024 );
@@ -460,14 +453,19 @@ sub _prepare_vm_via_console {
     if ( $self->forward_port_list ) {
 	my $ipt = Kanku::Util::IPTables->new(
 	  domain_name      => $self->domain_name,
-	  host_interface   => $ctx->{host_interface} || '',
+	  host_interface   => $ctx->{host_interface}
+	                      || Kanku::Config::Defaults->get('Kanku::Util::IPTables',
+			                                      'host_interface')
+			      || q{},
 	  guest_ipaddress  => $ip,
-	  iptables_chain   => $cfg->{'Kanku::Util::IPTables'}->{iptables_chain},
+	  iptables_chain   => Kanku::Config::Defaults->get('Kanku::Util::IPTables',
+	                                                   'iptables_chain'),
 	  domain_autostart => $self->domain_autostart,
 	);
 
 	$ipt->add_forward_rules_for_domain(
-	  start_port => $cfg->{'Kanku::Util::IPTables'}->{start_port},
+	  start_port => Kanku::Config::Defaults->get('Kanku::Util::IPTables',
+	                                             'start_port'),
 	  forward_rules => [ split(/,/,$self->forward_port_list) ]
 	);
     }

@@ -23,13 +23,24 @@ use File::Glob qw(:globally);
 use File::Find;
 
 use Kanku::Config;
+use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Handler';
 with 'Kanku::Roles::SSH';
 
-has commands    => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
 has _results    => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
-has users       => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
+has tasks       => ( is=>'rw',
+                     isa=>'ArrayRef',
+                     default => sub {
+		       Kanku::Config::Defaults->get(__PACKAGE__, 'tasks');
+		     },
+		   );
+has users       => ( is=>'rw',
+                     isa=>'ArrayRef',
+		     default => sub {
+		       Kanku::Config::Defaults->get(__PACKAGE__, 'users');
+		     },
+		   );
 has timeout     => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
@@ -42,19 +53,18 @@ sub execute {
   my ($self)  = @_;
   my $ip      = $self->ipaddress;
   my $ctx     = $self->job->context;
-  my $cfg     = Kanku::Config->instance(); 
-  my $pkg     = __PACKAGE__;
-  my $profile = $cfg->cf->{$pkg};
+  my $users   = $self->users;
+  my $tasks   = $self->tasks;
+
   my $cmds    = {
     cp    => sub { $self->cp($_[0]) },
     chown => sub { $self->chown($_[0]) },
     chmod => sub { $self->chmod($_[0]) },
     mkdir => sub { $self->mkdir($_[0]) },
   };
-
-  for my $user (@{$self->users}) {
+  for my $user (@{$users}) {
     $self->username($user);
-    if (ref($profile->{tasks}) ne 'ARRAY') {
+    if (!@{$tasks}) {
       return {
 	code        => 0,
 	message     => "No proper config found. Skipping!",
@@ -62,9 +72,8 @@ sub execute {
       };
     }
 
-    my $tasks   = $profile->{tasks};
     for my $task (@{$tasks}) {
-      croak("Found unknown command '$task->{cmd}' in your '$pkg' config") unless (ref($cmds->{$task->{cmd}}) eq 'CODE');
+      croak("Found unknown command '$task->{cmd}' in your config") unless (ref($cmds->{$task->{cmd}}) eq 'CODE');
       $cmds->{$task->{cmd}}->($task);
     };
   }
@@ -77,16 +86,21 @@ sub execute {
 
 sub cp {
   my ($self, $task) = @_;
-  my $pkg = __PACKAGE__;
   my $src = $task->{src} || croak("No src paramter given in your config");
   my $dst = $task->{dst} || $src;
-  my $rec = ($task->{recursive})?'-r':q{};
+  my $rec = ($task->{recursive}) ? '-r ' : q{};
   my $usr = $self->username || 'root';
   my $ctx = $self->job()->context();
-  my $cmd = "scp $rec -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null $src $usr\@$ctx->{ipaddress}:$dst";
+  my @sfiles = glob($task->{src});
+  # Cleanup scp file source and dest to behave
+  # like legacy scp instead of sftp
+  $src =~ s#~/#$::ENV{HOME}/#;
+  $src =~ s#/$##;
+  $dst =~ s#~/##;
+  $dst =~ s#/$##;
+  my $cmd = "scp $rec-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null $src $usr\@$ctx->{ipaddress}:$dst";
   $self->logger->info("Executing command: $cmd");
   my @out = `$cmd`;
-
   push @{$self->_results}, {
     command     => $cmd,
     exit_status => 0,
