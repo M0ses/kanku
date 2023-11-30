@@ -34,6 +34,19 @@ my $defaults = {
     users => [],
     tasks => [],
   },
+  'Kanku::Cli::init' => {
+    project => 'devel:kanku:images',
+    package => 'openSUSE-Leap-15.6-JeOS',
+    repository => 'images_leap_15_6',
+    apiurl => 'https://api.opensuse.org/public',
+  },
+  'Kanku::Cli::lsi' => {
+    apiurl => 'https://api.opensuse.org/public',
+    project => 'devel:kanku:images',
+  },
+  'Net::OBS::Client' => {
+    credentials => {},
+  },
 };
 
 sub get {

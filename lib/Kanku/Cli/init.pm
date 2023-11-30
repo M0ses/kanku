@@ -27,6 +27,7 @@ with 'Kanku::Cli::Roles::Schema';
 use Template;
 use Carp;
 use Kanku::Config;
+use Kanku::Config::Defaults;
 
 command_short_description  'create KankuFile in your current working directory';
 
@@ -74,12 +75,7 @@ option 'project' => (
     documentation => 'Project name to search for images in OBSCheck',
     cmd_aliases   => ['prj'],
     lazy          => 1,
-    default       => sub {
-      Kanku::Config->initialize();
-      my $cfg = Kanku::Config->instance();
-      my $pkg = __PACKAGE__;
-      return $cfg->cf->{$pkg}->{project} || 'devel:kanku:images';
-    },
+    default       => sub { Kanku::Config::Defaults->get(__PACKAGE__, 'project') },
 );
 
 option 'package' => (
@@ -88,12 +84,7 @@ option 'package' => (
     documentation => 'Package name to search for images in OBSCheck',
     cmd_aliases   => ['pkg'],
     lazy          => 1,
-    default       => sub {
-      Kanku::Config->initialize();
-      my $cfg = Kanku::Config->instance();
-      my $pkg = __PACKAGE__;
-      return $cfg->cf->{$pkg}->{package} || 'openSUSE-Leap-15.2-JeOS';
-    },
+    default       => sub { Kanku::Config::Defaults->get(__PACKAGE__, 'package') },
 );
 
 option 'repository' => (
@@ -102,12 +93,7 @@ option 'repository' => (
     documentation => 'Repository name to search for images in OBSCheck',
     cmd_aliases   => ['repo'],
     lazy          => 1,
-    default       => sub {
-      Kanku::Config->initialize();
-      my $cfg = Kanku::Config->instance();
-      my $pkg = __PACKAGE__;
-      return $cfg->cf->{$pkg}->{repository} || 'images_leap_15_2';
-   },
+    default       => sub { Kanku::Config::Defaults->get(__PACKAGE__, 'repository') },
 );
 
 option 'force' => (
@@ -133,11 +119,7 @@ option 'pool' => (
     is            => 'rw',
     documentation => 'libvirt storage pool',
     lazy          => 1,
-    default       => sub {
-      Kanku::Config->initialize();
-      my $cfg = Kanku::Config->instance();
-      return $cfg->cf->{'Kanku::Handler::CreateDomain'}->{pool_name} || '';
-   },
+    default       => sub { Kanku::Config::Defaults->get('Kanku::Handler::CreateDomain', 'pool_name') },
 );
 
 option 'apiurl' => (
@@ -145,9 +127,12 @@ option 'apiurl' => (
   is            => 'rw',
   cmd_aliases   => 'a',
   documentation => 'OBS api url',
-  default       => 'https://build.opensuse.org/public',
+  default       =>  sub { Kanku::Config::Defaults->get(__PACKAGE__, 'apiurl') },
 );
 
+BEGIN {
+  Kanku::Config->initialize();
+};
 
 sub run {
   my ($self)  = @_;
