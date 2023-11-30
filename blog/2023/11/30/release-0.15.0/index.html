@@ -8,10 +8,9 @@
         <link href="/kanku/theme/css/statocles-default.css" rel="stylesheet">
         <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 	<link href="/kanku/page/favicon.ico" rel="shortcut icon" type="image/x-icon">
-        <title>RELEASE 0.12.6 - Kanku</title>
+        <title>RELEASE 0.15.0 - Kanku</title>
         <meta content="Statocles 0.098" name="generator">
-        <link href="/kanku/blog/2022/06/23/release-0.12.7/index.html" rel="prev">
-        <link href="/kanku/blog/2022/06/03/release-0.12.5/index.html" rel="next">
+        <link href="/kanku/blog/2023/01/10/release-0.14.0/index.html" rel="next">
         
     </head>
     <body>
@@ -47,11 +46,11 @@
                     <main>
                         
 <header>
-    <h1>Release 0.12.6</h1>
+    <h1>Release 0.15.0</h1>
 
     <aside>
-        <time datetime="2022-06-22">
-            Posted on 2022-06-22
+        <time datetime="2023-11-30">
+            Posted on 2023-11-30
         </time>
     </aside>
 
@@ -65,112 +64,52 @@
 
 <h2>FEATURES</h2>
 
-<ul><li>[cli] up: new special job <code>__ALL__</code> where a sequence of jobs can be defined in an array
-</li><li>[cli] up: multiple jobs can now be specified as options
-</li><li>[handler] new Kanku::Handler::CopyProfile
+<ul><li>[cli] configurable apiurl for init and lsi
+</li><li>initial version of worker setup
+</li><li>[core] waitpid when stopping dispatcher
+</li><li>[web] improved login page
+</li><li>[web] show error message if user is not logged in
+</li><li>[handler] CreateDomain: added vcpu/memory to gui_config
+</li><li>[handler] GIT: new option &#39;recursive&#39; for recursive clones
+</li></ul>
+
+
+<h2>BUGFIXES</h2>
+
+<ul><li>[handler] OBSServerFrontendTests: fix cleanup temp and logfiles if succeeded
+</li><li>[handler] ImageDownload: always set vm_image_file if found vm_image_url
+</li><li>[handler] OBSServerFrontendTests: fix stuck test runs
+</li><li>[core] fix for rabbitmq reconnect
+</li><li>[worker] fixed routing key used for sending job_aborted
+</li><li>[handler] GIT: fixed mirror mode
+</li><li>[handler] SetupNetwork: fixed pod
+</li><li>[core] set job_group start_time before dispatching
+</li><li>[core] fixing rabbit retry time
+</li><li>[util] VM: changed default accessmode_9p to &#39;squash&#39;
+</li><li>[handler] OBSServerFrontendTests: changed to user kanku and use local path
+</li><li>[handler] OBSServerFrontendTests: split commands
+</li><li>[dist] set timeout for kanku-worker.service to 90sec
+</li><li>[dispatcher] kill dispatcher process running dead jobs
+</li><li>[dispatcher] clean up dead job groups on dispatcher startup/shutdown
+</li><li>[worker] send aborted_job to correct job queue
+</li><li>[web] return error if data for job_group rest call is HASH
+</li><li>[worker] do not return before destroying queue
+</li><li>[examples] updated KankuFile.openQA
+</li><li>[handler] SetupNetwork: added timeout
 </li></ul>
 
 
 
-
-<h2>EXAMPLES</h2>
-
-<h4>CLI: up - special configuration <code>__ALL__</code></h4>
-
-<p>In KankuFile:</p>
-
-<pre><code>domain_name: saltmaster
-default_job: saltmaster
-
-jobs:
-  __ALL__:
-    - clean
-    - saltmaster
-    - admin-hosts
-    - service-servers
-    ...
-  clean:
-    ...
-  saltmaster:
-    ...
-  service-servers:
-    ...
-  ...
-</code></pre>
-
-<p>On the cli:</p>
-
-<p><code>kanku up -j __ALL__ -S</code></p>
-
-<h4>CLI: up - specify multiple jobs in one command line</h4>
-
-<p><code>kanku up -j job1 -j job2</code></p>
-
-<h4>Handler: Kanku::Handler::CopyProfile</h4>
-
-<p>To use this Handler you need a configuration section in your
-~/.kanku/kanku-config.yml like the following to specify the commands
-which should be executed</p>
-
-<pre><code>Kanku::Handler::CopyProfile:
-  user: kanku
-  tasks:
-    - cmd: cp
-      src: ~/.gitconfig
-    - cmd: cp
-      src: ~/.vimrc
-    - cmd: cp
-      src: ~/.vim/
-      recursive: 1
-    - cmd: mkdir
-      path: ~/.config/
-    - cmd: cp
-      src: ~/.config/osc/
-      dst: ~/.config/osc/
-      recursive: 1
-    - cmd: chown
-      owner: kanku:users
-      recursive: 1
-      path: ~/.config/
-    - cmd: chmod
-      mode: 700
-      path: ~/.config/
-</code></pre>
-
-<p>And you need an entry in your KankuFile job, where you can specify the users
-for which this profile should be copied.</p>
-
-<pre><code>jobs:
-  default_job:
-    ...
-    -
-      use_module: Kanku::Handler::CopyProfile
-      options:
-        users:
-          - root
-          - kanku
-</code></pre>
-
-<p>ATM the following commands (cmd) are available:```</p>
-
-<ul>
-<li>mkdir</li>
-<li>cp</li>
-<li>chmod</li>
-<li>chown</li>
-</ul>
-
-
 <ul class="pager">
     <li class="prev">
-            <a class="button button-primary" href="/kanku/blog/2022/06/03/release-0.12.5/index.html" rel="prev">
+            <a class="button button-primary" href="/kanku/blog/2023/01/10/release-0.14.0/index.html" rel="prev">
                 ← Older
             </a>
     </li>
     <li class="next">
-            <a class="button button-primary" href="/kanku/blog/2022/06/23/release-0.12.7/index.html" rel="next">
+            <button disabled>
                 Newer →
-            </a>
+            </button>
     </li>
 </ul>
 

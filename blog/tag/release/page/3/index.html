@@ -8,9 +8,11 @@
         <link href="/kanku/theme/css/statocles-default.css" rel="stylesheet">
         <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
 	<link href="/kanku/page/favicon.ico" rel="shortcut icon" type="image/x-icon">
-        <title>RELEASE 0.12.0 - Kanku</title>
+        <title>Kanku</title>
         <meta content="Statocles 0.098" name="generator">
-        <link href="/kanku/blog/2022/02/16/release-0.12.1/index.html" rel="prev">
+        <link href="/kanku/blog/tag/release.atom" rel="alternate" type="application/atom+xml">
+        <link href="/kanku/blog/tag/release.rss" rel="alternate" type="application/rss+xml">
+        <link href="/kanku/blog/tag/release/page/2/" rel="prev">
         
     </head>
     <body>
@@ -45,72 +47,25 @@
                 <div class="nine columns">
                     <main>
                         
-<header>
-    <h1>Release 0.12.0</h1>
 
-    <aside>
-        <time datetime="2022-02-09">
-            Posted on 2022-02-09
-        </time>
-    </aside>
+<article>
+    <header>
+        <h1><a href="/kanku/blog/2022/02/09/release-0.12.0/">RELEASE 0.12.0</a></h1>
 
-    <p class="tags">Tags:
-        <a href="/kanku/blog/tag/release/" rel="tag">release</a>
-    </p>
+        <aside>
+            <time datetime="2022-02-09">
+                Posted on 2022-02-09
+            </time>
+        </aside>
 
+        <p class="tags">Tags:
+            <a href="/kanku/blog/tag/release/" rel="tag">release</a>
+        </p>
 
-</header>
-
-
-<h2>FEATURES</h2>
-
-<ul><li>[web]
-<ul><li>new switch autostart to create persistent VM&#39;s
-</li><li>added login route (for GET method)
-</li></ul></li><li>[cli]
-<ul><li>new command <code>kanku snapshot ...</code>
-</li><li>new options for <code>kanku ssh ...</code>:
-<ul><li><code>--ipaddress</code> to specify the ip address of the VM (alias <code>-i</code>)
-</li><li><code>--execute</code> to execute a single command via ssh (alias <code>-e</code>)
-</li></ul></li><li>use ssh_user from KankuFile for ssh command
-</li><li>new option: <code>--log_file/--log_stdout</code> for VM related commands
-</li><li>Suggest running ssh-add on auth fauilure when auth_type is &#39;agent&#39;
-</li></ul></li></ul>
+    </header>
 
 
-<h2>BUGFIXES</h2>
-
-<ul><li>[web]
-<ul><li>fix &#39;show only latest&#39; in job history
-</li></ul></li><li>[core]
-<ul><li>no_wait_for_bootloader for ExecuteCommandsViaConsole to avoid waiting for bootloader
-</li><li>Fix ssh key filename: id_ecdsa.pub_sk -&gt; id_ecdsa_sk.pub
-</li><li>various cleanups to avoid &#39;uninitialized value&#39;
-</li></ul></li><li>[dist]
-<ul><li>fix tabs in default config template setup/kanku-config.yml.tt2
-</li><li>K:H:PrepareSSH: fix permissions for user kanku
-</li><li>K:H:CleanupIPTables: cleanup unused packages
-</li></ul></li><li>[util]
-<ul><li>set default for running_remotely in VM to 0
-</li></ul></li><li>[examples] updated configs
-<ul><li>updated to current opensuse
-</li><li>deleted broken examples
-</li><li>updated centos to latest version
-</li><li>renamed centos -&gt; centos-current
-</li></ul></li></ul>
-
-
-<h2>EXAMPLES</h2>
-
-<p>This release containes a full functional version of the &quot;Kanku VM Autostart&quot; feature for kanku clusters.</p>
-
-<ul>
-<li>Restart VMs</li>
-<li>Restore VMs iptable rules</li>
-</ul>
-
-<p><img alt="Screenshot Autostart Domain" src="img/kanku_screenshot-feature-autostart_domain.png"></p>
-
+</article>
 
 <ul class="pager">
     <li class="prev">
@@ -119,11 +74,12 @@
             </button>
     </li>
     <li class="next">
-            <a class="button button-primary" href="/kanku/blog/2022/02/16/release-0.12.1/index.html" rel="next">
+            <a class="button button-primary" href="/kanku/blog/tag/release/page/2/" rel="next">
                 Newer →
             </a>
     </li>
 </ul>
+
 
 
 
@@ -140,7 +96,20 @@
         </ul>
     </nav>
 
-                    
+                            <h1>Feeds</h1>
+        <ul class="list-inline">
+            <li>
+                <a href="/kanku/blog/tag/release.atom" rel="alternate" type="application/atom+xml">
+                    Atom
+                </a>
+            </li>
+            <li>
+                <a href="/kanku/blog/tag/release.rss" rel="alternate" type="application/rss+xml">
+                    RSS
+                </a>
+            </li>
+        </ul>
+
                 </div>
             </div>
         </div>

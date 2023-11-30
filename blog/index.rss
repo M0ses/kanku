@@ -7,6 +7,21 @@
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
+            <title>RELEASE 0.15.0</title>
+            <link>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.15.0/</link>
+            <guid>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.15.0/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Thu, 30 Nov 2023 10:54:14 +0000
+            </pubDate>
+        </item>
+        <item>
             <title>RELEASE 0.14.0</title>
             <link>https://m0ses.github.io/kanku/blog/2023/01/10/release-0.14.0/</link>
             <guid>https://m0ses.github.io/kanku/blog/2023/01/10/release-0.14.0/</guid>
@@ -87,21 +102,6 @@ to auto-generate these documentationi.</p>
             ]]></description>
             <pubDate>
                 Thu, 23 Jun 2022 18:51:02 +0000
-            </pubDate>
-        </item>
-        <item>
-            <title>RELEASE 0.12.6</title>
-            <link>https://m0ses.github.io/kanku/blog/2022/06/22/release-0.12.6/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2022/06/22/release-0.12.6/</guid>
-            <description><![CDATA[
-
-                    <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
-                    </p>
-
-            ]]></description>
-            <pubDate>
-                Wed, 22 Jun 2022 10:09:52 +0000
             </pubDate>
         </item>
     </channel>

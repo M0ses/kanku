@@ -4,13 +4,13 @@
         <loc>https://m0ses.github.io/kanku/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/blog/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/blog/2022/02/09/release-0.12.0/</loc>
@@ -79,16 +79,22 @@
         <lastmod>2023-01-10</lastmod>
     </url>
     <url>
+        <loc>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.15.0/</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.5</priority>
+        <lastmod>2023-11-30</lastmod>
+    </url>
+    <url>
         <loc>https://m0ses.github.io/kanku/blog/page/2/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/blog/page/3/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/blog/tag/news/</loc>
@@ -100,391 +106,397 @@
         <loc>https://m0ses.github.io/kanku/blog/tag/release/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/blog/tag/release/page/2/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
+    </url>
+    <url>
+        <loc>https://m0ses.github.io/kanku/blog/tag/release/page/3/</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.3</priority>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/about/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/download/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/faq/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/getting_started/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/overview/</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Dispatch::RabbitMQ.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::ChangeDomainState.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::CleanupIPTables.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::CopyProfile.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::CreateDomain.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::DomainSnapshot.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::ExecuteCommandOnHost.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::ExecuteCommandViaConsole.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::ExecuteCommandViaSSH.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::GIT.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::HTTPDownload.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::ImageDownload.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::K8NodePortForward.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::OBSCheck.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::OBSDownload.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::OBSServerFrontendTests.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::OpenStack::CreateInstance.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::OpenStack::Image.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::OpenStack::RemoveInstance.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::PortForward.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::PrepareSSH.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::Reboot.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::RemoveDomain.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::ResizeImage.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::RevertQcow2Snapshot.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::SaltSSH.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::SetJobContext.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::SetupNetwork.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::Wait.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Handler::WaitForSystemd.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::JobList.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Notifier.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Notifier::NSCA.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Notifier::NSCAng.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Notifier::Sendmail.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::NotifyQueue::RabbitMQ.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::RabbitMQ.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Roles::Dispatcher.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Roles::NotifyQueue.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Roles::SSH.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Schema::Result::ImageDownloadHistory.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Schema::Result::JobHistory.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Schema::Result::JobHistorySub.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Schema::Result::JobWaitFor.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Schema::Result::ObsCheckHistory.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Schema::Result::Role.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Schema::Result::User.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Schema::Result::UserRole.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Task.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Task::Local.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Task::Remote.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Task::RemoteAll.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Test::RabbitMQ.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Util.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/Kanku::Util::VM::Console.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
     <url>
         <loc>https://m0ses.github.io/kanku/page/pod/OpenStack::API.html</loc>
         <changefreq>weekly</changefreq>
         <priority>0.5</priority>
-        <lastmod>2023-01-10</lastmod>
+        <lastmod>2023-11-30</lastmod>
     </url>
 </urlset>
 
