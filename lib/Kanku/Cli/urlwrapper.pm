@@ -20,7 +20,6 @@ use strict;
 use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
-use Net::OBS::Client::Project;
 use Data::Dumper;
 use Cwd;
 use Try::Tiny;
