@@ -2,11 +2,25 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://m0ses.github.io/kanku/blog/</id>
     <title>Kanku</title>
-    <updated>2023-11-30T10:54:14Z</updated>
+    <updated>2023-11-30T11:16:19Z</updated>
     <link href="https://m0ses.github.io/kanku/blog/index.atom" rel="self" />
     <link href="https://m0ses.github.io/kanku/blog/" rel="alternate" />
     <generator version="0.098">Statocles</generator>
 
+    <entry>
+        <id>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.16.0/</id>
+        <title>RELEASE 0.16.0</title>
+        <link href="https://m0ses.github.io/kanku/blog/2023/11/30/release-0.16.0/" rel="alternate" />
+        <content type="html"><![CDATA[
+
+                <p>Tags:
+                    <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
+                </p>
+
+        ]]></content>
+        <updated>2023-11-30T11:16:19Z</updated>
+        <category term="release" />
+    </entry>
     <entry>
         <id>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.15.0/</id>
         <title>RELEASE 0.15.0</title>
@@ -85,20 +99,6 @@ to auto-generate these documentationi.</p>
         ]]></content>
         <updated>2022-07-12T00:00:00Z</updated>
         <category term="news" />
-    </entry>
-    <entry>
-        <id>https://m0ses.github.io/kanku/blog/2022/06/23/release-0.12.7/</id>
-        <title>RELEASE 0.12.7</title>
-        <link href="https://m0ses.github.io/kanku/blog/2022/06/23/release-0.12.7/" rel="alternate" />
-        <content type="html"><![CDATA[
-
-                <p>Tags:
-                    <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
-                </p>
-
-        ]]></content>
-        <updated>2022-06-23T18:51:02Z</updated>
-        <category term="release" />
     </entry>
 </feed>
 

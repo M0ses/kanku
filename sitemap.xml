@@ -85,6 +85,12 @@
         <lastmod>2023-11-30</lastmod>
     </url>
     <url>
+        <loc>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.16.0/</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.5</priority>
+        <lastmod>2023-11-30</lastmod>
+    </url>
+    <url>
         <loc>https://m0ses.github.io/kanku/blog/page/2/</loc>
         <changefreq>daily</changefreq>
         <priority>0.3</priority>
