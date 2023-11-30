@@ -116,13 +116,31 @@ sub download {
 
       my %request;
 
-      if ( $self->username && $self->password ) {
-        $request{request} = HTTP::Request->new(GET=>$url);
-        $request{request}->authorization_basic($self->username,$self->password);
+      my $uri       = URI->new($url);
+      my $authority = $uri->authority;
+
+      # user/pass will be removed from uri automatically by LWP::UserAgent
+      my @auth = split(/\@/, $authority, 2);
+      if ($auth[1]) {
+        my ($user, $pass) = split(/:/, $auth[0], 2);
+        my $new_user      = ($self->username || $user);
+        my $new_pass      = ($self->password || $pass);
+        my $new_authority = $new_user;
+        $new_authority .= ":$new_pass" if ($new_authority && $new_pass);
+        $new_authority .= $auth[1];
+        $uri->authority($new_authority);
       }
 
+      # Add ETag to request header
+      my $header = [];
+      push @$header, ('If-None-Match', $self->etag) if ($self->etag);
+
+      $self->logger->debug("final URI: ".$uri->canonical);
+
+      my $req = HTTP::Request->new(GET => $uri, $header);
+
       $res = $ua->mirror(
-        url  => $url,
+        url  => $uri->canonical,
         file => $file->stringify,
         etag => $self->etag,
         %request,

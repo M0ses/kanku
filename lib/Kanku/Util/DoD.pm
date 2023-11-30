@@ -25,6 +25,7 @@ use Net::OBS::Client::Project;
 use Net::OBS::Client::Package;
 use Kanku::Util::CurlHttpDownload;
 use Kanku::Config;
+use Kanku::Config::Defaults;
 use Carp qw/confess croak/;
 
 with 'Kanku::Roles::Logger';
@@ -134,39 +135,35 @@ has get_image_file_from_url => (
 has [qw/skip_all_checks skip_check_project skip_check_package/ ] => (is => 'ro', isa => 'Bool',default => 0 );
 has [qw/use_oscrc/ ] => (is => 'ro', isa => 'Bool',default => 1);
 
-has pkg_config => (
-  is => 'rw',
-  isa => 'HashRef',
-  lazy => 1,
-  default => sub {
-    my $self = shift;
-    my $pkg = __PACKAGE__;
-    $self->logger->trace("Getting config for package $pkg");
-    $self->logger->trace(Dumper(Kanku::Config->instance()->config()));
-    my $cfg = Kanku::Config->instance()->config()->{$pkg};
-    $self->logger->trace(Dumper($cfg));
-    return $cfg || {};
-  },
-);
-
 has auth_config => (
   is => 'rw',
   isa => 'HashRef',
   lazy => 1,
   default => sub {
     my ($self)     = @_;
-    my $pkg_config = $self->pkg_config;
     my $cfg        = {};
+    my $use_oscrc  = Kanku::Config::Defaults->get(__PACKAGE__, 'use_oscrc') || $self->use_oscrc;
+    $self->logger->debug("use_oscrc: $use_oscrc");
 
-    if (exists($pkg_config->{use_oscrc})) {
-      $cfg->{use_oscrc} = $pkg_config->{use_oscrc};
-      if (! $cfg->{use_oscrc} ) {
-	$cfg->{user} = $pkg_config->{$self->api_url}->{obs_username} || $pkg_config->{obs_username} || q{};
-	$cfg->{pass} = $pkg_config->{$self->api_url}->{obs_password} || $pkg_config->{obs_password} || q{};
+    if (defined $use_oscrc) {
+      if (!$use_oscrc) {
+	my $default_credentials = Kanku::Config::Defaults->get(__PACKAGE__, $self->api_url);
+	my $user = Kanku::Config::Defaults->get(__PACKAGE__, 'obs_username');
+	my $pass = Kanku::Config::Defaults->get(__PACKAGE__, 'obs_password');
+        if ( $default_credentials || $user || $pass) {
+	  $cfg->{user} = $default_credentials->{obs_username} || $user || q{};
+	  $cfg->{pass} = $default_credentials->{obs_password} || $pass || q{};
+	} else {
+	  $self->logger->debug("Using Net::OBS::Client config");
+	  my $net_credentials = Kanku::Config::Defaults->get('Net::OBS::Client', 'credentials');
+          $cfg = {%{$net_credentials->{$self->api_url}}} if (ref($net_credentials->{$self->api_url}) eq 'HASH');
+	}
       }
+      $cfg->{use_oscrc} = $use_oscrc;
     } else {
       $cfg->{use_oscrc} = $self->use_oscrc;
     }
+    $self->logger->debug("auth_config: ".$self->dump_it($cfg));
     return $cfg;
   },
 );
@@ -181,8 +178,9 @@ has preferred_extension => (
 sub download {
   my $self  = shift;
   my $ua    = Net::OBS::Client->new(
-                use_oscrc=>$self->auth_config->{use_oscrc},
-                apiurl=>$self->api_url)->user_agent();
+                apiurl=>$self->api_url,
+                %{$self->auth_config},
+	      )->user_agent();
 
   my $fn    = $self->get_image_file_from_url()->{filename};
   my $url   = $self->download_url . $fn;

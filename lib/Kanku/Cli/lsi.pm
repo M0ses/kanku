@@ -22,6 +22,7 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 use Net::OBS::Client::Project;
 use Kanku::Config;
+use Kanku::Config::Defaults;
 
 
 command_short_description  'list standard kanku images';
@@ -41,7 +42,7 @@ option 'apiurl' => (
   is            => 'rw',
   cmd_aliases   => 'a',
   documentation => 'OBS api url',
-  default       => 'https://build.opensuse.org/public',
+  default       => sub { Kanku::Config::Defaults->get(__PACKAGE__, 'apiurl') },
 );
 
 option 'project' => (
@@ -49,21 +50,24 @@ option 'project' => (
   is            => 'rw',
   cmd_aliases   => 'p',
   documentation => 'Project name',
-  default       => 'devel:kanku:images',
+  default       => sub { Kanku::Config::Defaults->get(__PACKAGE__, 'project') },
 );
 
+BEGIN {
+  Kanku::Config->initialize();
+}
 
 sub run {
-  my $self    = shift;
-  my $pkg     = __PACKAGE__;
-  Kanku::Config->initialize();
-  my $cf = Kanku::Config->instance->cf;
-  my $prj_name = $self->project || $cf->{$pkg}->{project_name};
-  my $apiurl   = $self->apiurl;
+  my ($self)  = @_;
+  my $apiurl  = $self->apiurl;
+  my $project = $self->project;
+  my $cred_defaults = Kanku::Config::Defaults->get('Net::OBS::Client','credentials');
+  my %credentials = (ref($cred_defaults->{$apiurl}) eq "HASH") ? %{$cred_defaults->{$apiurl}} :();
 
   my $prj = Net::OBS::Client::Project->new(
-    name     => $prj_name,
+    name     => $project,
     apiurl   => $apiurl,
+    %credentials,
   );
 
   my $res  = $prj->fetch_resultlist;
@@ -76,9 +80,9 @@ sub run {
 	print <<EOF
 
     # --- $pkg->{package}
-      ## kanku init --apiurl $apiurl --project $prj_name --package $pkg->{package} --repository $tmp->{repository}
+      ## kanku init --apiurl $apiurl --project $project --package $pkg->{package} --repository $tmp->{repository}
       ## state: $pkg->{code}
-      project: $prj_name
+      project: $project
       package: $pkg->{package}
       repository: $tmp->{repository}
       arch: $arch
