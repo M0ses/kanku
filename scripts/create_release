@@ -15,6 +15,7 @@ use DateTime;
 use Data::Dumper;
 use Build::Rpm;
 use Statocles::Template;
+use DateTime::Format::ISO8601;
 
 
 my $version = $ARGV[0];
@@ -104,7 +105,7 @@ system("$::ENV{'EDITOR'} $filename");
 print "Really create file $outfile? [yN] ";
 my $ans=<STDIN>;
 chomp($ans);
-if ($ans =~ /y(es)/i) {
+if ($ans =~ /^y(es)?$/i) {
   my $dir = dirname($outfile);
   make_path($dir) unless -d $dir;
   print "Copying $filename -> $outfile\n";
@@ -194,11 +195,23 @@ sub query_release_datetime {
    print "\nDefault release time/date: ".$now->datetime(q{ })."\n";
    print "Please enter the correct release date/time in the given format.\n";
    print "Or press ENTER to accept the default.\n\n";
-   my $answer = <STDIN>;
-   chomp $answer;
-   return ($now->ymd('/'), $now->datetime) unless $answer;
-
-   return (undef, undef);
+   my $answer;
+   while ($answer = <STDIN>) {
+     chomp $answer;
+     last unless $answer;
+     if ($answer) {
+       $answer =~ s/^\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2}:\d{2})\s*(.*)\s*$/$1T$2$3/;
+       eval { $now = DateTime::Format::ISO8601->parse_datetime($answer) };
+       if ($@) {
+         print "Wrong date/time format: $@\n";
+       } else {
+	 last;
+       }
+     } else {
+       last;
+     }
+   }
+   return ($now->ymd('/'), $now->ymd." ".$now->hms);
 }
 sub verify_tag {
   my ($version) = @_;
