@@ -1,3 +1,16 @@
+# [0.16.0] - 2023-11-30
+
+## FEATURES
+
+* [feature] Implemented HTTP Signature Authentication
+* [feature] Defaults handling migrated to K::Config::Defaults
+
+
+## BUGFIXES
+
+* [cli] cleanup unused packages in urlwrapper
+
+
 # [0.15.0] - 2023-11-30
 
 ## FEATURES
