@@ -257,6 +257,7 @@ common config and lib files used in kanku
 /usr/lib/kanku/lib/Kanku/Task/
 /usr/lib/kanku/lib/OpenStack/
 /usr/lib/kanku/lib/Kanku/Config.pm
+%dir /usr/lib/kanku/lib/Kanku/Config/
 /usr/lib/kanku/lib/Kanku/Config/Defaults.pm
 /usr/lib/kanku/lib/Kanku/Handler.pod
 /usr/lib/kanku/lib/Kanku/Notifier
