@@ -109,6 +109,8 @@ e.g. to prepare development environments or run simple tests.
 
 %install
 %make_install DOCDIR=%{_defaultdocdir}/kanku/
+mkdir -p %{buildroot}/%{_sysusersdir}/system-user-%{kanku_user}.conf
+cp dist/system-user-%{kanku_user}.conf %{buildroot}/%{_sysusersdir}/system-user-%{kanku_user}.conf
 %fdupes %{buildroot}/opt/kanku/share
 ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-web
 ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-worker
@@ -323,10 +325,27 @@ EOF
 /etc/bash_completion.d/kanku.sh
 %ghost %{_localstatedir}/adm/update-messages/%{name}-%{version}-%{release}-something
 
+%package -n system-user-%{kanku_user}
+Summary: System user and group %{kanku_user}/%{kanku_group}
+Group:    System/Fhs 
+Provides: user(%{kanku_user}) 
+Provides: group(%{kanku_user}) 
+%if 0%{?suse_version:1}
+Requires(pre):  shadow
+%endif
+%sysusers_requires
+
+%description -n system-user-%{kanku_user}
+This package provides the system account '%{kanku_user}' and group '%{kanku_group}'.
+
+%pre -n system-user-%{kanku_user} -f %{kanku_user}.pre
+%files -n system-user-%{kanku_user}
+%{_sysusersdir}/system-user-%{kanku_user}.conf
+
 %package common-server
 Summary:        Common server files or settings for kanku
 Requires(pre):  libvirt-daemon libvirt-daemon-driver-qemu
-
+Requires: user(%{kanku_user})
 %if 0%{?fedora}
 Requires(pre):  shadow-utils
 %else
@@ -337,10 +356,6 @@ Requires(pre):  shadow
 This package contains common server files, settings and dependencies
 for the kanku server components like kanku-worker, kanku-dispatcher,
 kanku-web, kanku-scheduler and kanku-triggerd.
-
-%pre common-server
-getent group %{kanku_group} >/dev/null || groupadd -r %{kanku_group}
-getent passwd %{kanku_user} >/dev/null || useradd -r -g %{kanku_group} -G libvirt -d %{kanku_vardir} -s /sbin/nologin -c "user for kanku" %{kanku_user}
 
 %files common-server
 %defattr(-, root, root)
