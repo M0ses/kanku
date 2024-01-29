@@ -432,7 +432,6 @@ WebUI for kanku using perl Dancer
 /usr/share/kanku/views/login.tt
 %dir /usr/share/kanku/views/login
 /usr/share/kanku/views/login/denied.tt
-/usr/share/kanku/views/admin.tt
 /usr/share/kanku/views/settings.tt
 /usr/share/kanku/views/signup.tt
 /usr/share/kanku/views/pwreset.tt
