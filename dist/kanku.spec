@@ -35,6 +35,7 @@ ExclusiveArch:  aarch64 x86_64 %{ix86}
 BuildRequires:  fdupes
 BuildRequires:  perl-macros
 BuildRequires:  systemd-rpm-macros
+BuildRequires:  sysuser-tools
 
 # perl requires for %check
 BuildRequires:  perl(Const::Fast)
