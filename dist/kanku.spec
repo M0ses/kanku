@@ -335,12 +335,23 @@ Provides: group(%{kanku_group})
 %if 0%{?suse_version:1}
 Requires(pre):  shadow
 %endif
+%if 0%{?fedora}
+%{?sysusers_requires_compat}
+%else
 %sysusers_requires
+%endif
 
 %description -n system-user-%{kanku_user}
 This package provides the system account '%{kanku_user}' and group '%{kanku_group}'.
 
+
+%if 0%{?fedora}
+%pre -n system-user-%{kanku_user}
+%sysusers_create_compat dist//system-user-%{kanku_user}.conf
+%else
 %pre -n system-user-%{kanku_user} -f %{kanku_user}.pre
+%endif
+
 %files -n system-user-%{kanku_user}
 %{_sysusersdir}/system-user-%{kanku_user}.conf
 
