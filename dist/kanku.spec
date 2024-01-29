@@ -106,7 +106,8 @@ e.g. to prepare development environments or run simple tests.
 %autosetup -p1
 
 %build
-/bin/true
+%sysusers_generate_pre dist/system-user-%{kanku_user}.conf %{kanku_user} system-user-%{kanku_user}.conf
+
 
 %install
 %make_install DOCDIR=%{_defaultdocdir}/kanku/
@@ -328,9 +329,9 @@ EOF
 
 %package -n system-user-%{kanku_user}
 Summary: System user and group %{kanku_user}/%{kanku_group}
-Group:    System/Fhs 
-Provides: user(%{kanku_user}) 
-Provides: group(%{kanku_user}) 
+Group:    System/Fhs
+Provides: user(%{kanku_user})
+Provides: group(%{kanku_group})
 %if 0%{?suse_version:1}
 Requires(pre):  shadow
 %endif
