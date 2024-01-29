@@ -109,8 +109,11 @@ e.g. to prepare development environments or run simple tests.
 %autosetup -p1
 
 %build
+%if 0%{?suse_version}
 %sysusers_generate_pre dist/system-user-%{kanku_user}.conf %{kanku_user} system-user-%{kanku_user}.conf
-
+%else
+/bin/true
+%endif
 
 %install
 %make_install DOCDIR=%{_defaultdocdir}/kanku/
@@ -338,6 +341,7 @@ Provides: group(%{kanku_group})
 %if 0%{?suse_version:1}
 Requires(pre):  shadow
 %endif
+
 %if 0%{?fedora}
 %{?sysusers_requires_compat}
 %else
