@@ -235,12 +235,6 @@ common config and lib files used in kanku
 %config /etc/kanku/templates/examples-vm/sles11sp3.tt2
 %config /etc/kanku/templates/examples-vm/obs-server.tt2
 
-%dir /etc/kanku/jobs
-%dir /etc/kanku/jobs/examples
-%config /etc/kanku/jobs/examples/obs-server.yml
-%config /etc/kanku/jobs/examples/obs-server-26.yml
-%config /etc/kanku/jobs/examples/sles11sp3.yml
-
 # %exclude %dir /etc/sudoers.d
 # %ghost /etc/sudoers.d/kanku
 
@@ -379,6 +373,12 @@ kanku-web, kanku-scheduler and kanku-triggerd.
 
 %files common-server
 %defattr(-, root, root)
+%dir /etc/kanku/jobs
+%dir /etc/kanku/job_groups
+%dir /etc/kanku/jobs/examples
+%config /etc/kanku/jobs/examples/obs-server.yml
+%config /etc/kanku/jobs/examples/obs-server-26.yml
+%config /etc/kanku/jobs/examples/sles11sp3.yml
 %dir %attr(755, kankurun, kanku) /var/lib/kanku
 %dir %attr(755, kankurun, kanku) /var/lib/kanku/db
 %dir %attr(755, kankurun, kanku) /var/cache/kanku
