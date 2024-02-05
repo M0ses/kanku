@@ -197,9 +197,6 @@ Conflicts:      perl-DBD-SQLite-Amalgamation
 %description common
 common config and lib files used in kanku
 
-%post common
-%tmpfiles_create %_tmpfilesdir/kanku.conf
-
 %files common
 %doc README.md RELEASE-NOTES-*.md CHANGELOG.md
 
@@ -370,6 +367,9 @@ Requires(pre):  shadow
 This package contains common server files, settings and dependencies
 for the kanku server components like kanku-worker, kanku-dispatcher,
 kanku-web, kanku-scheduler and kanku-triggerd.
+
+%post common-server
+%tmpfiles_create %_tmpfilesdir/kanku.conf
 
 %files common-server
 %defattr(-, root, root)
