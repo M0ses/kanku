@@ -7,6 +7,21 @@
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
+            <title>RELEASE 0.16.1</title>
+            <link>https://m0ses.github.io/kanku/blog/2024/02/05/release-0.16.1/</link>
+            <guid>https://m0ses.github.io/kanku/blog/2024/02/05/release-0.16.1/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Mon, 05 Feb 2024 09:46:39 +0000
+            </pubDate>
+        </item>
+        <item>
             <title>RELEASE 0.16.0</title>
             <link>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.16.0/</link>
             <guid>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.16.0/</guid>
@@ -64,44 +79,6 @@
             ]]></description>
             <pubDate>
                 Mon, 10 Oct 2022 13:15:00 +0000
-            </pubDate>
-        </item>
-        <item>
-            <title>Kanku Project Page refurbished</title>
-            <link>https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/</guid>
-            <description><![CDATA[
-                  <h2>Welcome to the new project page</h2>
-
-<p>The new page is built with <a href="http://preaction.me/statocles/">Statocles</a>.</p>
-
-<p>We decided to switch from plain HTML to a Static Site Generator for the following reasons:</p>
-
-<ul>
-<li>Make it easier to write content</li>
-<li>Use a framework to maintain a blog</li>
-<li>Make deployment easier and more flexible</li>
-</ul>
-
-<p>but the most important point:</p>
-
-<ul>
-<li>Generate Changelog, Release notes, etc. out of one source</li>
-</ul>
-
-<p>We will follow up with some blog posts about the the tools we create
-to auto-generate these documentationi.</p>
-
-<p>Stay tuned.</p>
-
-
-                    <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/news/">news</a>
-                    </p>
-
-            ]]></description>
-            <pubDate>
-                Tue, 12 Jul 2022 00:00:00 +0000
             </pubDate>
         </item>
     </channel>
