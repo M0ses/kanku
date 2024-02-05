@@ -1,3 +1,10 @@
+# [0.16.1] - 2024-02-05
+
+## BUGFIXES
+
+* [dist] multiple improvements in packaging for rpm based distros
+
+
 # [0.16.0] - 2023-11-30
 
 ## FEATURES
