@@ -728,8 +728,6 @@ If configured a port_forward_list, it tries to find the next free port and confi
 
     template              : template xml to define VM (has precedence over job context)
 
-                            Can be virtio, ide, sata or scsi.
-
     default_console_timeout : default timeout for console commands (default: 600 sec)
 
     login_timeout         : timeout to wait from bootloader to login prompt (boot time) (default: 300 sec)
