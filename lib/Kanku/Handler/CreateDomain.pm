@@ -154,6 +154,11 @@ has gui_config => (
           type  => 'text',
           label => 'Memory size for new domain',
         },
+        {
+          param => 'template',
+          type  => 'text',
+          label => 'Template for domain xml',
+        },
       ];
   }
 );
