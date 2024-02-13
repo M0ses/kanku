@@ -1,3 +1,16 @@
+# [0.16.2] - 2024-02-13
+
+## FEATURES
+
+* [handler] CreateDomain: added template to gui_config
+
+
+## BUGFIXES
+
+* [dist] moved tmpfile conf to package kanku-common-server
+* [dist] fixed homedir path for user kankurun
+
+
 # [0.16.1] - 2024-02-05
 
 ## BUGFIXES
