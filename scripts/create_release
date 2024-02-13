@@ -126,6 +126,7 @@ if ( $ans !~ /^n/i ) {
 
 my $cmd_deploy = "statocles deploy";
 
+print "Check our blog: https://m0ses.github.io/kanku/blog/\n";
 print "Finished!\n";
 
 exit 0;
