@@ -100,7 +100,7 @@ Kanku::LibVirt::Network::OpenVSwitch:
 
 Kanku::Daemon::Scheduler:
   -
-    job_name: obs-server
+    job_name: dki-opensuse-tumbleweed-ext4
     delay: 86400
 #  -
 #    job_name: kanku-vm

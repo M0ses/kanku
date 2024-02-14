@@ -35,6 +35,11 @@ tasks:
     options:
       forward_port_list: tcp:22
   -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - echo "my test here"
+  -
     use_module: Kanku::Handler::CleanupIPTables
   -
     use_module: Kanku::Handler::RemoveDomain
