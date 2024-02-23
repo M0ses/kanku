@@ -54,15 +54,14 @@
     sudo shutdown -r now
 
 
-### Preparing a new Project
+### Prepare a new Project
 
-The command `kanku init` will create a default Kankufile 
-which should give you a good starting point.
+In Kanku, a "project" is a file, usually called `KankuFile`, which is
+associated with a libvirt domain (which means a VM, in libvirt terminology).
 
-The option `--memory=...` defines the RAM of the virtual guest and is optional.
-Default is 2G of RAM.
-For more options SEE `kanku init --help`
-
+The easiest way to manage your projects is to keep them in individual
+directories (it is also possible to have a single directory containing
+multiple Kankufiles, but this is slightly more complicated):
 
     # create directory
     mkdir MyProject
@@ -70,20 +69,30 @@ For more options SEE `kanku init --help`
     # cd in project's directory
     cd MyProject
 
+The command `kanku init` will create a default `KankuFile` in the current
+directory, which should give you a good starting point.
+
+The option `--memory=...` defines the RAM of the virtual guest and is optional.
+The default is 2G of RAM. For more options, see `kanku init --help`.
+
     kanku init --memory=2G --domain_name my-project
 
+(The `--domain_name` option is not required: if not given, kanku will assign
+a default domain name. However, this can lead to name collisions later on when
+you create a second VM!)
 
 
+### Create a VM
 
-### Download, create and start a new guest
-
+Now, `kanku init` only creates the `KankuFile` in your project directory. To
+create the VM, issue the command:
 
     kanku up
 
 
-### Connect to new machine
+### Connect to the VM
 
-Per default, if it exists, your ssh key is added to the authorized keys file
+Per default, if it exists, your ssh key is added to the authorized keys file.
 
 Otherwise you can login as
 
