@@ -614,7 +614,8 @@ update-desktop-database
 
 %package iptables
 Summary: Store and restore kanku iptables rules
-Requires: /usr/lib/kanku/network-setup.pl
+# Requires: /usr/lib/kanku/network-setup.pl
+Requires: kanku-common
 
 %description iptables
 kanku-iptables.service is required to store/restore iptables rules for
