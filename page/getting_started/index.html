@@ -96,32 +96,46 @@ sudo apt install -y kanku
 sudo shutdown -r now
 </code></pre>
 
-<h3>Preparing a new Project</h3>
+<h3>Prepare a new Project</h3>
 
-<p>The command <code>kanku init</code> will create a default Kankufile 
-which should give you a good starting point.</p>
+<p>In Kanku, a &quot;project&quot; is a file, usually called <code>KankuFile</code>, which is
+associated with a libvirt domain (which means a VM, in libvirt terminology).</p>
 
-<p>The option <code>--memory=...</code> defines the RAM of the virtual guest and is optional.
-Default is 2G of RAM.
-For more options SEE <code>kanku init --help</code></p>
+<p>The easiest way to manage your projects is to keep them in individual
+directories (it is also possible to have a single directory containing
+multiple Kankufiles, but this is slightly more complicated):</p>
 
 <pre><code># create directory
 mkdir MyProject
 
 # cd in project&#39;s directory
 cd MyProject
-
-kanku init --memory=2G --domain_name my-project
 </code></pre>
 
-<h3>Download, create and start a new guest</h3>
+<p>The command <code>kanku init</code> will create a default <code>KankuFile</code> in the current
+directory, which should give you a good starting point.</p>
+
+<p>The option <code>--memory=...</code> defines the RAM of the virtual guest and is optional.
+The default is 2G of RAM. For more options, see <code>kanku init --help</code>.</p>
+
+<pre><code>kanku init --memory=2G --domain_name my-project
+</code></pre>
+
+<p>(The <code>--domain_name</code> option is not required: if not given, kanku will assign
+a default domain name. However, this can lead to name collisions later on when
+you create a second VM!)</p>
+
+<h3>Create a VM</h3>
+
+<p>Now, <code>kanku init</code> only creates the <code>KankuFile</code> in your project directory. To
+create the VM, issue the command:</p>
 
 <pre><code>kanku up
 </code></pre>
 
-<h3>Connect to new machine</h3>
+<h3>Connect to the VM</h3>
 
-<p>Per default, if it exists, your ssh key is added to the authorized keys file</p>
+<p>Per default, if it exists, your ssh key is added to the authorized keys file.</p>
 
 <p>Otherwise you can login as</p>
 
