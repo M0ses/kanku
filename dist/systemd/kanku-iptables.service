@@ -1,5 +1,5 @@
 [Unit]
-Description=Restore and store kanku iptables rules
+Description=Store and restore kanku iptables rules
 After=local-fs.target network.target
 
 [Service]

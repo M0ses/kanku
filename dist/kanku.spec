@@ -97,6 +97,7 @@ Requires:       kanku-scheduler = %{version}
 Requires:       kanku-triggerd = %{version}
 Requires:       kanku-web = %{version}
 Requires:       kanku-worker = %{version}
+Requires:       kanku-iptables = %{version}
 
 %description
 kanku is a utility for integration of kiwi images built
@@ -125,6 +126,7 @@ ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-worker
 ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-dispatcher
 ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-scheduler
 ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-triggerd
+ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-iptables
 
 %check
 # FIXME
@@ -609,6 +611,28 @@ update-desktop-database
 %dir /usr/share/icons/hicolor/64x64
 %dir /usr/share/icons/hicolor/64x64/apps
 /usr/share/icons/hicolor/64x64/apps/kanku.png
+
+%package iptables
+Summary: Store and restore kanku iptables rules
+Requires: /usr/lib/kanku/network-setup.pl
+
+%description iptables
+kanku-iptables.service is required to store/restore iptables rules for
+kanku guests which are using the 'autostart' flag.
+
+%post iptables
+%systemd_post kanku-iptables.service
+
+%preun iptables
+%systemd_preun kanku-iptables.service
+
+%postun iptables
+%systemd_postun_with_restart kanku-iptables.service
+
+%files iptables
+%{_unitdir}/kanku-iptables.service
+%{_sbindir}/rckanku-iptables
+
 
 %changelog
 
