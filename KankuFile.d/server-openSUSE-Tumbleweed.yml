@@ -44,7 +44,7 @@
     options:
       commands:
         - rcnetwork restart
-        - zypper -n in rabbitmq-server rabbitmq-server-plugins openvswitch kanku
+        - zypper -n in rabbitmq-server rabbitmq-server-plugins openvswitch kanku openssh-clients
         - make -C /tmp/kanku install 2>&1 |tee /tmp/make.log
         - /usr/bin/kanku setup --apache --distributed --ssl 2>&1 |tee /tmp/setup-server.log
         - cp -r /tmp/kanku/etc/jobs/examples/* /etc/kanku/jobs/
