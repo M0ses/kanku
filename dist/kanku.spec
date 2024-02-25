@@ -139,7 +139,6 @@ ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-iptables
 %package common
 Summary:        Common files for kanku
 
-Recommends:     apache2
 Recommends:     osc
 Recommends:     perl(IO::Uncompress::UnXz)
 Recommends:     perl(YAML::PP::LibYAML)
@@ -296,6 +295,7 @@ Requires:       (perl(Passwd::Keyring::Gnome) if gnome-keyring)
 Requires:       (perl(Passwd::Keyring::KDEWallet) if kwalletd5)
 Requires:       perl(IO::Interactive)
 Requires:       perl(Net::AMQP::RabbitMQ)
+Requires:       openssh-clients
 
 %description cli
 Command line client for kanku, mainly used for setup tasks
@@ -401,6 +401,8 @@ Requires:       server(smtp)
 %else
 Requires:       smtp_daemon
 %endif
+Recommends:     apache2
+Recommends:     rabbitmq-server-plugins
 
 %description web
 WebUI for kanku using perl Dancer
@@ -498,6 +500,7 @@ Requires:       kanku-common-server = %{version}
 Requires:       perl(Net::AMQP::RabbitMQ)
 Requires(pre):  sudo
 Recommends:     rabbitmq-server
+Recommends:     openvswitch
 
 %description dispatcher
 A dispatcher for kanku based on RabbitMQ.
