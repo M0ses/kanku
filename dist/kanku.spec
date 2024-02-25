@@ -584,7 +584,7 @@ Summary:        Url wrapper for kanku:// urls
 Requires:       desktop-file-utils
 Requires:       kanku-cli = %{version}
 Requires:       shared-mime-info
-Obsoletes:      kanku-url-wrapper
+Obsoletes:      kanku-url-wrapper =< 0.11.0
 
 %description urlwrapper
 A URL wrapper to start kanku from kanku:// urls in the browser.
@@ -637,9 +637,24 @@ kanku guests which are using the 'autostart' flag.
 %{_unitdir}/kanku-iptables.service
 %{_sbindir}/rckanku-iptables
 
-
 %changelog
 
 %changelog cli
 
 %changelog common
+
+%changelog common-server
+
+%changelog web
+
+%changelog dispatcher
+
+%changelog urlwrapper
+
+%changelog scheduler
+
+%changelog triggerd
+
+%changelog iptables
+
+%changelog worker
