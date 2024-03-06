@@ -118,7 +118,7 @@ e.g. to prepare development environments or run simple tests.
 
 %install
 %make_install DOCDIR=%{_defaultdocdir}/kanku/
-mkdir -p %{buildroot}/%{_sysusersdir}/system-user-%{kanku_user}.conf
+mkdir -p %{buildroot}/%{_sysusersdir}
 cp dist/system-user-%{kanku_user}.conf %{buildroot}/%{_sysusersdir}/system-user-%{kanku_user}.conf
 %fdupes %{buildroot}/opt/kanku/share
 ln -s /usr/sbin/service %{buildroot}%{_sbindir}/rckanku-web
