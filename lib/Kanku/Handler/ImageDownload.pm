@@ -24,6 +24,7 @@ use File::Copy;
 use Try::Tiny;
 use Archive::Cpio;
 use Kanku::Config;
+use Kanku::Config::Defaults;
 extends 'Kanku::Handler::HTTPDownload';
 
 with 'Kanku::Roles::Handler';
