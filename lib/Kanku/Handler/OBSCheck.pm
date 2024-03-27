@@ -195,13 +195,14 @@ sub execute {
   $ctx->{obs_direct_url} = $binary->{bin_url};
   $ctx->{public_api}     = $binary->{public_api};
   $ctx->{obs_filename}   = $binary->{filename};
-  $self->logger->debug('obs_direct_url = "'.( $ctx->{obs_direct_url} || q{}).q{"});
   $ctx->{obs_username}   = $binary->{obs_username};
   $ctx->{obs_password}   = $binary->{obs_password};
+
   $ctx->{obs_project}    = $self->project;
   $ctx->{obs_package}    = $self->package;
   $ctx->{obs_repository} = $self->repository;
   $ctx->{obs_arch}       = $self->arch;
+  $ctx->{api_url}        = $self->api_url;
 
   if (!($ctx->{vm_image_url} or $ctx->{obs_direct_url})) {
     croak("Neither vm_image_url nor obs_direct_url found\n"
@@ -327,6 +328,8 @@ This handler downloads a file from a given url to the local filesystem and sets 
 =head2 setters
 
   vm_image_url
+
+  api_url
 
 =head1 DEFAULTS
 
