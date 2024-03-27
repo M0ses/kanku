@@ -93,8 +93,6 @@ sub download {
 
   my $res;
 
-  $self->logger->debug("sigauth_credentials: ".$self->dump_it($self->sigauth_credentials));
-
   if ( $self->offline ) {
     $self->logger->warn("Skipping download from $url in offline mode");
   } else {
