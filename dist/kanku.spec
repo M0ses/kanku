@@ -254,7 +254,6 @@ common config and lib files used in kanku
 /usr/lib/kanku/lib/Kanku/Util/
 /usr/lib/kanku/lib/Kanku/Util.pm
 /usr/lib/kanku/lib/Kanku/Task/
-/usr/lib/kanku/lib/OpenStack/
 /usr/lib/kanku/lib/Kanku/Config.pm
 %dir /usr/lib/kanku/lib/Kanku/Config/
 /usr/lib/kanku/lib/Kanku/Config/Defaults.pm

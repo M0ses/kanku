@@ -69,12 +69,6 @@ which are executed in this order.
 
 =item L<Kanku::Handler::WaitForSystemd>
 
-=item L<Kanku::Handler::OpenStack::CreateInstance>
-
-=item L<Kanku::Handler::OpenStack::Image>
-
-=item L<Kanku::Handler::OpenStack::RemoveInstance>
-
 =back
 
 =cut

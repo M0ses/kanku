@@ -27,7 +27,6 @@ has [qw/
         vm_image_file   vm_image_url    vm_template_file
         domain_name     host_interface  management_interface
         cache_dir       images_dir
-	os_instance_name os_image_id
 	login_user	login_pass
 	privatekey_path publickey_path
         ipaddress
@@ -72,11 +71,6 @@ has gui_config => (
           label => 'VM Template File',
         },
         {
-          param => 'os_instance_name',
-          type  => 'text',
-          label => 'Name for OpenStack instance',
-        },
-        {
           param => 'offline',
           type  => 'checkbox',
           label => 'Offline Mode',
@@ -100,7 +94,7 @@ sub execute {
   my $ctx  = $self->job()->context();
   for my $var (qw/
     domain_name vm_template_file host_interface images_dir cache_dir ipaddress
-    os_instance_name os_image_id login_user login_pass 
+    login_user login_pass 
     privatekey_path publickey_path
     host_dir_9p accessmode_9p
     vm_image_file management_interface snapshot_name domain_autostart
