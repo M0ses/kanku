@@ -188,9 +188,7 @@ sub download {
 
   $self->logger->debug(' -- state of skip_all_checks : '.$self->skip_all_checks);
 
-
-  $self->check_before_download();
-
+  $self->check_before_download() unless $self->skip_all_checks;
 
   my $curl = Kanku::Util::CurlHttpDownload->new(
       url         => $url,
@@ -204,7 +202,6 @@ sub download {
 sub check_before_download {
   my $self = shift;
 
-  return if ( $self->skip_all_checks() );
   if (!$self->skip_check_project()) {
       my $prj = Net::OBS::Client::Project->new(
           name        => $self->project,
