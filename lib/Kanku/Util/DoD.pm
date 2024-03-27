@@ -177,11 +177,6 @@ has preferred_extension => (
 
 sub download {
   my $self  = shift;
-  my $ua    = Net::OBS::Client->new(
-                apiurl=>$self->api_url,
-                %{$self->auth_config},
-	      )->user_agent();
-
   my $fn    = $self->get_image_file_from_url()->{filename};
   my $url   = $self->download_url . $fn;
   my $file  = $self->images_dir() . q{/} . $fn;
@@ -193,6 +188,7 @@ sub download {
   my $curl = Kanku::Util::CurlHttpDownload->new(
       url         => $url,
       output_file => $file,
+      %{$self->auth_config},
   );
 
   return $curl->download();
