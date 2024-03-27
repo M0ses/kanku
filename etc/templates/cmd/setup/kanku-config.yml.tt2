@@ -119,7 +119,6 @@ dispatcher: Kanku::Dispatch::RabbitMQ
 Kanku::Dispatch::RabbitMQ:
   max_processes: 2
 
-
 Kanku::Daemon::TriggerD:
   listener:
     -
@@ -170,3 +169,64 @@ Kanku::Handler::CopyProfile:
     #  mode: 700
     #  path: ~/.config/
 [% END %]
+
+################################################################################
+# Config Example for SigAuth authentication
+################################################################################
+#Net::OBS::Client:
+#  credentials:
+#
+#    # EXAMPLE 1
+#    #
+#    # auth_type: agent
+#    # user: bot1
+#    # keydir: $HOME/.ssh
+#    #
+#    # * try to authenticate with first key found in ssh-agent
+#    # * fallback: search $HOME/.ssh/ for id_ed25519/id_rsa file to authenticate
+#    #
+#    https://obs1.example.com:
+#      sigauth_credentials
+#        user: bot1
+#
+#    # EXAMPLE 2
+#    #
+#    # auth_type: agent
+#    # user: bot1
+#    # keyid: card_no:12_345_678
+#    #
+#    # * search for keyid in ssh-agent and use for authentication
+#    # * fallback: search $HOME/.ssh/ for id_ed25519/id_rsa file to authenticate
+#    https://obs2.example.com:
+#      sigauth_credentials
+#        user: bot1
+#        keyid: card_no:12_345_678
+#
+#    # EXAMPLE 3
+#    #
+#    # auth_type: keyfile
+#    # user: bot1
+#    # keyfile: /path/to/key
+#    # nofallback: 1
+#    #
+#    # * use key to authenticate
+#    # * fallback: not used
+#    https://obs2.example.com:
+#      sigauth_credentials
+#        auth_type: keyfile
+#        user: bot1
+#        keyfile: /path/to/key
+#        nofallback: 1
+#
+#    # EXAMPLE 4 (INSECURE AND NOT RECOMMENDED)
+#    #
+#    # auth_type: agent
+#    # user: bot1
+#    # keyid: card_no:12_345_678
+#    #
+#    # * search for keyid in ssh-agent and use for authentication
+#    # * fallback: search $HOME/.ssh/ for id_ed25519/id_rsa file to authenticate
+#    https://obs2.example.com:
+#      basicauth_credentials
+#        user: user1
+#        pass: mysecretpassword (INSECURE AND NOT RECOMMENDED)
