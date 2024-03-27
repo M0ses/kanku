@@ -19,7 +19,6 @@ use_ok 'Kanku::Roles::Handler';
 use_ok 'Kanku::Config';
 use_ok 'Kanku::Handler::GIT';
 use_ok 'Kanku::Handler::RemoveDomain';
-use_ok 'Kanku::Handler::OBSDownload';
 use_ok 'Kanku::Handler::PortForward';
 use_ok 'Kanku::Handler::ExecuteCommandViaSSH';
 use_ok 'Kanku::Handler::HTTPDownload';
