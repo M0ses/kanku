@@ -68,8 +68,6 @@ has [qw/etag/] => (
 sub download {
   my $self  = shift;
   my $url   = $self->url;
-
-
   my $file  = undef;
 
   if ( $self->output_file ) {
@@ -95,18 +93,16 @@ sub download {
 
   my $res;
 
+  $self->logger->debug("sigauth_credentials: ".$self->dump_it($self->sigauth_credentials));
+
   if ( $self->offline ) {
     $self->logger->warn("Skipping download from $url in offline mode");
   } else {
       $self->logger->info("Downloading $url");
       $self->logger->debug("  to file ".$file->stringify);
 
-      my $cfg      = Kanku::Config->instance();
       my $neo_ua   = Net::OBS::LWP::UserAgent->new();
-      #my $out_file = file($cfg->cache_dir, $self->_calc_output_file(0))->stringify;
       $self->_set_credentials($neo_ua, $url);
-
-      my $ua    = Net::OBS::LWP::UserAgent->new();
 
       my $res = $neo_ua->mirror(
         url  => $self->url,
@@ -133,10 +129,11 @@ sub _set_credentials {
   my ($self, $c, $url) = @_;
   my $uri        = URI->new($url);
 
+  $self->logger->debug("url: ".$url);
   my $creds = Kanku::Config::Defaults->get('Net::OBS::Client','credentials');
   for my $cred (keys %{$creds}) {
-    $self->logger->debug("cred: $cred / url: ".$self->url);
-    if ($self->url =~ /^$cred/) {
+    $self->logger->debug("cred: $cred");
+    if ($url =~ /^$cred/) {
       if ($creds->{$cred}->{sigauth_credentials}) {
         $c->sigauth_credentials($creds->{$cred}->{sigauth_credentials});
       } elsif ($creds->{$cred}->{basic_credentials}) {
