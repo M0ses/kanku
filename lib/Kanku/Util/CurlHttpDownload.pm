@@ -122,9 +122,11 @@ sub download {
       } else {
         die "Download failed from $url: '".$res->code."'\n";
       }
+
+      $self->etag($res->header('ETag'));
   }
 
-  return ($file->stringify, $res->header('ETag'));
+  return ($file->stringify, $self->etag);
 }
 
 sub _set_credentials {

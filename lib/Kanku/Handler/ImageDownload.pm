@@ -103,31 +103,6 @@ sub execute {
       $curl->password($ctx->{obs_password}) if $ctx->{obs_password};
     }
     ($tmp_file, $etag) = $curl->download();
-
-
-    if ($ctx->{public_api} ) {
-      my $cpio = Archive::Cpio->new;
-      my $out_file = file(file($tmp_file)->parent, $ctx->{obs_filename})->stringify;
-      if ($tmp_file ne $out_file) {
-        $logger->debug("extracting from $tmp_file to $out_file");
-
-        open(INFILE,  '<',$tmp_file) || die "Could not open $tmp_file: $!";
-        open(OUTFILE, '>',$out_file) || die "Could not open $out_file: $!";
-        $cpio->read_with_handler(\*INFILE,
-          sub {
-            my ($e) = @_;
-            if ($e->name eq $ctx->{obs_filename}) {
-              print OUTFILE $e->get_content;
-            }
-          }
-        );
-        close INFILE  || die "Could not close $tmp_file: $!";
-        close OUTFILE || die "Could not close $out_file: $!";
-        unlink($tmp_file);
-        $tmp_file = $out_file;
-      }
-      $ctx->{vm_image_file} = $ctx->{obs_filename};
-    }
   };
 
   $self->update_history($tmp_file, $etag);
