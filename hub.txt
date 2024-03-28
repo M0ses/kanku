@@ -6,7 +6,6 @@ https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFil
 https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.kubernetes;0
 https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.multivm;0
 https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.openQA;1
-https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.openstack;0
 https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.rabbitmq-opensuse;0
 https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.rockrobo;0
 https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.simple;0

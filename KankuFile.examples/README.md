@@ -35,16 +35,6 @@ kanku destroy
 # Create new domain
 kanku up
 ```
-# openstack
-
-```
-# Set KankuFile
-export KANKU_CONFIG=KankuFile.openstack
-# Remove existing domain
-kanku destroy
-# Create new domain
-kanku up
-```
 
 # rabbitmq-opensuse
 

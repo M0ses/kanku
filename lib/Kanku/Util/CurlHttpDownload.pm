@@ -17,14 +17,11 @@
 package Kanku::Util::CurlHttpDownload;
 
 use Moose;
-use Data::Dumper;
-use HTTP::Request;
-use Template;
-use Kanku::Util::HTTPMirror;
 use File::Temp qw/ :mktemp /;
 use File::Copy;
 use Path::Class::File;
 use Path::Class::Dir;
+use Net::OBS::LWP::UserAgent;
 use Kanku::Config;
 with 'Kanku::Roles::Logger';
 
@@ -71,8 +68,6 @@ has [qw/etag/] => (
 sub download {
   my $self  = shift;
   my $url   = $self->url;
-
-
   my $file  = undef;
 
   if ( $self->output_file ) {
@@ -96,14 +91,6 @@ sub download {
     die "Neither output_dir nor output_file given";
   }
 
-  $| = 1;  # autoflush
-
-  if ( $self->use_temp_file ) {
-      $file = Path::Class::File->new(mktemp($file->stringify."-XXXXXXXX"));
-  };
-
-  ( -d $file->parent ) || $file->parent->mkpath;
-
   my $res;
 
   if ( $self->offline ) {
@@ -112,39 +99,15 @@ sub download {
       $self->logger->info("Downloading $url");
       $self->logger->debug("  to file ".$file->stringify);
 
-      my $ua    = Kanku::Util::HTTPMirror->new();
+      my $neo_ua   = Net::OBS::LWP::UserAgent->new();
+      $self->_set_credentials($neo_ua, $url);
 
-      my %request;
-
-      my $uri       = URI->new($url);
-      my $authority = $uri->authority;
-
-      # user/pass will be removed from uri automatically by LWP::UserAgent
-      my @auth = split(/\@/, $authority, 2);
-      if ($auth[1]) {
-        my ($user, $pass) = split(/:/, $auth[0], 2);
-        my $new_user      = ($self->username || $user);
-        my $new_pass      = ($self->password || $pass);
-        my $new_authority = $new_user;
-        $new_authority .= ":$new_pass" if ($new_authority && $new_pass);
-        $new_authority .= $auth[1];
-        $uri->authority($new_authority);
-      }
-
-      # Add ETag to request header
-      my $header = [];
-      push @$header, ('If-None-Match', $self->etag) if ($self->etag);
-
-      $self->logger->debug("final URI: ".$uri->canonical);
-
-      my $req = HTTP::Request->new(GET => $uri, $header);
-
-      $res = $ua->mirror(
-        url  => $uri->canonical,
-        file => $file->stringify,
+      my $res = $neo_ua->mirror(
+        url  => $self->url,
         etag => $self->etag,
-        %request,
+        file => $file->stringify,
       );
+
 
       if ( $res->code == 200 ) {
         $self->logger->debug("  download succeed");
@@ -153,10 +116,33 @@ sub download {
       } else {
         die "Download failed from $url: '".$res->code."'\n";
       }
+
+      $self->etag($res->header('ETag'));
   }
 
-  return ($file->stringify, $res->header('ETag'));
+  return ($file->stringify, $self->etag);
 }
+
+sub _set_credentials {
+  my ($self, $c, $url) = @_;
+  my $uri        = URI->new($url);
+
+  $self->logger->debug("url: ".$url);
+  my $creds = Kanku::Config::Defaults->get('Net::OBS::Client','credentials');
+  for my $cred (keys %{$creds}) {
+    $self->logger->debug("cred: $cred");
+    if ($url =~ /^$cred/) {
+      if ($creds->{$cred}->{sigauth_credentials}) {
+        $c->sigauth_credentials($creds->{$cred}->{sigauth_credentials});
+      } elsif ($creds->{$cred}->{basic_credentials}) {
+        $c->basic_credentials($creds->{$cred}->{basic_credentials});
+      }
+    }
+    return;
+  }
+  return;
+}
+
 
 __PACKAGE__->meta->make_immutable;
 

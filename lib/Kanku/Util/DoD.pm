@@ -177,24 +177,18 @@ has preferred_extension => (
 
 sub download {
   my $self  = shift;
-  my $ua    = Net::OBS::Client->new(
-                apiurl=>$self->api_url,
-                %{$self->auth_config},
-	      )->user_agent();
-
   my $fn    = $self->get_image_file_from_url()->{filename};
   my $url   = $self->download_url . $fn;
   my $file  = $self->images_dir() . q{/} . $fn;
 
   $self->logger->debug(' -- state of skip_all_checks : '.$self->skip_all_checks);
 
-
-  $self->check_before_download();
-
+  $self->check_before_download() unless $self->skip_all_checks;
 
   my $curl = Kanku::Util::CurlHttpDownload->new(
       url         => $url,
       output_file => $file,
+      %{$self->auth_config},
   );
 
   return $curl->download();
@@ -204,7 +198,6 @@ sub download {
 sub check_before_download {
   my $self = shift;
 
-  return if ( $self->skip_all_checks() );
   if (!$self->skip_check_project()) {
       my $prj = Net::OBS::Client::Project->new(
           name        => $self->project,
