@@ -175,7 +175,7 @@ sub execute {
   }
 
   try {
-    $dod->check_before_download();
+    $dod->check_before_download() unless $self->skip_all_checks;
   }
   catch {
     my $e = $_;
