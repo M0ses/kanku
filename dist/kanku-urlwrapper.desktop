@@ -1,11 +1,11 @@
 [Desktop Entry]
 Name=Kanku CLI Tool Handler
 GenericName=Kanku CLI Tool
-Comment=Handle URL Scheme kanku://
+Comment=Handle URL Scheme kanku:// and kankus://
 Exec=kanku urlwrapper --url %u
 Terminal=true
 Type=Application
-MimeType=x-scheme-handler/kanku;
+MimeType=x-scheme-handler/kanku;x-scheme-handler/kankus;
 Icon=kanku
 Categories=Development;Building;
 Name[en_US]=Kanku CLI Tool Handler

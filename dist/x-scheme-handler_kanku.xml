@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
   <mime-type type="x-scheme-handler/kanku">
-    <!--Created automatically by update-mime-database. DO NOT EDIT!-->
-    <comment>kanku mime type</comment>
-    <glob pattern="KankuFile"/>
+    <comment>kanku:// url handler (http)</comment>
+    <glob pattern="KankuFile*"/>
+  </mime-type>
+  <mime-type type="x-scheme-handler/kankus">
+    <comment>kankus:// url handler (https)</comment>
+    <glob pattern="KankuFile*"/>
   </mime-type>
 </mime-info>

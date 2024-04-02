@@ -23,6 +23,7 @@ extends qw(Kanku::Cli);
 use Data::Dumper;
 use Cwd;
 use Try::Tiny;
+use Net::OBS::LWP::UserAgent;
 use Kanku::Util::VM;
 use File::Path qw/make_path/;
 
@@ -102,7 +103,7 @@ has _KankuFile => (
 sub run {
   my ($self) = @_;
   my $url    = $self->url || $self->select_url;
-  $url =~ s#kanku://##;
+  $url =~ s#kanku(|s)://#http$1://#;
   $self->ask_for_outdir;
   $self->_cwd(cwd());
   chdir $self->outdir;
@@ -273,7 +274,7 @@ sub select_url {
 sub get_hub_data {
   my ($self) = @_;
   my $data   = [];
-  my $ua     = LWP::UserAgent->new();
+  my $ua     = Net::OBS::LWP::UserAgent->new();
   my $response = $ua->get($self->_hub_url);
   if ($response->is_success) {
     my  @lines = split(/\n/, $response->decoded_content);
@@ -294,7 +295,8 @@ sub get_file {
  my ($self, $url, $outfile) = @_;
  my $fh;
  open($fh, '>', $outfile) || die "Could not open $outfile: $!\n";
- my $ua = LWP::UserAgent->new();
+ my $ua = Net::OBS::LWP::UserAgent->new();
+ print "Downloading $url\n";
  my $response = $ua->get($url);
   if ($response->is_success) {
     print $fh $response->decoded_content;
