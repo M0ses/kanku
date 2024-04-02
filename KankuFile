@@ -9,3 +9,4 @@ jobs:
 ###### JOB:
  sostw: !include KankuFile.d/server-openSUSE-Tumbleweed.yml
  devel: !include KankuFile.d/devel.yml
+ test: !include KankuFile.d/test.yml

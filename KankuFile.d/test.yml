@@ -1,0 +1,48 @@
+---
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      host_interface: eth0
+      login_user: root
+      login_pass: kankudai
+  -
+    use_module: Kanku::Handler::OBSCheck
+    options:
+      project: devel:kanku:images
+      package: openSUSE-Tumbleweed-JeOS:ext4
+      repository: images_tumbleweed
+  -
+    use_module: Kanku::Handler::ImageDownload
+  -
+    use_module: Kanku::Handler::ResizeImage
+    options:
+      disk_size: 100G
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 6G
+      vcpu: 2
+      use_9p: 1
+      pwrand:
+        users:
+          - root
+          - kanku
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/perl/openSUSE_Tumbleweed/devel:kanku:perl.repo
+        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/staging/openSUSE_Tumbleweed/devel:kanku:staging.repo
+        - zypper --gpg-auto-import-keys ref -s
+        # Only for development
+        - zypper -n in make apache2 sqlite3
+  # Install kanku server mode and run tests
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - rcnetwork restart
+        - zypper -n in kanku
+        - make -C /tmp/kanku test 2>&1 |tee /tmp/make.log
