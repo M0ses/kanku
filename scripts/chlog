@@ -1,127 +1,55 @@
 #!/usr/bin/perl
 
 use strict;
-
-BEGIN { push @::INC, '/usr/lib/build'; }
+use warnings;
 
 use YAML::PP;
 use FindBin;
-use Build::Rpm;
 use Getopt::Long;
+
+BEGIN { push @::INC, '/usr/lib/build', "$FindBin::Bin/../lib"; }
+
+use Build::Rpm;
+use Kanku::ReleaseTools::Changelog;
 
 our $dry_run;
 my $dst_branch = "master";
 
-GetOptions ('branch=s'=>\$dst_branch, 'dry-run'=>\$dry_run) or die("Error in command line arguments\n");
-
-my $pattern = '.*/release-(.*)/index.md';
-
-my @files  = glob("$FindBin::Bin/../blog/*/*/*/release-*/index.md");
-my %rnotes;
-
-for my $f (@files) {
-  print STDERR "Found file: $f\n" if $::ENV{DEBUG};
-  if ( $f =~ m#$pattern#) {
-    $rnotes{$1} = $f;
-  }
+if (!
+  GetOptions(
+    'branch=s'=>\$dst_branch, 
+    'dry-run'=>\$dry_run
+  )
+) {
+  die "Error in command line arguments\n";
 }
 
-my $verscmp     = \&Build::Rpm::verscmp;
-my @sorted_vers = sort { $verscmp->($a, $b) } keys %rnotes;
+my $changelog = Kanku::ReleaseTools::Changelog->new(
+  destination_branch => $dst_branch,
+  outdir             => "$FindBin::Bin/..",
+  blog_dir           => "$FindBin::Bin/../blog",
+);
 
-my $header = {
-  features => 'FEATURES',
-  fixes    => 'BUGFIXES',
-};
+my $log    = $changelog->create_new_changelog_entries();
 
-my @changelog=`git show $dst_branch:CHANGELOG.md`;
-my $revs = find_releases(\@changelog);
-
-my $log;
-my @new_revs;
-($verscmp->($_, $revs)>0) && push @new_revs, $_ for @sorted_vers;
-
-print "@new_revs\n" if $::ENV{DEBUG};
-
-for my $ver (@new_revs) {
-  my $yaml = YAML::PP::LoadFile($rnotes{$ver});
-  my $d    = $yaml->{data};
-  my ($date, $time) = split(/\s+/, $yaml->{date});
-  my $news = "# [$d->{release}] - $date\n\n";
-  for my $section ('features', 'fixes') {
-    next unless @{$d->{$section}||[]};
-    $news .= "## $header->{$section}\n\n";
-    for my $entry (@{$d->{$section}||[]}) {
-      print STDERR "$entry\n" if $::ENV{DEBUG};
-      $news .= gen_entries($entry, 0);
-    }
-    $news .= "\n\n";
+if (!$log) {
+  print "No new changelog entries found. Exiting...\n";
+  if ($dry_run) {
+    print "#### CURRENT CHANGELOG CONTENT####\n".
+      $changelog->current_changelog_content;
   }
-  $log = $news . $log;
+  exit 0;
 }
 
-{
-  local $"=q{};
-  $log="$log@changelog";
-};
+$log .= $changelog->current_changelog_content;
 
 if (!$dry_run) {
-  my $fn = "$FindBin::Bin/../CHANGELOG.md";
-  open(my $f, '>', $fn) || die "Cannot open $fn: $!\n";
-  print $f $log;
-  close $f;
-
-  stash_and_commit($dst_branch, "@new_revs");
+  my $file     = $changelog->write_new_changelog($log);
+  my @new_revs = $changelog->new_releases;
+  my $message  = "[doc] updated $file. New revisions: (@new_revs)";
+  $changelog->stash_and_commit($file, $message);
 } else {
- print $log;
+  print $log;
 }
 
 exit 0;
-################################################################################
-# Subroutines
-################################################################################
-
-sub get_unrelease_changes {
-  my ($rev, @sorted_vers) = @_;
-}
-
-sub gen_entries {
-  my ($entry, $indent) = @_;
-  if ((ref($entry)||q{}) eq 'ARRAY') {
-    my $result = q{};
-    for my $sub_entry (@{$entry}) {
-      $result .= gen_entries($sub_entry, $indent+2);
-    }
-    return $result;
-  } else {
-    return q{ } x $indent . "* $entry\n";
-  }
-}
-
-sub stash_and_commit {
-  my ($dst_branch, $new_revs) = @_;
-  my $current_branch=`git branch --show-current`;
-  my $message = '[doc] updated changelog ver: '.$new_revs;
-  my $cmds=[
-    "git add CHANGELOG.md",
-    "git stash push -m '$message'",
-    "git checkout $dst_branch",
-    "git commit -m '$message'",
-    "git checkout $current_branch",
-
-  ];
-  for my $cmd (@{$cmds}) {
-    print "Executing: $cmd\n";
-    my $r = system($cmd);
-    print "r: $r\n";
-    die "system '$cmd' failed: $?\n" if $?;
-  }
-}
-
-sub find_releases {
-  my ($changelog) = @_;
-  for my $line (@$changelog) {
-    return $+{release} if ($line =~ m/^# \[(?<release>\d+\.\d+\.\d+)\]/);
-  }
-}
-

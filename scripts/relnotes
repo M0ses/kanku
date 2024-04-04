@@ -3,93 +3,26 @@
 use strict;
 
 use YAML::PP;
-use FindBin;
 use Data::Dumper;
-use Mojo::DOM::HTML;
+use FindBin;
+
+BEGIN { push @::INC, "$FindBin::Bin/../lib"; };
+
+use Kanku::ReleaseTools::ReleaseNotes;
 
 my $release = $ARGV[0];
-# CONFIG
-my $dst_branch = "master";
-
 die "Please specify a release version as first parameter\n" unless $release;
 
-my $pattern = "$FindBin::Bin/../blog/*/*/*/release-$release/index.md";
-my @files = glob("$FindBin::Bin/../blog/*/*/*/release-$release/index.md");
+my $notes = Kanku::ReleaseTools::ReleaseNotes->new(
+  destination_branch => "master",
+  outdir             => "$FindBin::Bin/..",
+  blog_dir           => "$FindBin::Bin/../blog",
+  release            => $release,
+);
 
-die "\nNo release blog post found for pattern '$pattern'\n\n" unless @files;
-die "\nAmbiguous files for release $release found:\n\n  ".join("\n  ",@files)."\n\n" if @files > 1;
-
-my $yaml = YAML::PP::LoadFile($files[0]);
-
-create_relnotes($yaml);
-
-stash_and_commit($release, $dst_branch);
+my $rnotes = $notes->blog_releases;
+my $yaml = YAML::PP::LoadFile($rnotes->{$release});
+$notes->create($yaml);
+$notes->stash_and_commit();
 
 exit 0;
-
-sub create_relnotes {
-  my ($yaml) = @_;
-  my $data   = $yaml->{data};
-  my $header = {
-    warnings => '',
-    features => 'FEATURES',
-    fixes    => 'BUGFIXES',
-    examples => '',
-  };
-
-  my $content = {warnings=>$data->{warnings},examples=>$data->{examples}};
-
-  for my $section ('features', 'fixes') {
-    for my $entry (@{$data->{$section}||[]}) {
-      $content->{$section} .= gen_entries($entry, 0);
-    }
-  }
-
-  for my $section ('warnings','features', 'fixes', 'examples') {
-    if ($content->{$section}) {
-      my $headline = ($header->{$section}) ? "## $header->{$section}\n" : q{};
-      $content->{$section} = <<EOF;
-$headline
-$content->{$section}
-
-EOF
-    }
-  }
-  my $relfile = "$FindBin::Bin/../RELEASE-NOTES-$release.md";
-  open(my $F, '>', $relfile)||die "Could not open $relfile: $!\n";
-  print $F <<EOF;
-# $yaml->{title}
-
-$content->{warnings}$content->{features}$content->{fixes}$content->{examples}
-EOF
-  close $F;
-}
-
-sub gen_entries {
-  my ($entry, $indent) = @_;
-  if ((ref($entry)||q{}) eq 'ARRAY') {
-    my $result = q{};
-    for my $sub_entry (@{$entry}) {
-      $result .= gen_entries($sub_entry, $indent+2);
-    }
-    return $result;
-  } else {
-    return q{ } x $indent . "* $entry\n";
-  }
-}
-
-sub stash_and_commit {
-  my ($release, $dst_branch) = @_;
-  my $current_branch=`git branch --show-current`;
-  my $cmds=[
-    "git add RELEASE-NOTES-$release.md",
-    "git stash create -m '[doc] updated release notes $release'",
-    "git checkout $dst_branch",
-    "git commit -m '[doc] updated release notes $release'",
-    "git checkout $current_branch",
-
-  ];
-  for my $cmd (@{$cmds}) {
-    system($cmd);
-  }
-}
