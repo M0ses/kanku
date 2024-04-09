@@ -1,0 +1,36 @@
+# Settings for Kanku::ReleaseTools
+#
+project: kanku
+branch: master
+blogdir: blog
+blogurl: https://m0ses.github.io/kanku/blog/
+verify_latest_commit: 1
+
+blog:
+  source_branch: gh-pages-src
+  publish_branch: gh-pages
+  blogdir: blog/
+  blogurl: https://m0ses.github.io/kanku/blog/
+  type: Statocles
+
+version_replace:
+  -
+    file: dist/kanku.spec
+    pattern: (^Version:\s+)\d+\.\d+\.\d+(\s+.*)?$
+  -
+    file: dist/debian.dsc
+    pattern: (^Version:\s+)\d+\.\d+\.\d+(\s+.*)?$
+  -
+    file: lib/Kanku.pm
+    pattern: (our\s+\$VERSION\s*=\s*['"])\d+\.\d+\.\d+(['"]\s*;.*$)
+
+changelogs:
+  -
+    file: dist/debian.changelog
+    format: Debian
+  -
+    file: dist/kanku.changes
+    format: Rpm
+  -
+    file: CHANGELOG.md
+    format: Default
