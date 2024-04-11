@@ -27,3 +27,4 @@ t/tmp.db
 etc/rabbit.yml
 KankuFile.examples/rockrobo
 .statocles
+.krt
