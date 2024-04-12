@@ -1,3 +1,29 @@
+# [0.17.0] - 2024-04-12
+
+ ## FEATURES
+
+ * [dist] new package 'kanku-iptables' (Store and restore kanku iptables rules)
+ * [dist] added x-scheme-handler kankus://
+ * [core] configurable SigAuth for http(s) dependent libraries, e.g.:
+   - `Kanku::Handler::OBSCheck`
+   - `Kanku::Handler::ImageDownload`
+   - `Kanku::Util::CurlHttpDownload`
+ * [dist] improvments for rpm/debian packages
+ * [test] updated libraries in base check
+ * [dist] new kanku job 'test' to create a vm running kanku test suite
+ * [handler] removed obsolete OpenStack handler and modules
+ * [handler] OBSCheck: setter for api_url for later use
+ * [handler] removed deprecated K::H::OBSDownload
+ * [templates] examples for Net::OBS::Client authentication
+ * [util] deleted Kanku::Util::HTTPMirror
+ ## BUGFIXES
+
+ * [handler] fix skip_all_checks in OBSCheck
+ * [util] DoD: fixed auth problem
+ * [dist] fix mkdir for system-user-kankurun.conf
+ * [dist] more fixes for spec
+
+
 # [0.16.2] - 2024-02-13
 
 ## FEATURES
