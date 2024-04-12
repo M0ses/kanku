@@ -7,6 +7,21 @@
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
+            <title>RELEASE 0.17.0</title>
+            <link>https://m0ses.github.io/kanku/blog/2024/04/12/release-0.17.0/</link>
+            <guid>https://m0ses.github.io/kanku/blog/2024/04/12/release-0.17.0/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Fri, 12 Apr 2024 13:22:44 +0000
+            </pubDate>
+        </item>
+        <item>
             <title>RELEASE 0.16.2</title>
             <link>https://m0ses.github.io/kanku/blog/2024/02/13/release-0.16.2/</link>
             <guid>https://m0ses.github.io/kanku/blog/2024/02/13/release-0.16.2/</guid>
@@ -64,21 +79,6 @@
             ]]></description>
             <pubDate>
                 Thu, 30 Nov 2023 10:54:14 +0000
-            </pubDate>
-        </item>
-        <item>
-            <title>RELEASE 0.14.0</title>
-            <link>https://m0ses.github.io/kanku/blog/2023/01/10/release-0.14.0/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2023/01/10/release-0.14.0/</guid>
-            <description><![CDATA[
-
-                    <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
-                    </p>
-
-            ]]></description>
-            <pubDate>
-                Tue, 10 Jan 2023 09:15:00 +0000
             </pubDate>
         </item>
     </channel>

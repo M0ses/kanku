@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/kanku/theme/css/normalize.css" rel="stylesheet">
+        <link href="/kanku/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/kanku/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/kanku/page/favicon.ico" rel="shortcut icon" type="image/x-icon">
+        <title>RELEASE 0.17.0 - Kanku</title>
+        <meta content="Statocles 0.098" name="generator">
+        <link href="/kanku/blog/2024/02/13/release-0.16.2/index.html" rel="next">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/kanku/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/kanku/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        
+<header>
+    <h1>Release 0.17.0</h1>
+
+    <aside>
+        <time datetime="2024-04-12">
+            Posted on 2024-04-12
+        </time>
+    </aside>
+
+    <p class="tags">Tags:
+        <a href="/kanku/blog/tag/release/" rel="tag">release</a>
+    </p>
+
+
+</header>
+
+<h2>Attention:</h2>
+
+<p>
+   <b>Focus of this release has been:</b>
+</p>
+
+<ul>
+  <li>Support for new URL protocol (based on https) <pre><code>kankus://khub.example.com/path/to/KankuFile</code></pre></li>
+  <li>improve packaging for rpm and deb based distros</li>
+  <li>refactor LWP::UserAgent based libraries to use Net::OBS::Client/Net::OBS::LWP/UserAgent which supports experimental <a href="https://datatracker.ietf.org/doc/html/draft-cavage-http-signatures-12" target="_blank">&#39;Signature&#39; HTTP Authentication Scheme</a></li>
+  <li>cleanup deprecated/obsolete/broken libraries</li>
+</ul>
+
+<p>
+   <b>
+   The following libraries have been deleted.<br>
+   Please check your configs for the following Handlers:
+   </b>
+</p>
+
+<ul>
+  <li>Kanku::Handler::OBSDownload <b>(use Kanku::Handler::ImageDownload)</b></li>
+  <li>Kanku::Handler::OpenStack::CreateInstance (discontinued w/o replacement)</li>
+  <li>Kanku::Handler::OpenStack::Image (discontinued w/o replacement)</li>
+  <li>Kanku::Handler::OpenStack::RemoveInstance (discontinued w/o replacement)</li>
+</ul>
+
+<p>
+  The following libraries have been also removed.
+  This should only be relevant for kanku developers.
+  Kanku users should not notice these changes:
+</p>
+
+<ul>
+  <li>Kanku::Util::HTTPMirror</li>
+  <li>OpenStack::API</li>
+  <li>OpenStack::API::Cinder</li>
+  <li>OpenStack::API::EC2</li>
+  <li>OpenStack::API::Glance</li>
+  <li>OpenStack::API::Neutron</li>
+  <li>OpenStack::API::Nova</li>
+  <li>OpenStack::API::Quantum</li>
+  <li>OpenStack::API::Role::Client</li>
+  <li>OpenStack::API::Role::Service</li>
+</ul>
+
+
+<h2>FEATURES</h2>
+
+<ul><li>[dist] new package &#39;kanku-iptables&#39; (Store and restore kanku iptables rules)
+</li><li>[dist] added x-scheme-handler kankus://
+</li><li><p>[core] configurable SigAuth for http(s) dependent libraries, e.g.:
+- <code>Kanku::Handler::OBSCheck</code>
+- <code>Kanku::Handler::ImageDownload</code>
+- <code>Kanku::Util::CurlHttpDownload</code></p>
+</li><li>[dist] improvments for rpm/debian packages
+</li><li>[test] updated libraries in base check
+</li><li>[dist] new kanku job &#39;test&#39; to create a vm running kanku test suite
+</li><li>[handler] removed obsolete OpenStack handler and modules
+</li><li>[handler] OBSCheck: setter for api_url for later use
+</li><li>[handler] removed deprecated K::H::OBSDownload
+</li><li>[templates] examples for Net::OBS::Client authentication
+</li><li>[util] deleted Kanku::Util::HTTPMirror
+</li></ul>
+
+
+<h2>BUGFIXES</h2>
+
+<ul><li>[handler] fix skip_all_checks in OBSCheck
+</li><li>[util] DoD: fixed auth problem
+</li><li>[dist] fix mkdir for system-user-kankurun.conf
+</li><li>[dist] more fixes for spec
+</li></ul>
+
+
+<h3>Example configuration for SigAuth</h3>
+
+<p>
+   Add the following config snippet to your kanku config:
+</p>
+
+<ul>
+  <li><code>~/.kanku/kanku-config.yml</code> (devel mode)</li>
+  <li><code>/etc/kanku/kanku-config.yml</code> (server mode)</li>
+</ul>
+
+<p>
+   Net::OBS::SigAuth will try to find a private key to sign
+   your request in the following order
+</p>
+
+<ul>
+  <li>first key in ssh-agent (SEE <code>ssh-add -L</code>)</li>
+  <li><code>~/.ssh/id_ed25519</code></li>
+  <li><code>~/.ssh/id_rsa</code></li>
+</ul>
+
+<pre><code>
+Net::OBS::Client:
+  credentials:
+    https://obs.example.com:
+      sigauth_credentials:
+        user: Bob
+</code></pre>
+
+<p>
+  SEE <a href="https://github.com/M0ses/kanku/blob/a05871f15979138f2e55976bf6be8c3cc21e8add/etc/templates/cmd/setup/kanku-config.yml.tt2#L174" target="_blank">etc/templates/cmd/setup/kanku-config.yml.tt2</a> for more configuration examples.
+</p>
+
+
+<ul class="pager">
+    <li class="prev">
+            <a class="button button-primary" href="/kanku/blog/2024/02/13/release-0.16.2/index.html" rel="prev">
+                ← Older
+            </a>
+    </li>
+    <li class="next">
+            <button disabled>
+                Newer →
+            </button>
+    </li>
+</ul>
+
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                        <nav id="tags">
+        <h1>Tags</h1>
+        <ul class="list-inline">
+            <li><a href="/kanku/blog/tag/news/">news</a></li>
+            <li><a href="/kanku/blog/tag/release/">release</a></li>
+        </ul>
+    </nav>
+
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>
