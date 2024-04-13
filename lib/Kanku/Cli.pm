@@ -24,6 +24,14 @@ use Log::Log4perl;
 use Kanku::Config;
 use FindBin;
 
+option 'traceback'  => (
+  is            => 'rw',
+  isa           => 'Bool',
+  default       => 0,
+  cmd_aliases   => ['t'],
+  documentation => 'die with stacktrace',
+);
+
 app_exclude 'Kanku::Cli::Roles';
 
 my $lconf;

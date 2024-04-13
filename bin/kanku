@@ -5,6 +5,12 @@ use warnings;
 
 BEGIN {
   unshift @::INC, ($ENV{KANKU_LIB_DIR} || '/usr/lib/kanku/lib');
+  my @t = grep {m/(--traceback|-t)/} @ARGV;
+  if (@t) {
+    require Carp;
+    Carp->import('verbose');
+    $SIG{__DIE__} = sub { Carp::confess(@_) };
+  }
 }
 
 use Kanku::Cli;
