@@ -20,7 +20,7 @@ use Moose;
 
 use Kanku::Config;
 
-my $defaults = {
+my $defaults =    {
   'Kanku::Util::IPTables' =>
   {
     'iptables_chain' => 'KANKU_HOSTS',
@@ -44,6 +44,9 @@ my $defaults = {
     apiurl => 'https://api.opensuse.org/public',
     project => 'devel:kanku:images',
   },
+  'Kanku::Util::DoD' => {
+    use_oscrrc => 0,
+  },
   'Net::OBS::Client' => {
     credentials => {},
   },
@@ -52,8 +55,10 @@ my $defaults = {
 sub get {
   my ($self, $pkg, $var) = @_;
   my $cfg = Kanku::Config->instance->cf;
-  return ($cfg->{$pkg} || $defaults->{$pkg})  unless $var;
-  return $cfg->{$pkg}->{$var} || $defaults->{$pkg}->{$var};
+  my $ret = {%{$defaults->{$pkg}||{}}};
+  $ret = {%{$ret}, %{$cfg->{$pkg}}} if ref($cfg->{$pkg}) eq 'HASH';
+  return $ret->{$var} if $var;
+  return $ret;
 }
 __PACKAGE__->meta->make_immutable;
 1;
