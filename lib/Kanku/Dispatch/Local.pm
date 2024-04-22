@@ -115,6 +115,24 @@ sub initialize {
 
 }
 
+sub end_job {
+  my ($self, $job, $task) = @_;
+  if ($task) {
+    $job->state(($job->skipped) ? 'skipped' : $task->state);
+  } else {
+    $job->state('skipped') if ($job->skipped);
+  }
+  $job->end_time(time());
+  $job->update_db();
+  if (ref($job->context->{pwrand}) eq 'HASH') {
+    while ( my ($user, $pw) = each %{$job->context->{pwrand}}) {
+      $self->logger->error("Password for user '$user': $pw");
+    }
+  }
+  $self->logger->debug("Finished job: ".$job->name." (".$job->id.") with state '".$job->state."'");
+}
+
+
 __PACKAGE__->meta->make_immutable();
 
 1;
