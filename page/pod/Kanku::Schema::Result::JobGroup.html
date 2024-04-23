@@ -1,4 +1,4 @@
-<html><head><title>Kanku::Schema::Result::JobHistory        </title>
+<html><head><title>Kanku::Schema::Result::JobGroup        </title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="../../theme/css/normalize.css" />
@@ -49,11 +49,11 @@
 name="NAME"
 >NAME</a></h1>
 
-<p>Kanku::Schema::Result::JobHistory</p>
+<p>Kanku::Schema::Result::JobGroup</p>
 
 <h1><a class='u'
-name="TABLE:_job_history"
->TABLE: <code>job_history</code></a></h1>
+name="TABLE:_job_group"
+>TABLE: <code>job_group</code></a></h1>
 
 <h1><a class='u'
 name="ACCESSORS"
@@ -70,27 +70,6 @@ name="id"
 <h2><a class='u'
 name="name"
 >name</a></h2>
-
-<pre>  data_type: &#39;text&#39;
-  is_nullable: 1</pre>
-
-<h2><a class='u'
-name="state"
->state</a></h2>
-
-<pre>  data_type: &#39;text&#39;
-  is_nullable: 1</pre>
-
-<h2><a class='u'
-name="args"
->args</a></h2>
-
-<pre>  data_type: &#39;text&#39;
-  is_nullable: 1</pre>
-
-<h2><a class='u'
-name="result"
->result</a></h2>
 
 <pre>  data_type: &#39;text&#39;
   is_nullable: 1</pre>
@@ -119,35 +98,6 @@ name="end_time"
   default_value: 0
   is_nullable: 1</pre>
 
-<h2><a class='u'
-name="last_modified"
->last_modified</a></h2>
-
-<pre>  data_type: &#39;integer&#39;
-  default_value: 0
-  is_nullable: 1</pre>
-
-<h2><a class='u'
-name="workerinfo"
->workerinfo</a></h2>
-
-<pre>  data_type: &#39;text&#39;
-  is_nullable: 1</pre>
-
-<h2><a class='u'
-name="masterinfo"
->masterinfo</a></h2>
-
-<pre>  data_type: &#39;text&#39;
-  is_nullable: 1</pre>
-
-<h2><a class='u'
-name="job_group_id"
->job_group_id</a></h2>
-
-<pre>  data_type: &#39;integer&#39;
-  is_nullable: 1</pre>
-
 <h1><a class='u'
 name="PRIMARY_KEY"
 >PRIMARY KEY</a></h1>
@@ -156,19 +106,6 @@ name="PRIMARY_KEY"
 <li><a href="#id" class="podlinkpod"
 >&#34;id&#34;</a></li>
 </ul>
-
-<h1><a class='u'
-name="RELATIONS"
->RELATIONS</a></h1>
-
-<h2><a class='u'
-name="job_history_subs"
->job_history_subs</a></h2>
-
-<p>Type: has_many</p>
-
-<p>Related object: <a href="./Kanku%3A%3ASchema%3A%3AResult%3A%3AJobHistorySub.html" class="podlinkpod"
->Kanku::Schema::Result::JobHistorySub</a></p>
                     </main>
                 </div>
 

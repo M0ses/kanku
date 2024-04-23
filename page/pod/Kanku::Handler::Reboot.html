@@ -63,6 +63,7 @@ name="SYNOPSIS"
       wait_for_console: 1
       wait_for_network: 1
       timeout:          600
+      login_timeout:    900
       allow_ip_change:  1
       ....</pre>
 
@@ -82,7 +83,9 @@ name="OPTIONS"
 
     timeout :          wait only &#60;seconds&#62;
 
-    allow_ip_change:   allow VM to change ip address on reboot</pre>
+    allow_ip_change:   allow VM to change ip address on reboot
+
+    login_timeout:     console login timeout</pre>
 
 <h1><a class='u'
 name="CONTEXT"
@@ -108,7 +111,9 @@ name="DEFAULTS"
 
     timeout          : 600 seconds
 
-    allow_ip_change  : 0 (false)</pre>
+    allow_ip_change  : 0 (false)
+
+    login_timout     : defaults to Kanku::Util::VM::Console</pre>
                     </main>
                 </div>
 
