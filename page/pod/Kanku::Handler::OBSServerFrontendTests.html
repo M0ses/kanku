@@ -64,7 +64,8 @@ name="SYNOPSIS"
         ipaddress:
       jump_host: 192.168.199.17
       git_url: https://github.com/M0ses/open-build-service
-      git_revision: fix_foobar</pre>
+      git_revision: fix_foobar
+      ruby_version: 3.1</pre>
 
 <h1><a class='u'
 name="DESCRIPTION"
@@ -76,7 +77,13 @@ name="DESCRIPTION"
 name="OPTIONS"
 >OPTIONS</a></h1>
 
-<pre>      commands          : array of commands to execute</pre>
+<pre>    jump_host:      &#60;ip_of_execution_host&#62;
+
+    git_url:        &#60;url to pull open-build-serivce sources&#62;
+
+    git_revision:   &#60;revision/tag/branch to checkout&#62;
+
+    ruby_version:   &#60;ruby version to use&#62;</pre>
 
 <p>SEE ALSO Kanku::Roles::SSH, Kanku::Handler::ExecuteCommandViaSSH</p>
 

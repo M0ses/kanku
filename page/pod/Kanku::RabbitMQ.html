@@ -58,7 +58,6 @@ name="SYNOPSIS"
 <pre>    my $kmq = Kanku::RabbitMQ-&#62;new(%{ $config || {}});
     $kmq-&#62;shutdown_file($self-&#62;shutdown_file);
     $kmq-&#62;connect() or die &#34;Could not connect to rabbitmq\n&#34;;
-    $kmq-&#62;setup_worker();
     $kmq-&#62;create_queue(
       queue_name    =&#62; $self-&#62;worker_id,
       routing_key   =&#62;&#39;kanku.to_all_workers&#39;

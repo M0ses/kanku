@@ -1,4 +1,4 @@
-<html><head><title>OpenStack::API        </title>
+<html><head><title>Kanku::Schema::Result::JobGroup        </title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="../../theme/css/normalize.css" />
@@ -49,69 +49,63 @@
 name="NAME"
 >NAME</a></h1>
 
-<p>OpenStack::API</p>
+<p>Kanku::Schema::Result::JobGroup</p>
 
 <h1><a class='u'
-name="SYNOPSIS"
->SYNOPSIS</a></h1>
-
-<pre>  my $osa = OpenStack::API-&#62;new();
-
-  my $osa-&#62;authenticate();
-
-  my $nova = $osa-&#62;service(type =&#62; &#39;compute&#39;);</pre>
+name="TABLE:_job_group"
+>TABLE: <code>job_group</code></a></h1>
 
 <h1><a class='u'
-name="ATTRIBUTES"
->ATTRIBUTES</a></h1>
+name="ACCESSORS"
+>ACCESSORS</a></h1>
 
 <h2><a class='u'
-name="os_auth_url"
->os_auth_url</a></h2>
+name="id"
+>id</a></h2>
 
-<p>default: $ENV{OS_AUTH_URL}</p>
-
-<h2><a class='u'
-name="os_tenant_name"
->os_tenant_name</a></h2>
-
-<p>default: $ENV{OS_TENANT_NAME}</p>
+<pre>  data_type: &#39;integer&#39;
+  is_auto_increment: 1
+  is_nullable: 0</pre>
 
 <h2><a class='u'
-name="os_auth_api_version"
->os_auth_api_version</a></h2>
+name="name"
+>name</a></h2>
+
+<pre>  data_type: &#39;text&#39;
+  is_nullable: 1</pre>
 
 <h2><a class='u'
-name="os_username"
->os_username</a></h2>
+name="creation_time"
+>creation_time</a></h2>
 
-<p>default: $ENV{OS_USERNAME}</p>
+<pre>  data_type: &#39;integer&#39;
+  default_value: 0
+  is_nullable: 1</pre>
 
 <h2><a class='u'
-name="os_password"
->os_password</a></h2>
+name="start_time"
+>start_time</a></h2>
 
-<p>default: $ENV{OS_PASSWORD}</p>
+<pre>  data_type: &#39;integer&#39;
+  default_value: 0
+  is_nullable: 1</pre>
+
+<h2><a class='u'
+name="end_time"
+>end_time</a></h2>
+
+<pre>  data_type: &#39;integer&#39;
+  default_value: 0
+  is_nullable: 1</pre>
 
 <h1><a class='u'
-name="METHODS"
->METHODS</a></h1>
+name="PRIMARY_KEY"
+>PRIMARY KEY</a></h1>
 
-<h2><a class='u'
-name="tokens_url"
->tokens_url</a></h2>
-
-<h2><a class='u'
-name="authenticate"
->authenticate</a></h2>
-
-<h2><a class='u'
-name="service"
->service</a></h2>
-
-<pre>  my $nova    = $osa-&#62;service(type =&#62; &#39;compute&#39;);
-
-  my $glance  = $osa-&#62;service(name =&#62; &#39;glance&#39;);</pre>
+<ul>
+<li><a href="#id" class="podlinkpod"
+>&#34;id&#34;</a></li>
+</ul>
                     </main>
                 </div>
 
