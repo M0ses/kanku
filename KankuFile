@@ -28,8 +28,6 @@ jobs:
       memory: 2G
       vcpu: 2
       use_9p: 1
-      mnt_dir_9p: /srv/www/htdocs
-      images_dir: /var/lib/libvirt/images
   -
     use_module: Kanku::Handler::PrepareSSH
 
@@ -37,6 +35,7 @@ jobs:
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
-        - zypper -n in apache2
-        - systemctl start apache2
-        - systemctl enable apache2
+        - zypper ar obs://home:M0ses:perl hMp
+        - zypper --gpg-auto-import-keys ref -s
+        - zypper -n in perl-Statocles
+        - cd /tmp/kanku; statocles build --clean
