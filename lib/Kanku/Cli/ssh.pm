@@ -73,14 +73,28 @@ option 'x11_forward' => (
   documentation => 'allow X11 forwarding',
 );
 
+option 'pseudo_terminal' => (
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => 'T',
+  documentation => 'force/disable pseudo terminal allocation',
+);
+
 sub run {
   my ($self) = @_;
   my $cfg    = $self->cfg;
   my $user   = $self->user;
   my $ip     = $self->ipaddress;
-  my $A      = ($self->agent_forward) ? q{-A} : q{};
-  my $X      = ($self->x11_forward) ? q{-X} : q{};
-  my $cmd    = $self->execute || q{};
+  my $A      = ($self->agent_forward) ? q{ -A} : q{};
+  my $X      = ($self->x11_forward)   ? q{ -X} : q{};
+  my $cmd    = ($self->execute)       ? " '".$self->execute."'" : q{};
+  my $term   = q{};
+
+  if ($self->pseudo_terminal) {
+    $term = q{ -t} if ($self->pseudo_terminal eq 'force');
+    $term = q{ -T} if ($self->pseudo_terminal eq 'disable');
+  }
+
   if (!$ip) {
     my $vm     = Kanku::Util::VM->new(
 		  domain_name => $self->domain_name,
@@ -97,7 +111,10 @@ sub run {
       exit 2;
     }
   }
-  system "ssh $A $X -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -l $user $ip $cmd";
+  $self->logger->info("Executing ssh client as user '$user' to '$ip'");
+  my $sshcmd = 'ssh'.$A.$X.$term." -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -l $user $ip".$cmd;
+  $self->logger->debug("\$sshcmd=>$sshcmd<");
+  system $sshcmd;
   exit 0;
 }
 
