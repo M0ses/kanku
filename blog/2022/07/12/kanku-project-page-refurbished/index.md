@@ -3,11 +3,13 @@ status: published
 title: Kanku Project Page refurbished
 tags: news
 ---
-## Welcome to the new project page
+**Welcome to the new project page**
 
 The new page is built with [Statocles](http://preaction.me/statocles/).
 
 We decided to switch from plain HTML to a Static Site Generator for the following reasons:
+
+---
 
 * Make it easier to write content
 * Use a framework to maintain a blog
