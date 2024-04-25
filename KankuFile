@@ -38,4 +38,4 @@ jobs:
         - zypper ar obs://home:M0ses:perl hMp
         - zypper --gpg-auto-import-keys ref -s
         - zypper -n in perl-Statocles
-        - cd /tmp/kanku; statocles build --clean
+        - cd /tmp/kanku; statocles build
