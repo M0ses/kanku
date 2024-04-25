@@ -11,29 +11,13 @@
             <link>https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/</link>
             <guid>https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/</guid>
             <description><![CDATA[
-                  <h2>Welcome to the new project page</h2>
+                  <p><strong>Welcome to the new project page</strong></p>
 
 <p>The new page is built with <a href="http://preaction.me/statocles/">Statocles</a>.</p>
 
 <p>We decided to switch from plain HTML to a Static Site Generator for the following reasons:</p>
 
-<ul>
-<li>Make it easier to write content</li>
-<li>Use a framework to maintain a blog</li>
-<li>Make deployment easier and more flexible</li>
-</ul>
-
-<p>but the most important point:</p>
-
-<ul>
-<li>Generate Changelog, Release notes, etc. out of one source</li>
-</ul>
-
-<p>We will follow up with some blog posts about the the tools we create
-to auto-generate these documentationi.</p>
-
-<p>Stay tuned.</p>
-
+                    <p><a href="https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/#section-2">Continue reading...</a></p>
 
                     <p>Tags:
                         <a href="https://m0ses.github.io/kanku/blog/tag/news/">news</a>

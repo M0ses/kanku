@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/kanku/theme/css/normalize.css" rel="stylesheet">
+        <link href="/kanku/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/kanku/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/kanku/page/favicon.ico" rel="shortcut icon" type="image/x-icon">
+        <title>HowTo use 'official' openSUSE Images with kanku - Kanku</title>
+        <meta content="M0ses" name="author">
+        <meta content="Statocles 0.098" name="generator">
+        <link href="/kanku/blog/2024/04/12/release-0.17.0/index.html" rel="next">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/kanku/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/kanku/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        <header>
+    <h1>HowTo use &#39;official&#39; openSUSE Images with kanku</h1>
+
+    <aside>
+        <time datetime="2024-04-25">
+            Posted on 2024-04-25
+        </time>
+            <span class="author">
+                by M0ses
+            </span>
+    </aside>
+
+    <p class="tags">Tags:
+        <a href="/kanku/blog/tag/howto/" rel="tag">howto</a>
+        <a href="/kanku/blog/tag/kankufile/" rel="tag">KankuFile</a>
+        <a href="/kanku/blog/tag/opensuse/" rel="tag">openSUSE</a>
+    </p>
+
+
+</header>
+<section id="section-1">
+    <p>In this blog post we will describe the steps to create a KankuFile using a &#39;official&#39; openSUSE Image.</p>
+
+<p><strong>TL;DR</strong></p>
+
+<p>SEE our <a href="https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.openSUSE-Leap-15.5-official">example KankuFile</a></p>
+
+</section>
+<section id="section-2">
+    <h2>Choose an image</h2>
+
+<p>First we would like to explain what settings are required in a KankuFile for a <code>kanku up</code> to succeed.</p>
+
+<ul>
+<li>Access via serial console</li>
+<li>Configured root login (login_user/login_pass)</li>
+<li><code>installation</code> section in <code>Kanku::Handler::CreateDomain</code> (if a interactive bootstrapping is required - e.g. <code>firstboot</code>)</li>
+</ul>
+
+<p>One of design principals of kanku is the old UNIX pragma <code>KISS</code> - &quot;Keep It Simple, Stupid&quot;.
+As we don&#39;t like wasting time by downloading useless stuff 
+which is not used afterwards we have choosen the following image for our example:</p>
+
+<p><a href="https://build.opensuse.org/package/show/openSUSE:Leap:15.5:Images/kiwi-templates-Minimal">kiwi-templates-Minimal</a></p>
+
+<p>which has a download size of ~200MB.</p>
+
+<h2>Scaffolding a KankuFile</h2>
+
+<p>We recommend to create a base KankuFile with <code>kanku init -d my-new-vm</code>.</p>
+
+<h2>KankuFile in detail</h2>
+
+<h3>Global Settings</h3>
+
+<p>Lets start with the global settings at the beginning of the file.</p>
+
+<pre><code>domain_name: my-new-vm
+default_job: kanku-job
+login_user: root
+login_pass: linux
+</code></pre>
+
+<p>Please be aware that &#39;official&#39; images do not have set a default password.
+We have to set it while the interactive bootstrapping process.
+We will catch up later on.</p>
+
+<h3>The job definition</h3>
+
+<p>Please remember:</p>
+
+<ul>
+<li>A <code>job</code> definition is a list of <code>tasks</code>.</li>
+<li>Each <code>task</code> executes a <code>handler</code>
+<ul>
+<li>configured by <code>use_module</code></li>
+</ul></li>
+</ul>
+
+<p>In the following text we will name the tasks by the handler they use.</p>
+
+<h4>Kanku::Handler::SetJobContext</h4>
+
+<p>You can leave the first task untouched, if it already fits your local setup.
+Depending on the configured tasks the <code>host_interface</code> 
+setting might not be required at all.</p>
+
+<pre><code>jobs:
+ kanku-job: # Just a arbitrary string configured in `default_job:`
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      host_interface: eth0
+</code></pre>
+
+<h4>Kanku::Handler::OBSCheck</h4>
+
+<p>The next task <code>Kanku::Handler::OBSCheck</code> can be deleted or commented out,
+because the following features are not required in our use case:</p>
+
+<ul>
+<li>OBSCheck will search for the latest build result</li>
+<li>OBSCheck will fail if the image is building ATM or the project is in a <code>dirty</code> state.
+This means that either other build jobs are running or the image is unpublished.</li>
+<li>OBSCheck is able to download images, not yet published, via the OBS API.</li>
+</ul>
+
+<h4>Kanku::Handler::ImageDownload</h4>
+
+<p>The next task which needs to be changed is the <code>Kanku::Handler::ImageDownload</code>.
+We did not run <code>Kanku::Handler::OBSCheck</code> so no <code>vm_image_url</code> is stored in the job context.
+We need to specify a static link <code>url</code> (no <code>-Build*.*</code> number in the image name) manually:</p>
+
+<pre><code>  -
+    use_module: Kanku::Handler::ImageDownload
+    options:
+      url: https://download.opensuse.org/distribution/leap/15.5/appliances/openSUSE-Leap-15.5-Minimal-VM.x86_64-kvm-and-xen.qcow2
+</code></pre>
+
+<h4>Kanku::Handler::CreateDomain</h4>
+
+<p>Now we come to the most complicated part, the <code>Kanku::Handler::CreateDomain</code> task.
+In the [&#39;official&#39; kanku images]https://build.opensuse.org/project/show/devel:kanku:images) 
+we try to avoid manual interaction while the bootstrapping process.</p>
+
+<p>Not so the &#39;official&#39; openSUSE images.
+This is the reason why we need a <code>installation</code> section in the <code>CreateDomain</code> task.</p>
+
+<p>Another important detail:</p>
+
+<p><code>d:k:i</code>-Images (d:k:i = devel:kanku:images in OBS) are configured to prefer 
+the serial console over the default <code>tty</code> in grub2 and <code>kernelcmdline</code>.
+They don&#39;t need a graphical output (VNC or SPICE)/keyboard/mouse in their
+libvirt-xml.</p>
+
+<p>The &#39;official&#39; openSUSE images (and many other images like the OBS appliance)
+are configured for &quot;the average Joe&quot;. 
+Therefor we need to configure a different VM <code>template</code>.</p>
+
+<p>We recommend the &quot;with-spice&quot; variant included in the <code>kanku-common</code> package.</p>
+
+<p>SEE <code>/etc/kanku/templates/with-spice.tt2</code> for details.</p>
+
+<pre><code>  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 2G
+      vcpu: 1
+      use_9p: 1
+      template: with-spice # required for proper serial console connection
+      installation:
+        -
+          expect: Welcome
+          send_enter: 1
+        -
+          expect: Select keyboard layout
+          send_enter: 1
+        -
+          expect: LICENSE AGREEMENT
+          send_enter: 1
+        -
+          expect: Select time zone
+          send_enter: 1
+        -
+          expect: Enter root password
+          send: linux
+          send_enter: 1
+        -
+          expect: Confirm root password
+          send: linux
+          send_enter: 1
+</code></pre>
+
+<p>In the first four steps we just accecpt the default values by &quot;pressing&quot; <code>[ENTER]</code>.</p>
+
+<p>The last two steps are more interesting. </p>
+
+<p>We <code>send</code> our new root password.</p>
+
+<p>The password needs to be the same as the <code>login_pass</code> we defined as global option at the beginning of the KankuFile.</p>
+
+<h2>Done!?</h2>
+
+<p>Thats it. Now we are done ... or ... Wait!</p>
+
+<p>We would recommend to add the following additional tasks:</p>
+
+<ul>
+<li><code>Kanku::Handler::PrepareSSH</code>
+<ul>
+<li>deploy openssh-server in the VM</li>
+<li>your public keys in /root/.ssh/authorized_keys</li>
+</ul></li>
+<li><code>Kanku::Handler::ExecuteCommandViaSSH</code>
+<ul>
+<li>test the ssh connection as root to your new VM</li>
+</ul></li>
+</ul>
+
+<p><strong>Example:</strong></p>
+
+<pre><code>-
+    use_module: Kanku::Handler::PrepareSSH
+-
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - echo &quot;Just checking ssh connnection and key deployment&quot;
+</code></pre>
+
+<p>We also strongly recommend to enhance your <code>Kanku::Handler::CreateDomain</code> task to use pwrand.
+This will set a randomized password for the configured list of users 
+and encrypt them for a list of configured email addresses using gpg.</p>
+
+<p>SEE <code>perldoc Kanku::Handler::CreateDomain</code> and search for pwrand for more information.</p>
+
+<p>Have a lot of fun! (with kanku)</p>
+
+<p>M0ses</p>
+
+</section>
+
+<ul class="pager">
+    <li class="prev">
+            <a class="button button-primary" href="/kanku/blog/2024/04/12/release-0.17.0/index.html" rel="prev">
+                ← Older
+            </a>
+    </li>
+    <li class="next">
+            <button disabled>
+                Newer →
+            </button>
+    </li>
+</ul>
+
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                        <nav id="tags">
+        <h1>Tags</h1>
+        <ul class="list-inline">
+            <li><a href="/kanku/blog/tag/howto/">howto</a></li>
+            <li><a href="/kanku/blog/tag/kankufile/">KankuFile</a></li>
+            <li><a href="/kanku/blog/tag/news/">news</a></li>
+            <li><a href="/kanku/blog/tag/opensuse/">openSUSE</a></li>
+            <li><a href="/kanku/blog/tag/release/">release</a></li>
+        </ul>
+    </nav>
+
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>

@@ -2,11 +2,37 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://m0ses.github.io/kanku/blog/</id>
     <title>Kanku</title>
-    <updated>2024-04-12T13:22:44Z</updated>
+    <updated>2024-04-25T09:40:24Z</updated>
     <link href="https://m0ses.github.io/kanku/blog/index.atom" rel="self" />
     <link href="https://m0ses.github.io/kanku/blog/" rel="alternate" />
     <generator version="0.098">Statocles</generator>
 
+    <entry>
+        <id>https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</id>
+        <title>HowTo use &#39;official&#39; openSUSE Images with kanku</title>
+        <author><name>M0ses</name></author>
+        <link href="https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/" rel="alternate" />
+        <content type="html"><![CDATA[
+	      <p>In this blog post we will describe the steps to create a KankuFile using a &#39;official&#39; openSUSE Image.</p>
+
+<p><strong>TL;DR</strong></p>
+
+<p>SEE our <a href="https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.openSUSE-Leap-15.5-official">example KankuFile</a></p>
+
+                <p><a href="https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/#section-2">Continue reading...</a></p>
+
+                <p>Tags:
+                    <a href="https://m0ses.github.io/kanku/blog/tag/howto/">howto</a>
+                    <a href="https://m0ses.github.io/kanku/blog/tag/kankufile/">KankuFile</a>
+                    <a href="https://m0ses.github.io/kanku/blog/tag/opensuse/">openSUSE</a>
+                </p>
+
+        ]]></content>
+        <updated>2024-04-25T09:40:24Z</updated>
+        <category term="howto" />
+        <category term="KankuFile" />
+        <category term="openSUSE" />
+    </entry>
     <entry>
         <id>https://m0ses.github.io/kanku/blog/2024/04/12/release-0.17.0/</id>
         <title>RELEASE 0.17.0</title>
@@ -61,20 +87,6 @@
 
         ]]></content>
         <updated>2023-11-30T11:16:19Z</updated>
-        <category term="release" />
-    </entry>
-    <entry>
-        <id>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.15.0/</id>
-        <title>RELEASE 0.15.0</title>
-        <link href="https://m0ses.github.io/kanku/blog/2023/11/30/release-0.15.0/" rel="alternate" />
-        <content type="html"><![CDATA[
-
-                <p>Tags:
-                    <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
-                </p>
-
-        ]]></content>
-        <updated>2023-11-30T10:54:14Z</updated>
         <category term="release" />
     </entry>
 </feed>
