@@ -19,7 +19,7 @@
     zypper ar obs://devel:kanku devel:kanku
     zypper ar obs://devel:kanku:perl devel:kanku:perl
     zypper ref -s
-    zypper in kanku
+    zypper in kanku-cli
 
 
 ## Fedora/RedHat
@@ -27,7 +27,7 @@
 
     curl https://download.opensuse.org/repositories/devel:/kanku/Fedora_Rawhide/devel:kanku.repo > /etc/yum.repos.d/devel:kanku.repo
     curl https://download.opensuse.org/repositories/devel:/kanku:/perl/Fedora_Rawhide/devel:kanku:perl.repo > /etc/yum.repos.d/devel:kanku:perl.repo
-    dnf install kanku
+    dnf install kanku-cli
     usermod -a -G wheel kanku
     usermod -a -G libvirt kanku
 
@@ -40,7 +40,7 @@
     curl https://download.opensuse.org/repositories/devel:/kanku:/perl:/deb/xUbuntu_22.04/Release.key |sudo apt-key add -
     curl https://download.opensuse.org/repositories/devel:/kanku:/staging/xUbuntu_22.04/Release.key   |sudo apt-key add -
     sudo apt update
-    sudo apt install -y kanku
+    sudo apt install -y kanku-cli
 
 
 ## Setup your environment
