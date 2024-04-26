@@ -45,32 +45,30 @@
                     <main>
                         <h1>Installation</h1>
 
+<p>One of the goals of kanku is to make your life easier, and therefor we provide packages for most major distributions.</p>
+
+<p>Please visit <a href="https://build.opensuse.org/project/show/devel:kanku">devel:kanku</a> to see all currently available packages for the various distributions.</p>
+
+<p>As you might have read already in the <a href="/kanku/kanku">introduction</a> kanku offers two modes and we recommend to choose the appropriate package for your needs.</p>
+
+<ul>
+<li>kanku-cli (Developer Mode)</li>
+<li>kanku (Server Mode - almost everthing)</li>
+</ul>
+
 <h2>openSUSE</h2>
-
-<!--
-    <h2>
-    <a id="automatic-installation-with-yast-one-click-install" class="anchor" href="#automatic-installation-with-yast-one-click-install" aria-hidden="true">
-      <span aria-hidden="true" class="octicon octicon-link"></span></a>Automatic installation with yast one-click-install</h2>
-
-
-
-0c0f88080cb2494e730d4e08896006cb
-
-
-
--->
 
 <pre><code>zypper ar obs://devel:kanku devel:kanku
 zypper ar obs://devel:kanku:perl devel:kanku:perl
 zypper ref -s
-zypper in kanku
+zypper in kanku-cli
 </code></pre>
 
 <h2>Fedora/RedHat</h2>
 
 <pre><code>curl https://download.opensuse.org/repositories/devel:/kanku/Fedora_Rawhide/devel:kanku.repo &gt; /etc/yum.repos.d/devel:kanku.repo
 curl https://download.opensuse.org/repositories/devel:/kanku:/perl/Fedora_Rawhide/devel:kanku:perl.repo &gt; /etc/yum.repos.d/devel:kanku:perl.repo
-dnf install kanku
+dnf install kanku-cli
 usermod -a -G wheel kanku
 usermod -a -G libvirt kanku
 </code></pre>
@@ -82,7 +80,7 @@ sudo sh -c &#39;echo &quot;deb https://download.opensuse.org/repositories/devel:
 curl https://download.opensuse.org/repositories/devel:/kanku:/perl:/deb/xUbuntu_22.04/Release.key |sudo apt-key add -
 curl https://download.opensuse.org/repositories/devel:/kanku:/staging/xUbuntu_22.04/Release.key   |sudo apt-key add -
 sudo apt update
-sudo apt install -y kanku
+sudo apt install -y kanku-cli
 </code></pre>
 
 <h2>Setup your environment</h2>
