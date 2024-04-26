@@ -4,7 +4,7 @@ One of the goals of kanku is to make your life easier, and therefor we provide p
 
 Please visit [devel:kanku](https://build.opensuse.org/project/show/devel:kanku) to see all currently available packages for the various distributions.
 
-As you might have read already in the [introduction](/kanku) kanku offers two modes and we recommend to choose the appropriate package for your needs.
+As you might have read already in the [introduction](/) kanku offers two modes and we recommend to choose the appropriate package for your needs.
 
 * kanku-cli (Developer Mode)
 * kanku (Server Mode - almost everthing)
