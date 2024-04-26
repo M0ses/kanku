@@ -1,19 +1,16 @@
 # Installation
 
+One of the goals of kanku is to make your life easier, and therefor we provide packages for most major distributions.
+
+Please visit [devel:kanku](https://build.opensuse.org/project/show/devel:kanku) to see all currently available packages for the various distributions.
+
+As you might have read already in the [introduction](/kanku) kanku offers two modes and we recommend to choose the appropriate package for your needs.
+
+* kanku-cli (Developer Mode)
+* kanku (Server Mode - almost everthing)
+
+
 ## openSUSE
-<!--
-    <h2>
-    <a id="automatic-installation-with-yast-one-click-install" class="anchor" href="#automatic-installation-with-yast-one-click-install" aria-hidden="true">
-      <span aria-hidden="true" class="octicon octicon-link"></span></a>Automatic installation with yast one-click-install</h2>
-
-    <p>Simply search on <a id=ymp_link href="https://software.opensuse.org/package/kanku">software.opensuse.org</a> for your distribution and install the package</p>
-
-    <h2><a id="manual-installation" class="anchor" href="#manual-installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Manual installation</h2>
-
-    <h3><a id="install-opensuse" class="anchor" href="#install-opensuse" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>openSUSE</h3>
-
-    <pre><code>
--->
 
 
     zypper ar obs://devel:kanku devel:kanku
