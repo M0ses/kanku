@@ -13,7 +13,7 @@
       <feature enabled='yes' name='secure-boot'/>
     </firmware>
     <loader readonly='yes' secure='yes' type='pflash'>/usr/share/qemu/ovmf-x86_64-smm-ms-code.bin</loader>
-    <nvram template='/usr/share/qemu/ovmf-x86_64-smm-ms-vars.bin'>/var/lib/libvirt/qemu/nvram/opensusetumbleweed_VARS.fd</nvram>
+    <nvram template='/usr/share/qemu/ovmf-x86_64-smm-ms-vars.bin'>/var/lib/libvirt/qemu/nvram/[% domain.name %]_VARS.fd</nvram>
   </os>
   <features>
     <acpi/>
@@ -56,22 +56,9 @@
     <console type='pty'>
       <target type='serial' port='0'/>
     </console>
-<!--
-    <channel type='unix'>
-      <source mode='bind' path='/run/libvirt/qemu/channel/53-opensusetumbleweed/org.qemu.guest_agent.0'/>
-      <target type='virtio' name='org.qemu.guest_agent.0' state='disconnected'/>
-      <alias name='channel0'/>
-      <address type='virtio-serial' controller='0' bus='0' port='1'/>
-	</channel>
--->
     <channel type='spicevmc'>
       <target type='virtio' name='com.redhat.spice.0'/>
     </channel>
-<!--
-    <channel type='spicevmc'>
-      <target type='virtio' name='com.redhat.spice.0' state='disconnected'/>
-      <address type='virtio-serial' controller='0' bus='0' port='2'/>
--->
     <input type='tablet' bus='usb'/>
     <input type='mouse' bus='ps2'/>
     <input type='keyboard' bus='ps2'/>
