@@ -226,6 +226,7 @@ common config and lib files used in kanku
 %dir /etc/kanku/templates/cmd/setup
 %config /etc/kanku/templates/default-vm.tt2
 %config /etc/kanku/templates/with-spice.tt2
+%config /etc/kanku/templates/vm-x86_64-uefi-tpm2.0.tt2
 %config /etc/kanku/templates/cmd/init.tt2
 %config /etc/kanku/templates/cmd/setup/*
 %dir    /etc/kanku/templates/examples-vm/

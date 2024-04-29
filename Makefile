@@ -1,19 +1,4 @@
 CONFIG_FILES = \
-	templates/with-spice.tt2\
-	templates/cmd/init.tt2\
-	templates/cmd/setup/kanku.conf.mod_perl.tt2\
-	templates/cmd/setup/kanku.conf.mod_proxy.tt2\
-	templates/cmd/setup/kanku-vhost.conf.tt2\
-	templates/cmd/setup/openssl.cnf.tt2\
-	templates/cmd/setup/dancer-config.yml.tt2\
-	templates/cmd/setup/kanku-config.yml.tt2\
-	templates/cmd/setup/net-kanku-devel.xml.tt2\
-	templates/cmd/setup/net-kanku-ovs.xml.tt2\
-        templates/cmd/setup/pool-default.xml\
-        templates/cmd/setup/rabbitmq.config.tt2\
-	templates/examples-vm/obs-server-26.tt2\
-	templates/examples-vm/sles11sp3.tt2\
-	templates/examples-vm/obs-server.tt2\
 	jobs/examples/obs-server.yml\
 	jobs/examples/sles11sp3.yml\
 	jobs/examples/obs-server-26.yml\
@@ -25,15 +10,36 @@ CONFIG_FILES = \
 FULL_DIRS	= bin share/migrations share/fixtures
 CONFIG_DIRS		= \
 	etc/kanku/dancer\
+	etc/kanku/jobs\
+	etc/kanku/job_groups\
+	etc/kanku/jobs/examples\
+	etc/kanku/logging
+
+TEMPLATE_DIRS = \
 	etc/kanku/templates\
 	etc/kanku/templates/cmd\
 	etc/kanku/templates/cmd/setup\
 	etc/kanku/templates/cmd/setup/etc\
 	etc/kanku/templates/examples-vm/\
-	etc/kanku/jobs\
-	etc/kanku/job_groups\
-	etc/kanku/jobs/examples\
-	etc/kanku/logging
+
+TEMPLATE_FILES = \
+	templates/with-spice.tt2\
+	templates/vm-x86_64-uefi-tpm2.0.tt2\
+	templates/cmd/init.tt2\
+	templates/cmd/setup/kanku.conf.mod_perl.tt2\
+	templates/cmd/setup/kanku.conf.mod_proxy.tt2\
+	templates/cmd/setup/kanku-vhost.conf.tt2\
+	templates/cmd/setup/openssl.cnf.tt2\
+	templates/cmd/setup/dancer-config.yml.tt2\
+	templates/cmd/setup/kanku-config.yml.tt2\
+	templates/cmd/setup/net-kanku-devel.xml.tt2\
+	templates/cmd/setup/net-kanku-ovs.xml.tt2\
+	templates/cmd/setup/pool-default.xml\
+	templates/cmd/setup/rabbitmq.config.tt2\
+	templates/examples-vm/obs-server-26.tt2\
+	templates/examples-vm/sles11sp3.tt2\
+	templates/examples-vm/obs-server.tt2\
+
 ifeq ($(DOCDIR),)
 DOCDIR = /usr/share/doc/packages/kanku/
 endif
@@ -57,13 +63,31 @@ install: install_dirs install_full_dirs install_services install_docs configs pu
 bashcomp:
 	PERL5LIB=./lib ./bin/kanku bash_completion > $(DESTDIR)/etc/bash_completion.d/kanku.sh
 
-configs:
+configs: config_dirs config_files
+
+config_dirs:
 	#
 	for i in $(CONFIG_DIRS);do \
-		mkdir -p $(DESTDIR)/$$i ; \
+		[ -d $(DESTDIR)/$$i ] || mkdir -p $(DESTDIR)/$$i ; \
 	done
+
+config_files:
 	#
 	for i in $(CONFIG_FILES);do \
+		cp -rv ./etc/$$i $(DESTDIR)/etc/kanku/$$i ;\
+	done
+
+templates: template_dirs template_files
+
+template_dirs:
+	#
+	for i in $(TEMPLATE_DIRS);do \
+		[ -d $(DESTDIR)/$$i ] || mkdir -p $(DESTDIR)/$$i ; \
+	done
+
+template_files:
+	#
+	for i in $(TEMPLATE_FILES);do \
 		cp -rv ./etc/$$i $(DESTDIR)/etc/kanku/$$i ;\
 	done
 
