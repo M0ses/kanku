@@ -1,0 +1,95 @@
+<domain type='kvm'>
+  <name>[% domain.domain_name %]</name>
+  <memory unit='KiB'>[% domain.memory %]</memory>
+  <currentMemory unit='KiB'>[% domain.memory %]</currentMemory>
+  <vcpu placement='static'>[% domain.vcpu %]</vcpu>
+  <resource>
+    <partition>/machine</partition>
+  </resource>
+  <os firmware='efi'>
+    <type arch='x86_64' machine='pc-q35-8.2'>hvm</type>
+    <firmware>
+      <feature enabled='yes' name='enrolled-keys'/>
+      <feature enabled='yes' name='secure-boot'/>
+    </firmware>
+    <loader readonly='yes' secure='yes' type='pflash'>/usr/share/qemu/ovmf-x86_64-smm-ms-code.bin</loader>
+    <nvram template='/usr/share/qemu/ovmf-x86_64-smm-ms-vars.bin'>/var/lib/libvirt/qemu/nvram/opensusetumbleweed_VARS.fd</nvram>
+  </os>
+  <features>
+    <acpi/>
+    <apic/>
+    <vmport state='off'/>
+    <smm state='on'/>
+  </features>
+  <cpu mode='host-passthrough' check='none' migratable='on'>
+    <cache mode='passthrough'/>
+    <feature policy='require' name='[% host_feature %]'/>
+  </cpu>
+  <clock offset='utc'>
+    <timer name='rtc' tickpolicy='catchup'/>
+    <timer name='pit' tickpolicy='delay'/>
+    <timer name='hpet' present='no'/>
+  </clock>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <pm>
+    <suspend-to-mem enabled='no'/>
+    <suspend-to-disk enabled='no'/>
+  </pm>
+  <devices>
+    <emulator>[% qemu_kvm %]</emulator>
+    [% domain.disk_xml %]
+    <controller type='pci' index='0' model='pcie-root'/>
+    <controller type='pci' index='1' model='pcie-root-port'/>
+    <controller type='usb' index='0'/>
+    [% domain.disk_controllers_xml %]
+    <interface type='network'>
+      <source network='[% domain.network_name %]' bridge='[% domain.network_bridge %]'/>
+      <model type='virtio'/>
+    </interface>
+    <serial type='pty'>
+      <target type='isa-serial' port='0'>
+        <model name='isa-serial'/>
+      </target>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+<!--
+    <channel type='unix'>
+      <source mode='bind' path='/run/libvirt/qemu/channel/53-opensusetumbleweed/org.qemu.guest_agent.0'/>
+      <target type='virtio' name='org.qemu.guest_agent.0' state='disconnected'/>
+      <alias name='channel0'/>
+      <address type='virtio-serial' controller='0' bus='0' port='1'/>
+	</channel>
+-->
+    <channel type='spicevmc'>
+      <target type='virtio' name='com.redhat.spice.0'/>
+    </channel>
+<!--
+    <channel type='spicevmc'>
+      <target type='virtio' name='com.redhat.spice.0' state='disconnected'/>
+      <address type='virtio-serial' controller='0' bus='0' port='2'/>
+-->
+    <input type='tablet' bus='usb'/>
+    <input type='mouse' bus='ps2'/>
+    <input type='keyboard' bus='ps2'/>
+    <tpm model='tpm-crb'>
+      <backend type='emulator' version='2.0'/>
+    </tpm>
+    <graphics type='spice'/>
+    <sound model='ich9'/>
+    <audio id="1" type='spice'/>
+    <video>
+      <model type='virtio' heads='1' primary='yes'/>
+    </video>
+    <watchdog model='itco' action='reset'/>
+    <memballoon model='virtio'/>
+    <rng model='virtio'>
+      <backend model='random'>/dev/urandom</backend>
+    </rng>
+    [% domain.hostshare %]
+  </devices>
+</domain>
+
