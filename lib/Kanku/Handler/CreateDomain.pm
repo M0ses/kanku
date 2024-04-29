@@ -75,6 +75,7 @@ has [qw/
         skip_login
         skip_memory_checks
 	domain_autostart
+	no_wait_for_bootloader
 /]      => (is => 'rw',isa=>'Bool',default => 0);
 
 has "+images_dir"     => (default=>"/var/lib/libvirt/images");
@@ -302,6 +303,7 @@ sub execute {
       pool_name             => $self->pool_name,
       log_file              => $ctx->{log_file} || q{},
       log_stdout            => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
+      no_wait_for_bootloader => $self->no_wait_for_bootloader,
   );
 
   $vm->host_dir_9p($self->host_dir_9p) if ($self->host_dir_9p);
@@ -736,6 +738,8 @@ If configured a port_forward_list, it tries to find the next free port and confi
     default_console_timeout : default timeout for console commands (default: 600 sec)
 
     login_timeout         : timeout to wait from bootloader to login prompt (boot time) (default: 300 sec)
+
+    no_wait_for_bootloader : don't wait for bootloader messages (default: 0)
 
 
 =head1 CONTEXT

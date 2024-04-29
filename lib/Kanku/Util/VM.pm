@@ -44,6 +44,7 @@ has [qw/
 has job_id           => ( is => 'rw', isa => 'Int' );
 has root_disk        => ( is => 'rw', isa => 'Object' );
 has use_9p           => ( is => 'rw', isa => 'Bool' );
+has no_wait_for_bootloader => ( is => 'rw', isa => 'Bool' );
 has running_remotely => ( is => 'rw', isa => 'Bool', default => 0 );
 has empty_disks      => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has additional_disks => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
@@ -117,6 +118,7 @@ has console => (
         job_id      => $self->job_id,
 	log_file    => $self->log_file,
 	log_stdout  => $self->log_stdout,
+	no_wait_for_bootloader => $self->no_wait_for_bootloader,
       );
 
       $con->init();
@@ -300,6 +302,7 @@ sub process_template {
   # process input template, substituting variables
   $template->process($input, $vars, \$output)
     || die $template->error()->as_string();
+  $logger->debug("######### XML: ########\n$output\n");
   return $output;
 }
 
