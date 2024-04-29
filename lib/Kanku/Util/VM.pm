@@ -792,9 +792,7 @@ __DATA__
   <devices>
     <emulator>[% qemu_kvm %]</emulator>
     [% domain.disk_xml %]
-    <controller type='pci' index='0' model='pci-root'>
-      <alias name='pci.0'/>
-    </controller>
+    <controller type='pci' index='0' model='pci-root'/>
     [% domain.disk_controllers_xml %]
     <interface type='network'>
       <source network='[% domain.network_name %]' bridge='[% domain.network_bridge %]'/>
@@ -802,13 +800,10 @@ __DATA__
       <alias name='net0'/>
     </interface>
     <serial type='pty'>
-      <!-- to be tested <source path='/dev/pts/8'/> -->
       <target port='0'/>
-      <alias name='serial0'/>
     </serial>
     <console type='pty'>
       <target type='serial' port='0'/>
-      <alias name='serial0'/>
     </console>
 [% domain.hostshare %]
   </devices>
