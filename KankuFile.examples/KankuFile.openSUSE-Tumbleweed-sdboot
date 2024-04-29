@@ -1,0 +1,63 @@
+domain_name: openSUSE-Tumbleweed-sdboot
+default_job: kanku-job
+login_user: root
+login_pass: linux
+
+jobs:
+ kanku-job:
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      host_interface: eth0
+  -
+    use_module: Kanku::Handler::ImageDownload
+    options:
+      url: https://download.opensuse.org/tumbleweed/appliances/openSUSE-Tumbleweed-Minimal-VM.x86_64-kvm-and-xen-sdboot.qcow2
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 8G
+      vcpu: 4 
+      use_9p: 1
+      pwrand:
+        users:
+          - root
+        recipients:
+          - fschreiner@suse.de
+      template: vm-uefi-tpm2.0
+      no_wait_for_bootloader: 1 
+      installation:
+        -
+          expect: openSUSE
+          send: e
+          send_enter: 1
+        -
+          expect: Welcome
+          send_enter: 1
+        -
+          expect: Select keyboard layout
+          send_enter: 1
+        -
+          expect: LICENSE AGREEMENT
+          send_enter: 1
+        -
+          expect: Select time zone
+          send_enter: 1
+        -
+          expect: Enter root password
+          send: linux
+          send_enter: 1
+        -
+          expect: Confirm root password
+          send: linux
+          send_enter: 1
+        -
+          expect: openSUSE Tumbleweed
+          send_enter: 1
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - echo "Just checking ssh connnection and key deployment"
