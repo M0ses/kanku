@@ -65,7 +65,7 @@ BuildRequires:  perl(Moose)
 BuildRequires:  perl(MooseX::App)
 BuildRequires:  perl(MooseX::Singleton)
 BuildRequires:  perl(Net::IP)
-BuildRequires:  perl(Net::OBS::Client) >= 0.1.2
+BuildRequires:  perl(Net::OBS::Client) >= 0.1.3
 BuildRequires:  perl(Libssh::Session)
 BuildRequires:  perl(Path::Class)
 BuildRequires:  perl(Plack)
