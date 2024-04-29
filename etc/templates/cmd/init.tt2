@@ -39,8 +39,11 @@ jobs:
 [% END %]
   -
     use_module: Kanku::Handler::PrepareSSH
-#  -
-#    use_module: Kanku::Handler::ExecuteCommandViaSSH
-#    options:
-#      commands:
-#        - echo "my test here"
+  # Kanku::Handler::CopyProfile configuration in kanku-config.yml required
+  -
+    use_module: Kanku::Handler::CopyProfile
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - echo "Just for testing ssh connection"
