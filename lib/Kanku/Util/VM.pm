@@ -302,7 +302,6 @@ sub process_template {
   # process input template, substituting variables
   $template->process($input, $vars, \$output)
     || die $template->error()->as_string();
-  $logger->debug("######### XML: ########\n$output\n");
   return $output;
 }
 
@@ -412,7 +411,6 @@ sub create_domain {
   my $vmm;
   my $dom;
   $self->logger->trace("disk_xml:\n$disk_xml");
-  $self->logger->trace("domain_xml:\n$xml");
 
   # connect to libvirtd
   try {
@@ -420,6 +418,7 @@ sub create_domain {
   }
   catch {
     my ($e) = @_;
+    $self->logger->debug("domain_xml:\n$xml");
     if ( ref($e) eq 'Sys::Virt::Error' ){
       die $e->stringify();
     } else {
