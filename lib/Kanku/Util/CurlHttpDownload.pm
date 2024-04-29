@@ -102,6 +102,11 @@ sub download {
       my $neo_ua   = Net::OBS::LWP::UserAgent->new();
       $self->_set_credentials($neo_ua, $url);
 
+      if (! -d $file->parent) {
+        $self->logger->info('Creating directory '.$file->parent->stringify);
+        $file->parent->mkpath;
+      }
+
       my $res = $neo_ua->mirror(
         url  => $self->url,
         etag => $self->etag,
