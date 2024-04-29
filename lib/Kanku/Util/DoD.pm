@@ -118,12 +118,7 @@ has get_image_file_from_url => (
     my $record = $self->get_image_file_from_url_cb->($self,$binlist);
     if ( $record ) {
       $record->{url} = $self->download_url .$record->{prefix}. $record->{filename};
-      if ( $self->api_url =~ /\/public\/?$/ ) {
-        $record->{bin_url} = $self->api_url .'/build/'.$self->project.q{/}.$self->repository.q{/}.$self->arch.q{/}.$self->package.'?view=cpio';
-        $record->{public_api} = 1;
-      } else {
-	$record->{bin_url} = $self->api_url . '/build/'.$self->project.q{/}.$self->repository.q{/}.$self->arch.q{/}.$self->package."/$record->{filename}";
-      }
+      $record->{bin_url} = $self->api_url . '/build/'.$self->project.q{/}.$self->repository.q{/}.$self->arch.q{/}.$self->package."/$record->{filename}";
       $record->{obs_username} = $build_results->user;
       $record->{obs_password} = $build_results->pass;
     }

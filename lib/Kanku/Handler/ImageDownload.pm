@@ -73,7 +73,8 @@ sub execute {
     cache_dir => $cfg->cache_dir,
   );
 
-  $curl->output_file($self->_calc_output_file());
+  my @_of = split '/', $self->url;
+  $curl->output_file(pop @_of);
 
   $logger->debug("Using output file: ".$curl->output_file);
 
@@ -95,8 +96,6 @@ sub execute {
     $logger->debug("obs_direct_url = $ctx->{obs_direct_url}");
     $curl->url($ctx->{obs_direct_url});
 
-    $curl->output_file($self->_calc_output_file($ctx->{public_api}));
-
     $logger->info("Trying alternate url ".$curl->url);
 
     if (! $ctx->{public_api} ) {
@@ -117,18 +116,8 @@ sub execute {
 }
 
 sub _calc_output_file {
-  my ($self, $use_public_api) = @_;
-  my $ctx                    = $self->job()->context();
-  my $output_file;
-
-  if ($use_public_api) {
-    $output_file = $ctx->{obs_project}."-".$ctx->{obs_package} . '.cpio';
-  } else {
-    $output_file =  $self->url;
-    $output_file =~ s#.*/(.*)$#$1#;
-  }
-
-  return $output_file;
+  my ($self) = @_;
+  return [split '/', $self->url]->[-1];
 }
 
 sub update_history {
