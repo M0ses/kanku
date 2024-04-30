@@ -198,7 +198,7 @@ sub run {
   # effective user id
   if ( $> != 0 ) { ## no critic (Variables::ProhibitPunctuationVars)
     $logger->fatal('Please start setup as root');
-    exit 1;
+    return 1;
   }
 
   ### Get information
