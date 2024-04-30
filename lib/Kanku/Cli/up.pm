@@ -91,6 +91,7 @@ sub run {
   my ($self)  = @_;
   my $logger  = Log::Log4perl->get_logger;
   my $cfg     = $self->cfg;
+  my $rc      = 0;
 
   my $schema  = $self->schema;
   croak("Could not connect to database\n") if ! $schema;
@@ -110,7 +111,7 @@ sub run {
     $logger->debug("Searching for domain: $dn");
     if ($vm->dom) {
       $logger->fatal("Domain $dn already exists");
-      exit 1;
+      return 129;
     }
   }
 
@@ -177,11 +178,11 @@ sub run {
     } else {
 	$logger->error('Failed to create domain: ' . ( $ctx->{domain_name} || q{}));
 	$logger->error("ipaddress   : $ctx->{ipaddress}") if $ctx->{ipaddress};
-	return 1;
+	$rc = 128;
     };
   }
 
-  return 0;
+  return $rc;
 }
 
 __PACKAGE__->meta->make_immutable;
