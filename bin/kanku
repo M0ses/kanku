@@ -15,4 +15,4 @@ BEGIN {
 
 use Kanku::Cli;
 
-exit Kanku::Cli->new_with_command->run;
+exit(Kanku::Cli->new_with_command->run || 0);
