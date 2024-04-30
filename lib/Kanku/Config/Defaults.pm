@@ -17,7 +17,7 @@
 package Kanku::Config::Defaults;
 
 use Moose;
-
+use Try::Tiny;
 use Kanku::Config;
 
 my $defaults =    {
@@ -50,11 +50,28 @@ my $defaults =    {
   'Net::OBS::Client' => {
     credentials => {},
   },
+  'Kanku::Setup::Devel' => {
+    network_name => 'kanku-devel',
+    dns_domain_name => 'kanku.devel',
+  },
+  'Kanku::Setup::Server::Distributed' => {
+    network_name => 'kanku-ovs',
+    dns_domain_name => 'kanku.ovs',
+  },
+  'Kanku::Setup::Server::Standalone' => {
+    network_name => 'kanku-server',
+    dns_domain_name => 'kanku.server',
+  },
 };
 
 sub get {
   my ($self, $pkg, $var) = @_;
-  my $cfg = Kanku::Config->instance->cf;
+  my $cfg = {};
+  try {
+    $cfg = Kanku::Config->instance->cf;
+  } catch {
+    confess($_) unless $pkg =~ /^Kanku::Setup::/;
+  };
   my $ret = {%{$defaults->{$pkg}||{}}};
   $ret = {%{$ret}, %{$cfg->{$pkg}}} if ref($cfg->{$pkg}) eq 'HASH';
   return $ret->{$var} if $var;
