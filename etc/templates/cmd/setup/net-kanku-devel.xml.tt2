@@ -1,6 +1,7 @@
 <network>
-  <name>kanku-devel</name>
-  <domain name="[% dns_domain_name %]" onlyLocal="yes"/>Q
+  <name>[% network_name %]</name>
+  <domain name="[% dns_domain_name %]" onlyLocal="yes"/>
+  <bridge name='[% network_name %]' stp='on' delay='0'/>
   <forward mode='nat'>
     <nat>
       <port start='1024' end='65535'/>
