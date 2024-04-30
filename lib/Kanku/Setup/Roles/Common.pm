@@ -27,6 +27,7 @@ use Const::Fast;
 use File::Which;
 use File::Copy;
 use Template;
+use Kanku::Config::Defaults;
 
 const my $MAX_NETWORK_NUMBER => 255;
 
@@ -85,15 +86,23 @@ has interactive => (
 has dns_domain_name => (
     isa           => 'Str',
     is            => 'rw',
-    default       => 'kanku-devel',
+    builder       => '_build_defaults'
 );
 
 has network_name => (
     isa           => 'Str',
     is            => 'rw',
     lazy          => 1,
-    default       => sub { $_[0]->_distributed ? 'kanku-ovs' : 'kanku-devel'},
+    builder       => '_build_defaults'
 );
+
+sub _build_defaults {
+  my @c = caller(0);
+  return unless $c[1] =~ /accessor ([\w:]+) .*/;
+  my @p = split /::/, $1;
+  my $v = pop @p;
+  Kanku::Config::Defaults->get(join('::', @p), $v);
+}
 
 sub _configure_libvirtd_access { ## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
   my ($self, %opts) = @_;
@@ -299,13 +308,44 @@ EOF
     'Str',
   );
 
+  $self->dns_domain_name($dns_domain_name);
+
   my $rnd = rand $MAX_NETWORK_NUMBER;
   my $sn  = int $rnd;
-  my $xml = $self->_create_config_from_template($ttf, undef, {subnet=>$sn, dns_domain_name=>($dns_domain_name)});
+  my $xml = $self->_create_config_from_template($ttf, undef, {subnet=>$sn, dns_domain_name=>($dns_domain_name),network_name=> $nn});
   my $net = $vmm->define_network($xml);
   $net->set_autostart(1);
   $net->create();
+  $self->_create_systemd_conf($sn);
+  return;
+}
 
+sub _create_systemd_conf {
+  my ($self, $sn)   = @_;
+  my $sd_path  = "/etc/systemd/network/";
+  my $nn       = $self->network_name();
+  my $of       = "$sd_path/$nn.conf";
+
+  if (! -d $sd_path) {
+    $self->logger->debug("Directory $sd_path does not exist! Skipping creation of systemd config.");
+    $self->logger->info("Skipping creation of systemd config.");
+  } elsif (-f $of) {
+    $self->logger->debug("File $of already exists");
+    $self->logger->info("Skipping creation of systemd config.");
+  } else {
+    my $dns      = $self->dns_domain_name;
+    my $content  = <<EOF;
+[Match]
+Name=$nn
+
+[Resolve]
+DNS=192.168.$sn.1
+Domains=$dns
+EOF
+    open(my $fh, '>', $of) || croak("Could not open $of: $!");
+    print $fh $content || croak("Could not write to $of: $!");
+    close $fh || croak("Could not close $of: $!");
+  }
   return;
 }
 
