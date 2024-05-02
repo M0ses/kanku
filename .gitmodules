@@ -1,0 +1,3 @@
+[submodule ".krt"]
+	path = .krt
+	url = https://github.com/M0ses/Kanku-ReleaseTools
