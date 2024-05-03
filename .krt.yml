@@ -22,7 +22,7 @@ version_replace:
     pattern: (^Version:\s+)\d+\.\d+\.\d+(\s+.*)?$
   -
     file: lib/Kanku.pm
-    pattern: (our\s+\$VERSION\s*=\s*['"])\d+\.\d+\.\d+(['"]\s*;.*$)
+    pattern: (our\s+\$VERSION\s*=\s*['"])\d+\.\d+\.\d+(["']\s*;.*$)
 
 changelogs:
   -
@@ -34,3 +34,10 @@ changelogs:
   -
     file: CHANGELOG.md
     format: Default
+
+Kanku::ReleaseTools::POD:
+  log_level: 9
+  path: lib/
+  src_branch: master
+  src_dir: lib
+  dst_dir: page/pod
