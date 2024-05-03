@@ -41,3 +41,11 @@ Kanku::ReleaseTools::POD:
   src_branch: master
   src_dir: lib
   dst_dir: page/pod
+
+Kanku::ReleaseTools::OBS:
+  -
+    command: service remoterun devel:kanku:staging kanku
+  -
+    command: result -v -w devel:kanku:staging kanku
+#  -
+#    command:
