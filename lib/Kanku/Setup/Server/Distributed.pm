@@ -129,6 +129,8 @@ sub setup {
   $logger->info("To make sure libvirtd is coming up properly we recommend a reboot");
 
   $self->logger->fatal("PLEASE REMEMBER YOUR CA PASSWORD: ".$self->ca_pass) if $self->ca_pass;
+
+  return;
 }
 
 sub _create_ca {

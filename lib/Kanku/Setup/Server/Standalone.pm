@@ -49,6 +49,8 @@ sub setup {
 
   $logger->info("Server mode setup successfully finished!");
   $logger->info("To make sure libvirtd is coming up properly we recommend a reboot");
+
+  return;
 }
 
 1;
