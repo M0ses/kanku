@@ -7,6 +7,21 @@
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
+            <title>RELEASE 0.17.1</title>
+            <link>https://m0ses.github.io/kanku/blog/2024/05/03/release-0.17.1/</link>
+            <guid>https://m0ses.github.io/kanku/blog/2024/05/03/release-0.17.1/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Fri, 03 May 2024 15:07:39 +0000
+            </pubDate>
+        </item>
+        <item>
             <title>HowTo use &#39;official&#39; openSUSE Images with kanku</title>
             <link>https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</link>
             <guid>https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</guid>
@@ -73,21 +88,6 @@
             ]]></description>
             <pubDate>
                 Mon, 05 Feb 2024 09:46:39 +0000
-            </pubDate>
-        </item>
-        <item>
-            <title>RELEASE 0.16.0</title>
-            <link>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.16.0/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2023/11/30/release-0.16.0/</guid>
-            <description><![CDATA[
-
-                    <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
-                    </p>
-
-            ]]></description>
-            <pubDate>
-                Thu, 30 Nov 2023 11:16:19 +0000
             </pubDate>
         </item>
     </channel>
