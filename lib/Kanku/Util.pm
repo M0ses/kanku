@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 sub get_arch {
-  open(my $uname, "uname -p|");
+  open(my $uname, "uname -m|");
   my $arch = <$uname>;
   close($uname);
   chomp $arch;
