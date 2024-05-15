@@ -158,9 +158,14 @@ EOF
   if ($user) {
     if (
       $self->_run_system_cmd('usermod', '-aG', $group, $user)->{return_code}
-   ) {
+    ) {
       die "Error while adding user $user to group $group!\n";
-   }
+    }
+
+    # This is for e.g. Debian 12
+    # add $user to group 'kvm' 
+    # if group kvm doesn't exists, we do not care
+    $self->_run_system_cmd('usermod', '-aG', 'kvm', $user);
   }
 
   if (
