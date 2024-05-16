@@ -21,7 +21,12 @@
 
 ## BUGFIXES
 
-* 
+* [dist] VM templates: improvments for serial console
+* [cli] setup:
+
+- add user to group `kvm` if exists 
+  - fixes permission problems on debian
+- backup `/etc/group` before configuring libvirt
 * [cli] return rc > 0 if `kanku up` fails
 * [core][fix] improvements for Kanku::Config::Defaults
 

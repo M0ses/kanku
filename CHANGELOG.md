@@ -278,4 +278,3 @@
   * updated centos to latest version
   * renamed centos -> centos-current
 
-
