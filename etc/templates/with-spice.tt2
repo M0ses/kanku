@@ -9,6 +9,7 @@
   </cpu>
   <os>
     <type arch='x86_64' machine='pc'>hvm</type>
+    <bios useserial='yes'/>
   </os>
   <features>
     <acpi/>

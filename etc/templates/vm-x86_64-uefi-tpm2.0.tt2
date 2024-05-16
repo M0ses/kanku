@@ -14,6 +14,7 @@
     </firmware>
     <loader readonly='yes' secure='yes' type='pflash'>/usr/share/qemu/ovmf-x86_64-smm-ms-code.bin</loader>
     <nvram template='/usr/share/qemu/ovmf-x86_64-smm-ms-vars.bin'>/var/lib/libvirt/qemu/nvram/[% domain.name %]_VARS.fd</nvram>
+    <bios useserial='yes'/>
   </os>
   <features>
     <acpi/>
