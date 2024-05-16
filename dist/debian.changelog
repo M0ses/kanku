@@ -18,7 +18,11 @@ kanku (0.17.1) unstable; urgency=medium
             - Kanku::Setup::Server::Distributed
             - Kanku::Setup::Server::Standalone
     * BUGFIXES
-      * 
+      * [dist] VM templates: improvments for serial console
+      * [cli] setup:
+        * add user to group kvm if exists
+          * fixes permission problems on debian
+        * backup /etc/group before configuring libvirt
       * [cli] return rc > 0 if `kanku up` fails
       * [core][fix] improvements for Kanku::Config::Defaults
         
@@ -32,7 +36,7 @@ kanku (0.17.1) unstable; urgency=medium
       * [dist] added templates to install in Makefile
       * [core] cleanup cpio api leftovers
 
-  -- Frank Schreiner <fschreiner@suse.de>  Fri, 03 May 2024 15:18:35 +0000
+  -- Frank Schreiner <fschreiner@suse.de>  Thu, 16 May 2024 05:18:35 +0000
 
 kanku (0.17.0) unstable; urgency=medium
 

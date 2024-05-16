@@ -1,4 +1,4 @@
-# [0.17.1] - 2024-05-03
+# [0.17.1] - 2024-05-16
 
  ## FEATURES
 
@@ -12,17 +12,19 @@
  * [templates] init.tt2: add Kanku::Handler::CopyProfile
  * [doc] enhance CONTRIBUTING.md
  * [core] made Kanku::Config::Defaults "setup" ready
-   
    - add defaults for
      - Kanku::Setup::Devel
        - Kanku::Setup::Server::Distributed
        - Kanku::Setup::Server::Standalone
  ## BUGFIXES
 
- * 
+ * [dist] VM templates: improvments for serial console
+ * [cli] setup:
+   * add user to group kvm if exists
+     * fixes permission problems on debian
+   * backup /etc/group before configuring libvirt
  * [cli] return rc > 0 if `kanku up` fails
  * [core][fix] improvements for Kanku::Config::Defaults
-   
    - Better handling if empty defaults
    - merge default settings with configured settings instead of overwriting defaults
  * [setup] use libvirt network name as  bridge name
