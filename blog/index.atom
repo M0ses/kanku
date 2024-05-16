@@ -2,15 +2,15 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://m0ses.github.io/kanku/blog/</id>
     <title>Kanku</title>
-    <updated>2024-05-03T15:07:39Z</updated>
+    <updated>2024-05-16T09:07:39Z</updated>
     <link href="https://m0ses.github.io/kanku/blog/index.atom" rel="self" />
     <link href="https://m0ses.github.io/kanku/blog/" rel="alternate" />
     <generator version="0.098">Statocles</generator>
 
     <entry>
-        <id>https://m0ses.github.io/kanku/blog/2024/05/03/release-0.17.1/</id>
+        <id>https://m0ses.github.io/kanku/blog/2024/05/16/release-0.17.1/</id>
         <title>RELEASE 0.17.1</title>
-        <link href="https://m0ses.github.io/kanku/blog/2024/05/03/release-0.17.1/" rel="alternate" />
+        <link href="https://m0ses.github.io/kanku/blog/2024/05/16/release-0.17.1/" rel="alternate" />
         <content type="html"><![CDATA[
 
                 <p>Tags:
@@ -18,7 +18,7 @@
                 </p>
 
         ]]></content>
-        <updated>2024-05-03T15:07:39Z</updated>
+        <updated>2024-05-16T09:07:39Z</updated>
         <category term="release" />
     </entry>
     <entry>
