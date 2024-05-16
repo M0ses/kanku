@@ -58,6 +58,8 @@ sub setup {
 
   $self->_set_sudoers();
 
+  $self->_backup_config_file("/etc/group");
+
   $self->_configure_libvirtd_access(user=>$self->user);
 
   $self->_setup_database();
