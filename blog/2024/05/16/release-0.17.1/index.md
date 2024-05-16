@@ -1,6 +1,6 @@
 ---
 title: RELEASE 0.17.1
-date: 2024-05-03 15:07:39
+date: 2024-05-16 09:07:39
 tags: release
 template: blog/release-post.html
 data:
@@ -33,6 +33,13 @@ data:
           - Kanku::Setup::Server::Standalone
   fixes:
     - |-
+      [dist] VM templates: improvments for serial console
+    - |-
+      [cli] setup:
+
+      - add user to group `kvm` if exists
+        - fixes permission problems on debian
+      - backup `/etc/group` before configuring libvirt
     - |-
       [cli] return rc > 0 if `kanku up` fails
     - |-
