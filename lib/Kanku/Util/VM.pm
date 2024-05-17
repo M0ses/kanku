@@ -351,14 +351,10 @@ sub _generate_disk_xml {
 sub _get_hw_virtualization {
   my $proc = open(my $fh,"<","/proc/cpuinfo") || die "Cannot open /proc/cpuinfo: $!";
   while (<$fh>) { return $1 if /(vmx|svm)/ }
-  open(my $uname, "uname -p|");
-  my $arch = <$uname>;
-  close($uname);
-  chomp $arch;
+  my $arch = Kanku::Util->get_arch;
   return $arch if ($arch eq "aarch64");
   return;
 }
-
 
 sub create_empty_disks  {
   my ($self) = @_;
