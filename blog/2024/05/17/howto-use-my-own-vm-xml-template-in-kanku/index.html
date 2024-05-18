@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/kanku/theme/css/normalize.css" rel="stylesheet">
+        <link href="/kanku/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/kanku/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/kanku/page/favicon.ico" rel="shortcut icon" type="image/x-icon">
+        <title>Howto use my own VM XML template in kanku - Kanku</title>
+        <meta content="M0ses" name="author">
+        <meta content="Statocles 0.098" name="generator">
+        <link href="/kanku/blog/2024/05/16/release-0.17.1/index.html" rel="next">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/kanku/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/kanku/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/kanku/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        <header>
+    <h1>Howto use my own VM XML template in kanku</h1>
+
+    <aside>
+        <time datetime="2024-05-17">
+            Posted on 2024-05-17
+        </time>
+            <span class="author">
+                by M0ses
+            </span>
+    </aside>
+
+    <p class="tags">Tags:
+        <a href="/kanku/blog/tag/howto/" rel="tag">howto</a>
+        <a href="/kanku/blog/tag/kankufile/" rel="tag">KankuFile</a>
+        <a href="/kanku/blog/tag/template/" rel="tag">template</a>
+    </p>
+
+
+</header>
+<section id="section-1">
+    <p><strong>Problem:</strong></p>
+
+<p>I would like to customize the libvirt XML description for my new kanku VM.</p>
+
+<p><strong>TL;DR</strong></p>
+
+<p>Only two steps are required to use your own XML template</p>
+
+<ul>
+<li>Create a new VM XML template</li>
+<li>Configure your kanku job to use your new template in your
+<ul>
+<li>KankuFile</li>
+<li>or /etc/kanku/jobs/<myjob>.yml</myjob></li>
+</ul></li>
+</ul>
+
+</section>
+<section id="section-2">
+    <h2>Create a new VM XML template</h2>
+
+<p>First you need to create a new XML template in the template directory (<code>/etc/kanku/templates/</code>).</p>
+
+<p>Lets assume you want to call your template <code>myvm</code> then you need to create the file <code>/etc/kanku/templates/myvm.tt2</code></p>
+
+<p>We recommend starting with one of the default templates delivered with the 
+<code>kanku-common</code> package in <code>/etc/kanku/templates/*.tt2</code>.</p>
+
+<p>The following options are used to populate the template and can be modified 
+directly in the KankuFile or kanku job definition on the server:</p>
+
+<h3>Directly configurable options</h3>
+
+<ul>
+<li>domain
+<ul>
+<li>vcpu                 - Kanku::Handler::CreateDomain.options.vcpu</li>
+<li>memory               - Kanku::Handler::CreateDomain.options.memory</li>
+<li>domain_name          - multiple options (most specific wins)
+<ul>
+<li>KankuFile global option <code>domain_name</code></li>
+<li>Kanku::Handler::SetJobContext-&gt;options-&gt;domain_name</li>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;domain_name</li>
+</ul></li>
+<li>network_name         - </li>
+<li>network_bridge       - =&gt; $self-&gt;network_bridge  ,</li>
+</ul></li>
+</ul>
+
+<h3>Automatically generated or selected options</h3>
+
+<h4>disk_xml/disk_controllers_xml</h4>
+
+<p>The following variables</p>
+
+<ul>
+<li>disk_xml</li>
+<li>disk_controllers_xml</li>
+</ul>
+
+<p>can be controlled/influenced by several options</p>
+
+<ul>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;empty_disks</li>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;additional_disks</li>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;root_disk_bus</li>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;root_disk_size</li>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;pool_name</li>
+</ul>
+
+<p>Explaining these options in detail would blast this document.</p>
+
+<p>Please have a look into the documentation of <code>Kanku::Handler::CreateDomain</code> or
+see our various <code>KankuFile.examples</code>.</p>
+
+<h4>hostshare</h4>
+
+<p>The hostshare variable contains the xml snippet to configure shared
+directories between host and guest.</p>
+
+<p>It can be controlled/influenced by the following configuration options:</p>
+
+<ul>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;use_9p</li>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;host_dir_9p</li>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;accessmode_9p</li>
+</ul>
+
+<h4>host_feature/qemu_km</h4>
+
+<p>The following variables get automatically set by Kanku::Handler::CreateDomain
+depending on the underlying hardware.</p>
+
+<ul>
+<li>host_feature
+<ul>
+<li>vmx</li>
+<li>svm</li>
+<li>aarch64</li>
+</ul></li>
+<li>qemu_kvm             - autoselected (path to emulator)</li>
+</ul>
+
+<h3>Deprecated options (might be removed in future)</h3>
+
+<ul>
+<li>images_dir (replaced by autogenerated disk_xml and cache_dir)
+<ul>
+<li>Kanku::Handler::SetJobContext-&gt;options-&gt;images_dir</li>
+<li>Kanku::Handler::CreateDomain-&gt;options-&gt;images_dir</li>
+</ul></li>
+<li>image_file</li>
+</ul>
+
+<h2>Configure kanku job</h2>
+
+<p>In development mode you need to configure your new template in <code>KankuFile</code>.
+In server mode you can do this in `/etc/kanku/jobs/<myjob>.yml</myjob></p>
+
+<p>You have two possibilities to specify your new template:</p>
+
+<ul>
+<li>Kanku::Handler::SetJobContext-&gt;vm_template_file</li>
+</ul>
+
+<p>or</p>
+
+<ul>
+<li>Kanku::Handler::CreateDomain-&gt;template</li>
+</ul>
+
+<p><strong>Example KankuFile snippet:</strong></p>
+
+<pre><code>- 
+  use_handler: Kanku::Handler::SetJobContext
+  options:
+    vm_template_file: myvm
+  ...
+-
+  use_handler: Kanku::Handler::CreateDomain
+  options:
+    template: myvm
+...
+</code></pre>
+
+<h2>Troubleshooting</h2>
+
+<h3>Check your logs, which template is <em>really</em> used</h3>
+
+<p>Kanku will <em>NOT</em> exit/fail if the configured template does not exists.
+It will fallback to the <code>default-vm.tt2</code> or use an internal default xml.</p>
+
+<p>So please make sure that <code>myvm.tt2</code> is really used.
+The used template will get logged in INFO loglevel and above.</p>
+
+</section>
+
+<ul class="pager">
+    <li class="prev">
+            <a class="button button-primary" href="/kanku/blog/2024/05/16/release-0.17.1/index.html" rel="prev">
+                ← Older
+            </a>
+    </li>
+    <li class="next">
+            <button disabled>
+                Newer →
+            </button>
+    </li>
+</ul>
+
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                        <nav id="tags">
+        <h1>Tags</h1>
+        <ul class="list-inline">
+            <li><a href="/kanku/blog/tag/howto/">howto</a></li>
+            <li><a href="/kanku/blog/tag/kankufile/">KankuFile</a></li>
+            <li><a href="/kanku/blog/tag/news/">news</a></li>
+            <li><a href="/kanku/blog/tag/opensuse/">openSUSE</a></li>
+            <li><a href="/kanku/blog/tag/release/">release</a></li>
+            <li><a href="/kanku/blog/tag/template/">template</a></li>
+        </ul>
+    </nav>
+
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>

@@ -7,6 +7,41 @@
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
+            <title>Howto use my own VM XML template in kanku</title>
+            <link>https://m0ses.github.io/kanku/blog/2024/05/17/howto-use-my-own-vm-xml-template-in-kanku/</link>
+            <guid>https://m0ses.github.io/kanku/blog/2024/05/17/howto-use-my-own-vm-xml-template-in-kanku/</guid>
+            <description><![CDATA[
+                  <p><strong>Problem:</strong></p>
+
+<p>I would like to customize the libvirt XML description for my new kanku VM.</p>
+
+<p><strong>TL;DR</strong></p>
+
+<p>Only two steps are required to use your own XML template</p>
+
+<ul>
+<li>Create a new VM XML template</li>
+<li>Configure your kanku job to use your new template in your
+<ul>
+<li>KankuFile</li>
+<li>or /etc/kanku/jobs/<myjob>.yml</myjob></li>
+</ul></li>
+</ul>
+
+                    <p><a href="https://m0ses.github.io/kanku/blog/2024/05/17/howto-use-my-own-vm-xml-template-in-kanku/#section-2">Continue reading...</a></p>
+
+                    <p>Tags:
+                        <a href="https://m0ses.github.io/kanku/blog/tag/howto/">howto</a>
+                        <a href="https://m0ses.github.io/kanku/blog/tag/kankufile/">KankuFile</a>
+                        <a href="https://m0ses.github.io/kanku/blog/tag/template/">template</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Fri, 17 May 2024 15:40:24 +0000
+            </pubDate>
+        </item>
+        <item>
             <title>RELEASE 0.17.1</title>
             <link>https://m0ses.github.io/kanku/blog/2024/05/16/release-0.17.1/</link>
             <guid>https://m0ses.github.io/kanku/blog/2024/05/16/release-0.17.1/</guid>
@@ -73,21 +108,6 @@
             ]]></description>
             <pubDate>
                 Tue, 13 Feb 2024 17:28:18 +0000
-            </pubDate>
-        </item>
-        <item>
-            <title>RELEASE 0.16.1</title>
-            <link>https://m0ses.github.io/kanku/blog/2024/02/05/release-0.16.1/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2024/02/05/release-0.16.1/</guid>
-            <description><![CDATA[
-
-                    <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
-                    </p>
-
-            ]]></description>
-            <pubDate>
-                Mon, 05 Feb 2024 09:46:39 +0000
             </pubDate>
         </item>
     </channel>
