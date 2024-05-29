@@ -24,10 +24,12 @@ with 'Kanku::Roles::Handler';
 with 'Kanku::Roles::SSH';
 
 has commands => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
-has timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
+has _timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});
+
+sub timeout { my ($s, @a) = @_; return $s->_timeout(@a); }
 
 sub distributable { 1 }
 

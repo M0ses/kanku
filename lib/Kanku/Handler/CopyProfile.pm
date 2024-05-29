@@ -41,7 +41,11 @@ has users       => ( is=>'rw',
 		       Kanku::Config::Defaults->get(__PACKAGE__, 'users');
 		     },
 		   );
-has timeout     => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
+has _timeout     => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
+
+# Required to make role happy
+sub timeout { my ($s, @a) = @_; return $s->_timeout(@a); }
+
 
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});

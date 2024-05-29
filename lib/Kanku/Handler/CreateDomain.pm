@@ -17,6 +17,7 @@
 package Kanku::Handler::CreateDomain;
 
 use Moose;
+use Moose::Util::TypeConstraints;
 use Try::Tiny;
 use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError) ;
 use File::Copy qw/copy/;
@@ -46,28 +47,48 @@ has [qw/
 /] => (is => 'rw',isa=>'Str');
 
 has 'network_name' => (
-  is     => 'rw',
-  isa    =>'Str',
-  lazy   => 1,
-  default => sub { Kanku::Config::Defaults->get(__PACKAGE__,'network_name') },
+  is      => 'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  builder => '_build_network_name',
 );
+
+sub _build_network_name {
+  return
+    $_[0]->job->context->{network_name}
+    || Kanku::Config::Defaults->get(__PACKAGE__,'network_name');
+}
 
 has 'pool_name' => (
-  is     => 'rw',
-  isa    =>'Str',
-  lazy   => 1,
-  default => sub { Kanku::Config::Defaults->get(__PACKAGE__,'pool_name') },
+  is      => 'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  builder => '_build_pool_name',
 );
 
-has '+memory'         => ( default => 1024*1024 );
+sub _build_pool_name {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'pool_name');
+}
+
+has '+memory'         => ( builder => '_build_memory' );
+
+sub _build_memory {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'memory');
+}
 
 has '+management_interface' => ( default => '');
 
 has '+management_network'   => ( default => '');
 
-has [qw/vcpu/] => (is => 'rw',isa=>'Int');
+has 'vcpu' => (
+  is     => 'rw',
+  isa    =>'Int',
+  builder => '_build_vcpu',
+);
 
-has '+vcpu'           => ( default => 1 );
+sub _build_vcpu {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'vcpu');
+}
 
 has [qw/
         use_9p
@@ -83,12 +104,22 @@ has "+images_dir"     => (default=>"/var/lib/libvirt/images");
 has ['cache_dir']     => (
   is      => 'rw',
   isa     => 'Str',
-  default => sub {
-    return Kanku::Config->instance->cache_dir;
-  },
+  builder => '_build_cache_dir',
 );
 
-has ['mnt_dir_9p']    => (is => 'rw', isa => 'Str', default => '/tmp/kanku');
+sub _build_cache_dir {
+  return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
+}
+
+has 'mnt_dir_9p' => (
+  is => 'rw',
+  isa => 'Str',
+  builder => '_build_mnt_dir_9p',
+);
+
+sub _build_mnt_dir_9p {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'mnt_dir_9p');
+}
 
 has ['host_dir_9p']    => (is => 'rw', isa => 'Str');
 
@@ -103,7 +134,15 @@ has ['_root_disk']    => (is => 'rw', isa => 'Object');
 
 has 'root_disk_size'  => (is => 'rw', isa => 'Str');
 
-has 'root_disk_bus'  => (is => 'rw', isa => 'Str', default => 'virtio');
+has 'root_disk_bus'  => (
+  is => 'rw',
+  isa => 'Str',
+  builder => '_build_root_disk_bus',
+);
+
+sub _build_root_disk_bus {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'root_disk_bus');
+}
 
 has empty_disks => (
   is => 'rw',
@@ -190,10 +229,26 @@ has login_timeout => (
   isa     => 'Int',
 );
 
+enum 'ImageType' => [qw/kanku vagrant/];
+
+has image_type => (
+  is      => 'rw',
+  isa     => 'ImageType',
+  lazy    => 1,
+  builder => '_build_image_type',
+);
+
+sub _build_image_type {
+  my ($self) = @_;
+  my $ctx  = $self->job()->context();
+  my $d    = Kanku::Config::Defaults->get(__PACKAGE__, 'image_type');
+  return $ctx->{image_type} || $d;
+}
+
 sub distributable { 1 };
 
 sub prepare {
-  my $self = shift;
+  my ($self) = @_;
   my $ctx  = $self->job()->context();
 
   $self->domain_name($ctx->{domain_name})       if ( ! $self->domain_name && $ctx->{domain_name});
@@ -204,6 +259,7 @@ sub prepare {
   $self->accessmode_9p($ctx->{accessmode_9p})   if ( ! $self->accessmode_9p  && $ctx->{accessmode_9p});
   $self->cache_dir($ctx->{cache_dir})           if ($ctx->{cache_dir});
   $self->domain_autostart(1)                    if ($ctx->{domain_autostart});
+  $self->no_wait_for_bootloader(1)              if $self->image_type eq 'vagrant';
 
   $ctx->{management_interface} = $self->management_interface
     if $self->management_interface;
@@ -217,6 +273,7 @@ sub prepare {
   }
   $self->logger->debug("*** vm_image_file: ".$self->vm_image_file);
   $self->logger->debug("*** tmp_image_file: ".$ctx->{tmp_image_file}) if $ctx->{tmp_image_file};
+  $self->logger->debug("*** image_type: ".$self->image_type);
 
   return {
     code    => 0,
@@ -277,8 +334,8 @@ sub execute {
 
   my $pkg = __PACKAGE__;
   my $network_name = $self->network_name
-    || Kanku::Config->instance->cf->{$pkg}->{network_name}
-    || 'kanku-devel';
+    || $ctx->{network_name}
+    || Kanku::Config::Defaults->get(__PACKAGE__, 'network_name');
 
   my $vm = Kanku::Util::VM->new(
       vcpu                  => $self->vcpu,
@@ -317,6 +374,7 @@ sub execute {
 
   $vm->template_file($self->template) if ($self->template);
 
+  $logger->info("Creating domain ".$self->domain_name);
   $vm->create_domain();
 
   if ($self->domain_autostart) {
@@ -325,20 +383,24 @@ sub execute {
   }
 
   $ctx->{tmp_image_file} = undef if exists $ctx->{tmp_image_file};
+  if ($self->image_type ne 'vagrant') {
+    my $con = $vm->console();
 
-  my $con = $vm->console();
+    $con->cmd_timeout($self->default_console_timeout);
+    $con->login_timeout($self->login_timeout) if $self->login_timeout;
 
-  $con->cmd_timeout($self->default_console_timeout);
-  $con->login_timeout($self->login_timeout) if $self->login_timeout;
+    if (@{$self->installation}) {
+      $self->_handle_installation($con);
+    }
 
-  if (@{$self->installation}) {
-    $self->_handle_installation($con);
-  }
-
-  if ($self->skip_login) {
-    $con->wait_for_login_prompt;
+    if ($self->skip_login) {
+      $con->wait_for_login_prompt;
+    } else {
+      $self->_prepare_vm_via_console($con, $vm);
+    }
   } else {
-    $self->_prepare_vm_via_console($con, $vm);
+    $logger->info('Image Type "'.$self->image_type.'". Skipping VM preparation via console');
+    $ctx->{ipaddress} = $vm->get_ipaddress();
   }
 
   return {
@@ -761,6 +823,10 @@ If configured a port_forward_list, it tries to find the next free port and confi
  cache_dir
 
  domain_autostart
+
+ network_name
+
+ image_type
 
 =head2 setters
 

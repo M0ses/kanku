@@ -26,6 +26,8 @@ use Kanku::Config;
 
 with 'Kanku::Roles::Logger';
 
+requires 'timeout';
+
 has 'passphrase' => (
   is	  => 'rw',
   isa	  => 'Str',
@@ -36,7 +38,7 @@ has 'privatekey_path' => (
   is	  => 'rw',
   isa	  => 'Str',
   lazy	  => 1,
-  default => sub { 
+  default => sub {
     return $_[0]->job->context->{privatekey_path}
     || Kanku::Config->instance()->config()->{'Kanku::Roles::SSH'}->{privatekey_path}
     || '';
@@ -146,26 +148,37 @@ sub connect {
   my ($self)  = @_;
   my $logger  = $self->logger;
 
-  my $ssh = Libssh::Session->new();
-  $ssh->options(Host => $self->ipaddress, Port => $self->port);
-
-  $self->ssh($ssh);
 
   my $results = [];
   my $ip      = $self->ipaddress;
+  my $port    = $self->port;
+  my $timeout = $self->connect_timeout;
 
-  $logger->debug("Connecting to $ip");
+  my $cc      = 0; # Connection Counter
 
-  my $connect_count=0;
+  $logger->debug("Connecting to $ip (Timeout: $timeout)!");
 
-  while ($ssh->connect() != SSH_OK) {
-    croak("Could not connect to $ip: $!") if ($connect_count > $self->connect_timeout);
-    $connect_count++;
-    $logger->trace("Trying to reconnect: connect_count: ".$connect_count." timeout: ".$self->connect_timeout);
-    sleep 1;
+  my $ssh;
+
+  while ($cc < $timeout) {
+    $ssh = Libssh::Session->new();
+    $ssh->options(
+      Host => $ip,
+      Port => $port,
+      User => $self->username,
+    );
+    if ($ssh->connect(connect_only=>1) != SSH_OK) {
+      my $e = $ssh->error;
+      $logger->trace("Retry connecting ($cc): $e");
+      sleep 1;
+    } else {
+      $logger->debug("Connected successfully to $ip after $cc retries.");
+      $timeout = 0;
+    }
+    $cc++;
   }
 
-  $logger->debug("Connected successfully to $ip after $connect_count retries.");
+  $self->ssh($ssh);
 
   $logger->debug(' - SSH_AUTH_SOCK: '.($::ENV{SSH_AUTH_SOCK} || q{}));
   $logger->debug(
@@ -177,13 +190,10 @@ sub connect {
           "passphrase : " . ( $self->passphrase || '' )       . "\n".
           "password   : " . ( $self->password || '' )         . "\n"
   );
-
-  $ssh->options(User=>$self->username) if $self->username;
-  $ssh->options(Identity=>$self->privatekey_path) if $self->privatekey_path;
-
   my $auth_result;
 
   if ( $self->auth_type eq 'publickey' or $self->auth_type eq 'agent' ) {
+    $ssh->options(Identity=>$self->privatekey_path) if $self->privatekey_path;
     $auth_result = $ssh->auth_publickey_auto(
       $self->username,
       $self->publickey_path,
@@ -191,18 +201,19 @@ sub connect {
       $self->passphrase
     );
   } elsif ( $self->auth_type eq 'password' ) {
-    $auth_result = $ssh->auth_password($self->username, $self->password);
+    $logger->debug('Using password authentication');
+    $auth_result = $ssh->auth_password(password => $self->password);
   } else {
     croak("ssh auth_type not known!\n");
   }
 
   if ($auth_result != SSH_AUTH_SUCCESS) {
     my $msg = "";
-    my @err = $ssh->error;
+    my $err = $ssh->error;
     if ( $self->auth_type eq 'agent' ) {
       $msg = " Have you added your ssh key to ssh-agent by running ssh-add?";
     }
-    croak("Could not authenticate!$msg @err\n");
+    croak("Could not authenticate!$msg $err\n");
   }
 
   return $ssh;

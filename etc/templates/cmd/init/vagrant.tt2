@@ -1,0 +1,25 @@
+domain_name: [% domain_name %]
+default_job: [% default_job %]
+
+jobs:
+ [% default_job %]:
+  -
+    use_module: Kanku::Handler::Vagrant
+    options:
+      box: [% box %]
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: [% domain_memory %]
+      vcpu: [% domain_cpus %]
+      use_9p: 1
+      mnt_dir_9p: /vagrant
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      username: vagrant
+      password:
+      commands:
+        - echo "Just testing ssh connection"

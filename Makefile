@@ -18,6 +18,7 @@ CONFIG_DIRS		= \
 TEMPLATE_DIRS = \
 	etc/kanku/templates\
 	etc/kanku/templates/cmd\
+	etc/kanku/templates/cmd/init\
 	etc/kanku/templates/cmd/setup\
 	etc/kanku/templates/cmd/setup/etc\
 	etc/kanku/templates/examples-vm/\
@@ -25,7 +26,8 @@ TEMPLATE_DIRS = \
 TEMPLATE_FILES = \
 	templates/with-spice.tt2\
 	templates/vm-x86_64-uefi-tpm2.0.tt2\
-	templates/cmd/init.tt2\
+	templates/cmd/init/default.tt2\
+	templates/cmd/init/vagrant.tt2\
 	templates/cmd/setup/kanku.conf.mod_perl.tt2\
 	templates/cmd/setup/kanku.conf.mod_proxy.tt2\
 	templates/cmd/setup/kanku-vhost.conf.tt2\

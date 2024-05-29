@@ -223,11 +223,13 @@ common config and lib files used in kanku
 
 %dir /etc/kanku/templates
 %dir /etc/kanku/templates/cmd
+%dir /etc/kanku/templates/cmd/init
 %dir /etc/kanku/templates/cmd/setup
 %config /etc/kanku/templates/default-vm.tt2
 %config /etc/kanku/templates/with-spice.tt2
 %config /etc/kanku/templates/vm-x86_64-uefi-tpm2.0.tt2
-%config /etc/kanku/templates/cmd/init.tt2
+%config /etc/kanku/templates/cmd/init/default.tt2
+%config /etc/kanku/templates/cmd/init/vagrant.tt2
 %config /etc/kanku/templates/cmd/setup/*
 %dir    /etc/kanku/templates/examples-vm/
 %config /etc/kanku/templates/examples-vm/obs-server-26.tt2

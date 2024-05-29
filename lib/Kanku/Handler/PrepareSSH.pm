@@ -23,9 +23,12 @@ use Kanku::Config;
 use Path::Class qw/file/;
 
 with 'Kanku::Roles::Handler';
+with 'Kanku::Roles::SSH';
 
 has ['public_keys', 'public_key_files' ] => (is=>'rw',isa=>'ArrayRef',lazy=>1,default=>sub { [] });
 has [qw/domain_name login_user login_pass/] => (is=>'rw',isa=>'Str');
+
+sub timeout { 180 }
 
 sub distributable { 1 }
 
@@ -89,57 +92,69 @@ sub prepare {
 }
 
 sub execute {
-  my $self = shift;
-  my $cfg   = Kanku::Config->instance()->config();
-  my $ctx  = $self->job()->context();
-  my $con;
+  my ($self) = @_;
+  my $cfg    = Kanku::Config->instance()->config();
+  my $ctx    = $self->job()->context();
+
   $self->logger->debug("username/password: ".$self->login_user.'/'.$self->login_pass);
-
-  $con = Kanku::Util::VM::Console->new(
-    domain_name => $self->domain_name,
-    login_user  => $self->login_user(),
-    login_pass  => $self->login_pass(),
-    debug       => $cfg->{'Kanku::Util::VM::Console'}->{debug} || 0,
-    job_id      => $self->job->id,
-    log_file    => $ctx->{log_file} || q{},
-    log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
-    no_wait_for_bootloader => 1,
-  );
-
-  $con->init();
-  $con->login();
 
   my $str="";
   map { $str .= "$_\n" } @{$self->public_keys()};
 
-  $con->cmd('[ -d $HOME/.ssh ] || mkdir $HOME/.ssh');
+  if ($ctx->{image_type} eq 'vagrant') {
+    $self->username($self->login_user);
+    $self->password($self->login_pass);
+    $self->auth_type('password');
+    $self->connect();
+    $self->exec_command(
+      "cat <<EOF > \$HOME/.ssh/authorized_keys\n" .
+      "$str\n" .
+      "EOF\n"
+    );
+  } else {
+    my $default_user = 'kanku';
+    my $con = Kanku::Util::VM::Console->new(
+      domain_name => $self->domain_name,
+      login_user  => $self->login_user(),
+      login_pass  => $self->login_pass(),
+      debug       => $cfg->{'Kanku::Util::VM::Console'}->{debug} || 0,
+      job_id      => $self->job->id,
+      log_file    => $ctx->{log_file} || q{},
+      log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
+      no_wait_for_bootloader => 1,
+    );
+    $con->init();
+    $con->login();
 
+    $con->cmd('[ -d $HOME/.ssh ] || mkdir $HOME/.ssh');
 
-  $con->cmd(
-    "cat <<EOF >> \$HOME/.ssh/authorized_keys\n" .
-    "$str\n" .
-    "EOF\n"
-  );
+    $con->cmd(
+      "cat <<EOF >> \$HOME/.ssh/authorized_keys\n" .
+      "$str\n" .
+      "EOF\n"
+    );
 
-  $con->cmd('id kanku || useradd -m kanku');
-  $con->cmd('[ -d /home/kanku/.ssh ] || mkdir /home/kanku/.ssh');
-  $con->cmd(
-    "cat <<EOF >> /home/kanku/.ssh/authorized_keys\n" .
-    "$str\n" .
-    "EOF\n"
-  );
-  $con->cmd("chown kanku:users -R /home/kanku/.ssh/");
+    $con->cmd("id $default_user || useradd -m $default_user");
+    $con->cmd("[ -d /home/$default_user/.ssh ] || mkdir /home/$default_user/.ssh");
+    $con->cmd(
+      "cat <<EOF >> /home/$default_user/.ssh/authorized_keys\n" .
+      "$str\n" .
+      "EOF\n"
+    );
+    $con->cmd("chown $default_user:users -R /home/$default_user/.ssh/");
 
-  # Hack for Fedora 33
-  my $crypto_cfg = '/etc/crypto-policies/back-ends/opensshserver.config';
-  $con->cmd("[ -f $crypto_cfg ] && sed -i -E 's/(PubkeyAcceptedKeyTypes .*)/\\1,ssh-rsa/' $crypto_cfg");
+    # Hack for Fedora 33
+    my $crypto_cfg = '/etc/crypto-policies/back-ends/opensshserver.config';
+    $con->cmd("[ -f $crypto_cfg ] && sed -i -E 's/(PubkeyAcceptedKeyTypes .*)/\\1,ssh-rsa/' $crypto_cfg");
 
-  # TODO: make dynamically switchable between systemV and systemd
-  $con->cmd("systemctl restart sshd.service");
+    # TODO: make dynamically switchable between systemV and systemd
+    $con->cmd("systemctl restart sshd.service");
 
-  $con->cmd("systemctl enable sshd.service");
+    $con->cmd("systemctl enable --now sshd.service");
 
-  $con->logout();
+    $con->logout();
+  }
+
 
   return {
     code    => 0,

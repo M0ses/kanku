@@ -73,8 +73,10 @@ sub execute {
     cache_dir => $cfg->cache_dir,
   );
 
+
   my @_of = split '/', $self->url;
-  $curl->output_file(pop @_of);
+  my $_outfile = ($ctx->{vagrant_boxfile}) ? $ctx->{vagrant_boxfile} : pop @_of;
+  $curl->output_file($_outfile);
 
   $logger->debug("Using output file: ".$curl->output_file);
 

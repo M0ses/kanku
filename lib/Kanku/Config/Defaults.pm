@@ -27,18 +27,34 @@ my $defaults =    {
     'start_port'     => 49001,
   },
   'Kanku::Handler::CreateDomain' => {
-    network_name => 'kanku-devel',
-    pool_name    => 'default',
+    network_name  => 'kanku-devel',
+    pool_name     => 'default',
+    image_type    => 'kanku',
+    memory        => '2G',
+    vcpu          => 1,
+    mnt_dir_9p    => '/tmp/kanku',
+    root_disk_bus => 'virtio',
   },
   'Kanku::Handler::CopyProfile' => {
     users => [],
     tasks => [],
   },
+  'Kanku::Handler::Vagrant' => {
+    base_url      => 'https://app.vagrantup.com',
+    box           => 'opensuse/Tumbleweed.x86_64',
+    box_version   => 'latest',
+    login_user    => 'vagrant',
+    login_pass    => 'vagrant',
+  },
   'Kanku::Cli::init' => {
-    project => 'devel:kanku:images',
-    package => 'openSUSE-Leap-15.6-JeOS',
-    repository => 'images_leap_15_6',
-    apiurl => 'https://api.opensuse.org/public',
+    project       => 'devel:kanku:images',
+    package       => 'openSUSE-Leap-15.6-JeOS',
+    repository    => 'images_leap_15_6',
+    apiurl        => 'https://api.opensuse.org/public',
+    template_path => '/etc/kanku/templates/cmd/init',
+    template      => 'default',
+    # Kanku::Handler::Vagrant 
+    box           => 'opensuse/Tumbleweed.x86_64',
   },
   'Kanku::Cli::lsi' => {
     apiurl => 'https://api.opensuse.org/public',
@@ -61,6 +77,9 @@ my $defaults =    {
   'Kanku::Setup::Server::Standalone' => {
     network_name => 'kanku-server',
     dns_domain_name => 'kanku.server',
+  },
+  'Kanku::Config::GlobalVars' => {
+    cache_dir => "$::ENV{'HOME'}/.cache/kanku",
   },
 };
 

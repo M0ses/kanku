@@ -80,6 +80,9 @@ option 'pseudo_terminal' => (
   documentation => 'force/disable pseudo terminal allocation',
 );
 
+# Must be sub because role requires
+sub timeout { 180 }
+
 sub run {
   my ($self) = @_;
   my $cfg    = $self->cfg;

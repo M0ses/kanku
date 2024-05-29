@@ -143,21 +143,25 @@ sub delete_volume {
 
 sub get_image_size {
   my ($self) = @_;
-
-  if ( $self->source_file ) {
+  my $src = $self->source_file || q{};
+  my $t_size = 0;
+  if ( $src && -f $src ) {
     my $file = File::LibMagic->new();
-    my $info = $file->info_from_filename($self->source_file);
+    my $info = $file->info_from_filename($src);
 
     if ( $info->{description} =~ /^QEMU QCOW Image .* (\d+) bytes/ ) {
       $self->logger->debug("QCOW Image size: $1");
-      return $1;
+      $t_size = $1;
     } else {
-      my @stat = stat($self->source_file);
-      return $stat[7];
+      my @stat = stat($src) || croak("Cannot stat $src: $!");
+      $t_size  = $stat[7];
     }
+  } else {
+    croak("source_file not given or source_file ($src) does not exists.");
   }
+
   my $vol  = $self->vol_name;
-  my $size = $self->_string2bytes($self->size);
+  my $size = $self->_string2bytes($t_size);
   $self->logger->debug(" -------- size: $size");
 
   croak("Size of volume '$vol' could not be determined\n") unless $size;

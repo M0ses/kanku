@@ -719,6 +719,10 @@ sub _get_ip_from_dhcp {
 
   my $wait = $self->wait_for_network;
 
+  $self->logger->debug("Trying to get ip address via dhcp (Timeout: $wait)");
+
+  my $err_msg ="Could not find ipaddress from dhcp within $wait seconds";
+
   while ( $wait > 0) {
       my @nics = $dom->get_interface_addresses(
                    Sys::Virt::Domain::INTERFACE_ADDRESSES_SRC_LEASE
@@ -744,15 +748,14 @@ sub _get_ip_from_dhcp {
 
       sleep 1;
 
-      $self->logger->debug("Could not get ip address from interface using net-dhcp-leases.");
-      $self->logger->debug("Waiting another $wait seconds for network to come up");
+      $self->logger->trace("Could not get ip address from interface using net-dhcp-leases.");
+      $self->logger->trace("Waiting another $wait seconds for network to come up");
 
   }
 
-  if (! $ipaddress) {
-    die "Could not get ip address for interface within "
-      . $self->wait_for_network." seconds.";
-  }
+  croak($err_msg) unless $ipaddress;
+
+  $self->logger->debug("Found ipaddress $ipaddress via dhcp.");
 
   return $self->ipaddress($ipaddress);
 
