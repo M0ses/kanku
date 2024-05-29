@@ -1,0 +1,53 @@
+#
+domain_name: kanku-vagrant
+default_job: kanku-job
+login_user: root
+login_pass: kankudai
+
+jobs:
+ kanku-job:
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      host_interface: eth0
+  -
+    use_module: Kanku::Handler::OBSCheck
+    options:
+      api_url: https://api.opensuse.org/public
+      # Please have a look at
+      # kanku lsi
+      # to find more official Images
+      project: devel:kanku:images
+      package: openSUSE-Tumbleweed-JeOS:ext4
+      repository: images_tumbleweed
+      arch: x86_64
+      use_oscrc: 0
+  -
+    use_module: Kanku::Handler::ImageDownload
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 6G
+      vcpu: 4 
+      use_9p: 1
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::CopyProfile
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - zypper -n in kanku-cli make
+        - git clone https://github.com/M0ses/kanku.git && git -C kanku checkout fix_issue_59 && make -C kanku lib templates
+        - kanku setup --devel --user kanku
+        # END
+        - "chown kanku -R /home/kanku/.ssh"
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      username: kanku
+      commands:
+        - 'ssh-keygen -b 2048 -t rsa -f ~/.ssh/id_rsa -q -N ""'
+        - kanku init -T vagrant -d vagrant
+        - kanku up
