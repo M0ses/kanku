@@ -1,5 +1,7 @@
 domain_name: [% domain_name %]
 default_job: [% default_job %]
+ssh_user: vagrant
+ssh_pass: vagrant
 
 jobs:
  [% default_job %]:
