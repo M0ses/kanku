@@ -24,4 +24,6 @@ jobs:
       username: vagrant
       password:
       commands:
+        # enable key based ssh auth for user root
+        - sudo cp .ssh/authorized_keys /root/.ssh/
         - echo "Just testing ssh connection"
