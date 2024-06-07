@@ -28,7 +28,6 @@ use Net::IP;
 use Kanku::Job;
 use Kanku::Config;
 
-with 'Kanku::Roles::SSH';
 with 'Kanku::Cli::Roles::VM';
 
 command_short_description  'manage snapshots for kanku vms';
@@ -73,7 +72,7 @@ option 'name' => (
 
 sub run {
   my ($self) = @_;
-  my $logger = $self->logger;
+  my $logger  = Log::Log4perl->get_logger;
   my $cfg    = $self->cfg;
   my $vm     = Kanku::Util::VM->new(
                  domain_name   => $self->domain_name,
