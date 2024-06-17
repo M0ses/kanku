@@ -20,6 +20,27 @@ use Moose;
 use Kanku::Util::IPTables;
 use Try::Tiny;
 use Carp;
+
+sub _build_gui_config {
+  [
+    {
+      param => 'domain_name',
+      type  => 'text',
+      label => 'Domain Name',
+    },
+    {
+      param => 'disabled',
+      type  => 'checkbox',
+      label => 'Disabled',
+    },
+    {
+      param => 'ignore_autostart',
+      type  => 'checkbox',
+      label => 'Ignore Autostart',
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 0);
 with 'Kanku::Roles::Handler';
 
 has domain_name => (
@@ -28,31 +49,6 @@ has domain_name => (
 );
 
 has [qw/disabled ignore_autostart/] => (is => 'rw',isa=>'Bool');
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'domain_name',
-          type  => 'text',
-          label => 'Domain Name',
-        },
-        {
-          param => 'disabled',
-          type  => 'checkbox',
-          label => 'Disabled',
-        },
-	{
-          param => 'ignore_autostart',
-          type  => 'checkbox',
-          label => 'Ignore Autostart',
-        },
-      ];
-  }
-);
 
 sub execute {
   my ($self) = @_;

@@ -20,7 +20,8 @@ package Kanku::Roles::Handler;
 use Moose::Role;
 
 requires 'execute';
-
+requires 'distributable';
+requires '_build_gui_config';
 
 has 'last_run_result' => (
   is => 'rw',
@@ -54,22 +55,19 @@ has 'running_remotely' => (
 );
 
 has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub { [] }
+  is      => 'ro',
+  isa     => 'ArrayRef',
+  lazy    => 1,
+  builder => '_build_gui_config',
 );
 
 has cfg => (
   is      => 'ro',
   isa     => 'HashRef',
   lazy    => 1,
-  default => sub {
-    return Kanku::Config->instance()->config();
-  },
+  builder => '_build_cfg'
 );
-
-sub distributable { 0 }
+sub _build_cfg { return Kanku::Config->instance()->config(); }
 
 sub prepare {
 

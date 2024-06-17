@@ -17,30 +17,25 @@
 package Kanku::Handler::Wait;
 
 use Moose;
+
+sub _build_gui_config {
+  [
+    {
+      param => 'delay',
+      type  => 'text',
+      label => 'Time in sec to wait'
+    },
+    {
+      param => 'reason',
+      type  => 'text',
+      label => 'Description for reason to wait'
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 0);
 with 'Kanku::Roles::Handler';
 
 has [qw/delay reason/] => (is=>'rw',isa=>'Str');
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'delay',
-          type  => 'text',
-          label => 'Time in sec to wait'
-        },
-        {
-          param => 'reason',
-          type  => 'text',
-          label => 'Description for reason to wait'
-        },
-      ];
-  }
-);
-
 
 sub execute {
   my $self = shift;
@@ -54,6 +49,8 @@ sub execute {
     message => "Slept for " . $self->delay . ". Reason: $reason"
   };
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 __END__

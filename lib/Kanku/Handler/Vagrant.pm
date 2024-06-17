@@ -29,15 +29,39 @@ use Net::OBS::LWP::UserAgent;
 use LWP::UserAgent;
 use JSON::XS;
 use URI;
+
+sub _build_gui_config {
+  [
+    {
+      param => 'base_url',
+      type  => 'text',
+      label => 'Base URL',
+    },
+    {
+      param => 'box',
+      type  => 'text',
+      label => 'Vagrant Box name',
+    },
+    {
+      param => 'box_version',
+      type  => 'text',
+      label => 'Vagrant Box version',
+    },
+    {
+      param => 'offline',
+      type  => 'checkbox',
+      label => 'Offline mode',
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 0);
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
 
 has 'base_url' => (
   is      =>'rw',
   isa     =>'Str',
   builder => '_build_base_url',
 );
-
 sub _build_base_url {
   my ($self) = @_;
   Kanku::Config::Defaults->get(__PACKAGE__, 'base_url');
@@ -48,7 +72,6 @@ has 'box' => (
   isa     =>'Str',
   builder => '_build_box',
 );
-
 sub _build_box {
   my ($self) = @_;
   Kanku::Config::Defaults->get(__PACKAGE__, 'box');
@@ -59,7 +82,6 @@ has 'box_version' => (
   isa     =>'Str',
   builder => '_build_box_version',
 );
-
 sub _build_box_version {
   my ($self) = @_;
   Kanku::Config::Defaults->get(__PACKAGE__, 'box_version');
@@ -70,7 +92,6 @@ has 'login_user' => (
   isa     =>'Str',
   builder => '_build_login_user',
 );
-
 sub _build_login_user {
   my ($self) = @_;
   Kanku::Config::Defaults->get(__PACKAGE__, 'login_user');
@@ -81,7 +102,6 @@ has 'login_pass' => (
   isa     =>'Str',
   builder => '_build_login_pass',
 );
-
 sub _build_login_pass {
   my ($self) = @_;
   Kanku::Config::Defaults->get(__PACKAGE__, 'login_pass');
@@ -92,40 +112,9 @@ has offline => (
   isa     => 'Bool',
   builder => '_build_offline',
 );
-
 sub _build_offline {
   return 0;
 }
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'base_url',
-          type  => 'text',
-          label => 'Base URL',
-        },
-        {
-          param => 'box',
-          type  => 'text',
-          label => 'Vagrant Box name',
-        },
-        {
-          param => 'box_version',
-          type  => 'text',
-          label => 'Vagrant Box version',
-        },
-        {
-          param => 'offline',
-          type  => 'checkbox',
-          label => 'Offline mode',
-        },
-      ];
-  },
-);
 
 sub prepare {
   my ($self)    = @_;
@@ -268,6 +257,8 @@ sub get_from_history {
     message => "Sucessfully fetch vm_image_url '$ctx->{vm_image_url}' from database",
   };
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 __END__

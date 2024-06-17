@@ -18,12 +18,9 @@ package Kanku::Handler::SaltSSH;
 
 use Moose;
 
-use Data::Dumper;
-
-use namespace::autoclean;
-
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 0);
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
 
 has [qw/ipaddress publickey_path privatekey_path passphrase/] => (is=>'rw',isa=>'Str');
 has states     => (is=>'rw',isa=>'ArrayRef',default=>sub { [] });

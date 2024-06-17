@@ -209,7 +209,7 @@ sub connect {
 
   if ($auth_result != SSH_AUTH_SUCCESS) {
     my $msg = "";
-    my $err = $ssh->error;
+    my $err = $ssh->error || q{};
     if ( $self->auth_type eq 'agent' ) {
       $msg = " Have you added your ssh key to ssh-agent by running ssh-add?";
     }

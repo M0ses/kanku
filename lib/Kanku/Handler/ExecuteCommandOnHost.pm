@@ -18,11 +18,8 @@ package Kanku::Handler::ExecuteCommandOnHost;
 
 use Moose;
 
-use Path::Class qw/file dir/;
-use namespace::autoclean;
-use IPC::Run qw/run/;
-use URI;
-
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
 
 has commands => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
@@ -30,8 +27,6 @@ has commands => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has _env_backup => (is=>'rw', isa=>'HashRef', default => sub {{}});
-
-sub distributable { 1 }
 
 sub prepare {
   my ($self) = @_;

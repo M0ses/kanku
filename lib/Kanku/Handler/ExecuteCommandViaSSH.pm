@@ -18,20 +18,18 @@ package Kanku::Handler::ExecuteCommandViaSSH;
 
 use Moose;
 use Carp;
-use namespace::autoclean;
 
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
+
+has timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 with 'Kanku::Roles::SSH';
 
 has commands => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
-has _timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});
-
-sub timeout { my ($s, @a) = @_; return $s->_timeout(@a); }
-
-sub distributable { 1 }
 
 sub execute {
   my $self    = shift;
@@ -58,7 +56,6 @@ sub execute {
   }
 
   foreach my $cmd ( @{$self->commands} ) {
-
       my $ret = $self->exec_command($cmd);
 
       if ($ret->{exit_code}) {
@@ -71,7 +68,6 @@ sub execute {
         exit_status => 0,
         message     => $ret->{stdout},
       };
-
   }
 
   return {
@@ -82,6 +78,7 @@ sub execute {
 }
 
 __PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__

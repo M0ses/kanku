@@ -25,10 +25,16 @@ extends qw(Kanku::Cli);
 use Kanku::Util::VM;
 use Net::IP;
 
-use Kanku::Job;
-use Kanku::Config;
-
+# timeout must be defined before consuming role
+#
+option 'timeout' => (
+  isa           => 'Int',
+  is            => 'rw',
+  documentation => 'Timeout to use for ssh',
+  default       => 180,
+);
 with 'Kanku::Roles::SSH';
+
 with 'Kanku::Cli::Roles::VM';
 
 command_short_description  'open ssh connection to vm';
@@ -79,9 +85,6 @@ option 'pseudo_terminal' => (
   cmd_aliases   => 'T',
   documentation => 'force/disable pseudo terminal allocation',
 );
-
-# Must be sub because role requires
-sub timeout { 180 }
 
 sub run {
   my ($self) = @_;

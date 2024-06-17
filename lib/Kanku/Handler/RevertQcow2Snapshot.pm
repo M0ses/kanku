@@ -19,6 +19,21 @@ package Kanku::Handler::RevertQcow2Snapshot;
 use Moose;
 use Kanku::Config;
 
+sub _build_gui_config {
+  [
+    {
+      param => 'disk_image_file',
+      type  => 'text',
+      label => 'Path to file to revert'
+    },
+    {
+      param => 'snapshot_id',
+      type  => 'text',
+      label => 'Id of snapshot to apply'
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 0);
 with 'Kanku::Roles::Handler';
 
 has [qw/disk_image_file/] => (is => 'rw',isa=>'Str');
@@ -26,26 +41,6 @@ has [qw/disk_image_file/] => (is => 'rw',isa=>'Str');
 has [qw/
       snapshot_id
 /] => (is => 'rw',isa=>'Int');
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'disk_image_file',
-          type  => 'text',
-          label => 'Path to file to revert'
-        },
-        {
-          param => 'snapshot_id',
-          type  => 'text',
-          label => 'Id of snapshot to apply'
-        },
-      ];
-  }
-);
 
 sub execute {
   my $self = shift;
@@ -66,6 +61,8 @@ sub execute {
   };
 
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

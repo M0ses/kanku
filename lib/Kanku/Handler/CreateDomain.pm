@@ -34,14 +34,54 @@ use Kanku::Util::VM;
 use Kanku::Util::VM::Image;
 use Kanku::Util::IPTables;
 
+sub _build_gui_config {
+  [
+    {
+      param => 'forward_port_list',
+      type  => 'text',
+      label => 'List of Forwarded Ports'
+    },
+    {
+      param => 'network_name',
+      type  => 'text',
+      label => 'Name of libvirt network'
+    },
+    {
+      param => 'network_bridge',
+      type  => 'text',
+      label => 'Name of network bridge'
+    },
+    {
+      param => 'domain_autostart',
+      type  => 'checkbox',
+      label => 'Set autostart for domain on host startup',
+    },
+    {
+      param => 'vcpu',
+      type  => 'text',
+      label => 'Number of CPUs for new domain',
+    },
+    {
+      param => 'memory',
+      type  => 'text',
+      label => 'Memory size for new domain',
+    },
+    {
+      param => 'template',
+      type  => 'text',
+      label => 'Template for domain xml',
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
+with 'Kanku::Roles::Helpers';
 
 has [qw/
       domain_name           vm_image_file
       login_user            login_pass
-      images_dir            ipaddress
+      forward_port_list     ipaddress
       management_interface  management_network
-      forward_port_list     images_dir
       short_hostname	    memory
       network_bridge        template
 /] => (is => 'rw',isa=>'Str');
@@ -52,7 +92,6 @@ has 'network_name' => (
   lazy    => 1,
   builder => '_build_network_name',
 );
-
 sub _build_network_name {
   return
     $_[0]->job->context->{network_name}
@@ -65,30 +104,26 @@ has 'pool_name' => (
   lazy    => 1,
   builder => '_build_pool_name',
 );
-
 sub _build_pool_name {
   return Kanku::Config::Defaults->get(__PACKAGE__, 'pool_name');
 }
 
 has '+memory'         => ( builder => '_build_memory' );
-
 sub _build_memory {
   return Kanku::Config::Defaults->get(__PACKAGE__, 'memory');
 }
 
-has '+management_interface' => ( default => '');
-
-has '+management_network'   => ( default => '');
-
 has 'vcpu' => (
-  is     => 'rw',
-  isa    =>'Int',
+  is      => 'rw',
+  isa     =>'Int',
   builder => '_build_vcpu',
 );
-
 sub _build_vcpu {
   return Kanku::Config::Defaults->get(__PACKAGE__, 'vcpu');
 }
+
+has '+management_interface' => ( default => q{});
+has '+management_network'   => ( default => q{});
 
 has [qw/
         use_9p
@@ -99,14 +134,20 @@ has [qw/
 	no_wait_for_bootloader
 /]      => (is => 'rw',isa=>'Bool',default => 0);
 
-has "+images_dir"     => (default=>"/var/lib/libvirt/images");
+has "images_dir"     => (
+  is      => 'rw',
+  isa     => 'Str',
+  builder => '_build_images_dir',
+);
+sub _build_images_dir {
+  return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'images_dir');
+}
 
-has ['cache_dir']     => (
+has 'cache_dir'     => (
   is      => 'rw',
   isa     => 'Str',
   builder => '_build_cache_dir',
 );
-
 sub _build_cache_dir {
   return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
 }
@@ -116,7 +157,6 @@ has 'mnt_dir_9p' => (
   isa => 'Str',
   builder => '_build_mnt_dir_9p',
 );
-
 sub _build_mnt_dir_9p {
   return Kanku::Config::Defaults->get(__PACKAGE__, 'mnt_dir_9p');
 }
@@ -139,7 +179,6 @@ has 'root_disk_bus'  => (
   isa => 'Str',
   builder => '_build_root_disk_bus',
 );
-
 sub _build_root_disk_bus {
   return Kanku::Config::Defaults->get(__PACKAGE__, 'root_disk_bus');
 }
@@ -156,51 +195,6 @@ has additional_disks => (
   isa => 'ArrayRef',
   lazy => 1,
   default => sub {[]}
-);
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'forward_port_list',
-          type  => 'text',
-          label => 'List of Forwarded Ports'
-        },
-        {
-          param => 'network_name',
-          type  => 'text',
-          label => 'Name of libvirt network'
-        },
-        {
-          param => 'network_bridge',
-          type  => 'text',
-          label => 'Name of network bridge'
-        },
-        {
-          param => 'domain_autostart',
-          type  => 'checkbox',
-          label => 'Set autostart for domain on host startup',
-        },
-        {
-          param => 'vcpu',
-          type  => 'text',
-          label => 'Number of CPUs for new domain',
-        },
-        {
-          param => 'memory',
-          type  => 'text',
-          label => 'Memory size for new domain',
-        },
-        {
-          param => 'template',
-          type  => 'text',
-          label => 'Template for domain xml',
-        },
-      ];
-  }
 );
 
 has installation => (
@@ -244,8 +238,6 @@ sub _build_image_type {
   my $d    = Kanku::Config::Defaults->get(__PACKAGE__, 'image_type');
   return $ctx->{image_type} || $d;
 }
-
-sub distributable { 1 };
 
 sub prepare {
   my ($self) = @_;
@@ -309,7 +301,7 @@ sub execute {
     $logger->debug("Using default network_bridge : '".$self->network_bridge."'");
   }
 
-  $logger->debug("additional_disks:".Dumper($self->additional_disks));
+  $logger->debug("additional_disks:".$self->dump_it($self->additional_disks));
 
 
   my $final_file = ($ctx->{tmp_image_file} ) ? basename($ctx->{tmp_image_file}->filename) : $self->vm_image_file;
@@ -682,6 +674,9 @@ sub _create_image_file_from_cache {
 
   return ($vol, $image);
 }
+
+__PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__

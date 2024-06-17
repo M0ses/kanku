@@ -22,32 +22,41 @@ use Moose::Util::TypeConstraints;
 use Kanku::Config;
 use Kanku::Util::VM;
 
-use Path::Class::File;
-use Data::Dumper;
+sub _build_gui_config {
+  [
+    {
+      param => 'wait_for_console',
+      type  => 'checkbox',
+      label => 'Wait for console'
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
 
-has [qw/domain_name login_user login_pass/] => (is => 'rw',isa=>'Str');
-has 'action'      => (is => 'ro', isa => enum([qw[reboot shutdown create destroy undefine]]));
-
-# TODO: implement wait_for_*
-has [qw/wait_for_network wait_for_console/] => (is => 'rw',isa=>'Bool',lazy=>1,default=>1);
-has [qw/timeout/] => (is => 'rw',isa=>'Int',lazy=>1,default=>600);
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'wait_for_console',
-          type  => 'checkbox',
-          label => 'Wait for console'
-        },
-      ];
-  }
+has [qw/domain_name login_user login_pass/] => (
+  is => 'rw',
+  isa=>'Str'
 );
-sub distributable { 1 };
+
+has 'action' => (
+  is => 'ro',
+  isa => enum([qw[reboot shutdown create destroy undefine]]),
+);
+
+has [qw/wait_for_network wait_for_console/] => (
+  is      => 'rw',
+  isa     => 'Bool',
+  lazy    => 1,
+  default => 1,
+);
+
+has 'timeout' => (
+  is      => 'rw',
+  isa     => 'Int',
+  lazy    => 1,
+  default => 600,
+);
 
 sub prepare {
   my $self = shift;
@@ -127,6 +136,8 @@ sub execute {
     message => "Action '$action' on ". $self->domain_name ." finished successfully"
   };
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

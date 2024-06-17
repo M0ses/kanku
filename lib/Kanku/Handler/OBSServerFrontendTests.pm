@@ -17,47 +17,39 @@
 package Kanku::Handler::OBSServerFrontendTests;
 
 use Moose;
-use namespace::autoclean;
 use File::Temp;
 
+sub _build_gui_config {
+  [
+    {
+      param => 'git_url',
+      type  => 'text',
+      label => 'Git URL:'
+    },
+    {
+      param => 'git_revision',
+      type  => 'text',
+      label => 'Git Revision:'
+    },
+    {
+      param => 'ruby_version',
+      type  => 'text',
+      label => 'Ruby Version:'
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::SSH';
 
 has timeout       => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
+with 'Kanku::Roles::SSH';
+
 has environment   => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env   => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has jump_host     => (is=>'rw', isa=>'Str');
 has git_url       => (is=>'rw', isa=>'Str', default => 'https://github.com/openSUSE/open-build-service.git');
 has git_revision  => (is=>'rw', isa=>'Str', default => 'master');
 has ruby_version  => (is=>'rw', isa=>'Str', default => '2.5');
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'git_url',
-          type  => 'text',
-          label => 'Git URL:'
-        },
-        {
-          param => 'git_revision',
-          type  => 'text',
-          label => 'Git Revision:'
-        },
-        {
-          param => 'ruby_version',
-          type  => 'text',
-          label => 'Ruby Version:'
-        },
-      ];
-  }
-);
-
-
-sub distributable { 1 }
 
 sub execute {
   my $self    = shift;

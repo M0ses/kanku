@@ -17,7 +17,6 @@
 package Kanku::Handler::CopyProfile;
 
 use Moose;
-use namespace::autoclean;
 use Carp qw(croak);
 use File::Glob qw(:globally);
 use File::Find;
@@ -25,7 +24,11 @@ use File::Find;
 use Kanku::Config;
 use Kanku::Config::Defaults;
 
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 0);
 with 'Kanku::Roles::Handler';
+
+has timeout         => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 with 'Kanku::Roles::SSH';
 
 has _results    => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
@@ -35,23 +38,16 @@ has tasks       => ( is=>'rw',
 		       Kanku::Config::Defaults->get(__PACKAGE__, 'tasks');
 		     },
 		   );
+
 has users       => ( is=>'rw',
                      isa=>'ArrayRef',
 		     default => sub {
 		       Kanku::Config::Defaults->get(__PACKAGE__, 'users');
 		     },
 		   );
-has _timeout     => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
-
-# Required to make role happy
-sub timeout { my ($s, @a) = @_; return $s->_timeout(@a); }
-
 
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});
-
-
-sub distributable { 0 }
 
 sub execute {
   my ($self)  = @_;

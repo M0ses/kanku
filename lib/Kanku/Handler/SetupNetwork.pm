@@ -23,44 +23,69 @@ use Kanku::Util::VM;
 use Kanku::Util::VM::Console;
 use Kanku::Config;
 use Try::Tiny;
+
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
 
+has [qw/domain_name login_user login_pass/] => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  default => q{},
+);
 
-has [qw/domain_name login_user login_pass/] => (is=>'rw',isa=>'Str',lazy=>1,default=>'');
-has 'interfaces' => (is=>'rw',isa=>'ArrayRef', default=>sub{[]});
-has 'resolv' => (is=>'rw',isa=>'HashRef|Undef');
+has 'interfaces' => (
+  is      => 'rw',
+  isa     => 'ArrayRef',
+  builder => '_build_interfaces',
+);
+sub _build_interfaces {[]}
+
+has 'resolv' => (
+  is  => 'rw',
+  isa => 'HashRef|Undef'
+);
+
 has 'routes' => (
   is      =>'rw',
   isa     =>'HashRef',
   lazy    => 1,
-  default => sub {{}},
+  builder => '_build_routes',
 );
-has '_mac_table' => (is=>'rw',isa=>'HashRef',lazy=>1,default=>sub {{}});
+sub _build_routes {{}}
+
+has '_mac_table' => (
+  is      => 'rw',
+  isa     => 'HashRef',
+  lazy    => 1,
+  builder => '_build__mac_table',
+);
+sub _build__mac_table {{}}
 
 has '_con' => (
-  is=>'rw',
-  isa=>'Object',
-  lazy=>1,
-  default=>sub {
-    my ($self) = @_;
-    my $ctx    = $self->job()->context();
-    return Kanku::Util::VM::Console->new(
-        domain_name => $self->domain_name,
-        login_user  => $self->login_user(),
-        login_pass  => $self->login_pass(),
-        job_id      => $self->job->id,
-        log_file    => $ctx->{log_file} || q{},
-        log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
-        no_wait_for_bootloader => 1,
-    );
-  },
+  is      => 'rw',
+  isa     => 'Object',
+  lazy    => 1,
+  builder => '_build__con',
 );
+sub _build__con {
+  my ($self) = @_;
+  my $ctx    = $self->job()->context();
+  return Kanku::Util::VM::Console->new(
+    domain_name => $self->domain_name,
+    login_user  => $self->login_user(),
+    login_pass  => $self->login_pass(),
+    job_id      => $self->job->id,
+    log_file    => $ctx->{log_file} || q{},
+    log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
+    no_wait_for_bootloader => 1,
+  );
+}
 
-has '_requires_restart' => (is=>'rw', isa=>'Bool', default=>0);
+has '_requires_restart'       => (is=>'rw', isa=>'Bool', default=>0);
 has '_get_ipaddress_required' => (is=>'rw', isa=>'Bool', default=>1);
-has '_management_interface' => (is=>'rw', isa=>'Str', default=>q{});
-
-sub distributable { 1 };
+has '_management_interface'   => (is=>'rw', isa=>'Str' , default=>q{});
 
 sub prepare {
   my $self = shift;
@@ -264,8 +289,8 @@ sub _get_interface_info {
   return $iinfo;
 }
 
-
 __PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__

@@ -19,8 +19,9 @@ package Kanku::Handler::HTTPDownload;
 use Moose;
 use Kanku::Util::CurlHttpDownload;
 
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
 
 has dod_object => (
   is      =>'rw',

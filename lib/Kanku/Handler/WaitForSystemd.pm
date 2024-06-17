@@ -19,14 +19,15 @@ package Kanku::Handler::WaitForSystemd;
 use Moose;
 use Kanku::Util::VM;
 use Kanku::Util::VM::Console;
+
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
 
 
 has [qw/domain_name login_user login_pass/] => (is=>'rw',isa=>'Str',lazy=>1,default=>'');
 has timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>3600);
 has delay   => (is=>'rw',isa=>'Int',lazy=>1,default=>1);
-
-sub distributable { 1 }
 
 sub prepare {
   my $self = shift;
@@ -79,6 +80,7 @@ sub execute {
 }
 
 __PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__

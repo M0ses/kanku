@@ -21,28 +21,64 @@ use Kanku::Util::DoD;
 use Try::Tiny;
 use Data::Dumper;
 use Carp;
+
+sub _build_gui_config {
+  [
+    {
+      param => 'api_url',
+      type  => 'text',
+      label => 'API URL',
+    },
+    {
+      param => 'skip_all_checks',
+      type  => 'checkbox',
+      label => 'Skip all checks',
+    },
+    {
+      param => 'project',
+      type  => 'text',
+      label => 'Project',
+    },
+    {
+      param => 'package',
+      type  => 'text',
+      label => 'Package',
+    },
+    {
+      param => 'repository',
+      type  => 'text',
+      label => 'Repository',
+    },
+    {
+      param => 'preferred_extension',
+      type  => 'text',
+      label => 'Extension (qcow2, raw, etc.)',
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
 
 has dod_object => (
   is      =>'rw',
   isa     =>'Object',
   lazy    => 1,
-  default => sub  {
-    my $self = shift;
-    Kanku::Util::DoD->new(
-      skip_all_checks     => $self->skip_all_checks,
-      skip_check_project  => $self->skip_check_project,
-      skip_check_package  => $self->skip_check_package,
-      project             => $self->project,
-      package             => $self->package,
-      arch                => $self->arch,
-      api_url             => $self->api_url,
-      preferred_extension => $self->preferred_extension,
-      use_oscrc           => $self->use_oscrc,
-    );
-  },
+  builder => '_build_dod_object',
 );
+sub _build_dod_object  {
+  my ($self) = @_;
+  Kanku::Util::DoD->new(
+    skip_all_checks     => $self->skip_all_checks,
+    skip_check_project  => $self->skip_check_project,
+    skip_check_package  => $self->skip_check_package,
+    project             => $self->project,
+    package             => $self->package,
+    arch                => $self->arch,
+    api_url             => $self->api_url,
+    preferred_extension => $self->preferred_extension,
+    use_oscrc           => $self->use_oscrc,
+  );
+}
 
 has ['api_url','project','package'] => (is=>'rw',isa=>'Str',required=>1);
 
@@ -55,50 +91,14 @@ has _changed => (is=>'rw',isa=>'Bool',default=>0);
 
 has _binary => (is=>'rw',isa=>'HashRef',lazy=>1,default=>sub { { } });
 
-has [qw/skip_check_project skip_check_package skip_download/ ] => (is => 'ro', isa => 'Bool',default => 0 );
+has [qw/skip_check_project skip_check_package skip_download/ ] => (
+  is      => 'ro',
+  isa     => 'Bool',
+  default => 0,
+);
+
 has [qw/offline skip_all_checks use_oscrc/ ] => (is => 'rw', isa => 'Bool',default => 0 );
 has [qw/use_oscrc/ ] => (is => 'rw', isa => 'Bool',default => 0);
-
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'api_url',
-          type  => 'text',
-          label => 'API URL',
-        },
-        {
-          param => 'skip_all_checks',
-          type  => 'checkbox',
-          label => 'Skip all checks',
-        },
-        {
-          param => 'project',
-          type  => 'text',
-          label => 'Project',
-        },
-        {
-          param => 'package',
-          type  => 'text',
-          label => 'Package',
-        },
-        {
-          param => 'repository',
-          type  => 'text',
-          label => 'Repository',
-        },
-        {
-          param => 'preferred_extension',
-          type  => 'text',
-          label => 'Extension (qcow2, raw, etc.)',
-        },
-      ];
-  },
-);
 
 sub prepare {
   my $self      = shift;

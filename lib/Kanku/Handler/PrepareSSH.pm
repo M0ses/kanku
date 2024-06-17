@@ -17,20 +17,19 @@
 package Kanku::Handler::PrepareSSH;
 
 use Moose;
-use Data::Dumper;
 use Kanku::Util::VM::Console;
 use Kanku::Config;
 use Path::Class qw/file/;
 
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
+
+has 'timeout' => (is=>'rw', isa=>'Int', default=>180);
 with 'Kanku::Roles::SSH';
 
 has ['public_keys', 'public_key_files' ] => (is=>'rw',isa=>'ArrayRef',lazy=>1,default=>sub { [] });
 has [qw/domain_name login_user login_pass/] => (is=>'rw',isa=>'Str');
-
-sub timeout { 180 }
-
-sub distributable { 1 }
 
 sub prepare {
   my $self = shift;

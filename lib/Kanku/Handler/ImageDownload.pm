@@ -27,13 +27,12 @@ use Kanku::Config;
 use Kanku::Config::Defaults;
 extends 'Kanku::Handler::HTTPDownload';
 
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
 
-has ['vm_image_file','url'] => (is=>'rw',isa=>'Str');
-has ['offline'] => (is=>'rw',isa=>'Bool',default=>0);
-
-sub distributable { 1 }
+has [qw/vm_image_file url/] => (is=>'rw', isa=>'Str');
+has 'offline'               => (is=>'rw', isa=>'Bool', default=>0);
 
 sub prepare {
   my $self = shift;
@@ -194,6 +193,8 @@ sub remove_old_images {
   }
   $rs->delete;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

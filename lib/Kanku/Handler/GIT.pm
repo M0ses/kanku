@@ -18,14 +18,70 @@ package Kanku::Handler::GIT;
 
 use Moose;
 
-use Data::Dumper;
 use Path::Class qw/file dir/;
-use namespace::autoclean;
 use IPC::Run qw/run/;
 use URI;
 use Try::Tiny;
 
+sub _build_gui_config {
+  [
+    {
+      param  => 'giturl',
+      type   => 'text',
+      label  => 'Git URL (required)',
+    },
+    {
+      param  => 'gituser',
+      type   => 'text',
+      label  => 'Git User',
+    },
+    {
+      param  => 'gitpass',
+      type   => 'password',
+      label  => 'Git Password',
+      secure => 1,
+    },
+    {
+      param  => 'destination',
+      type   => 'text',
+      label  => 'Destination',
+    },
+    {
+      param  => 'revision',
+      type   => 'text',
+      label  => 'Revision',
+    },
+    {
+      param  => 'mirror',
+      type   => 'checkbox',
+      label  => 'Mirror mode',
+    },
+    {
+      param  => 'remote_url',
+      type   => 'text',
+      label  => 'Remote Url (only for mirror mode)',
+    },
+    {
+      param  => 'gitlab_merge_request_id',
+      type   => 'text',
+      label  => 'Gitlab Merge Request ID (requires manual fetch)',
+    },
+    {
+      param  => 'submodules',
+      type   => 'checkbox',
+      label  => 'Init and checkout submodules',
+    },
+    {
+      param  => 'recursive',
+      type   => 'checkbox',
+      label  => 'Clone recursivly (including submodules)',
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 0);
 with 'Kanku::Roles::Handler';
+
+has 'timeout' => (is=>'rw', isa=>'Int', default=>600);
 with 'Kanku::Roles::SSH';
 
 has [qw/  giturl          revision    destination
@@ -34,70 +90,7 @@ has [qw/  giturl          revision    destination
 	  gitlab_merge_request_id
     /] => (is=>'rw',isa=>'Str');
 
-has ['submodules' , 'mirror', 'recursive'] => (is=>'rw',isa=>'Bool');
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param  => 'giturl',
-          type   => 'text',
-          label  => 'Git URL (required)',
-        },
-        {
-          param  => 'gituser',
-          type   => 'text',
-          label  => 'Git User',
-        },
-        {
-          param  => 'gitpass',
-          type   => 'password',
-          label  => 'Git Password',
-          secure => 1,
-        },
-        {
-          param  => 'destination',
-          type   => 'text',
-          label  => 'Destination',
-        },
-        {
-          param  => 'revision',
-          type   => 'text',
-          label  => 'Revision',
-        },
-        {
-          param  => 'mirror',
-          type   => 'checkbox',
-          label  => 'Mirror mode',
-        },
-        {
-          param  => 'remote_url',
-          type   => 'text',
-          label  => 'Remote Url (only for mirror mode)',
-        },
-        {
-          param  => 'gitlab_merge_request_id',
-          type   => 'text',
-          label  => 'Gitlab Merge Request ID (requires manual fetch)',
-        },
-        {
-          param  => 'submodules',
-          type   => 'checkbox',
-          label  => 'Init and checkout submodules',
-        },
-        {
-          param  => 'recursive',
-          type   => 'checkbox',
-          label  => 'Clone recursivly (including submodules)',
-        },
-      ];
-  }
-);
-
-has 'timeout' => (is=>'rw', isa=>'Int', default=>600);
+has [qw/submodules mirror recursive/] => (is=>'rw', isa=>'Bool');
 
 sub prepare {
   my ($self) = @_;
@@ -248,6 +241,7 @@ sub execute {
 }
 
 __PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__

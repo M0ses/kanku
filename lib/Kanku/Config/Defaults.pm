@@ -79,7 +79,8 @@ my $defaults =    {
     dns_domain_name => 'kanku.server',
   },
   'Kanku::Config::GlobalVars' => {
-    cache_dir => "$::ENV{'HOME'}/.cache/kanku",
+    cache_dir  => "$::ENV{'HOME'}/.cache/kanku",
+    images_dir => '/var/lib/libvirt/images',
   },
 };
 

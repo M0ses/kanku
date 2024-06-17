@@ -20,26 +20,20 @@ use Moose;
 
 use Kanku::Util::VM;
 
+sub _build_gui_config {
+  [
+    {
+      param => 'name',
+      type  => 'text',
+      label => 'Snapshot name'
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
 
-has [qw/action name domain_name login_user login_pass/] => (is=>'rw',isa=>'Str');
+has [qw/action name domain_name login_user login_pass/] => (is=>'rw', isa=>'Str');
 has '+action' => (default=>'create');
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'name',
-          type  => 'text',
-          label => 'Snapshot name'
-        },
-      ];
-  }
-);
-
 
 sub execute {
   my ($self) = @_;
@@ -73,6 +67,8 @@ sub execute {
     message => "Action '$action' for snapshot '". $self->name."' in domain '".$self->domain_name."' succeed."
   };
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 __END__

@@ -17,14 +17,16 @@
 package Kanku::Handler::K8NodePortForward;
 
 use Moose;
-use namespace::autoclean;
 use Kanku::Util::IPTables;
 
+sub _build_gui_config {[]}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
 with 'Kanku::Roles::Handler';
+
+has timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 with 'Kanku::Roles::SSH';
 
 has nodeports=> (is=>'rw', isa=>'ArrayRef', default => sub {[]});
-has timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});
@@ -74,7 +76,7 @@ sub execute {
       my $cmd = "kubectl get -o jsonpath='{.spec.ports[0].nodePort}' services -n $np->{namespace} $np->{service}";
       $self->logger->debug("COMMAND: $cmd");
       my $ret = $self->exec_command($cmd);
-      my $out = $ret->{stdout}
+      my $out = $ret->{stdout};
       $self->logger->debug("OUTPUT: $out");
 
       my @err = $ssh2->error();
@@ -110,6 +112,7 @@ sub execute {
 }
 
 __PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__

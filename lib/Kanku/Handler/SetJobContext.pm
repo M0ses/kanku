@@ -17,10 +17,43 @@
 package Kanku::Handler::SetJobContext;
 
 use Moose;
-use feature 'say';
-use Data::Dumper;
+
+sub _build_gui_config {
+  [
+    {
+      param => 'images_dir',
+      type  => 'text',
+      label => 'Image Directory',
+    },
+    {
+      param => 'domain_name',
+      type  => 'text',
+      label => 'Domain Name',
+    },
+    {
+      param => 'vm_template_file',
+      type  => 'text',
+      label => 'VM Template File',
+    },
+    {
+      param => 'offline',
+      type  => 'checkbox',
+      label => 'Offline Mode',
+    },
+    {
+      param => 'domain_autostart',
+      type  => 'checkbox',
+      label => 'Autostart domain',
+    },
+    {
+      param  => 'gitlab_merge_request_id',
+      type   => 'text',
+      label  => 'Gitlab Merge Request ID (requires manual fetch)',
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 0);
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
 
 has [qw/
         api_url         project         package
@@ -49,46 +82,6 @@ has [qw/
   tmp_image_file
 /] => (is => 'rw', isa => 'Object|Undef');
 
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'images_dir',
-          type  => 'text',
-          label => 'Image Directory',
-        },
-        {
-          param => 'domain_name',
-          type  => 'text',
-          label => 'Domain Name',
-        },
-        {
-          param => 'vm_template_file',
-          type  => 'text',
-          label => 'VM Template File',
-        },
-        {
-          param => 'offline',
-          type  => 'checkbox',
-          label => 'Offline Mode',
-        },
-        {
-          param => 'domain_autostart',
-          type  => 'checkbox',
-          label => 'Autostart domain',
-        },
-        {
-          param  => 'gitlab_merge_request_id',
-          type   => 'text',
-          label  => 'Gitlab Merge Request ID (requires manual fetch)',
-        },
-      ];
-  }
-);
-
 sub execute {
   my $self = shift;
   my $ctx  = $self->job()->context();
@@ -113,6 +106,7 @@ sub execute {
   };
 }
 
+__PACKAGE__->meta->make_immutable;
 
 1;
 

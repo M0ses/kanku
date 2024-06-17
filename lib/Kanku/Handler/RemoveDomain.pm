@@ -21,40 +21,40 @@ use Kanku::Util::VM;
 use Kanku::Util::IPTables;
 use Try::Tiny;
 use Carp;
+
+sub _build_gui_config {
+  [
+    {
+      param => 'domain_name',
+      type  => 'text',
+      label => 'Domain Name',
+    },
+    {
+      param => 'disabled',
+      type  => 'checkbox',
+      label => 'Disabled',
+    },
+    {
+      param => 'ignore_autostart',
+      type  => 'checkbox',
+      label => 'Ignore Autostart',
+    },
+  ];
+}
+has 'distributable' => (is=>'ro', isa=>'Bool', default => 2);
 with 'Kanku::Roles::Handler';
 
-has [qw/uri domain_name/] => (is => 'rw',isa=>'Str');
-
+has [qw/uri domain_name/]           => (is => 'rw',isa=>'Str');
 has [qw/disabled ignore_autostart/] => (is => 'rw',isa=>'Bool');
-has [qw/keep_volumes/] => (is => 'rw', isa => 'ArrayRef', lazy => 1, default => sub {[]});
 
-has gui_config => (
-  is => 'ro',
+has 'keep_volumes' => (
+  is => 'rw',
   isa => 'ArrayRef',
   lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'domain_name',
-          type  => 'text',
-          label => 'Domain Name',
-        },
-        {
-          param => 'disabled',
-          type  => 'checkbox',
-          label => 'Disabled',
-        },
-        {
-          param => 'ignore_autostart',
-          type  => 'checkbox',
-          label => 'Ignore Autostart',
-        },
-      ];
-  }
+  builder => '_build_keep_volumes',
 );
+sub _build_keep_volumes {[]}
 
-# send to all hosts
-sub distributable { 2 };
 
 sub execute {
   my ($self) = @_;
@@ -103,6 +103,8 @@ sub execute {
   }
 
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 
