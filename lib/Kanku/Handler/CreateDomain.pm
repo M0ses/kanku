@@ -73,7 +73,7 @@ sub _build_gui_config {
     },
   ];
 }
-has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
+has 'distributable' => (is=>'ro', isa=>'Int', default => 1);
 with 'Kanku::Roles::Handler';
 with 'Kanku::Roles::Helpers';
 

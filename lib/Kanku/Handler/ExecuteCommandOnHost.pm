@@ -19,7 +19,7 @@ package Kanku::Handler::ExecuteCommandOnHost;
 use Moose;
 
 sub _build_gui_config {[]}
-has 'distributable' => (is=>'ro', isa=>'Bool', default => 1);
+has 'distributable' => (is=>'ro', isa=>'Int', default => 1);
 with 'Kanku::Roles::Handler';
 
 has commands => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
