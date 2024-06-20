@@ -18,6 +18,7 @@ package Kanku::Roles::Handler;
 
 
 use Moose::Role;
+use MooseX::ClassAttribute;
 
 requires 'execute';
 requires 'distributable';
@@ -54,10 +55,9 @@ has 'running_remotely' => (
   default => 0,
 );
 
-has gui_config => (
+class_has gui_config => (
   is      => 'ro',
   isa     => 'ArrayRef',
-  lazy    => 1,
   builder => '_build_gui_config',
 );
 
@@ -103,3 +103,5 @@ sub evaluate_console_credentials {
 
 1;
 
+no Moose;
+no MooseX::ClassAttribute;
