@@ -391,8 +391,8 @@ sub check_task {
   my ($self,$mod) = @_;
 
   $self->load_module($mod);
-
-  return $mod->distributable();
+  my $obj = $mod->new;
+  return $obj->distributable();
 }
 
 sub decline_applications {
