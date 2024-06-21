@@ -19,7 +19,7 @@ package Kanku::Handler::SaltSSH;
 use Moose;
 
 sub _build_gui_config {[]}
-has 'distributable' => (is=>'ro', isa=>'Int', default => 0);
+sub distributable { 0 }
 with 'Kanku::Roles::Handler';
 
 has [qw/ipaddress publickey_path privatekey_path passphrase/] => (is=>'rw',isa=>'Str');

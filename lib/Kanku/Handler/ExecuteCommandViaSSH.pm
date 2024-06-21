@@ -20,7 +20,7 @@ use Moose;
 use Carp;
 
 sub _build_gui_config {[]}
-has 'distributable' => (is=>'ro', isa=>'Int', default => 1);
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
 has timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);

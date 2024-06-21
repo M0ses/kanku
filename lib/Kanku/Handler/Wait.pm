@@ -32,7 +32,7 @@ sub _build_gui_config {
     },
   ];
 }
-has 'distributable' => (is=>'ro', isa=>'Int', default => 0);
+sub distributable { 0 }
 with 'Kanku::Roles::Handler';
 
 has [qw/delay reason/] => (is=>'rw',isa=>'Str');

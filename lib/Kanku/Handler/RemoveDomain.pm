@@ -41,7 +41,7 @@ sub _build_gui_config {
     },
   ];
 }
-has 'distributable' => (is=>'ro', isa=>'Int', default => 2);
+sub distributable { 2 }
 with 'Kanku::Roles::Handler';
 
 has [qw/uri domain_name/]           => (is => 'rw',isa=>'Str');

@@ -28,7 +28,7 @@ use Kanku::Config::Defaults;
 extends 'Kanku::Handler::HTTPDownload';
 
 sub _build_gui_config {[]}
-has 'distributable' => (is=>'ro', isa=>'Int', default => 1);
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
 has [qw/vm_image_file url/] => (is=>'rw', isa=>'Str');

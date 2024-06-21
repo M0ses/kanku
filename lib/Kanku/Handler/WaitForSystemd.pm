@@ -21,7 +21,7 @@ use Kanku::Util::VM;
 use Kanku::Util::VM::Console;
 
 sub _build_gui_config {[]}
-has 'distributable' => (is=>'ro', isa=>'Int', default => 1);
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
 

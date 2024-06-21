@@ -25,7 +25,7 @@ use Kanku::Config;
 use Kanku::Config::Defaults;
 
 sub _build_gui_config {[]}
-has 'distributable' => (is=>'ro', isa=>'Int', default => 0);
+sub distributable { 0 }
 with 'Kanku::Roles::Handler';
 
 has timeout         => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);

@@ -29,7 +29,8 @@ sub _build_gui_config {
     },
   ];
 }
-has 'distributable' => (is=>'ro', isa=>'Int', default => 0);
+sub distributable { 0 }
+with 'Kanku::Roles::Handler';
 
 has [qw/ipaddress domain_name forward_port_list host_interface/] => (is => 'rw',isa=>'Str');
 
