@@ -26,6 +26,7 @@ use File::Temp;
 use File::Copy;
 use IO::Uncompress::AnyUncompress qw/anyuncompress $AnyUncompressError/;
 use Carp;
+use JSON::XS;
 
 use Kanku::Util::VM::Console;
 use Kanku::Config;
@@ -89,10 +90,12 @@ sub create_volume {
 
   $self->logger->info('Creating volume "'. ($self->vol_name || q{}).'" with format '.$self->format);
 
+  my $size = ($self->source_file) ? $self->get_image_size() : $self->_string2bytes($self->size);
+
   my $xml  =
       '<volume type="file">'
     . ' <name>' . $self->vol_name . '</name>'
-    . ' <capacity unit="bytes">'. $self->get_image_size() .'</capacity>'
+    . ' <capacity unit="bytes">'. $size .'</capacity>'
     . ' <target>'
     . '  <format type="'.$self->format.'"/>'
     . ' </target>'
@@ -143,18 +146,30 @@ sub delete_volume {
 
 sub get_image_size {
   my ($self) = @_;
-  my $src = $self->source_file || q{};
+  my $src    = $self->source_file || q{};
+  my $logger = $self->logger;
   my $t_size = 0;
-  if ( $src && -f $src ) {
-    my $file = File::LibMagic->new();
-    my $info = $file->info_from_filename($src);
 
-    if ( $info->{description} =~ /^QEMU QCOW Image .* (\d+) bytes/ ) {
-      $self->logger->debug("QCOW Image size: $1");
-      $t_size = $1;
+  if ( $src && -f $src ) {
+    if ( $src =~ /\.vmdk$/i) {
+      my $cmd = "qemu-img info --output json $src";
+      open(my $pipe, '-|', $cmd) || croak "Failed to create pipe '$cmd': $!";
+      my @json = <$pipe>;
+      $logger->debug("JSON: @json");
+      close $pipe || croak "Could not close pipe: $!";
+      my $info = decode_json("@json");
+      $t_size = $info->{'virtual-size'};
     } else {
-      my @stat = stat($src) || croak("Cannot stat $src: $!");
-      $t_size  = $stat[7];
+      my $file = File::LibMagic->new();
+      my $info = $file->info_from_filename($src);
+
+      if ( $info->{description} =~ /^QEMU QCOW Image .* (\d+) bytes/ ) {
+	$logger->debug("QCOW Image size: $1");
+	$t_size = $1;
+      } else {
+	my @stat = stat($src) || croak("Cannot stat $src: $!");
+	$t_size  = $stat[7];
+      }
     }
   } else {
     croak("source_file not given or source_file ($src) does not exists.");
@@ -162,7 +177,7 @@ sub get_image_size {
 
   my $vol  = $self->vol_name;
   my $size = $self->_string2bytes($t_size);
-  $self->logger->debug(" -------- size: $size");
+  $logger->debug(" -------- size: $size");
 
   croak("Size of volume '$vol' could not be determined\n") unless $size;
 
@@ -230,7 +245,7 @@ sub _string2bytes {
              t => 1024*1024*1024*1024, p => 1024*1024*1024*1024*1024
            };
 
-  $size =~ /^(\d+)([bkmgtp]m?)?/i;
+  $size =~ /^(\d+)([bkmgtp]b?)?/i;
 
   my $f = ($2) ? $sh->{lc $2} : 1;
 
