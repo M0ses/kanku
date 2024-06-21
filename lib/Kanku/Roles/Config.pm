@@ -25,6 +25,7 @@ use YAML::PP;
 use YAML::PP::Schema::Include;
 use Try::Tiny;
 use File::HomeDir;
+use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Config::Base';
 
@@ -58,7 +59,9 @@ has cache_dir => (
   isa       =>'Str',
   lazy      => 1,
   default   => sub {
-    return $_[0]->config()->{cache_dir};
+    return
+      $_[0]->config()->{cache_dir}
+      || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
   }
 );
 
