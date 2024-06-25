@@ -19,7 +19,7 @@ package Kanku::Handler::ExecuteCommandViaSSH;
 use Moose;
 use Carp;
 
-sub _build_gui_config {[]}
+sub gui_config {[]}
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 

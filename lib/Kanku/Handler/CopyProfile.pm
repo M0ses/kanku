@@ -24,7 +24,7 @@ use File::Find;
 use Kanku::Config;
 use Kanku::Config::Defaults;
 
-sub _build_gui_config {[]}
+sub gui_config {[]}
 sub distributable { 0 }
 with 'Kanku::Roles::Handler';
 

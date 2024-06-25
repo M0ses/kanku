@@ -30,7 +30,7 @@ use LWP::UserAgent;
 use JSON::XS;
 use URI;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'base_url',

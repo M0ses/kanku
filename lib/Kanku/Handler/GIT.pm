@@ -23,7 +23,7 @@ use IPC::Run qw/run/;
 use URI;
 use Try::Tiny;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param  => 'giturl',

@@ -21,7 +21,7 @@ use Kanku::Util::VM::Console;
 use Kanku::Config;
 use Path::Class qw/file/;
 
-sub _build_gui_config {[]}
+sub gui_config {[]}
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 

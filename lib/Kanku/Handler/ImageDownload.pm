@@ -27,7 +27,7 @@ use Kanku::Config;
 use Kanku::Config::Defaults;
 extends 'Kanku::Handler::HTTPDownload';
 
-sub _build_gui_config {[]}
+sub gui_config {[]}
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 

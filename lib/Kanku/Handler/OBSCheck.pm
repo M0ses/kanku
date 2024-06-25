@@ -22,7 +22,7 @@ use Try::Tiny;
 use Data::Dumper;
 use Carp;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'api_url',

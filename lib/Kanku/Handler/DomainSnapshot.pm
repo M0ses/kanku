@@ -20,7 +20,7 @@ use Moose;
 
 use Kanku::Util::VM;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'name',

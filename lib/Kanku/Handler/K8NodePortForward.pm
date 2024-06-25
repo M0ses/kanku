@@ -19,7 +19,7 @@ package Kanku::Handler::K8NodePortForward;
 use Moose;
 use Kanku::Util::IPTables;
 
-sub _build_gui_config {[]}
+sub gui_config {[]}
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 

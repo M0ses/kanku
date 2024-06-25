@@ -22,7 +22,7 @@ use Moose::Util::TypeConstraints;
 use Kanku::Config;
 use Kanku::Util::VM;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'wait_for_console',

@@ -22,7 +22,7 @@ use Kanku::Util::IPTables;
 use Try::Tiny;
 use Carp;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'domain_name',

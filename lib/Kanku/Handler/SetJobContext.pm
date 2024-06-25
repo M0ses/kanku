@@ -18,7 +18,7 @@ package Kanku::Handler::SetJobContext;
 
 use Moose;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'images_dir',

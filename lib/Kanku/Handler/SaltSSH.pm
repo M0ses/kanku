@@ -18,7 +18,7 @@ package Kanku::Handler::SaltSSH;
 
 use Moose;
 
-sub _build_gui_config {[]}
+sub gui_config {[]}
 sub distributable { 0 }
 with 'Kanku::Roles::Handler';
 

@@ -19,7 +19,7 @@ package Kanku::Handler::HTTPDownload;
 use Moose;
 use Kanku::Util::CurlHttpDownload;
 
-sub _build_gui_config {[]}
+sub gui_config {[]}
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 

@@ -19,7 +19,7 @@ package Kanku::Handler::RevertQcow2Snapshot;
 use Moose;
 use Kanku::Config;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'disk_image_file',

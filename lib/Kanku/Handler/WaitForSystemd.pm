@@ -20,7 +20,7 @@ use Moose;
 use Kanku::Util::VM;
 use Kanku::Util::VM::Console;
 
-sub _build_gui_config {[]}
+sub gui_config {[]}
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 

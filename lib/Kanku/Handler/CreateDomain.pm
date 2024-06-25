@@ -34,7 +34,7 @@ use Kanku::Util::VM;
 use Kanku::Util::VM::Image;
 use Kanku::Util::IPTables;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'forward_port_list',

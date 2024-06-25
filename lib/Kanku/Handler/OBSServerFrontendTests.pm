@@ -19,7 +19,7 @@ package Kanku::Handler::OBSServerFrontendTests;
 use Moose;
 use File::Temp;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'git_url',

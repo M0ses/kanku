@@ -21,7 +21,7 @@ use Path::Class::File;
 use Kanku::Config;
 use Kanku::Util::VM::Image;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'disk_size',

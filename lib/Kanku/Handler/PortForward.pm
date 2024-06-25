@@ -20,7 +20,7 @@ use Moose;
 use Kanku::Config;
 use Kanku::Util::IPTables;
 
-sub _build_gui_config {
+sub gui_config {
   [
     {
       param => 'forward_port_list',
