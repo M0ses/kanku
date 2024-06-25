@@ -100,7 +100,7 @@ sub execute {
   my $str="";
   map { $str .= "$_\n" } @{$self->public_keys()};
 
-  if ($ctx->{image_type} eq 'vagrant') {
+  if (($ctx->{image_type}||q{}) eq 'vagrant') {
     $self->username($self->login_user);
     $self->password($self->login_pass);
     $self->auth_type('password');
