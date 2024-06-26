@@ -151,26 +151,13 @@ sub get_image_size {
   my $t_size = 0;
 
   if ( $src && -f $src ) {
-    if ( $src =~ /\.vmdk$/i) {
-      my $cmd = "qemu-img info --output json $src";
-      open(my $pipe, '-|', $cmd) || croak "Failed to create pipe '$cmd': $!";
-      my @json = <$pipe>;
-      $logger->debug("JSON: @json");
-      close $pipe || croak "Could not close pipe: $!";
-      my $info = decode_json("@json");
-      $t_size = $info->{'virtual-size'};
-    } else {
-      my $file = File::LibMagic->new();
-      my $info = $file->info_from_filename($src);
-
-      if ( $info->{description} =~ /^QEMU QCOW Image .* (\d+) bytes/ ) {
-	$logger->debug("QCOW Image size: $1");
-	$t_size = $1;
-      } else {
-	my @stat = stat($src) || croak("Cannot stat $src: $!");
-	$t_size  = $stat[7];
-      }
-    }
+    my $cmd = "qemu-img info --output json $src";
+    open(my $pipe, '-|', $cmd) || croak "Failed to create pipe '$cmd': $!";
+    my @json = <$pipe>;
+    $logger->debug("JSON: @json");
+    close $pipe || croak "Could not close pipe: $!";
+    my $info = decode_json("@json");
+    $t_size = $info->{'virtual-size'};
   } else {
     croak("source_file not given or source_file ($src) does not exists.");
   }
