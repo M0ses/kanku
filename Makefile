@@ -18,6 +18,7 @@ CONFIG_DIRS		= \
 TEMPLATE_DIRS = \
 	etc/kanku/templates\
 	etc/kanku/templates/cmd\
+	etc/kanku/templates/cmd/init\
 	etc/kanku/templates/cmd/setup\
 	etc/kanku/templates/cmd/setup/etc\
 	etc/kanku/templates/examples-vm/\
@@ -25,7 +26,8 @@ TEMPLATE_DIRS = \
 TEMPLATE_FILES = \
 	templates/with-spice.tt2\
 	templates/vm-x86_64-uefi-tpm2.0.tt2\
-	templates/cmd/init.tt2\
+	templates/cmd/init/default.tt2\
+	templates/cmd/init/vagrant.tt2\
 	templates/cmd/setup/kanku.conf.mod_perl.tt2\
 	templates/cmd/setup/kanku.conf.mod_proxy.tt2\
 	templates/cmd/setup/kanku-vhost.conf.tt2\
@@ -61,7 +63,12 @@ install: install_dirs install_full_dirs install_services install_docs configs te
 	install -m 644 dist/_etc_apache2_conf.d_kanku-worker.conf $(DESTDIR)/etc/apache2/conf.d/kanku-worker.conf
 
 bashcomp:
-	PERL5LIB=./lib ./bin/kanku bash_completion > $(DESTDIR)/etc/bash_completion.d/kanku.sh
+	# FIXME: This is only a temporary workaround until we got upstream
+	#        MooseX/App/Plugin/BashCompletion bug fixed.
+	#        ATM its not able to handle subcommands like in 
+	#        `kanku rguest console` properly.
+	#PERL5LIB=./lib ./bin/kanku bash_completion > $(DESTDIR)/etc/bash_completion.d/kanku.sh
+	cp dist/_etc_bash_completion.d_kanku.sh $(DESTDIR)/etc/bash_completion.d/kanku.sh
 
 configs: config_dirs config_files
 

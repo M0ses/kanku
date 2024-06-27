@@ -130,6 +130,23 @@ option 'apiurl' => (
   default       =>  sub { Kanku::Config::Defaults->get(__PACKAGE__, 'apiurl') },
 );
 
+option 'template' => (
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => 'T',
+  documentation => 'Template (e.g. vagrant)',
+  default       =>  sub { Kanku::Config::Defaults->get(__PACKAGE__, 'template') },
+);
+
+option 'box' => (
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => 'b',
+  documentation => 'Box name for vagrant images',
+  default       =>  sub { Kanku::Config::Defaults->get(__PACKAGE__, 'box') },
+);
+
+
 BEGIN {
   Kanku::Config->initialize();
 };
@@ -154,8 +171,11 @@ sub run {
     exit 1;
   }
 
+  my $template_path = Kanku::Config::Defaults->get(__PACKAGE__, 'template_path');
+  $logger->info("Using template_path: $template_path");
+
   my $config = {
-    INCLUDE_PATH => '/etc/kanku/templates/cmd/',
+    INCLUDE_PATH => $template_path,
     INTERPOLATE  => 1,               # expand "$var" in plain text
   };
 
@@ -174,11 +194,12 @@ sub run {
         pool          => $self->pool,
 	apiurl        => $self->apiurl,
         arch          => Kanku::Config->instance->cf->{'arch'},
+        box           => $self->box,
   };
 
   my $output = q{};
   # process input template, substituting variables
-  $template->process('init.tt2', $vars, $out)
+  $template->process($self->template.'.tt2', $vars, $out)
                || croak($template->error()->as_string());
 
   $logger->info("$out written");

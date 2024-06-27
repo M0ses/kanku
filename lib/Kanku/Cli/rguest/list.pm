@@ -14,7 +14,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::rguest;
+package Kanku::Cli::rguest::list;
 
 use MooseX::App::Command;
 use Moose::Util::TypeConstraints;
@@ -31,10 +31,17 @@ use Kanku::YAML;
 
 command_short_description  "list guests on your remote kanku instance";
 
-command_long_description
-  "list guests on your remote kanku instance
+command_long_description   "
+This command lists guests on your remote kanku instance matching the specified
+filter.
 
-" . $_[0]->description_footer;
+Possible filters are:
+
+* domain
+* state
+* host
+
+";
 
 option 'host' => (
   isa           => 'Str',
@@ -57,14 +64,10 @@ option 'state' => (
 
 sub run {
   my $self  = shift;
-  Kanku::Config->initialize;
-  my $logger  = Log::Log4perl->get_logger;
 
-  if ($self->list) {
-    $self->_list;
-  } else {
-    $logger->fatal("Please specify a command. Run 'kanku help rguest' for further information.");
-  }
+  Kanku::Config->initialize;
+
+  return $self->_list;
 }
 
 sub _list {
@@ -75,6 +78,17 @@ sub _list {
   $self->view('rguest/list.tt', $data);
 }
 
+sub _get_filtered_guest_list {
+  my ($self) = @_;
+  my $kr     = $self->connect_restapi();
+  my $params = {};
+  my @filters;
+  push @filters, "host:".$self->host.".*" if $self->host;
+  push @filters, "domain:".$self->domain.".*" if $self->domain;
+  push @filters, "state:".$self->state if $self->state;
+  $params->{filter} = \@filters if @filters;
+  return $kr->get_json(path => "guest/list", params => $params);
+}
 __PACKAGE__->meta->make_immutable;
 
 1;

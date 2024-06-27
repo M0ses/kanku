@@ -1,0 +1,29 @@
+domain_name: [% domain_name %]
+default_job: [% default_job %]
+ssh_user: vagrant
+ssh_pass: vagrant
+
+jobs:
+ [% default_job %]:
+  -
+    use_module: Kanku::Handler::Vagrant
+    options:
+      box: [% box %]
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: [% domain_memory %]
+      vcpu: [% domain_cpus %]
+      use_9p: 1
+      mnt_dir_9p: /vagrant
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      username: vagrant
+      password:
+      commands:
+        # enable key based ssh auth for user root
+        - sudo cp .ssh/authorized_keys /root/.ssh/
+        - echo "Just testing ssh connection"

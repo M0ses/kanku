@@ -391,7 +391,6 @@ sub check_task {
   my ($self,$mod) = @_;
 
   $self->load_module($mod);
-
   return $mod->distributable();
 }
 

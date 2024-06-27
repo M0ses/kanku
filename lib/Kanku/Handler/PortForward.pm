@@ -20,6 +20,16 @@ use Moose;
 use Kanku::Config;
 use Kanku::Util::IPTables;
 
+sub gui_config {
+  [
+    {
+      param => 'forward_port_list',
+      type  => 'text',
+      label => 'List of Forwarded Ports'
+    },
+  ];
+}
+sub distributable { 0 }
 with 'Kanku::Roles::Handler';
 
 has [qw/ipaddress domain_name forward_port_list host_interface/] => (is => 'rw',isa=>'Str');
@@ -44,21 +54,6 @@ has '+host_interface' => (
 has '+ipaddress' => (
   lazy => 1,
   default => sub { $_[0]->job()->context()->{ipaddress} || '' }
-);
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'forward_port_list',
-          type  => 'text',
-          label => 'List of Forwarded Ports'
-        },
-      ];
-  }
 );
 
 sub execute {
