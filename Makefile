@@ -68,7 +68,7 @@ bashcomp:
 	#        ATM its not able to handle subcommands like in 
 	#        `kanku rguest console` properly.
 	#PERL5LIB=./lib ./bin/kanku bash_completion > $(DESTDIR)/etc/bash_completion.d/kanku.sh
-	cp dist/_etc_bash_completion.d_kanku.sh > $(DESTDIR)/etc/bash_completion.d/kanku.sh
+	cp dist/_etc_bash_completion.d_kanku.sh $(DESTDIR)/etc/bash_completion.d/kanku.sh
 
 configs: config_dirs config_files
 
