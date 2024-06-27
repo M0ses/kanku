@@ -61,22 +61,6 @@ option 'domain' => (
   documentation => 'filter list by domain (wildcard .)',
 );
 
-option 'ssh_user' => (
-  isa           => 'Str',
-  is            => 'rw',
-  cmd_aliases   =>  ['U', 'ssh-user'],
-  documentation => 'username to use for ssh to kanku guest.',
-  default       => 'root',
-);
-
-option 'execute' => (
-  isa           => 'Str',
-  is            => 'rw',
-  cmd_aliases   =>  'e',
-  documentation => 'command to execute on kanku guest VM. (if using --ssh)',
-);
-
-
 sub run {
   my $self  = shift;
   Kanku::Config->initialize;

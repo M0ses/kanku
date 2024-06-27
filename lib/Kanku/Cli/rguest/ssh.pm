@@ -33,7 +33,7 @@ command_short_description  "ssh to kanku guest on your remote kanku instance";
 
 command_long_description "
 This command opens a ssh connection to a specified/selected domain on your
-remote kanku instance using the forwarded (ssh) port on the kanku master.
+remote kanku instance using the forwarded ssh port on the kanku master.
 
 You can specify the following filters:
 
@@ -41,8 +41,7 @@ You can specify the following filters:
 * host
 
 If only one domain matches the specified filter, the console will be opened
-immediately. Otherwise (if multiple domains match), a select menu will be
-printed.
+immediately, otherwise  a select menu will be printed.
 
 ";
 

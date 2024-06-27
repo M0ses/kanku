@@ -48,7 +48,6 @@ option 'domain' => (
   documentation => 'filter list by domain (wildcard .)',
 );
 
-
 option 'state' => (
   isa           => 'Int',
   is            => 'rw',
@@ -56,140 +55,16 @@ option 'state' => (
   documentation => 'filter list by state of domain',
 );
 
-
-option 'ssh_user' => (
-  isa           => 'Str',
-  is            => 'rw',
-  cmd_aliases   =>  ['U', 'ssh-user'],
-  documentation => 'username to use for ssh to kanku guest.',
-  default       => 'root',
-);
-
-option 'execute' => (
-  isa           => 'Str',
-  is            => 'rw',
-  cmd_aliases   =>  'e',
-  documentation => 'command to execute on kanku guest VM. (if using --ssh)',
-);
-
-enum CommandList => [qw/console ssh list/];
-
-parameter 'command' => (
-  isa           => 'CommandList',
-  is            => 'rw',
-  required      => 1,
-  documentation => "command to execute.",
-);
-
-
 sub run {
   my $self  = shift;
   Kanku::Config->initialize;
   my $logger  = Log::Log4perl->get_logger;
 
-  if ($self->command eq 'list') {
+  if ($self->list) {
     $self->_list;
-  } elsif ($self->command eq 'console') {
-    return $self->_console;
-  } elsif ($self->command eq 'ssh') {
-    return $self->_ssh;
   } else {
     $logger->fatal("Please specify a command. Run 'kanku help rguest' for further information.");
   }
-}
-
-sub _ssh {
-  my ($self) = @_;
-  my $logger = $self->logger;
-  $self->state(1);
-  my $data = $self->_get_filtered_guest_list();
-  my $domain;
-
-  while (my ($dk, $dv) = each(%{$data->{guest_list}})) {
-    $dv->{conn_opts} = $self->_find_ssh_forwarded_port($dv);
-    delete $data->{guest_list}->{$dk} unless $dv->{conn_opts};
-  }
-
-  if (keys %{$data->{guest_list}}) {
-    $domain = $self->_print_select_menu($data->{guest_list});
-  } else {
-    $logger->warn("No running domain is matching the specified filters!");
-    return 1;
-  }
-
-  my $cmd = $self->render_template('rguest/ssh.tt', $domain->{conn_opts});
-  system($cmd);
-
-  return;
-}
-
-sub _find_ssh_forwarded_port {
-  my ($self, $guest) = @_;
-  my $logger = $self->logger;
-
-  if (!$guest->{forwarded_ports}) {
-    $logger->fatal("No running domain is matching the specified filters!");
-    return;
-  }
-
-  my $fp = $guest->{forwarded_ports};
-  for my $ip (keys %{$fp}) {
-    for my $port (keys %{$fp->{$ip}}) {
-      if (($fp->{$ip}->{$port}->[1]||'') eq 'ssh') {
-        return {
-	  ip    => $ip,
-	  port  => $port,
-	  user  => $self->ssh_user,
-	  execute  => $self->execute,
-	};
-      }
-    }
-  }
-
-  return;
-}
-
-sub _console {
-  my ($self) = @_;
-  my $logger = $self->logger;
-  $self->state(1);
-  my $data = $self->_get_filtered_guest_list();
-  my $domain;
-
-  if (keys %{$data->{guest_list}}) {
-    $domain = $self->_print_select_menu($data->{guest_list});
-  } else {
-    $logger->fatal("No running domain is matching the specified filters!");
-    return 1;
-  }
-
-  my $cmd = ['ssh', '-t', $domain->{host}, "virsh console $domain->{domain_name}"];
-
-  system(@$cmd);
-
-  return;
-}
-
-sub _print_select_menu {
-  my ($self, $guest_list) = @_;
-  my @domains = sort(keys %{$guest_list});
-  return $guest_list->{$domains[0]} if (@domains < 2);
-  my $answer;
-  while (1) {
-      print "\nINVALID ANSWER ($answer)!\nPlease try again.\n" if defined $answer;
-      print "\nFound the following running domains matching your filters:\n\n";
-      my $i=0;
-      for my $d (@domains) {
-        print "[$i] - $d\n";
-	$i++;
-      }
-      print "\nPlease select a domain: [Enter number]\n";
-      $answer=<STDIN>;
-      chomp $answer;
-      next if ($answer !~ /^\d+$/);
-      next unless (defined $domains[$answer]);
-      return $guest_list->{$domains[$answer]};
-    }
 }
 
 sub _list {
@@ -200,17 +75,6 @@ sub _list {
   $self->view('rguest/list.tt', $data);
 }
 
-sub _get_filtered_guest_list {
-  my ($self) = @_;
-  my $kr     = $self->connect_restapi();
-  my $params = {};
-  my @filters;
-  push @filters, "host:".$self->host.".*" if $self->host;
-  push @filters, "domain:".$self->domain.".*" if $self->domain;
-  push @filters, "state:".$self->state if $self->state;
-  $params->{filter} = \@filters if @filters;
-  return $kr->get_json(path => "guest/list", params => $params);
-}
 __PACKAGE__->meta->make_immutable;
 
 1;
