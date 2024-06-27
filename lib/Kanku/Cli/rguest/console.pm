@@ -31,7 +31,7 @@ use Kanku::YAML;
 command_short_description  "open console to guest on kanku worker via ssh";
 
 command_long_description  "
-This command opens a console to a specified/selected kanku guest 
+This command opens a console to a specified/selected kanku guest
 on a kanku worker via ssh.
 You can specify the following filters:
 
@@ -43,11 +43,11 @@ immediately.
 If multiple domains match the specified filter, a select menu will be printed.
 If no domain matches your filter, an error message will be printed.
 
-DISCLAIMER: 
+DISCLAIMER:
 
 This command relies on a working ssh connection to the kanku worker.
 
-" . $_[0]->description_footer;
+";
 
 option 'host' => (
   isa           => 'Str',

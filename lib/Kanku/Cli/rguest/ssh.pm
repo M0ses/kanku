@@ -29,12 +29,22 @@ use Try::Tiny;
 
 use Kanku::YAML;
 
-command_short_description  "list guests on your remote kanku instance";
+command_short_description  "ssh to kanku guest on your remote kanku instance";
 
-command_long_description
-  "list guests on your remote kanku instance
+command_long_description "
+This command opens a ssh connection to a specified/selected domain on your
+remote kanku instance using the forwarded (ssh) port on the kanku master.
 
-" . $_[0]->description_footer;
+You can specify the following filters:
+
+* domain
+* host
+
+If only one domain matches the specified filter, the console will be opened
+immediately. Otherwise (if multiple domains match), a select menu will be
+printed.
+
+";
 
 option 'host' => (
   isa           => 'Str',
@@ -48,15 +58,6 @@ option 'domain' => (
   documentation => 'filter list by domain (wildcard .)',
 );
 
-
-option 'state' => (
-  isa           => 'Int',
-  is            => 'rw',
-  cmd_aliases   =>  'S',
-  documentation => 'filter list by state of domain',
-);
-
-
 option 'ssh_user' => (
   isa           => 'Str',
   is            => 'rw',
@@ -69,7 +70,7 @@ option 'execute' => (
   isa           => 'Str',
   is            => 'rw',
   cmd_aliases   =>  'e',
-  documentation => 'command to execute on kanku guest VM. (if using --ssh)',
+  documentation => 'command to execute on kanku guest VM.',
 );
 
 sub run {
@@ -87,7 +88,10 @@ sub _ssh {
 
   while (my ($dk, $dv) = each(%{$data->{guest_list}})) {
     $dv->{conn_opts} = $self->_find_ssh_forwarded_port($dv);
-    delete $data->{guest_list}->{$dk} unless $dv->{conn_opts};
+    if (!$dv->{conn_opts}) {
+      $logger->debug("No ssh port forwarded to $dv->{domain_name}.");
+      delete $data->{guest_list}->{$dk};
+    }
   }
 
   if (keys %{$data->{guest_list}}) {
@@ -162,6 +166,7 @@ sub _get_filtered_guest_list {
   $params->{filter} = \@filters if @filters;
   return $kr->get_json(path => "guest/list", params => $params);
 }
+
 __PACKAGE__->meta->make_immutable;
 
 1;

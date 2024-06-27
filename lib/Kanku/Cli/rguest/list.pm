@@ -41,7 +41,7 @@ Possible filters are:
 * state
 * host
 
-" . $_[0]->description_footer;
+";
 
 option 'host' => (
   isa           => 'Str',
