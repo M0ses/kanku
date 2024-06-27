@@ -14,7 +14,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::rguest;
+package Kanku::Cli::rguest::ssh;
 
 use MooseX::App::Command;
 use Moose::Util::TypeConstraints;
@@ -72,30 +72,10 @@ option 'execute' => (
   documentation => 'command to execute on kanku guest VM. (if using --ssh)',
 );
 
-enum CommandList => [qw/console ssh list/];
-
-parameter 'command' => (
-  isa           => 'CommandList',
-  is            => 'rw',
-  required      => 1,
-  documentation => "command to execute.",
-);
-
-
 sub run {
   my $self  = shift;
   Kanku::Config->initialize;
-  my $logger  = Log::Log4perl->get_logger;
-
-  if ($self->command eq 'list') {
-    $self->_list;
-  } elsif ($self->command eq 'console') {
-    return $self->_console;
-  } elsif ($self->command eq 'ssh') {
-    return $self->_ssh;
-  } else {
-    $logger->fatal("Please specify a command. Run 'kanku help rguest' for further information.");
-  }
+  return $self->_ssh;
 }
 
 sub _ssh {
@@ -149,27 +129,6 @@ sub _find_ssh_forwarded_port {
   return;
 }
 
-sub _console {
-  my ($self) = @_;
-  my $logger = $self->logger;
-  $self->state(1);
-  my $data = $self->_get_filtered_guest_list();
-  my $domain;
-
-  if (keys %{$data->{guest_list}}) {
-    $domain = $self->_print_select_menu($data->{guest_list});
-  } else {
-    $logger->fatal("No running domain is matching the specified filters!");
-    return 1;
-  }
-
-  my $cmd = ['ssh', '-t', $domain->{host}, "virsh console $domain->{domain_name}"];
-
-  system(@$cmd);
-
-  return;
-}
-
 sub _print_select_menu {
   my ($self, $guest_list) = @_;
   my @domains = sort(keys %{$guest_list});
@@ -190,14 +149,6 @@ sub _print_select_menu {
       next unless (defined $domains[$answer]);
       return $guest_list->{$domains[$answer]};
     }
-}
-
-sub _list {
-  my ($self) = @_;
-
-  my $data = $self->_get_filtered_guest_list();
-
-  $self->view('rguest/list.tt', $data);
 }
 
 sub _get_filtered_guest_list {

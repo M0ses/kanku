@@ -14,10 +14,9 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::rguest;
+package Kanku::Cli::rguesti::console;
 
 use MooseX::App::Command;
-use Moose::Util::TypeConstraints;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Remote';
@@ -29,10 +28,24 @@ use Try::Tiny;
 
 use Kanku::YAML;
 
-command_short_description  "list guests on your remote kanku instance";
+command_short_description  "open console to guest on kanku worker via ssh";
 
-command_long_description
-  "list guests on your remote kanku instance
+command_long_description  "
+This command opens a console to a specified/selected kanku guest 
+on a kanku worker via ssh.
+You can specify the following filters:
+
+* domain
+* host
+
+If only one domain matches the specified filter, the console will be opened
+immediately.
+If multiple domains match the specified filter, a select menu will be printed.
+If no domain matches your filter, an error message will be printed.
+
+DISCLAIMER: 
+
+This command relies on a working ssh connection to the kanku worker.
 
 " . $_[0]->description_footer;
 
@@ -47,15 +60,6 @@ option 'domain' => (
   is            => 'rw',
   documentation => 'filter list by domain (wildcard .)',
 );
-
-
-option 'state' => (
-  isa           => 'Int',
-  is            => 'rw',
-  cmd_aliases   =>  'S',
-  documentation => 'filter list by state of domain',
-);
-
 
 option 'ssh_user' => (
   isa           => 'Str',
@@ -72,81 +76,12 @@ option 'execute' => (
   documentation => 'command to execute on kanku guest VM. (if using --ssh)',
 );
 
-enum CommandList => [qw/console ssh list/];
-
-parameter 'command' => (
-  isa           => 'CommandList',
-  is            => 'rw',
-  required      => 1,
-  documentation => "command to execute.",
-);
-
 
 sub run {
   my $self  = shift;
   Kanku::Config->initialize;
-  my $logger  = Log::Log4perl->get_logger;
 
-  if ($self->command eq 'list') {
-    $self->_list;
-  } elsif ($self->command eq 'console') {
-    return $self->_console;
-  } elsif ($self->command eq 'ssh') {
-    return $self->_ssh;
-  } else {
-    $logger->fatal("Please specify a command. Run 'kanku help rguest' for further information.");
-  }
-}
-
-sub _ssh {
-  my ($self) = @_;
-  my $logger = $self->logger;
-  $self->state(1);
-  my $data = $self->_get_filtered_guest_list();
-  my $domain;
-
-  while (my ($dk, $dv) = each(%{$data->{guest_list}})) {
-    $dv->{conn_opts} = $self->_find_ssh_forwarded_port($dv);
-    delete $data->{guest_list}->{$dk} unless $dv->{conn_opts};
-  }
-
-  if (keys %{$data->{guest_list}}) {
-    $domain = $self->_print_select_menu($data->{guest_list});
-  } else {
-    $logger->warn("No running domain is matching the specified filters!");
-    return 1;
-  }
-
-  my $cmd = $self->render_template('rguest/ssh.tt', $domain->{conn_opts});
-  system($cmd);
-
-  return;
-}
-
-sub _find_ssh_forwarded_port {
-  my ($self, $guest) = @_;
-  my $logger = $self->logger;
-
-  if (!$guest->{forwarded_ports}) {
-    $logger->fatal("No running domain is matching the specified filters!");
-    return;
-  }
-
-  my $fp = $guest->{forwarded_ports};
-  for my $ip (keys %{$fp}) {
-    for my $port (keys %{$fp->{$ip}}) {
-      if (($fp->{$ip}->{$port}->[1]||'') eq 'ssh') {
-        return {
-	  ip    => $ip,
-	  port  => $port,
-	  user  => $self->ssh_user,
-	  execute  => $self->execute,
-	};
-      }
-    }
-  }
-
-  return;
+  return $self->_console;
 }
 
 sub _console {
@@ -190,14 +125,6 @@ sub _print_select_menu {
       next unless (defined $domains[$answer]);
       return $guest_list->{$domains[$answer]};
     }
-}
-
-sub _list {
-  my ($self) = @_;
-
-  my $data = $self->_get_filtered_guest_list();
-
-  $self->view('rguest/list.tt', $data);
 }
 
 sub _get_filtered_guest_list {
