@@ -14,7 +14,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::rguesti::console;
+package Kanku::Cli::rguest::console;
 
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
@@ -124,7 +124,7 @@ sub _print_select_menu {
       next if ($answer !~ /^\d+$/);
       next unless (defined $domains[$answer]);
       return $guest_list->{$domains[$answer]};
-    }
+  }
 }
 
 sub _get_filtered_guest_list {
