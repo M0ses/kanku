@@ -16,26 +16,22 @@
 #
 package Kanku::Cli::retrigger; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
-use POSIX;
 use Try::Tiny;
-use JSON::XS;
 
 command_short_description  'retrigger a remote job given by id';
 
-command_long_description
-  "retrigger a specified job on your remote instance\n\n"
-  . $_[0]->description_footer;
+command_long_description  "
+This command retriggers a specified job on your remote instance
+
+";
 
 option 'job' => (
   isa           => 'Int',
@@ -44,18 +40,22 @@ option 'job' => (
   documentation => '(*) Remote job id - mandatory',
 );
 
-sub run {
-  my $self  = shift;
+BEGIN {
   Kanku::Config->initialize();
-  my $logger  = Log::Log4perl->get_logger;
+}
 
-  if ( $self->job ) {
-    my $kr;
-    try {
-      $kr = $self->connect_restapi();
-    } catch {
-      exit 1;
-    };
+sub run {
+  my ($self) = @_;
+  my $logger = $self->logger;
+  my $ret    = 0;
+
+  if (!$self->job) {
+    $logger->error('You must at least specify a job name to trigger');
+    return 1;
+  }
+
+  try {
+    my $kr = $self->connect_restapi();
     my $rdata = $kr->post_json(
       # path is only subpath, rest is added by post_json
       path => 'job/retrigger/'.$self->job,
@@ -63,11 +63,12 @@ sub run {
     );
 
     $self->view('retrigger.tt', $rdata);
-  } else {
-	$logger->error('You must at least specify a job name to trigger');
-  }
+  } catch {
+    $logger->fatal($_);
+    $ret = 1;
+  };
 
-  return;
+  return $ret;
 }
 
 __PACKAGE__->meta->make_immutable;

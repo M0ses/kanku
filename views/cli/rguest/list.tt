@@ -26,7 +26,7 @@
      guest_list.$guest.forwarded_ports.$ip.$port.0 == '22'
   || guest_list.$guest.forwarded_ports.$ip.$port.1 == 'ssh'
 %]
-          [% INCLUDE 'rguest/ssh.tt' %]
+          [% INCLUDE 'ssh.tt' %]
 [% ELSE %]
           Unkown port forwarding: [% port %] --> [% guest_list.$guest.forwarded_ports.$ip.$port.0 +%]
 [% END %]

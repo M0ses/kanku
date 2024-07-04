@@ -19,19 +19,19 @@ package Kanku::Cli::api;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
+with 'Kanku::Cli::Roles::View';
 with 'Kanku::Roles::Helpers';
 
 use Try::Tiny;
-use Data::Dumper;
 
 command_short_description  "make (GET) requests to api with arbitrary (sub) uri";
 
-command_long_description "list guests on your remote kanku instance
+command_long_description "
+With this command you can send arbitrary queries to your remote kanku instance.
 
-" . $_[0]->description_footer;
+";
 
 parameter 'uri' => (
   isa           => 'Str',
@@ -47,17 +47,23 @@ option 'data' => (
 );
 
 sub run {
-  my $self  = shift;
-  my $logger  = Log::Log4perl->get_logger;
+  my ($self) = @_;
+  my $ret    = 0;
+  my $fmt    = $self->format;
 
-  my $kr;
   try {
-	$kr = $self->connect_restapi();
+    my $kr = $self->connect_restapi();
+    $self->logger->debug("Raw data from API formatted as `$fmt`:");
+    $self->print_formatted(
+      $self->format,
+      $kr->get_json(path=>$self->uri),
+    );
   } catch {
-	exit 1;
+    $self->logger->fatal($_);
+    $ret = 1;
   };
-  $logger->info("Raw data from API");
-  print Dumper($kr->get_json( path => $self->uri ));
+
+  return $ret;
 }
 
 __PACKAGE__->meta->make_immutable;

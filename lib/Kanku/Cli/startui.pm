@@ -16,37 +16,43 @@
 #
 package Kanku::Cli::startui; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
-use Log::Log4perl;
-use Carp;
-use File::HomeDir;
 extends qw(Kanku::Cli);
 
 command_short_description  'start an simple webserver to access web ui under http://localhost:5000';
-command_long_description   'start an simple webserver to access web ui under http://localhost:5000';
+
+command_long_description   '
+This command starts an simple webserver to access web ui.
+Use the URL http://localhost:5000
+
+';
+
+use Carp;
+use File::Slurp;
+use File::HomeDir;
 
 sub run {
   my ($self)    = @_;
-  my $hd        = File::HomeDir->users_home($ENV{USER});
+  my $logger    = $self->logger;
+  my $hd        = File::HomeDir->my_home;
   my $pid_file  = "$hd/.kanku/ui.pid";
-  my $logger    = Log::Log4perl->get_logger;
-
 
   if ( -f $pid_file ) {
-    $logger->warn('WebUI already running! Please run stopui before or connect to http://localhost:5000');
-    exit 1;
+    $logger->warn('WebUI already running!');
+    $logger->info('*** Please run stopui before or connect to http://localhost:5000 ***');
+    return 1;
   }
 
   my $pid = fork;
 
   if ( $pid == 0 ) {
-    my $log_file = "$hd/.kanku/ui.log";
-
     # autoflush
     local $| = 1;
+
+    # remove pid_file if child die`s
+    $SIG{__DIE__} = sub { unlink $pid_file };
+
+    my $log_file = "$hd/.kanku/ui.log";
 
     local *STDOUT; ## no critic (Variables::RequireInitializationForLocalVars)
     local *STDERR; ## no critic (Variables::RequireInitializationForLocalVars)
@@ -63,16 +69,14 @@ sub run {
     close STDOUT || croak("Could not close STDOUT: $!");
     close STDERR || croak("Could not close STDERR: $!");
 
-    exit 0;
-  } else {
-    open(my $pf, '>', $pid_file) || croak("Could not open $pid_file: $!");
-    print {$pf} $pid;
-    close $pf || croak("Could not close $pid_file: $!");
-
-    $logger->info("Started webserver with pid: $pid");
-    $logger->info('Please connect to http://localhost:5000');
+    return 0;
   }
-  return;
+
+  write_file($pid_file, $pid);
+  $logger->info("Started webserver with pid: $pid");
+  $logger->info('Please connect to http://localhost:5000');
+
+  return 0;
 }
 
 __PACKAGE__->meta->make_immutable;

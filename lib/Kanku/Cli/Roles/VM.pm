@@ -1,30 +1,32 @@
 package Kanku::Cli::Roles::VM;
 
-use strict;
-use warnings;
-
 use MooseX::App::Role;
 use Kanku::Config;
 
 option 'domain_name' => (
   is            => 'rw',
-  cmd_aliases   => 'd',
+  cmd_aliases   => [qw/d domain-name/],
   documentation => 'name of domain to open console',
   lazy          => 1,
-  default       => sub { $_[0]->cfg->config->{domain_name} },
+  builder       => '_build_domain_name',
 );
+sub _build_domain_name {
+  my ($self) = @_;
+  return $self->cfg->config->{domain_name} || q{};
+}
 
 has cfg => (
   isa           => 'Object',
   is            => 'rw',
   lazy          => 1,
-  default       => sub {
-    Kanku::Config->initialize(class => 'KankuFile');
-    my $cfg = Kanku::Config->instance();
-    $cfg->file($_[0]->file);
-    return $cfg;
-  },
+  builder       => '_build_cfg',
 );
+sub _build_cfg {
+  Kanku::Config->initialize(class => 'KankuFile');
+  my $cfg = Kanku::Config->instance();
+  $cfg->file($_[0]->file);
+  return $cfg;
+}
 
 option 'file' => (
   isa           => 'Str',
@@ -35,6 +37,7 @@ option 'file' => (
 option 'log_file' => (
   isa           => 'Str',
   is            => 'rw',
+  cmd_aliases   => [qw/log-file/],
   documentation => 'path to logfile for Expect output',
   default       => q{},
 );
@@ -42,7 +45,8 @@ option 'log_file' => (
 option 'log_stdout' => (
   isa           => 'Bool',
   is            => 'rw',
-  documentation => 'log Expect output to stdout - (default: 1)',
+  cmd_aliases   => [qw/log-stdout/],
+  documentation => 'Log Expect output to stdout - (default: 1)',
   default       => 1,
 );
 

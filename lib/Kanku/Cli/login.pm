@@ -29,11 +29,14 @@ with 'Kanku::Cli::Roles::Remote';
 
 command_short_description  'login to your remote kanku instance';
 
-command_long_description  'login to your remote kanku instance';
+command_long_description  '
+With this command you can login to your remote kanku instance.
+
+';
 
 sub run {
-  my $self  = shift;
-  my $logger  = Log::Log4perl->get_logger;
+  my ($self) = @_;
+  my $logger = $self->logger;
 
   # Please note the priority of options
   # * command line options

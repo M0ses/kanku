@@ -16,35 +16,38 @@
 #
 package Kanku::Cli;
 
-use strict;
-use warnings;
 use MooseX::App qw(Color BashCompletion);
+use Moose::Util::TypeConstraints;
 
-use Log::Log4perl;
-use Kanku::Config;
-use FindBin;
+with 'Kanku::Roles::Logger';
+with 'Kanku::Cli::Roles::View';
 
 option 'traceback'  => (
   is            => 'rw',
   isa           => 'Bool',
   default       => 0,
   cmd_aliases   => ['t'],
-  documentation => 'die with stacktrace',
+  documentation => 'print stacktrace on die',
+);
+
+enum 'LogLevel' => [qw/FATAL ERROR WARN INFO DEBUG TRACE/];
+option 'loglevel'  => (
+  is            => 'rw',
+  isa           => 'Str',
+  cmd_aliases   => [qw/ll log_level log-level/],
+  documentation => 'set log level',
+);
+
+enum 'OutputFormat' => [qw/json dumper yaml none pjson/];
+option 'format' => (
+  isa           => 'OutputFormat',
+  is            => 'rw',
+  cmd_aliases   => [qw/of output-format output_format/],
+  documentation => 'output format',
+  default       => 'dumper'
 );
 
 app_exclude 'Kanku::Cli::Roles';
-
-my $lconf;
-if (-e "$ENV{HOME}/.kanku/logging.conf" ) {
-  $lconf = "$ENV{HOME}/.kanku/logging.conf";
-} elsif ( -e '/etc/kanku/logging/console.conf' ) {
-  $lconf = '/etc/kanku/logging/console.conf';
-} elsif ( -e "$FindBin::Bin/../etc/logging/console.conf" ) {
-  # used in testing and generating bash-completion while package building
-  $lconf = "$FindBin::Bin/../etc/logging/console.conf";
-}
-
-Log::Log4perl->init($lconf);
 
 __PACKAGE__->meta->make_immutable();
 

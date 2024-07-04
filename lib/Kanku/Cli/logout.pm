@@ -16,28 +16,23 @@
 #
 package Kanku::Cli::logout; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::Remote';
-
-use Term::ReadKey;
-use Kanku::YAML;
 
 command_short_description  'logout from your remote kanku instance';
 
-command_long_description
-  'This command will proceeced a logout from your remote kanku instance and '.
-  'delete the local session cookie';
+command_long_description '
+This command will proceeced a logout from your remote kanku instance and delete
+the local session cookie
+';
 
 sub run {
-  my $self  = shift;
-  my $logger  = Log::Log4perl->get_logger;
-
-  my $kr =  $self->connect_restapi();
+  my ($self) = @_;
+  my $logger = $self->logger;
+  my $kr     = $self->connect_restapi();
 
   if ( $kr->logout() ) {
     $logger->error('Logout failed on the remote side');
@@ -45,7 +40,7 @@ sub run {
     $logger->info('Logout succeed');
   }
 
-  return;
+  return 0;
 }
 
 __PACKAGE__->meta->make_immutable;

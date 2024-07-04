@@ -22,33 +22,39 @@ use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use Log::Log4perl;
-use Carp;
+use Try::Tiny;
+use File::Slurp;
 use File::HomeDir;
 
-command_short_description  'stop our local webserver, providing the ui';
+command_short_description  'stop local webserver';
 
-command_long_description  'stop our local webserver, providing the ui';
+command_long_description  '
+This command stops the local webserver, providing the ui
+
+';
 
 sub run {
-  my ($self)      = @_;
-
-  my $logger    = Log::Log4perl->get_logger;
-  my $hd        = File::HomeDir->users_home($ENV{USER});
+  my ($self)    = @_;
+  my $logger    = $self->logger;
+  my $hd        = File::HomeDir->my_home;
   my $pid_file  = "$hd/.kanku/ui.pid";
+  my $ret       = 0;
 
-  my $pf;
-  if (open $pf, '<', $pid_file) {
-    my $pid = <$pf>;
-    close $pf || croak("Error while closing $pid_file: $!");;
-    kill(9, $pid) || croak("Error while killing $pid: $!");
-    unlink($pid_file) || croak("Error while deleting $pid_file: $!");
-    $logger->info("Stopped webserver with pid: $pid");
-  } else {
-    $logger->warn('No pid file found.');
+  try {
+    if (my $pid = read_file($pid_file)) {
+      kill(9, $pid) || $logger->error("Error while killing $pid: $!");
+      unlink($pid_file) || $logger->error("Error while deleting $pid_file: $!");
+      $logger->info("Stopped webserver with pid: $pid");
+    } else {
+      $logger->warn('No pid file found.');
+      $ret = 1;
+    }
   }
-
-  return;
+  catch {
+    $logger->error($_);
+    $ret = 1;
+  };
+  return $ret;
 }
 
 1;

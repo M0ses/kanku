@@ -176,7 +176,7 @@ sub execute {
   }
 
   my $cache_dir = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
-  ( -d $cache_dir ) || make_path($cache_dir); 
+  ( -d $cache_dir ) || make_path($cache_dir);
   my $duri     = URI->new($durl);
   my $dpath    = $duri->path;
   my @parts    = split('/', $dpath);

@@ -16,9 +16,6 @@
 #
 package Kanku::Cli::rtrigger; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
@@ -26,17 +23,16 @@ with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
-use POSIX;
 use Try::Tiny;
 use JSON::XS;
 
 command_short_description  'trigger a remote job or job group';
 
-command_long_description
-  "Trigger a specified job or job group on your remote instance.\n".
-  "Either job name or job group name is required."
-  . $_[0]->description_footer;
+command_long_description   '
+Trigger a specified job or job group on your remote instance.
+Either job name or job group name is required.
+
+';
 
 option 'job' => (
   isa           => 'Str',
@@ -59,54 +55,59 @@ option 'config' => (
   documentation => '(*) use given config for remote job. example: -c "[]"',
 );
 
+BEGIN {
+  Kanku::Config->initialize;
+}
+
 sub run {
-  my $self  = shift;
-  Kanku::Config->initialize();
-  my $logger  = Log::Log4perl->get_logger;
+  my ($self)  = @_;
+  my $logger  = $self->logger;
+  my $ret     = 0;
 
   if ( $self->job ) {
-    my $kr;
     try {
-      $kr = $self->connect_restapi();
-    } catch {
-      exit 1;
-    };
-    my $json = JSON::XS->new();
-    my $data = {
-      data     => $self->config || [],
-      is_admin => $self->as_admin,
-    };
-    my $rdata = $kr->post_json(
-      # path is only subpath, rest is added by post_json
-      path => 'job/trigger/'.$self->job,
-      data => $json->encode($data),
-    );
+      my $kr = $self->connect_restapi();
+      my $json = JSON::XS->new();
+      my $data = {
+        data     => $self->config || [],
+        is_admin => $self->as_admin,
+      };
+      my $rdata = $kr->post_json(
+        # path is only subpath, rest is added by post_json
+        path => 'job/trigger/'.$self->job,
+        data => $json->encode($data),
+      );
 
-    $self->view('rtrigger.tt', $rdata);
+      $self->view('rtrigger.tt', $rdata);
+    } catch {
+      $logger->error($_);
+      $ret = 1;
+    };
   } elsif ( $self->job_group) {
-    my $kr;
     try {
-      $kr = $self->connect_restapi();
-    } catch {
-      exit 1;
-    };
-    my $json = JSON::XS->new();
-    my $data = {
-      data     => $self->config || [],
-      is_admin => 1,
-    };
-    my $rdata = $kr->post_json(
-      # path is only subpath, rest is added by post_json
-      path => 'job_group/trigger/'.$self->job_group,
-      data => $json->encode($data),
-    );
+      my $kr = $self->connect_restapi();
+      my $json = JSON::XS->new();
+      my $data = {
+	data     => $self->config || [],
+	is_admin => 1,
+      };
+      my $rdata = $kr->post_json(
+	# path is only subpath, rest is added by post_json
+	path => 'job_group/trigger/'.$self->job_group,
+	data => $json->encode($data),
+      );
 
-    $self->view('rtrigger.tt', $rdata);
+      $self->view('rtrigger.tt', $rdata);
+    } catch {
+      $logger->error($_);
+      $ret = 1;
+    };
   } else {
-	$logger->error('You must at least specify a job name (<-j|--job>) or job group name (<-J|--job_group>) to trigger');
+    $logger->error('You must at least specify a job name (<-j|--job>) or job group name (<-J|--job_group>) to trigger');
+    $ret = 1;
   }
 
-  return;
+  return $ret;
 }
 
 __PACKAGE__->meta->make_immutable;

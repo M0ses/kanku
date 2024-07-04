@@ -19,8 +19,8 @@ package Kanku::Cli::rabbit;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Roles::Logger';
 use FindBin;
-use Log::Log4perl;
 
 use Kanku::YAML;
 use Kanku::Config;
@@ -96,7 +96,7 @@ sub run {
 
   my $mq = Kanku::Test::RabbitMQ->new(
     config        => $cfg,
-    logger        => Log::Log4perl->get_logger,
+    logger        => $self->logger,
     notifications => $self->cfg->{notifications},
     notification  => $self->notification,
     output_plugin => $self->output_plugin,

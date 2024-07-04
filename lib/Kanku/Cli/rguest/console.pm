@@ -71,7 +71,6 @@ sub run {
 sub _console {
   my ($self) = @_;
   my $logger = $self->logger;
-  $self->state(1);
   my $data = $self->_get_filtered_guest_list();
   my $domain;
 
@@ -91,23 +90,19 @@ sub _console {
 
 sub _print_select_menu {
   my ($self, $guest_list) = @_;
-  my @domains = sort(keys %{$guest_list});
-  return $guest_list->{$domains[0]} if (@domains < 2);
-  my $answer;
+  my $data = {
+    guest_list => [sort {$a->{domain_name} cmp $b->{domain_name}} (values %{$guest_list})],
+  };
+  return $data->{guest_list}->[0] if (@{$data->{guest_list}} < 2);
   while (1) {
-      print "\nINVALID ANSWER ($answer)!\nPlease try again.\n" if defined $answer;
-      print "\nFound the following running domains matching your filters:\n\n";
-      my $i=0;
-      for my $d (@domains) {
-        print "[$i] - $d\n";
-	$i++;
-      }
-      print "\nPlease select a domain: [Enter number]\n";
-      $answer=<STDIN>;
-      chomp $answer;
-      next if ($answer !~ /^\d+$/);
-      next unless (defined $domains[$answer]);
-      return $guest_list->{$domains[$answer]};
+    $self->view('rguest/select_menu.tt', $data);
+    $data->{answer} = <STDIN>;
+    chomp $data->{answer};
+    return 1 if ($data->{answer} eq '0');
+    next if ($data->{answer} !~ /^\d+$/);
+    my $f = $data->{answer} - 1;
+    next unless (defined $data->{guest_list}->[$f]);
+    return $data->{guest_list}->[$f];
   }
 }
 
@@ -118,7 +113,7 @@ sub _get_filtered_guest_list {
   my @filters;
   push @filters, "host:".$self->host.".*" if $self->host;
   push @filters, "domain:".$self->domain.".*" if $self->domain;
-  push @filters, "state:".$self->state if $self->state;
+  push @filters, "state:1";
   $params->{filter} = \@filters if @filters;
   return $kr->get_json(path => "guest/list", params => $params);
 }

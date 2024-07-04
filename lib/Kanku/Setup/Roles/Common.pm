@@ -17,19 +17,21 @@
 package Kanku::Setup::Roles::Common;
 
 use Moose::Role;
-use Path::Class qw/file/;
 use Sys::Virt;
 use IPC::Run qw/run timeout/;
-use Path::Class qw/dir file/;
 use Carp;
 use English qw/-no_match_vars/;
 use Const::Fast;
 use File::Which;
 use File::Copy;
+use File::Slurp qw/read_file write_file edit_file/;
 use Template;
+
 use Kanku::Config::Defaults;
 
 const my $MAX_NETWORK_NUMBER => 255;
+
+with 'Kanku::Roles::Logger';
 
 requires 'setup';
 
@@ -43,13 +45,6 @@ has _tt_config => (
       INTERPOLATE  => 1,               # expand "$var" in plain text
     };
   },
-);
-
-has logger => (
-  isa   => 'Object',
-  is    => 'rw',
-  lazy  => 1,
-  default => sub { Log::Log4perl->get_logger },
 );
 
 has user => (
@@ -95,13 +90,22 @@ has network_name => (
     lazy          => 1,
     builder       => '_build_defaults'
 );
-
 sub _build_defaults {
   my @c = caller(0);
   return unless $c[1] =~ /accessor ([\w:]+) .*/;
   my @p = split /::/, $1;
   my $v = pop @p;
   Kanku::Config::Defaults->get(join('::', @p), $v);
+}
+
+has host_interface=> (
+    isa           => 'Str',
+    is            => 'rw',
+    lazy          => 1,
+    builder       => '_build_host_interface',
+);
+sub _build_host_interface {
+  return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'host_interface');
 }
 
 sub _configure_libvirtd_access { ## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
@@ -124,11 +128,11 @@ EOF
 
   return unless $choice;
 
-  my $dconf = file('/etc/libvirt/libvirtd.conf');
+  my $dconf = '/etc/libvirt/libvirtd.conf';
 
   $self->_backup_config_file($dconf);
 
-  my @lines = $dconf->slurp;
+  my @lines = read_file($dconf);
   my $user  = $opts{user};
   my $group = 'libvirt';
   my $defaults = {
@@ -152,7 +156,7 @@ EOF
     push @lines, "$key = \"$defaults->{$key}\"\n" unless $seen->{$key};
   }
 
-  $dconf->spew(\@lines);
+  write_file($dconf, @lines);
 
   # add user to group libvirt
   if ($user) {
@@ -163,7 +167,7 @@ EOF
     }
 
     # This is for e.g. Debian 12
-    # add $user to group 'kvm' 
+    # add $user to group 'kvm'
     # if group kvm doesn't exists, we do not care
     $self->_run_system_cmd('usermod', '-aG', 'kvm', $user);
   }
@@ -201,18 +205,12 @@ EOF
 
   return unless $choice;
 
-  my $conf = file('/etc/libvirt/qemu.conf');
+  my $conf = '/etc/libvirt/qemu.conf';
 
-  $logger->debug("Setting user $user in ". $conf->stringify);
+  $logger->debug("Setting user $user in $conf");
   $self->_backup_config_file($conf);
-  my @lines = $conf->slurp;
 
-  for my $line (splice @lines) {
-    $line =~ s/^#?(user\s*=\s*).*/$1"$user"/;
-    push @lines, $line;
-  }
-
-  $conf->spew(\@lines);
+  edit_file { s/^#?(user\s*=\s*).*/$1"$user"/ } $conf;
 
   return;
 }
@@ -254,7 +252,7 @@ EOF
   );
 
   return 0 unless $choice;
-  my $xml = file($self->_tt_config->{INCLUDE_PATH},'pool-default.xml')->slurp;
+  my $xml = read_file($self->_tt_config->{INCLUDE_PATH}.'/pool-default.xml');
   my $pool = $vmm->define_storage_pool($xml);
   $pool->create();
   $pool->set_autostart(1);
@@ -419,9 +417,13 @@ EOF
   );
 
   if ($choice) {
-    my $sudoers_file  = file('/etc/sudoers.d/kanku');
-    $logger->info("Adding commands for user $user in " . $sudoers_file->stringify);
-    $sudoers_file->spew("$user ALL=NOPASSWD: /usr/lib/kanku/ss_netstat_wrapper,/usr/lib/kanku/iptables_wrapper\n");
+    my $sudoers_file = '/etc/sudoers.d/kanku';
+    $logger->info("Adding commands for user $user in $sudoers_file");
+    write_file(
+      $sudoers_file,
+      "$user ALL=NOPASSWD: /usr/lib/kanku/ss_netstat_wrapper".
+      ",/usr/lib/kanku/iptables_wrapper\n"
+    )
   }
 
   return;

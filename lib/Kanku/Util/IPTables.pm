@@ -21,7 +21,7 @@ use File::Which;
 use JSON::MaybeXS;
 use Carp;
 
-use Kanku::Config;
+use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Logger';
 
@@ -42,30 +42,32 @@ has host_ipaddress => (
   is      =>'rw',
   isa     =>'Str',
   lazy    => 1,
-  default =>sub {
-    my $host_interface = $_[0]->host_interface;
-    if (! $host_interface ) {
-      my $cfg  = Kanku::Config->instance->cf;
-      $host_interface = $cfg->{'Kanku::Util::IPTables'}->{host_interface};
-    }
-
-    die "No host_interface given. Can not determine host_ipaddress" if (! $host_interface );
-
-    $_[0]->logger->debug("Using host_interface: $host_interface");
-
-    # use cat for disable colors
-    my $cmd = "LANG=C ip addr show " . $host_interface . "|cat";
-    $_[0]->logger->debug("Executing command: '$cmd'");
-    my @out = `$cmd`;
-
-    for my $line (@out) {
-      if ( $line =~ /^\s*inet\s+([0-9\.]*)(\/\d+)?\s.*/ ) {
-        return $1
-      }
-    }
-    return '';
-  }
+  builder => '_build_host_interface',
 );
+sub _build_host_interface {
+  my ($self) = @_;
+  my $host_interface = $self->host_interface
+    || Kanku::Config::Defaults->get(
+	 'Kanku::Config::GlobalVars',
+	 'host_interface'
+       );
+
+  die "No host_interface given. Can not determine host_ipaddress" if (! $host_interface );
+
+  $self->logger->debug("Using host_interface: $host_interface");
+
+  # use cat for disable colors
+  my $cmd = "LANG=C ip addr show " . $host_interface . "|cat";
+  $self->logger->debug("Executing command: '$cmd'");
+  my @out = `$cmd`;
+
+  for my $line (@out) {
+    if ( $line =~ /^\s*inet\s+([0-9\.]*)(\/\d+)?\s.*/ ) {
+      return $1
+    }
+  }
+  return '';
+}
 
 has 'domain_autostart' => (
   is      => 'rw',

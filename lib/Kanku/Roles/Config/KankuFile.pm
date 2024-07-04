@@ -17,33 +17,57 @@
 package Kanku::Roles::Config::KankuFile;
 
 use Moose::Role;
-use Path::Class::File;
-use Path::Class::Dir;
-use Data::Dumper;
+use File::Spec;
 use Cwd;
 
 with 'Kanku::Roles::Config::Base';
 
-has 'log_dir' => (is=>'rw',isa=>'Object',default=>sub {Path::Class::Dir->new(getcwd(),'.kanku','log')});
+has 'views_dir' => (
+  is      =>'rw',
+  isa     =>'Str',
+  default => '/usr/share/kanku/views',
+);
 
-has '_file'   => (is=>'rw',isa=>'Object', default => sub { Path::Class::File->new(getcwd(),'KankuFile') });
+has 'log_dir' => (
+  is=>'rw',
+  isa=>'Str',
+  builder => '_build_log_dir',
+);
+sub _build_log_dir {
+  return File::Spec->canonpath(getcwd(),'.kanku','log');
+}
+
+has '_file' => (
+  is      =>'rw',
+  isa     =>'Str',
+  builder => '_build__file',
+);
+sub _build__file {
+  my ($self)  = @_;
+
+  # FIXME:
+  # change `KankuFile` to something like $self->kankufile
+  #
+  return File::Spec->canonpath(getcwd(), 'KankuFile');
+}
 
 sub file {
   my ($self, $file)  = @_;
-  if ($file) {
-    $self->_file(Path::Class::File->new($file));
-  } elsif ($ENV{KANKU_CONFIG}) {
-    $self->_file(Path::Class::File->new($ENV{KANKU_CONFIG}));
-  }
-
+  my $f = File::Spec->canonpath(
+    $file
+    || $ENV{KANKU_CONFIG}
+    || getcwd()."/KankuFile"
+  );
+  $self->_file($f) if $f;
   return $self->_file;
 };
 
 sub job_config {
-  my $self      = shift;
-  my $job_name  = shift;
+  my ($self, $job_name) = @_;
 
-  return {tasks=>$self->config->{jobs}->{$job_name}};
+  return {
+    tasks => $self->config->{jobs}->{$job_name}
+  };
 }
 
 sub notifiers_config {
@@ -52,16 +76,8 @@ sub notifiers_config {
 }
 
 sub job_list {
-  return keys(%{$_[0]->config->{jobs}});
+  my ($self) = @_;
+  return (keys %{$self->config->{jobs}});
 }
-
-has cache_dir => (
-  is        =>'rw',
-  isa       =>'Str',
-  lazy      => 1,
-  default   => sub {
-    return Path::Class::Dir->new($ENV{HOME},".cache","kanku")->stringify;
-  }
-);
 
 1;

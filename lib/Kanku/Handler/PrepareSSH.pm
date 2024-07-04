@@ -146,6 +146,9 @@ sub execute {
     my $crypto_cfg = '/etc/crypto-policies/back-ends/opensshserver.config';
     $con->cmd("[ -f $crypto_cfg ] && sed -i -E 's/(PubkeyAcceptedKeyTypes .*)/\\1,ssh-rsa/' $crypto_cfg");
 
+    # Set loglevel of vm's sshd to debug3
+    $con->cmd('[ -d /etc/ssh/sshd_config.d ] && echo "LogLevel DEBUG3" > /etc/ssh/sshd_config.d/loglevel.conf');
+
     # TODO: make dynamically switchable between systemV and systemd
     $con->cmd("systemctl restart sshd.service");
 
@@ -225,7 +228,7 @@ The following variables will be taken from the job context if not set explicitly
 
 =head1 DEFAULTS
 
-If neither public_keys nor public_key_files are given, 
+If neither public_keys nor public_key_files are given,
 than the handler will check $HOME/.ssh and /etc/kanku/ssh
 for the following files:
 id_dsa.pub, id_ecdsa.pub, id_ecdsa_sk.pub,

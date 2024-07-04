@@ -25,12 +25,17 @@ has schema => (
   is      => 'rw',
   isa     => 'Object',
   lazy    => 1,
-  default => sub {
-    my $file = '/etc/kanku/dancer/config.yml';
-    my $cfg_yaml;
-    $cfg_yaml = Kanku::YAML::LoadFile($file);
-    return Kanku::Schema->connect($cfg_yaml->{plugins}->{DBIC}->{default}->{dsn});
-  }
+  builder => '_build_schema',
 );
+sub _build_schema {
+  my ($self) = @_;
+  my $file   = '/etc/kanku/dancer/config.yml';
+  my $cfg_yaml = Kanku::YAML::LoadFile($file);
+  return
+    Kanku::Schema->connect(
+      $cfg_yaml->{plugins}->{DBIC}->{default}->{dsn}
+    )
+  ;
+}
 
 1;

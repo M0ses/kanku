@@ -20,17 +20,20 @@ use Moose;
 
 use Sys::Virt;
 use Sys::Virt::Stream;
+use Sys::Virt::StorageVol;
 use Expect;
 use Template;
 use Cwd;
 use Net::IP;
-use Sys::Virt::StorageVol;
 use XML::XPath;
 use Try::Tiny;
 use File::Path qw/make_path/;
 
+with 'Kanku::Roles::Logger';
+
 use Kanku::Util::VM::Console;
 use Kanku::Util::VM::Image;
+
 
 has [qw/
       image_file    domain_name   vcpu        memory
@@ -49,6 +52,7 @@ has running_remotely => ( is => 'rw', isa => 'Bool', default => 0 );
 has empty_disks      => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has additional_disks => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has keep_volumes     => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
+has '+domain_name'   => ( required => 1);
 has '+uri'           => ( default => 'qemu:///system');
 has '+template_file' => ( default => q{});
 has '+snapshot_name' => ( default => 'current');
@@ -125,13 +129,6 @@ has console => (
 
       return $con
   }
-);
-
-has logger => (
-  is => 'rw',
-  isa => 'Object',
-  lazy => 1,
-  default => sub { Log::Log4perl->get_logger(); }
 );
 
 has wait_for_network => (
@@ -291,11 +288,11 @@ sub process_template {
   } else {
     $logger->warn("No template file found!");
     $logger->warn("Using internal template!");
-    my $template;
     my $start = tell DATA;
-    while ( <DATA> ) { $template .= $_ };
+    local $/; # enable localized slurp mode
+    my $data = <DATA>;
     seek DATA, $start,0;
-    $input = \$template;
+    $input = \$data;
     $logger->trace("template:\n${$input}");
   }
   my $output = '';
@@ -668,13 +665,13 @@ sub get_disk_list {
 }
 
 sub state {
-  my $self    	= shift;
-  my %opts    	= @_;
-  my $dom       = $self->dom;
+  my ($self, %opts) = @_;
+  my $logger        = $self->logger;
+  my $dom           = $self->dom;
 
   if ($dom) {
     my $info = $dom->get_info();
-    $self->logger->debug("State: $info->{state}");
+    $logger->trace("State: $info->{state}");
     if ( $info->{state} == 5 ) {
       return "off";
     } elsif ( $info->{state} == 1 ) {

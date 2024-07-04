@@ -18,19 +18,20 @@ package Kanku::Roles::Logger;
 
 use Moose::Role;
 
-use Log::Log4perl;
-use Data::Dumper;
-
-BEGIN {
-  $Data::Dumper::Sortkeys = sub { return [ grep { !/^(db_object|schema|logger)$/ } ( keys(%{$_[0]}) )  ] };
-}
+use Kanku::Logger;
 
 has logger => (
   is      => 'rw',
   isa     => 'Object',
   lazy    => 1,
-  default => sub { return Log::Log4perl->get_logger(); }
+  builder => '_build_logger',
 );
-
+sub _build_logger {
+  my ($self) = @_;
+  my $lo = Kanku::Logger->new();
+  my $can = $self->can('loglevel');
+  $lo->loglevel($self->loglevel) if ($can && $self->loglevel);
+  return $lo->logger;
+}
 
 1;

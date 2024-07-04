@@ -1,8 +1,11 @@
 ---
-views_dir: /usr/share/kanku/views
-log_dir: /var/log/kanku
-cache_dir: [% cache_dir %]
-arch: [% arch %]
+
+Kanku::Config::GlobalVars:
+  views_dir: /usr/share/kanku/views
+  log_dir: /var/log/kanku
+  cache_dir: [% cache_dir %]
+  arch: [% arch %]
+  host_interface: [% host_interface %]
 
 Kanku::Util::DoD:
   use_oscrc: 0
@@ -169,6 +172,7 @@ Kanku::Handler::CopyProfile:
     #  mode: 700
     #  path: ~/.config/
 [% END %]
+
 
 ################################################################################
 # Config Example for SigAuth authentication

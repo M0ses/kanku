@@ -99,6 +99,12 @@ sub setup {
 
   $self->_backup_config_file($gconf);
 
+  my $arch = Kanku::Util::get_arch();
+  my $arch2repo = {
+    x86_64  => 'devel:kanku:images',
+    aarch64 => 'devel:kanku:images:aarch64',
+  };
+
   $self->_create_config_from_template(
     "kanku-config.yml.tt2",
     $gconf,
@@ -114,6 +120,9 @@ sub setup {
        ovs_ip_prefix  => $self->ovs_ip_prefix,
        cache_dir      => '/var/cache/kanku',
        network_name   => $self->network_name,
+       arch           => $arch,
+       official_image_repo => $arch2repo->{$arch},
+       host_interface => $self->host_interface,
     }
   );
 

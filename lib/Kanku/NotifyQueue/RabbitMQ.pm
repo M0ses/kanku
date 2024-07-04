@@ -34,11 +34,12 @@ package Kanku::NotifyQueue::RabbitMQ;
 =cut
 
 use Moose;
-use Log::Log4perl;
-use Data::Dumper;
 use JSON::XS;
 
 use Kanku::Config;
+
+BEGIN { Kanku::Config->initialize(); }
+
 use Kanku::RabbitMQ;
 
 with 'Kanku::Roles::NotifyQueue';
@@ -63,7 +64,7 @@ with 'Kanku::Roles::NotifyQueue';
 
 sub prepare {
     my ($self) = @_;
-    my $cfg = Kanku::Config->instance();
+    my $cfg    = Kanku::Config->instance();
     my $config = $cfg->config()->{'Kanku::RabbitMQ'};
     my $kmq    = Kanku::RabbitMQ->new(%{ $config || {}});
 

@@ -54,7 +54,7 @@ Kanku::Notifier::Sendmail
 =head1 SYNOPSIS
 
   notifiers:
-    - 
+    -
       use_module: Kanku::Notifier::Sendmail
       options:
         from: kanku@suse.de

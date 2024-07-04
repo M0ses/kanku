@@ -16,10 +16,11 @@
 #
 package Kanku::Cli::lsi;  ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
+
+with 'Kanku::Roles::Logger';
+
 use Net::OBS::Client::Project;
 use Kanku::Config;
 use Kanku::Config::Defaults;
@@ -93,7 +94,7 @@ EOF
   }
 }
 
-  return;
+  return 0;
 }
 
 __PACKAGE__->meta->make_immutable;

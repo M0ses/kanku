@@ -91,6 +91,7 @@ sub setup {
        cache_dir      => "$home/.cache/kanku",
        arch           => $arch,
        official_image_repo => $arch2repo->{$arch},
+       host_interface => $self->host_interface,
     }
   );
 

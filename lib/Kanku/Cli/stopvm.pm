@@ -16,9 +16,6 @@
 #
 package Kanku::Cli::stopvm;     ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
@@ -29,7 +26,10 @@ with 'Kanku::Cli::Roles::VM';
 
 command_short_description 'Stop kanku VM';
 
-command_long_description 'This command can be used to stop/shutdown a running VM';
+command_long_description '
+This command can be used to stop/shutdown a running VM
+
+';
 
 
 option 'force' => (
@@ -41,7 +41,7 @@ option 'force' => (
 
 sub run {
   my ($self)  = @_;
-  my $logger  = Log::Log4perl->get_logger;
+  my $logger  = $self->logger;
   my $dn      = $self->domain_name;
 
   my $vm      = Kanku::Util::VM->new(
@@ -58,15 +58,13 @@ sub run {
     } else {
       $vm->dom->shutdown();
     }
-    while ($vm->state eq 'on') {
-      sleep 1;
-    }
+    sleep 1 while ($vm->state eq 'on');
     $logger->info("Stopped domain: $dn successfully");
   } else {
     $logger->fatal("Domain $dn doesn't exists");
-    exit 1;
+    return 1;
   }
-  return;
+  return 0;
 }
 
 __PACKAGE__->meta->make_immutable;

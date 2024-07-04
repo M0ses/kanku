@@ -16,18 +16,15 @@
 #
 package Kanku::Cli::up; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
+
+BEGIN { Kanku::Config->initialize(class=>'KankuFile'); }
 
 with 'Kanku::Cli::Roles::Schema';
 with 'Kanku::Cli::Roles::VM';
 
 use Carp;
-use Log::Log4perl::Appender;
-use Kanku::Config;
 use Kanku::Job;
 use Kanku::JobList;
 use Kanku::Dispatch::Local;
@@ -89,16 +86,13 @@ option 'skip_check_domain' => (
 
 sub run {
   my ($self)  = @_;
-  my $logger  = Log::Log4perl->get_logger;
-  my $cfg     = $self->cfg;
+  my $logger  = $self->logger;
+  my $config  = $self->cfg->config;
   my $rc      = 0;
-
   my $schema  = $self->schema;
   croak("Could not connect to database\n") if ! $schema;
 
-  Kanku::Config->initialize();
-
-  $logger->debug(__PACKAGE__ . '->execute()');
+  $logger->debug(__PACKAGE__ . '->run();');
 
   my $dn = $self->domain_name;
   my $vm      = Kanku::Util::VM->new(
@@ -119,19 +113,19 @@ sub run {
 
   my $jobs = [];
 
-  if ($self->job_name && ($self->job_name->[1]||q{}) eq '__ALL__' && ref($cfg->config->{jobs}->{__ALL__}) eq 'ARRAY') {
-    $jobs = $cfg->config->{jobs}->{__ALL__};
+  if ($self->job_name && ($self->job_name->[1]||q{}) eq '__ALL__' && ref($config->{jobs}->{__ALL__}) eq 'ARRAY') {
+    $jobs = $config->{jobs}->{__ALL__};
   } elsif (ref($self->job_name) eq 'ARRAY') {
     for (my $i=0; $i <= @{$self->job_name}; $i++) {
       push @$jobs, $self->job_name->[$i+1] if $self->job_name->[$i+1];
       $i++;
     }
   } else {
-    $jobs->[0] = $cfg->config->{default_job} if ! $self->job_name;
+    $jobs->[0] = $config->{default_job} if ! $self->job_name;
   }
 
   for my $jname (@$jobs) {
-    croak("Error in config for job '$jname'") unless ref($cfg->config->{jobs}->{$jname}) eq 'ARRAY';
+    croak("Error in config for job '$jname'") unless ref($config->{jobs}->{$jname}) eq 'ARRAY';
   }
 
   for my $jname (@$jobs) {
@@ -142,6 +136,8 @@ sub run {
 	state         => 'triggered',
     });
 
+    $logger->info("Starting kanku job `$jname` with id `".$ds->id."`");
+    $logger->info("Current  domain_name: `$dn`");
     my $job = Kanku::Job->new(
 	  db_object => $ds,
 	  id        => $ds->id,
@@ -152,8 +148,8 @@ sub run {
 	  triggered => 0,
 	  context   => {
 	    domain_name        => $dn,
-	    login_user         => $cfg->config->{login_user},
-	    login_pass         => $cfg->config->{login_pass},
+	    login_user         => $config->{login_user},
+	    login_pass         => $config->{login_pass},
 	    offline            => $self->offline            || 0,
 	    skip_all_checks    => $self->skip_all_checks    || 0,
 	    skip_check_project => $self->skip_check_project || 0,
@@ -164,7 +160,7 @@ sub run {
     );
     @ARGV=(); ## no critic (Variables::RequireLocalizedPunctuationVars)
     if ($self->pool) {
-      Kanku::Config->instance->cf->{'Kanku::Handler::CreateDomain'}->{pool_name} = $self->pool;
+      #Kanku::Config->instance->cf->{'Kanku::Handler::CreateDomain'}->{pool_name} = $self->pool;
     }
     my $dispatch = Kanku::Dispatch::Local->new(schema=>$schema);
     my $result   = $dispatch->run_job($job);

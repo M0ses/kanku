@@ -19,14 +19,13 @@ package Kanku::Cli::rworker; ## no critic (NamingConventions::Capitalization)
 use strict;
 use warnings;
 
-use Term::ReadKey;
-use POSIX;
 use Try::Tiny;
 use JSON::XS;
 
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
@@ -43,25 +42,30 @@ option 'list' => (
   documentation => 'list all worker information',
 );
 
-sub run {
-  my $self  = shift;
+BEGIN {
   Kanku::Config->initialize();
-  my $logger  = Log::Log4perl->get_logger;
+}
+
+sub run {
+  my ($self)  = @_;
+  my $logger  = $self->logger;
+  my $ret     = 0;
 
   if ( $self->list) {
     my $kr;
     try {
-      $kr = $self->connect_restapi();
+      my $kr = $self->connect_restapi();
+      my $data = $kr->get_json(path => 'worker/list');
+      $self->view('rworker.tt', $data);
     } catch {
-      exit 1;
+      $logger->error($_);
+      $ret = 1;
     };
-
-    my $data = $kr->get_json(path => 'worker/list');
-    $self->view('rworker.tt', $data);
   } else {
-	$logger->error('You must at least add the option "-l" to list information about worker');
+    $logger->error('You must at least add the option "-l" to list information about worker');
+    $ret = 1;
   }
-  return;
+  return $ret;
 }
 
 __PACKAGE__->meta->make_immutable;

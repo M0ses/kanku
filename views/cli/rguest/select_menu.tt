@@ -1,0 +1,16 @@
+[%- IF answer %]
+
+INVALID ANSWER ([% answer %])!
+Please try again.
+
+[%- END %]
+
+Found the following running domains matching your filters:
+
+ - [0] EXIT
+[% FOREACH g IN guest_list %]
+ - [[% loop.count %]] [% g.domain_name %] ([% g.host %])
+[% END %]
+
+Please select a domain [1-[% guest_list.size() %]]:
+

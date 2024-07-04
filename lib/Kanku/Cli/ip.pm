@@ -16,43 +16,50 @@
 #
 package Kanku::Cli::ip; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use Kanku::Config;
-use Kanku::Job;
+with 'Kanku::Roles::Logger';
+with 'Kanku::Cli::Roles::VM';
+with 'Kanku::Cli::Roles::View';
+
 use Kanku::Util::VM;
 
-command_short_description  'Show ip address of kanku vm';
+command_short_description  'Show ip address of a kanku vm';
 
-command_long_description  'Show ip address of kanku vm';
-
-with 'Kanku::Cli::Roles::VM';
+command_long_description '
+This command shows the ip address of a kanku vm
+';
 
 option 'login_user' => (
     isa           => 'Str',
     is            => 'rw',
-    cmd_aliases   => 'u',
+    cmd_aliases   => [qw/u login-user/],
     documentation => 'user to login',
     lazy          => 1,
-    default       => sub { $_[0]->cfg->config()->{login_user} || q{} },
+    builder       => '_build_login_user'
 );
+sub _build_login_user {
+  my ($self) = @_;
+  return $self->cfg->config()->{login_user} || q{};
+}
 
 option 'login_pass' => (
     isa           => 'Str',
     is            => 'rw',
-    cmd_aliases   => 'p',
+    cmd_aliases   => [qw/p login-password/],
     documentation => 'password to login',
     lazy          => 1,
-    default       => sub { $_[0]->cfg->config()->{login_pass} || q{} },
+    builder       => '_build_login_pass',
 );
+sub _build_login_pass {
+  my ($self) = @_;
+  return $self->cfg->config()->{login_pass} || q{};
+}
 
 sub run {
-  my $self    = shift;
-  my $logger  = Log::Log4perl->get_logger;
+  my ($self)  = @_;
+  my $logger  = $self->logger;
 
   my $vm = Kanku::Util::VM->new(
     domain_name => $self->domain_name,
@@ -63,9 +70,8 @@ sub run {
   my $ip = $vm->get_ipaddress();
 
   if ( $ip ) {
-
     $logger->info("IP Address: $ip");
-
+    $self->print_formatted($self->format, $ip);
   } else {
     $logger->error('Could not find IP Address');
   }

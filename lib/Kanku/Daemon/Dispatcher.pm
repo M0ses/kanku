@@ -18,10 +18,12 @@ package Kanku::Daemon::Dispatcher;
 
 use Moose;
 use Try::Tiny;
+
+with 'Kanku::Roles::Daemon';
+
 use Kanku::Dispatch::Local;
 use Kanku::Dispatch::RabbitMQ;
 
-with 'Kanku::Roles::Daemon';
 
 sub run {
   my ($self) = @_;

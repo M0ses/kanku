@@ -10,6 +10,8 @@ use Carp qw/confess/;
 use Kanku::LibVirt::HostList;
 use Kanku::Util::IPTables;
 
+with 'Kanku::Roles::Logger';
+
 
 has cfg_file => (
   is      => 'rw',
@@ -23,13 +25,6 @@ has cfg => (
 	isa => 'HashRef',
 	lazy => 1,
 	default => sub { Kanku::YAML::LoadFile($_[0]->cfg_file) }
-);
-
-has logger => (
-	is => 'rw',
-	isa => 'Object',
-	lazy => 1,
-	default => sub { Log::Log4perl->get_logger() }
 );
 
 has iptables_chain => (
@@ -89,7 +84,8 @@ sub bridges {
 }
 
 sub prepare_ovs {
-  my ($self) = @_;
+  my ($self)  = @_;
+  my $logger  = $self->logger;
   my $bridges = $self->bridges;
 
   for my $ncfg (@$bridges) {
@@ -106,16 +102,17 @@ sub prepare_ovs {
     my $out;
     my $fh;
 
-
-    $self->logger->info("Creating bridge $br");
+    $logger->info("Creating bridge $br");
     system('ovs-vsctl', '--may-exist', 'add-br', $br);
     system('ovs-vsctl', 'set', 'bridge', $br, 'stp_enable=true');
 
     my $port_counter = 0;
     for my $remote ( @{$lvhl->get_remote_ips} ) {
-      $self->logger->info("Setting up connection for $remote");
+      $logger->info("Setting up connection for $remote");
+
       my $port = "$vlan-$port_counter";
-      $self->logger->info("Adding port $port on bridge $br");
+      $logger->info("Adding port $port on bridge $br");
+
       system('ovs-vsctl', '--may-exist', 'add-port', $br, $port);
       my @cmd = ('ovs-vsctl','set','Interface',$port,'type=vxlan',"options:remote_ip=$remote");
       push @cmd, "options:dst_port=$ncfg->{dst_port}" if $ncfg->{dst_port};
@@ -127,36 +124,36 @@ sub prepare_ovs {
     my @cmd;
     my $ip = new Net::IP ($ncfg->{network});
     @cmd = ("ip", "addr", "add", "$ncfg->{host_ip}/".$ip->mask, 'dev', $br);
-    $self->logger->debug("Configuring interface with command '@cmd'");
+    $logger->debug("Configuring interface with command '@cmd'");
     system(@cmd);
 
     # Set interface mode to up
     @cmd = ("ip", "link", "set",$br, "up");
-    $self->logger->debug("Configuring interface with command '@cmd'");
+    $logger->debug("Configuring interface with command '@cmd'");
     system(@cmd);
 
     # Set MTU for bridge interface
     @cmd=(qw/ip link set mtu/, $mtu, $br);
-    $self->logger->debug("Configuring interface with command '@cmd'");
+    $logger->debug("Configuring interface with command '@cmd'");
     system(@cmd);
   }
 }
 
 sub bridge_down {
-  my $self = shift;
+  my ($self)  = @_;
+  my $logger  = $self->logger;
   my $bridges = $self->bridges;
-  $self->logger->debug("Stopping bridges of network '".$self->name."'");
+  $logger->debug("Stopping bridges of network '".$self->name."'");
   for my $ncfg (@$bridges)  {
     my $br   = $ncfg->{bridge};
 
-    $self->logger->info("Deleting bridge $br");
+    $logger->info("Deleting bridge $br");
 
     system('ovs-vsctl','del-br',$br);
 
-    if ( $? > 0 ) {
-      $self->logger->error("Deleting bridge $br failed");
-    }
+    $logger->error("Deleting bridge $br failed") if $?;
   }
+  return;
 }
 
 sub prepare_dns {
@@ -197,7 +194,8 @@ EOF
 }
 
 sub start_dhcp {
-  my ($self) = @_;
+  my ($self)  = @_;
+  my $logger  = $self->logger;
   my $bridges = $self->bridges;
   my $name    = $self->name;
 
@@ -209,7 +207,7 @@ sub start_dhcp {
     defined (my $kid = fork) or die "Cannot fork: $!\n";
     if ($kid) {
       # Parent runs this block
-      $self->logger->debug("Setting iptables commands");
+      $logger->debug("Setting iptables commands");
       my @comment = ('-m','comment','--comment',"Kanku:net:$name");
       system("iptables","-I","INPUT","1","-p","tcp","-i",$net_cfg->{bridge},"--dport","67","-j","ACCEPT",@comment);
       system("iptables","-I","INPUT","1","-p","udp","-i",$net_cfg->{bridge},"--dport","67","-j","ACCEPT",@comment);
@@ -233,7 +231,7 @@ sub start_dhcp {
 	         "--conf-file=$conf",
 		 "--leasefile-ro",
 		 "--dhcp-script=$dhcp_script");
-      $self->logger->debug("@cmd");
+      $logger->debug("@cmd");
       system(@cmd);
       exit 0;
     }
@@ -242,6 +240,7 @@ sub start_dhcp {
 
 sub configure_iptables {
   my ($self)       = @_;
+  my $logger       = $self->logger;
   my $net_cfg      = $self->net_cfg;
   my $bridges      = $self->bridges;
   my $name         = $self->name;
@@ -251,25 +250,25 @@ sub configure_iptables {
   my $forward;
 
   for my $ncfg (@$bridges) {
-    $self->logger->debug("Starting configuration of iptables");
+    $logger->debug("Starting configuration of iptables");
 
     next if (! $ncfg->{is_gateway} );
 
     if ( ! $ncfg->{network} ) {
-      $self->logger->error("No netmask configured");
+      $logger->error("No netmask configured");
       next;
     }
 
     my $ip = new Net::IP ($ncfg->{network});
     if ( ! $ip ) {
-      $self->logger->debug("Bad network configuration");
+      $logger->debug("Bad network configuration");
       next;
     }
     $forward++;
 
     my $prefix = $ip->prefix;
 
-    $self->logger->debug("prefix: $prefix");
+    $logger->debug("prefix: $prefix");
 
     my @comment = ('-m','comment','--comment',"Kanku:net:$name");
     my $rules = [
@@ -301,13 +300,13 @@ sub configure_iptables {
 
 
     for my $rule (@{$rules}) {
-      $self->logger->debug("Adding rule: iptables @{$rule}");
+      $logger->debug("Adding rule: iptables @{$rule}");
       my @ipt;
       my @cmd = ("iptables",@{$rule});
       run \@cmd, \$ipt[0],\$ipt[1],\$ipt[2];
       if ( $? ) {
-	$self->logger->error("Failed while executing '@cmd'");
-	$self->logger->error("Error: $ipt[2]");
+	$logger->error("Failed while executing '@cmd'");
+	$logger->error("Error: $ipt[2]");
       }
     }
   }
@@ -318,28 +317,29 @@ sub configure_iptables {
     $ipt->restore_iptables_autostart($json_file);
     unlink $json_file;
   } else {
-    $self->logger->debug("Could not find $json_file");
+    $logger->debug("Could not find $json_file");
   }
   return 0;
 }
 
 sub kill_dhcp {
   my ($self) = @_;
+  my $logger = $self->logger;
 
   my $pid_file = $self->dnsmasq_pid_file($self->name);
   return if ( ! -f $pid_file );
 
   my $pid = $pid_file->slurp;
-  $self->logger->debug("Killing dnsmasq with pid $pid");
+  $logger->debug("Killing dnsmasq with pid $pid");
 
   kill 'TERM', $pid;
 }
 
 sub cleanup_iptables {
   my ($self)  = @_;
+  my $logger  = $self->logger;
   my $bridges = $self->bridges;
   my $name    = $self->name;
-  my $logger  = $self->logger;
 
   $logger->info("Starting cleanup_iptables for network $name");
 

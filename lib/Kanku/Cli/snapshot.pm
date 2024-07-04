@@ -16,23 +16,24 @@
 #
 package Kanku::Cli::snapshot; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use Kanku::Util::VM;
+with 'Kanku::Roles::Logger';
+with 'Kanku::Cli::Roles::VM';
+
 use Net::IP;
 
 use Kanku::Job;
-use Kanku::Config;
+use Kanku::Util::VM;
 
-with 'Kanku::Cli::Roles::VM';
 
 command_short_description  'manage snapshots for kanku vms';
 
-command_long_description  'manage snapshots for kanku vms';
+command_long_description  '
+With this command you can manage snapshots for kanku local domains.
+
+';
 
 option 'create' => (
   isa           => 'Bool',
@@ -72,14 +73,16 @@ option 'name' => (
 
 sub run {
   my ($self) = @_;
-  my $logger  = Log::Log4perl->get_logger;
+  my $ret    = 0;
+  my $logger = $self->logger;
   my $cfg    = $self->cfg;
+  my $dn     = $self->domain_name;
   my $vm     = Kanku::Util::VM->new(
-                 domain_name   => $self->domain_name,
-                 snapshot_name => $self->name,
-		 login_user    => $self->cfg->{login_user} || 'root',
-		 login_pass    => $self->cfg->{login_pass} || 'kankudai',
-	       );
+    domain_name   => $dn,
+    snapshot_name => $self->name,
+    login_user    => $self->cfg->{login_user} || 'root',
+    login_pass    => $self->cfg->{login_pass} || 'kankudai',
+  );
 
   if ($self->create) {
     $vm->create_snapshot;
@@ -88,12 +91,17 @@ sub run {
   } elsif ($self->revert) {
     $vm->revert_snapshot;
   } elsif ($self->list) {
+    my @snapshots = $vm->list_snapshots;
+    $logger->warn("No snapshots found for domain `$dn`") unless @snapshots;
     for my $domss ($vm->list_snapshots) {
-      print STDOUT $domss->get_name . "\n";
+      $self->print_formatted($self->format, $domss->get_name);
     }
   } else {
-    $logger->warn('Please specify a command. Run "kanku help snapshot" for further information.');
+    $logger->error('Please specify a command.');
+    $logger->warn(' Run "kanku help snapshot" for further information.');
+    $ret = 1;
   }
+  return $ret;
 }
 
 __PACKAGE__->meta->make_immutable;

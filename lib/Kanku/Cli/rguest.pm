@@ -20,19 +20,19 @@ use MooseX::App::Command;
 use Moose::Util::TypeConstraints;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
 use Try::Tiny;
 
 use Kanku::YAML;
 
 command_short_description  "list guests on your remote kanku instance";
 
-command_long_description
-  "list guests on your remote kanku instance
+command_long_description  "
+This command lists guests on your remote kanku instance.
 
 " . $_[0]->description_footer;
 
@@ -55,24 +55,17 @@ option 'state' => (
   documentation => 'filter list by state of domain',
 );
 
-sub run {
-  my $self  = shift;
+BEGIN {
   Kanku::Config->initialize;
-  my $logger  = Log::Log4perl->get_logger;
-
-  if ($self->list) {
-    $self->_list;
-  } else {
-    $logger->fatal("Please specify a command. Run 'kanku help rguest' for further information.");
-  }
 }
 
-sub _list {
+sub run {
   my ($self) = @_;
+  my $logger = $self->logger;
 
-  my $data = $self->_get_filtered_guest_list();
-
-  $self->view('rguest/list.tt', $data);
+  #my $data = $self->_get_filtered_guest_list();
+  #$self->view('rguest/list.tt', $data);
+  return 0;
 }
 
 __PACKAGE__->meta->make_immutable;

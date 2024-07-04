@@ -6,13 +6,13 @@ use Kanku::NotifyQueue::RabbitMQ;
 use Kanku::NotifyQueue::Dummy;
 
 sub new {
-  my $self   = shift;
+  my ($self, @args) = @_;
   my $config = Kanku::Config->instance()->config;
 
   if (ref($config->{'Kanku::RabbitMQ'})) {
-    return Kanku::NotifyQueue::RabbitMQ->new(@_);
+    return Kanku::NotifyQueue::RabbitMQ->new(@args);
   }
-  return Kanku::NotifyQueue::Dummy->new(@_);
+  return Kanku::NotifyQueue::Dummy->new(@args);
 }
 
 1;

@@ -22,14 +22,6 @@ has cfg => (
   }
 );
 
-has logger => (
-  is      => 'rw',
-  isa     => 'Object',
-  lazy    => 1,
-  default => sub { Log::Log4perl->get_logger() }
-);
-
-
 sub get_remote_ips {
   my $self       = shift;
   my $cfg        = $self->cfg;

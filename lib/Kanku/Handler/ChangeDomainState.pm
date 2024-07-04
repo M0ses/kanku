@@ -155,7 +155,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
     use_module: Kanku::Handler::ChangeDomainState
     options:
       action: shutdown
-      timeout:          600 
+      timeout:          600
 
 =head1 DESCRIPTION
 

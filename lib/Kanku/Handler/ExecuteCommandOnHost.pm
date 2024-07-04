@@ -111,16 +111,16 @@ Here is an example how to configure the module in your jobs file or KankuFile
   -
     use_module: Kanku::Handler::ExecuteCommandOnHost
     options:
-      environment: 
+      environment:
         CURL_CA_BUNDLE: /path/to/my/ca
-      context2env: 
+      context2env:
         ipaddress:
       commands:
         - curl https://$IPADDRESS/
-        
+
 =head1 DESCRIPTION
 
-This handler allows the execution of arbitrary commands on the host system, 
+This handler allows the execution of arbitrary commands on the host system,
 e.g. for checking access rules from a remote site instead of localhost inside
 the test vm.
 

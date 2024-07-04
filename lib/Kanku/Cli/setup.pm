@@ -16,24 +16,20 @@
 #
 package Kanku::Cli::setup; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-with 'Kanku::Cli::Roles::Schema';
 with 'Kanku::Roles::Logger';
+with 'Kanku::Cli::Roles::Schema';
 
+use Carp;
+use Cwd;
 use Path::Class qw/file dir/;
 use File::HomeDir;
-use Term::ReadKey;
-use Cwd;
 use DBIx::Class::Migration;
 use Sys::Virt;
 use Sys::Hostname;
 use Net::Domain qw/hostfqdn/;
-use Carp;
 
 use Kanku::Schema;
 use Kanku::Setup::Devel;
@@ -43,9 +39,12 @@ use Kanku::Setup::Worker;
 
 command_short_description  'Setup local environment to work as server or developer mode.';
 
-command_long_description "\nSetup local environment to work as server or developer mode.\n"
-  . "Installation wizard which asks you several questions,\n"
-  . "how to configure your machine.\n\n";
+command_long_description   '
+Setup local environment to work as server or developer mode:
+Installation wizard which asks you several questions,
+how to configure your machine.
+
+';
 
 option 'server' => (
     isa           => 'Bool',
@@ -155,13 +154,15 @@ option 'mq_pass' => (
     is            => 'rw',
     lazy          => 1,
     documentation => 'Password for rabbitmq (server setup only)',
-    default       => sub {
-       my @alphanumeric = ('a'..'z', 'A'..'Z', 0..9);
-       my $pass = join q{}, map { $alphanumeric[rand @alphanumeric] } 0..12;
-       return $pass
-    },
+    builder       => '_build_mq_pass',
 );
 
+sub _build_mq_pass {
+  # Create a random 12 letter alphanumeric password
+  my @alphanumeric = ('a'..'z', 'A'..'Z', 0..9);
+  my $pass = join q{}, map { $alphanumeric[rand @alphanumeric] } 0..12;
+  return $pass
+}
 option 'interactive' => (
     isa           => 'Bool',
     is            => 'rw',
@@ -191,6 +192,13 @@ option 'master' => (
     documentation => 'IP address of the master server',
 );
 
+option 'host_interface' => (
+    isa           => 'Str',
+    is            => 'rw',
+    documentation => 'Interface used for port forwarding.',
+    default       => 'eth0',
+);
+
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
@@ -218,6 +226,7 @@ sub run {
       mq_vhost        => $self->mq_vhost,
       mq_pass         => $self->mq_pass,
       dns_domain_name => $self->dns_domain_name,
+      host_interface  => $self->host_interface,
     );
     $setup->ovs_ip_prefix($self->ovs_ip_prefix) if $self->ovs_ip_prefix;
   } elsif ($self->devel) {
@@ -232,6 +241,7 @@ sub run {
       _devel          => 1,
       interactive     => $self->interactive,
       dns_domain_name => $self->dns_domain_name,
+      host_interface  => $self->host_interface,
     );
   } elsif ($self->worker) {
     $setup = Kanku::Setup::Worker->new(

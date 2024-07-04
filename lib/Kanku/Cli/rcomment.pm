@@ -6,22 +6,25 @@ use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Roles::Logger';
+
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 with 'Kanku::Roles::Helpers';
 
 use Term::ReadKey;
-use Log::Log4perl;
 use POSIX;
 use Try::Tiny;
 use Data::Dumper;
 
 command_short_description 'list job history on your remote kanku instance';
 
-command_long_description
-  "list/create/show/modify/delete comments in the job history on your remote kanku instance\n\n"
-    . $_[0]->description_footer;
+command_long_description  "
+With this command you can list/create/show/modify/delete comments in the job history
+on your remote kanku instance.
+
+";
 
 option 'job_id' => (
   isa           => 'Int',
@@ -72,15 +75,17 @@ option 'delete' => (
   documentation => '(*) Delete comment',
 );
 
-sub run {
-  my $self  = shift;
+BEGIN {
   Kanku::Config->initialize;
-  my $logger  =	Log::Log4perl->get_logger;
+}
+
+sub run {
+  my ($self)  = @_;
+  my $logger  =	$self->logger;
   my $res;
 
   if ($self->list) {
     $res = $self->_list;
-    $logger->info(Dumper($self->_list));
   } elsif ($self->create) {
     $res = $self->_create();
   } elsif ($self->modify) {
@@ -90,111 +95,114 @@ sub run {
   }
 
   if ($res) {
-    $logger->info(Dumper($res));
-    $logger->warn('TODO: implement view');
-  } else {
-    $logger->warn('Please specify a command. Run "kanku rcomment --help" for further information.');
+    $self->print_formatted($self->format, $self->list);
+    return 0;
   }
 
-  return;
+  $logger->warn('Please specify a command. Run "kanku rcomment --help" for further information.');
+  return 1;
 }
 
 sub _list {
-  my $self = shift;
-  my $logger  =	Log::Log4perl->get_logger;
+  my ($self)  = @_;
+  my $logger  =	$self->logger;
+  my $res     = 0;
 
   if (! $self->job_id ) {
     $logger->warn('Please specify a job_id');
-    exit 1;
+    return 1;
   }
 
   my $kr;
   try {
     $kr = $self->connect_restapi();
+
+    my $path = 'job/comment/'.$self->job_id;
+    $logger->debug("Using path: $path");
+
+    $res =  $kr->get_json( path => $path );
   } catch {
-    exit 1;
+    $logger->error($_);
+    $res = 1;
   };
 
-  my %params = (
-    job_id => $self->job_id,
-  );
-  my $path = 'job/comment/'.$self->job_id;
-  $logger->debug("Using path: $path");
-
-  my $res =  $kr->get_json( path => $path );
   return $res
-
 };
 
 sub _create {
-  my $self = shift;
-  my $logger  =	Log::Log4perl->get_logger;
+  my ($self)  = @_;
+  my $logger  =	$self->logger;
+  my $res     = 0;
 
   if (! $self->job_id ) {
     $logger->warn('Please specify a job_id (-j <job_id>)');
-    exit 1;
+    return 1;
   }
 
   if (! $self->message ) {
     $logger->warn('Please specify a comment message (-m "my message")');
-    exit 1;
+    return 1;
   }
 
-  my $kr;
   try {
-	$kr = $self->connect_restapi();
+    my $kr = $self->connect_restapi();
+    my %params = (message => $self->message);
+    $kr->post_json( path => 'job/comment/'.$self->job_id, data => \%params );
   } catch {
-	exit 1;
+    $logger->fatal($_);
+    $res = 1;
   };
 
-  my %params = (message => $self->message);
-
-  return $kr->post_json( path => 'job/comment/'.$self->job_id, data => \%params );
+  return $res;
 };
 
 sub _modify {
-  my $self = shift;
-  my $logger  =	Log::Log4perl->get_logger;
+  my ($self)  = @_;
+  my $logger  =	$self->logger;
+  my $res     = 0;
 
   if (! $self->comment_id ) {
     $logger->warn('Please specify a comment_id (-C <comment_id>)');
-    exit 1;
+    return 1;
   }
 
   if (! $self->message ) {
     $logger->warn('Please specify a comment message (-m "my message")');
-    exit 1;
+    return 1;
   }
 
-  my $kr;
   try {
-	$kr = $self->connect_restapi();
+    my $kr = $self->connect_restapi();
+    my %params = (message => $self->message);
+    $kr->put_json( path => 'job/comment/'.$self->comment_id, data => \%params );
   } catch {
-	exit 1;
+    $logger->fatal($_);
+    $res = 1;
   };
 
-  my %params = (message => $self->message);
 
-  return $kr->put_json( path => 'job/comment/'.$self->comment_id, data => \%params );
+  return $res;
 };
 
 sub _delete {
-  my $self = shift;
-  my $logger  =	Log::Log4perl->get_logger;
+  my ($self)  = @_;
+  my $logger  =	$self->logger;
+  my $res     = 0;
 
   if (! $self->comment_id ) {
     $logger->warn('Please specify a comment_id (-C <comment_id>)');
-    exit 1;
+    return 1;
   }
 
-  my $kr;
   try {
-	$kr = $self->connect_restapi();
+    my $kr = $self->connect_restapi();
+    $kr->delete_json( path => 'job/comment/'.$self->comment_id);
   } catch {
-	exit 1;
+    $logger->fatal($_);
+    $res = 1;
   };
 
-  return $kr->delete_json( path => 'job/comment/'.$self->comment_id);
+  return $res;
 };
 
 __PACKAGE__->meta->make_immutable;

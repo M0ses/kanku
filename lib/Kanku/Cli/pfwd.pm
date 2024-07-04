@@ -19,21 +19,8 @@ package Kanku::Cli::pfwd;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use Try::Tiny;
-use Log::Log4perl;
-use XML::XPath;
-
-use Kanku::Config;
-
-option 'domain_name' => (
-    isa           => 'Str',
-    is            => 'rw',
-    cmd_aliases   => 'd',
-    documentation => 'name of domain to forward ports to',
-    default       => sub { $_[0]->cfg->config->{domain_name} },
-    required      => 1
-);
-
+with 'Kanku::Roles::Logger';
+with 'Kanku::Cli::Roles::VM';
 
 option 'ports' => (
     isa           => 'Str',
@@ -51,30 +38,26 @@ option 'interface' => (
     required      => 1
 );
 
-has cfg => (
-    isa           => 'Object',
-    is            => 'rw',
-    lazy          => 1,
-    default       => sub { Kanku::Config->instance(); }
-);
-
 command_short_description  "Create port forwards for VM";
 
-command_long_description "This command can be used to create the portforwarding for an already existing VM";
+command_long_description "
+This command can be used to create the portforwarding for an already existing VM
+";
 
-sub execute {
-  my $self    = shift;
-  my $logger  = Log::Log4perl->get_logger;
+sub run {
+  my ($self)  = @_;
+  my $logger  = $self->logger;
   my $vm      = Kanku::Util::VM->new(domain_name=>$self->domain_name);
 
-
   $logger->debug("Searching for domain: ".$self->domain_name);
+
   my $ip    = $vm->get_ipaddress();
   my $ipt = Kanku::Util::IPTables->new(
     domain_name     => $self->domain_name,
     host_interface  => $self->interface,
     guest_ipaddress => $ip
   );
+
   $ipt->add_forward_rules_for_domain(
     start_port => $self->cfg->{'Kanku::Util::IPTables'}->{start_port},
     forward_rules => [split(/,/,$self->ports)]

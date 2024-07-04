@@ -25,10 +25,10 @@ sub encrypt {
   my ($in, $out, $err);
 
   my $h = start \@cmd, \$in, \$out, \$err, timeout( 10 );
- 
+
   $in = $self->message;
   finish $h or croak "command '@cmd' returned $?";
- 
+
   return $out;         ## All of cat's output
 }
 

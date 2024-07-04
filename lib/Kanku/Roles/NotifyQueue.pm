@@ -28,12 +28,8 @@ package Kanku::Roles::NotifyQueue;
 =cut
 
 use Moose::Role;
-use Log::Log4perl;
-use Data::Dumper;
-use JSON::XS;
 
-use Kanku::Config;
-use Kanku::RabbitMQ;
+with 'Kanku::Roles::Logger';
 
 =head1 ATTRIBUTES
 
@@ -51,11 +47,6 @@ has shutdown_file => (
 );
 
 has _queue => (
-  is      => 'rw',
-  isa     => 'Object',
-);
-
-has logger => (
   is      => 'rw',
   isa     => 'Object',
 );

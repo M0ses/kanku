@@ -16,24 +16,23 @@
 #
 package Kanku::Cli::db;    ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Schema';
+with 'Kanku::Roles::Logger';
 
-use Path::Class qw/file dir/;
+use File::Path;
 use File::HomeDir;
-use Term::ReadKey;
-use Kanku::Schema;
-use Cwd;
+use File::Basename;
 use DBIx::Class::Migration;
 
 command_short_description 'Initialize database';
 
-command_long_description 'Initialize database';
+command_long_description '
+This command can be used for database maintainance.
+
+';
 
 option 'server' => (
     isa           => 'Bool',
@@ -45,7 +44,7 @@ option 'devel' => (
     isa           => 'Bool',
     is            => 'rw',
     cmd_aliases   => 'd',
-    documentation => 'Use database in your $HOME/.kanku/kanku-schema.db directory',    ## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
+    documentation => 'Use database in your $HOME/.kanku/kanku-schema.db directory', ## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
 );
 
 option 'dsn' => (
@@ -80,77 +79,73 @@ option 'status' => (
 );
 
 option 'dbfile' => (
-  isa 	=> 'Str',
-  is  	=> 'rw',
-  lazy  => 1,
-  default => sub {
-    my ($self) = @_;
-    return $self->server
-      ? '/var/lib/kanku/db/kanku-schema.db'
-      : $self->homedir.'/.kanku/kanku-schema.db';
-  },
+  isa 	  => 'Str',
+  is  	  => 'rw',
+  lazy    => 1,
+  builder => '_build_dbfile',
 );
+sub _build_dbfile {
+  my ($self) = @_;
+  return $self->server
+    ? '/var/lib/kanku/db/kanku-schema.db'
+    : $self->homedir.'/.kanku/kanku-schema.db';
+}
 
 option 'homedir' => (
-    isa           => 'Str',
-    is            => 'rw',
-    #cmd_aliases   => 'X',
-    documentation => 'home directory for user',
-    lazy          => 1,
-    default       => sub {
-      # dbi:SQLite:dbname=/home/frank/Projects/kanku/share/kanku-schema.db
-      return File::HomeDir->users_home($ENV{USER});
-    },
+  isa           => 'Str',
+  is            => 'rw',
+  documentation => 'home directory for user',
+  lazy          => 1,
+  builder       => '_build_homedir',
 );
+sub _build_homedir {
+      return File::HomeDir->users_home($ENV{USER});
+}
 
 option 'share_dir' => (
-    isa           => 'Str',
-    is            => 'rw',
-    #cmd_aliases   => 'X',
-    documentation => 'directory where migrations and fixtures are stored',
-    lazy          => 1,
-    default       => '/usr/share/kanku',
+  isa           => 'Str',
+  is            => 'rw',
+  documentation => 'directory where migrations and fixtures are stored',
+  lazy          => 1,
+  default       => '/usr/share/kanku',
 );
 
 option 'dbuser' => (
-    isa           => 'Str',
-    is            => 'rw',
-    cmd_aliases   => 'U',
-    documentation => 'User to connect to database',
-    lazy          => 1,
-    default       => 'kanku',
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => [qw/U/],
+  documentation => 'User to connect to database',
+  lazy          => 1,
+  default       => 'kanku',
 );
 
 option 'dbpass' => (
-    isa           => 'Str',
-    is            => 'rw',
-    cmd_aliases   => 'P',
-    documentation => 'Password to connect to database',
-    lazy          => 1,
-    default       => '',
+  isa           => 'Str',
+  is            => 'rw',
+  cmd_aliases   => [qw/P/],
+  documentation => 'Password to connect to database',
+  lazy          => 1,
+  default       => q{},
 );
 
 has _dbdir => (
-	isa 	=> 'Object',
+	isa 	=> 'Str',
 	is  	=> 'rw',
 	lazy	=> 1,
-	default => sub { return file($_[0]->dbfile)->parent; },
+	builder => '_build__dbdir',
 );
-
-has logger => (
-  isa   => 'Object',
-  is    => 'rw',
-  lazy  => 1,
-  default => sub { Log::Log4perl->get_logger },
-);
+sub _build__dbdir {
+  my ($self) = @_;
+  return dirname($self->dbfile);
+}
 
 sub run {
-  my $self    = shift;
+  my ($self)  = @_;
   my $logger  = $self->logger;
-
 
   $logger->debug('Using dsn: '.$self->dsn);
   $logger->debug('Using share_dir: '.$self->share_dir);
+
   # prepare database setup
   my $migration = DBIx::Class::Migration->new(
     schema_class   => 'Kanku::Schema',
@@ -162,7 +157,7 @@ sub run {
   if ($self->install) {
     if (! -d $self->_dbdir) {
       $logger->debug('Creating _dbdir: '.$self->_dbdir);
-      $self->_dbdir->mkpath;
+      File::Path::make_path($self->_dbdir);
     }
     $migration->install_if_needed(default_fixture_sets => ['install']);
   } elsif ($self->upgrade) {

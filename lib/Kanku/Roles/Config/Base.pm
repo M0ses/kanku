@@ -17,10 +17,11 @@
 package Kanku::Roles::Config::Base;
 
 use Moose::Role;
-use Path::Class::File;
-use Data::Dumper;
+use Carp;
+use File::Basename;
+use File::HomeDir;
+use File::stat;
 use Kanku::YAML;
-use Path::Class qw/dir/;
 
 with 'Kanku::Roles::Logger';
 
@@ -31,28 +32,38 @@ has config => (
   is      => 'rw',
   isa     => 'HashRef',
   lazy    => 1,
-  default => sub { return Kanku::YAML::LoadFile($_[0]->file) },
+  builder => '_build_config',
 );
+sub _build_config {
+  my ($self) = @_;
+  return Kanku::YAML::LoadFile($self->file);
+}
 
 has cf => (
   is      => 'rw',
   isa     => 'HashRef',
   lazy    => 1,
-  default => sub {
-    my ($self) = @_;
-    my $home  = File::HomeDir->my_home;
-    my @files = ("$home/.kanku/kanku-config.yml", '/etc/kanku/kanku-config.yml');
-    for my $f (@files) {
-      if (-f $f) {
-        $self->logger->debug("Found Config file '$f'!");
-        return Kanku::YAML::LoadFile($f);
-      }
-      $self->logger->debug("Config file '$f' not found!");
-    }
-    $self->logger->debug("No config file found! Using empty configuration.");
-    return {};
-  }
+  builder => '_build_cf',
 );
+sub _build_cf {
+  my ($self) = @_;
+  my $home  = File::HomeDir->my_home;
+  my @search_path = (
+    "$home/.config/kanku/",
+    "$home/.kanku/",
+    '/etc/kanku/',
+  );
+  for my $sp (@search_path) {
+    my $f = File::Spec->canonpath($sp.'/kanku-config.yml');
+    if (-f $f) {
+      $self->logger->debug("Found Config file `$f`!");
+      return Kanku::YAML::LoadFile($f);
+    }
+    $self->logger->debug("Config file '$f' not found!");
+  }
+  $self->logger->warn("No config file found! Using empty configuration.");
+  return {};
+}
 
 has last_modified => (
   is        => 'rw',
@@ -60,25 +71,25 @@ has last_modified => (
   default   => 0
 );
 
+# TODO: clarify if this attribute is still in use
 has log_dir => (
   is      => 'rw',
-  isa     => 'Object',
+  isa     => 'Str',
   lazy    => 1,
-  default => sub {
-    return Path::Class::Dir->new('/var/log/kanku');
-  }
+  builder => '_build_log_dir',
 );
-
-sub _build_config { return Kanku::YAML::LoadFile($_[0]->file) }
+sub _build_log_dir {
+  return '/var/log/kanku';
+}
 
 around 'config' => sub {
   my ($orig, $self) = @_;
-  my $cfg_file      = $self->file->stringify;
+  my $cfg_file      = $self->file;
 
-  die "Configuration file $cfg_file doesn`t exists\n" unless -f $cfg_file;
-
-  my $mtime = $self->file->stat->mtime;
-  my $ltime = $self->last_modified;
+  croak "Configuration file $cfg_file doesn`t exists\n" unless -f $cfg_file;
+  my $st    = File::stat->new($cfg_file) || croak "Could not open `$cfg_file`: $!\n";
+  my $mtime = $st->mtime || 0;
+  my $ltime = $self->last_modified || 0;
 
   if ($mtime != $ltime) {
     if ($ltime) {
@@ -86,31 +97,21 @@ around 'config' => sub {
     } else {
       $self->logger->debug("Initial read of config file '$cfg_file'");
     }
-    $self->last_modified($self->file->stat->mtime);
-    return $self->$orig( $self->_build_config() );
+    $self->last_modified($mtime);
+    return $self->$orig($self->_build_config());
   }
 
   return $self->$orig();
 };
 
 sub job_list {
-  my $self  = shift;
-  my @files = dir('/etc/kanku/jobs')->children;
-  my @result;
-  for my $f (@files) {
-    push(@result, $1) if ($f =~ /.*\/(.*)\.yml$/);
-  }
-  return @result;
+  my ($self) = @_;
+  return (map { basename($_) =~ m/^(.*)\.yml$/; $1; } glob('/etc/kanku/jobs/*.yml'));
 }
 
 sub job_group_list {
-  my $self  = shift;
-  my @files = dir('/etc/kanku/job_groups')->children;
-  my @result;
-  for my $f (@files) {
-    push(@result, $1) if ($f =~ /.*\/(.*)\.yml$/);
-  }
-  return @result;
+  my ($self) = @_;
+  return (map { basename($_) =~ m/^(.*)\.yml$/; $1; } glob('/etc/kanku/job_groups/*.yml'));
 }
 
 1;

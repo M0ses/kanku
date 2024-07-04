@@ -16,20 +16,20 @@
 #
 package Kanku::Cli::urlwrapper;  ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
-use Data::Dumper;
-use Cwd;
-use Try::Tiny;
-use Net::OBS::LWP::UserAgent;
-use Kanku::Util::VM;
+
 use File::Path qw/make_path/;
 
-command_short_description  'list standard kanku images';
-command_long_description   'This command lists the standard kanku images which'.
-  ' are based on (open)SUSEs JeOS images';
+use Net::OBS::LWP::UserAgent;
+
+use Kanku::Util::VM;
+
+command_short_description  'open kanku url (kanku:// or kankus://)';
+command_long_description   '
+This command lists the standard kanku images which are based on (open)SUSEs JeOS images.
+
+';
 
 option 'url' => (
   isa           => 'Str',

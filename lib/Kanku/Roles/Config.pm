@@ -58,12 +58,14 @@ has cache_dir => (
   is        =>'rw',
   isa       =>'Str',
   lazy      => 1,
-  default   => sub {
-    return
-      $_[0]->config()->{cache_dir}
-      || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
-  }
+  builder   => '_build_cache_dir',
 );
+sub _build_cache_dir {
+  my ($self) = @_;
+  return
+    $self->config->{cache_dir}
+    || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
+}
 
 sub job_config {
   my ($self, $job_name) = @_;

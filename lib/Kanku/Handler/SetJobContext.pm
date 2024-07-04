@@ -87,7 +87,7 @@ sub execute {
   my $ctx  = $self->job()->context();
   for my $var (qw/
     domain_name vm_template_file host_interface images_dir cache_dir ipaddress
-    login_user login_pass 
+    login_user login_pass
     privatekey_path publickey_path
     host_dir_9p accessmode_9p
     vm_image_file management_interface snapshot_name domain_autostart

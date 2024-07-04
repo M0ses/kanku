@@ -16,17 +16,18 @@
 #
 package Kanku::Cli::check_configs;     ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Roles::Logger';
+use Try::Tiny;
 use Kanku::Config;
 
 command_short_description  'Check kanku config files';
 
-command_long_description 'Check kanku config files';
+command_long_description '
+Check kanku config files
+';
 
 option 'jobs' => (
   isa           => 'Bool',
@@ -54,53 +55,69 @@ option 'devel' => (
 
 sub run {
   my ($self) = @_;
-  my $logger  = Log::Log4perl->get_logger;
-  my $result = 0;
+  my $logger = $self->logger;
+  my $ret    = 0;
 
   if ($self->server) {
     Kanku::Config->initialize();
-    for my $job (sort Kanku::Config->instance()->job_list) {
-      eval { Kanku::Config->instance()->job_config($job); };
-      if($@) {
-        $logger->error("Failed to load job config $job:\n$@");
-        $result = 1;
-      } else {
-        $logger->debug("$job - ok");
-      }
+    my $kci = Kanku::Config->instance;
+
+    # job_list
+    for my $job (sort $kci->job_list) {
+      my $NOT = ' not';
+      try {
+	$kci->job_config($job);
+	$NOT = q{};
+      } catch {
+        $logger->debug("Failed to load job config $job:\n$_");
+        $ret = 1;
+      };
+      $logger->info("Checking job $job -$NOT ok");
     }
-    for my $job (sort Kanku::Config->instance()->job_group_list) {
-      eval { Kanku::Config->instance()->job_group_config($job); };
-      if($@) {
-        $logger->error("Failed to load job config $job:\n$@");
-        $result = 1;
-      } else {
-        $logger->debug("$job - ok");
-      }
+
+    # job_group_list
+    for my $job_group (sort $kci->job_group_list) {
+      my $NOT = ' not';
+      try {
+	$kci->job_group_config($job_group);
+	$NOT = q{};
+      } catch {
+        $logger->debug("Failed to load job config $job_group:\n$_");
+        $ret = 1;
+      };
+
+      $logger->info("Checking job_group $job_group -$NOT ok");
     }
+
   } elsif ($self->devel) {
-    eval { 
-      Kanku::Config->initialize(class=>'KankuFile'); 
+    my $NOT = ' not';
+    try {
+      Kanku::Config->initialize(class=>'KankuFile');
       Kanku::Config->instance->job_list();
+      $NOT = q{};
+    } catch {
+      $logger->debug("Failed to load KankuFile:\n$_");
+      $ret = 1;
     };
-    if($@) {
-      $logger->error("Failed to load KankuFile:\n$@");
-      $result = 1;
-    } else {
-      $logger->debug("KankuFile - ok");
-    }
+    $logger->info("KankuFile -$NOT ok");
   } else {
     $logger->error("Please choose --server or --devel");
     return 1;
   }
 
-  if ($result) {
-    $logger->error("Errors while checking configs!");
-  } else {
-    $logger->info("All checked configs ok!");
-  }
-
-  return $result;
+  return $self->_print_footer($ret);
 }
 
-#__PACKAGE__->meta->make_immutable;
+sub _print_footer {
+  my ($self, $ret) = @_;
+  if ($ret) {
+    $self->logger->error("Errors while checking configs!");
+  } else {
+    $self->logger->info("All checked configs ok!");
+  }
+  return $ret;
+}
+
+__PACKAGE__->meta->make_immutable;
+
 1;

@@ -16,30 +16,40 @@
 #
 package Kanku::Cli::console;     ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use Kanku::Config;
-
 command_short_description  'Open a serial console to vm';
 
-command_long_description 'Open a serial console to vm';
+command_long_description '
+With this command you can open a serial console to the domain specified
+(as domain_name) in your KankuFile.
 
+';
+
+with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::VM';
+
+option 'virt_uri' => (
+  is     => 'rw',
+  isa    => 'Str',
+  lazy   => 1,
+  default => 'qemu:///system',
+  documentation => 'libvirt connection uri',
+  cmd_aliases   => [qw/v virt-uri/],
+);
 
 sub run {
   my ($self) = @_;
-  my $logger  = Log::Log4perl->get_logger;
+  my $cmd    = 'virsh -c '.$self->virt_uri.' console '.$self->domain_name;
 
-  my $cmd = 'virsh -c qemu:///system console '.$self->domain_name;
+  system $cmd;
 
-  system $cmd || croak("Failed to execute '$cmd': $!");
+  $self->logger->error("Failed to execute '$cmd'") if $?;
 
-  return;
+  return $? >> 8;
 }
 
 __PACKAGE__->meta->make_immutable;
+
 1;

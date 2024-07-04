@@ -344,7 +344,7 @@ sub get_ipaddress {
   my $do_logout = 0;
 
   my $save_timeout = $self->cmd_timeout;
- 
+
   $self->cmd_timeout(600);
 
   croak 'Please specify an interface!' unless $opts{interface};
@@ -381,7 +381,7 @@ sub get_ipaddress {
 
   $self->logout if $do_logout;
 
-  if (! $ipaddress) { 
+  if (! $ipaddress) {
     croak "Could not get ip address for interface $opts{interface} within "
       . "$opts{timeout} seconds.";
   }

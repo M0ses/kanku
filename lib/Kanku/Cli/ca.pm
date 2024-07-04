@@ -25,25 +25,15 @@ extends qw(Kanku::Cli);
 with 'Kanku::Cli::Roles::Schema';
 with 'Kanku::Roles::Logger';
 
-use Path::Class qw/file dir/;
-use File::HomeDir;
-use Term::ReadKey;
-use Cwd;
-use DBIx::Class::Migration;
-use Sys::Virt;
-use Sys::Hostname;
-use Net::Domain qw/hostfqdn/;
-use Carp;
 use Path::Class qw/dir/;
 
-use Kanku::Schema;
-use Kanku::Setup::Devel;
 use Kanku::Setup::Server::Distributed;
-use Kanku::Setup::Server::Standalone;
 
 command_short_description  'Kanku CA management.';
 
-command_long_description "\nManage your local Kanku CA.\n";
+command_long_description "
+Manage your local Kanku CA.
+";
 
 option 'create' => (
     isa           => 'Bool',
@@ -67,27 +57,23 @@ option 'ca_path' => (
     default       => '/etc/kanku/ca'
 );
 
-
 sub run {
   my ($self)  = @_;
-  my $logger  = $self->logger;
-
-  ### Get information
-  # ask for mode
-  my $setup;
 
   if ($self->create) {
-    $setup = Kanku::Setup::Server::Distributed->new(
+    my $setup = Kanku::Setup::Server::Distributed->new(
       _ssl     => 1,
       ca_path  => dir($self->ca_path),
       _apache  => 0,
     );
     $setup->_create_ca();
     $setup->_create_server_cert();
-    $logger->warn("CA password: ".$setup->ca_pass);
-  } else {
-    croak('No valid setup mode found');
+    $self->logger->warn("CA password: ".$setup->ca_pass);
+    return 0;
   }
+
+  $self->logger->fatal('No valid setup mode found');
+  return 2;
 }
 
 __PACKAGE__->meta->make_immutable();

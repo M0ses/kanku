@@ -145,7 +145,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
 
 =head1 DESCRIPTION
 
-This handler will connect to the given ipaddress and execute the OBS server 
+This handler will connect to the given ipaddress and execute the OBS server
 frontend test suite (smoketests)
 
 

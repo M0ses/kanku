@@ -95,14 +95,14 @@ sub notify {
   $opts->{port} = $cfg->{$pkg}->{init}->{remote_port} if $cfg->{$pkg}->{init}->{remote_port};
 
   my $c = Net::NSCAng::Client->new(
-    $cfg->{$pkg}->{init}->{remote_host}, 
-    $cfg->{$pkg}->{init}->{remote_identity}, 
-    $cfg->{$pkg}->{init}->{remote_password}, 
+    $cfg->{$pkg}->{init}->{remote_host},
+    $cfg->{$pkg}->{init}->{remote_identity},
+    $cfg->{$pkg}->{init}->{remote_password},
     node_name => $cfg->{$pkg}->{send_report}->{hostname},
     %{$opts},
   );
 
-  $c->svc_result($nstat, $output, { 
+  $c->svc_result($nstat, $output, {
     node_name => $self->options->{send_report}->{hostname} || $cfg->{$pkg}->{send_report}->{hostname} ,
     svc_description => $self->options->{send_report}->{service}
   });

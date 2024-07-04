@@ -28,6 +28,8 @@ use IO::Uncompress::AnyUncompress qw/anyuncompress $AnyUncompressError/;
 use Carp;
 use JSON::XS;
 
+with 'Kanku::Roles::Logger';
+
 use Kanku::Util::VM::Console;
 use Kanku::Config;
 
@@ -76,32 +78,31 @@ has vmm => (
   },
 );
 
-has logger => (
-  is => 'rw',
-  isa => 'Object',
-  lazy => 1,
-  default => sub { return Log::Log4perl->get_logger() },
-);
-
 sub create_volume {
-  my ($self) = @_;
+  my ($self)   = @_;
+  my $logger   = $self->logger;
+  my $vol_name = $self->vol_name || q{};
+  my $vol_fmt  = $self->format;
 
   $self->delete_volume();
 
-  $self->logger->info('Creating volume "'. ($self->vol_name || q{}).'" with format '.$self->format);
+  $logger->info("Creating volume `$vol_name` with format $vol_fmt");
 
-  my $size = ($self->source_file) ? $self->get_image_size() : $self->_string2bytes($self->size);
+  my $size = ($self->source_file)
+    ? $self->get_image_size()
+    : $self->string_to_bytes($self->size)
+  ;
 
   my $xml  =
       '<volume type="file">'
-    . ' <name>' . $self->vol_name . '</name>'
+    . ' <name>' . $vol_name . '</name>'
     . ' <capacity unit="bytes">'. $size .'</capacity>'
     . ' <target>'
-    . '  <format type="'.$self->format.'"/>'
+    . '  <format type="'.$vol_fmt.'"/>'
     . ' </target>'
     . '</volume>';
 
-  $self->logger->debug("create_volume: xml -\n$xml");
+  $logger->debug("create_volume: xml -\n$xml");
   my $vol;
   try {
       $vol  = $self->pool->create_volume($xml);
@@ -109,7 +110,7 @@ sub create_volume {
   }
   catch {
     my ($e) = @_;
-    $self->logger->fatal("Error: $e");
+    $logger->fatal("Error: $e");
     if (ref $e eq 'Sys::Virt::Error'){
       croak($e->stringify);
     } else {
@@ -163,7 +164,7 @@ sub get_image_size {
   }
 
   my $vol  = $self->vol_name;
-  my $size = $self->_string2bytes($t_size);
+  my $size = $self->string_to_bytes($t_size);
   $logger->debug(" -------- size: $size");
 
   croak("Size of volume '$vol' could not be determined\n") unless $size;
@@ -223,20 +224,26 @@ sub resize_image {
   return $tmp;
 }
 
-sub _string2bytes {
-  my ($self, $size) = @_;
+sub string_to_bytes {
+  my ($self, $string) = @_;
+  $string = $self if (!ref($self) && !$string);
 
-  my $sh = {
-             b => 1,                   k => 1024 ,
-             m => 1024*1024,           g => 1024*1024*1024,
-             t => 1024*1024*1024*1024, p => 1024*1024*1024*1024*1024
-           };
+  my $unit_to_factor = {
+    b => 1,
+    k => 1024 ,
+    m => 1024*1024,
+    g => 1024*1024*1024,
+    t => 1024*1024*1024*1024,
+    p => 1024*1024*1024*1024*1024
+ };
 
-  $size =~ /^(\d+)([bkmgtp]b?)?/i;
+  croak "Invalid input: `$string`" unless ($string =~ m/^(\d+)([bkmgtp]b?)?/i);
 
-  my $f = ($2) ? $sh->{lc $2} : 1;
+  my $val    = $1;
+  my $unit   = lc($2||'b');
+  my $factor = $unit_to_factor->{$unit};
 
-  return ($1 || 0) * $f;
+  return ($val*$factor);
 }
 
 sub _copy_volume {
@@ -273,7 +280,7 @@ sub _copy_volume {
 
 sub _expand_raw_image {
   my ($self, $st) = @_;
-  my $final_size = $self->_string2bytes($self->final_size);
+  my $final_size = $self->string_to_bytes($self->final_size);
   if ( $self->format eq 'raw' && $final_size > $self->_total_sent ) {
     my $to_read = $final_size - $self->_total_sent;
     my $nbytes  = $self->_nbytes;

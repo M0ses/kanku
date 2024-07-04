@@ -16,59 +16,68 @@
 #
 package Kanku::Cli::destroy; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use Log::Log4perl;
 use Try::Tiny;
 
-use Kanku::Config;
 use Kanku::Util::VM;
 use Kanku::Util::IPTables;
 
 command_short_description 'Remove domain completely';
-command_long_description 'Remove domain completely';
+command_long_description '
+With this command you can remove the given domain entirely.
+It will not only undefine a domain, it will also remove defined images for this
+domain from disk unless they are excluded with `--keep-volumes`.
+';
 
 with 'Kanku::Cli::Roles::VM';
+with 'Kanku::Roles::Logger';
 
 option 'keep_volumes' => (
     isa           => 'ArrayRef',
     is            => 'rw',
-    #cmd_aliases   => 'X',
+    cmd_aliases   => [qw/k keep-volumes/],
     documentation => 'Volumes to keep when destroying VM to reuse next time.',
+    builder       => '_build_keep_volumes',
 );
-
+sub _build_keep_volumes {[]}
 
 sub run {
   my ($self)  = @_;
-  my $vm      = Kanku::Util::VM->new(domain_name => $self->domain_name);
-  $vm->keep_volumes($self->keep_volumes) if $self->keep_volumes;
-  my $logger  = Log::Log4perl->get_logger;
-  my $dom;
+  my $ret     = 0;
+  my $logger  = $self->logger;
+  my $dn      = $self->domain_name;
+
+  my $vm      = Kanku::Util::VM->new(
+    domain_name  => $dn,
+    keep_volumes => $self->keep_volumes,
+  );
 
   try {
-    $dom = $vm->dom;
+    $vm->dom;
   } catch {
-    $logger->fatal('Error: '.$self->domain_name." not found\n");
-    exit 1;
+    $logger->error($_);
+    $logger->fatal("Domain $dn not found");
+    $ret = 1;
   };
+
+  return $ret if $ret;
 
   try {
     $vm->remove_domain();
   } catch {
-    $logger->fatal('Error while removing domain: '.$self->domain_name."\n");
-    $logger->fatal($_);
-    exit 1;
+    $logger->error($_);
+    $logger->fatal("Error while removing domain: `$dn`");
+    $ret = 1;
   };
 
-  my $ipt = Kanku::Util::IPTables->new(domain_name=>$self->domain_name);
+  my $ipt = Kanku::Util::IPTables->new(domain_name=>$dn);
   $ipt->cleanup_rules_for_domain();
 
-  $logger->info('Removed domain '.$self->domain_name.' successfully');
+  $logger->info("Removed domain `$dn` successfully");
 
-  return;
+  return $ret;
 }
 
 __PACKAGE__->meta->make_immutable;

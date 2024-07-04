@@ -17,26 +17,22 @@
 package Kanku::Dispatch::Local;
 
 use Moose;
+use JSON::XS;
+use Try::Tiny;
 
 with 'Kanku::Roles::Logger';
 with 'Kanku::Roles::Dispatcher';
 with 'Kanku::Roles::Daemon';
 with 'Kanku::Roles::Helpers';
 
-use Kanku::Config;
-use Kanku::Job;
 use Kanku::Task;
-use JSON::XS;
-use Try::Tiny;
 
 has 'max_processes' => (is=>'rw',isa=>'Int',default=>1);
 
-
 sub run_job {
-  my $self    = shift;
-  my $job     = shift;
-  my $logger  = $self->logger();
-  my $schema  = $self->schema();
+  my ($self, $job) = @_;
+  my $logger       = $self->logger();
+  my $schema       = $self->schema();
 
   my $job_definition = $self->load_job_definition($job);
   if ( ! $job_definition) {
@@ -117,6 +113,7 @@ sub initialize {
 
 sub end_job {
   my ($self, $job, $task) = @_;
+  my $logger              = $self->logger;
   if ($task) {
     $job->state(($job->skipped) ? 'skipped' : $task->state);
   } else {
@@ -126,10 +123,10 @@ sub end_job {
   $job->update_db();
   if (ref($job->context->{pwrand}) eq 'HASH') {
     while ( my ($user, $pw) = each %{$job->context->{pwrand}}) {
-      $self->logger->error("Password for user '$user': $pw");
+      $logger->error("Password for user '$user': $pw");
     }
   }
-  $self->logger->debug("Finished job: ".$job->name." (".$job->id.") with state '".$job->state."'");
+  $logger->info("Finished job: ".$job->name." (".$job->id.") with state '".$job->state."'");
 }
 
 

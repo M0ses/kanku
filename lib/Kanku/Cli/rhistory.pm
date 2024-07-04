@@ -16,25 +16,24 @@
 #
 package Kanku::Cli::rhistory; ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
+
+with 'Kanku::Roles::Logger';
 
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
-use Log::Log4perl;
-use POSIX;
+use POSIX qw/floor/;
 use Try::Tiny;
 
 command_short_description  'list job history on your remote kanku instance';
 
-command_long_description
-  "list job history on your remote kanku instance\n\n"
-  . $_[0]->description_footer;
+command_long_description   "
+list job history on your remote kanku instance
+
+";
 
 option 'full' => (
   isa           => 'Bool',
@@ -79,19 +78,22 @@ option 'worker' => (
 );
 
 
+BEGIN {
+  Kanku::Config->initialize;
+}
+
 sub run {
   my ($self)  = @_;
-  Kanku::Config->initialize;
-  my $logger  =	Log::Log4perl->get_logger;
+  my $logger  =	$self->logger;
 
   if ( $self->list ) {
     $self->_list();
   } elsif ( $self->details ) {
     $self->_details();
   } else {
-	$logger->warn('Please specify a command. Run "kanku help rhistory" for further information.');
+    $logger->warn('Please specify a command. Run "kanku help rhistory" for further information.');
   }
-  return;
+  return 0;
 }
 
 sub _list {
@@ -123,12 +125,12 @@ sub _list {
     }
   }
   $self->view('jobs.tt', $data);
-  return;
+  return 0;
 };
 
 sub _details {
   my ($self) = @_;
-  my $logger = Log::Log4perl->get_logger;
+  my $logger = $self->logger;
   if ( ! $self->details ) {
     $logger->error('No job id given');
     exit 1;

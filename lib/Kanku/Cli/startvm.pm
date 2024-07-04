@@ -16,9 +16,6 @@
 #
 package Kanku::Cli::startvm;    ## no critic (NamingConventions::Capitalization)
 
-use strict;
-use warnings;
-
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
@@ -33,7 +30,7 @@ command_long_description 'This command can be used to start an already existing 
 
 sub run {
   my ($self)  = @_;
-  my $logger  = Log::Log4perl->get_logger;
+  my $logger  = $self->logger;
   my $dn      = $self->domain_name;
   my $vm      = Kanku::Util::VM->new(
     domain_name => $dn,
@@ -52,10 +49,10 @@ sub run {
     }
   } else {
     $logger->fatal("Domain $dn doesn`t exist");
-    exit 1;
+    return 1;
   }
 
-  return;
+  return 0;
 }
 
 __PACKAGE__->meta->make_immutable;

@@ -142,7 +142,7 @@ This handler reboots the VM and optional waits for network and console.
 
 
     wait_for_console : wait for console login
- 
+
     wait_for_network : wait until network is up again
 
     timeout :          wait only <seconds>
@@ -162,7 +162,7 @@ This handler reboots the VM and optional waits for network and console.
 =head1 DEFAULTS
 
     wait_for_console : 1 (true)
- 
+
     wait_for_network : 1 (true)
 
     timeout          : 600 seconds

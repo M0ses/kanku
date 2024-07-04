@@ -195,7 +195,7 @@ sub execute {
   my $user    = $ctx->{gituser} || $self->gituser;
 
   my $recursive = ($self->recursive) ? '--recursive' : q{};
-  
+
   # clone git repository
   try {
     my $cmd_clone = "git clone $recursive ".$self->_giturl.(( $self->destination ) ? " " . $self->destination : '');

@@ -53,7 +53,7 @@ my $defaults =    {
     apiurl        => 'https://api.opensuse.org/public',
     template_path => '/etc/kanku/templates/cmd/init',
     template      => 'default',
-    # Kanku::Handler::Vagrant 
+    # Kanku::Handler::Vagrant
     box           => 'opensuse/Tumbleweed.x86_64',
   },
   'Kanku::Cli::lsi' => {
@@ -81,14 +81,23 @@ my $defaults =    {
   'Kanku::Config::GlobalVars' => {
     cache_dir  => "$::ENV{'HOME'}/.cache/kanku",
     images_dir => '/var/lib/libvirt/images',
+    host_interface => 'eth0',
+  },
+  'Kanku::Roles::SSH' => {
+    logverbosity    => 0,
+    privatekey_path => q{},
+    publickey_path  => q{},
+    auth_type       => 'agent',
   },
 };
 
 sub get {
   my ($self, $pkg, $var) = @_;
   my $cfg = {};
+  Kanku::Config->initialize();
   try {
-    $cfg = Kanku::Config->instance->cf;
+    my $kc = Kanku::Config->instance();
+    $cfg = $kc->cf;
   } catch {
     confess($_) unless $pkg =~ /^Kanku::Setup::/;
   };
@@ -97,5 +106,7 @@ sub get {
   return $ret->{$var} if $var;
   return $ret;
 }
+
 __PACKAGE__->meta->make_immutable;
+
 1;

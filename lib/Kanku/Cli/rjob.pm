@@ -33,9 +33,10 @@ use Data::Dumper;
 
 command_short_description  'show result of tasks from a specified remote job';
 
-command_long_description
-  "show result of tasks from a specified job on your remote instance\n\n"
- . $_[0]->description_footer;
+command_long_description   "
+show result of tasks from a specified job on your remote instance
+
+";
 
 option 'config' => (
   isa           => 'Str',
@@ -51,64 +52,63 @@ option 'filter' => (
   documentation => 'filter job names by pattern',
 );
 
-sub run {
-  my $self  = shift;
+BEGIN {
   Kanku::Config->initialize;
-  my $logger  = Log::Log4perl->get_logger;
+}
+
+sub run {
+  my ($self)  = @_;
+  my $logger  = $self->logger;
+  my $ret     = 0;
 
   if ( $self->config ) {
-    my $kr;
     try {
-      $kr = $self->connect_restapi();
+      my $kr = $self->connect_restapi();
+      my $data = $kr->get_json( path => 'job/config/'.$self->config);
+      $self->print_formatted($self->format, $data->{config}) if $data;
     } catch {
-      exit 1;
+      $logger->fatal($_);
+      $ret = 1;
     };
-
-    my $data = $kr->get_json( path => 'job/config/'.$self->config);
-
-    print $data->{config} if $data;
-
   } elsif ($self->list) {
 
-    my $kr;
     try {
-      $kr = $self->connect_restapi();
+      my $kr = $self->connect_restapi();
+      $logger->debug('- filter: '.($self->filter||q{}));
+      my $params = {};
+      $params->{filter} = $self->filter if $self->{filter};
+      my $tmp_data = $kr->get_json( path => 'gui_config/job', params => $params);
+      my @job_names = sort map { $_->{job_name} } @{$tmp_data->{config}} ;
+      my $data = { job_names => \@job_names , errors => $tmp_data->{errors}};
+      $self->view('rjob/list.tt', $data);
     } catch {
-      exit 1;
+      $logger->fatal($_);
+      $ret = 1;
     };
-    $logger->debug('- filter: '.($self->filter||q{}));
-    my $params = {};
-    $params->{filter} = $self->filter if $self->{filter};
-    my $tmp_data = $kr->get_json( path => 'gui_config/job', params => $params);
-
-    my @job_names = sort map { $_->{job_name} } @{$tmp_data->{config}} ;
-    my $data = { job_names => \@job_names , errors => $tmp_data->{errors}};
-
-    $self->view('rjob/list.tt', $data);
 
   } elsif ($self->details) {
 
-    my $kr;
     try {
-      $kr = $self->connect_restapi();
+      my $kr = $self->connect_restapi();
+      my $data = $kr->get_json( path => 'gui_config/job');
+      my $job_config;
+      while ( my $j = shift @{$data->{config}}) {
+        if ( $j->{job_name} eq $self->details ) {
+          $job_config = $j;
+          last;
+        }
+      }
+      $self->print_formatted($self->format, $job_config);
     } catch {
-      exit 1;
+      $logger->fatal($_);
+      $ret = 1;
     };
 
-    my $data = $kr->get_json( path => 'gui_config/job');
-	my $job_config;
-	while ( my $j = shift @{$data->{config}}) {
-		if ( $j->{job_name} eq $self->details ) {
-			$job_config = $j;
-			last;
-		}
-	}
-    print Dumper($job_config);
-    $self->logger->warn('FIXME: implement view');
   } else {
-	$logger->warn('Please specify a command. Run "kanku help rjob" for further information.');
+	$logger->fatal('Please specify a command. Run "kanku help rjob" for further information.');
+	$ret = 1;
   }
-  return;
+  return $ret;
 }
 
 __PACKAGE__->meta->make_immutable;

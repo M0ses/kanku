@@ -24,7 +24,6 @@ use Try::Tiny;
 
 use Kanku::Config;
 use Kanku::Job;
-use Kanku::Task;
 
 with 'Kanku::Roles::ModLoader';
 with 'Kanku::Roles::DB';

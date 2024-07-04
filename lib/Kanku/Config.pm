@@ -18,10 +18,8 @@ package Kanku::Config;
 
 use MooseX::Singleton;
 
-
 sub initialize {
-  my $self = shift;
-  my %args = @_;
+  my ($self, %args) = @_;
 
   if ( $args{class} ) {
     with "Kanku::Roles::Config::$args{class}";
@@ -29,6 +27,14 @@ sub initialize {
     with 'Kanku::Roles::Config';
   }
 
+  return $self;
 }
+
+# TODO:
+# Document why the following line is commented out
+# (cannot make immutable as `with` statements are not execute
+# at compile/start time)
+#
+#__PACKAGE__->meta->make_immutable;
 
 1;

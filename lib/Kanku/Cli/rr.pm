@@ -22,30 +22,32 @@ use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::Remote';
 
-use Term::ReadKey;
 use Kanku::YAML;
 
 command_short_description  'remove remote from your config';
 
-command_long_description
-  'This command will remove the given apiurl from your local config and '.
-  'perform a logout on the remote server';
+command_long_description   '
+This command will remove the given apiurl from your local config and
+perform a logout on the remote server
+
+';
+
+BEGIN {
+  Kanku::Config->intialize();
+}
 
 sub run {
-  my $self  = shift;
-  my $logger  = Log::Log4perl->get_logger;
-
-  #$self->settings(Kanku::YAML::LoadFile($self->rc_file));
-
-  my $kr =  $self->connect_restapi();
-
-  my $apiurl = $self->settings->{apiurl};
+  my ($self)  = @_;
+  my $logger  = $self->logger;
+  my $kr      = $self->connect_restapi();
+  my $apiurl  = $self->settings->{apiurl};
 
   if (!$apiurl) {
       $self->logger->warn('No apiurl found in config file. Aborting!');
-      return;
+      return 1;
   }
 
   my $user   = $self->settings->{$apiurl}->{user};
@@ -53,8 +55,8 @@ sub run {
   Kanku::YAML::DumpFile($self->rc_file, $self->settings);
 
   if (!$user) {
-      $self->logger->warn("No user found in config file for apiurl '$apiurl'. Aborting!");
-      return;
+    $self->logger->warn("No user found in config file for apiurl '$apiurl'. Aborting!");
+    return 1;
   }
 
   if ( my $ls = $kr->logout() ) {
@@ -68,14 +70,13 @@ sub run {
       my $krmod  = my $krpkg = $self->settings->{keyring};
       $krmod =~ s#::#/#g;
       require "$krmod.pm";
-      $self->logger->debug("Removing '$user || $apiurl' from $krpkg");
+      $logger->debug("Removing '$user || $apiurl' from $krpkg");
       my $keyring = $krpkg->new(app=>'kanku', group=>'kanku');
       $keyring->clear_password($user, $apiurl);
-    } else {
     }
   }
 
-  return;
+  return 0;
 }
 
 __PACKAGE__->meta->make_immutable;
