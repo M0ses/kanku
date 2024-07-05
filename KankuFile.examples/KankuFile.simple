@@ -1,18 +1,10 @@
-#
-Kanku::Util::IPTables:
-  start_port: 49001
-
-
-domain_name: kanku-leap-15-4
-default_job: kanku-job
+domain_name: simple
+default_job: tasks
 login_user: root
 login_pass: kankudai
 
-qemu:
-  user: 
-
 jobs:
- kanku-job:
+ tasks:
   -
     use_module: Kanku::Handler::SetJobContext
     options:
@@ -25,8 +17,8 @@ jobs:
       # https://build.opensuse.org/project/show/devel:kanku:images
       # to find more official Images
       project: devel:kanku:images
-      repository: images_leap_15_4
-      package: openSUSE-Leap-15.4-JeOS
+      repository: images_leap_15_6
+      package: openSUSE-Leap-15.6-JeOS
       use_oscrc: 0
   -
     use_module: Kanku::Handler::ImageDownload
