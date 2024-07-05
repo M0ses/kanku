@@ -139,7 +139,7 @@ sub get_defaults {
 
   $logger->debug(' - get_defaults: privatekey_path - '.$self->privatekey_path);
 
-  $self->publickey_path($cfg->{publickey_path}) if $cfg->publickey_path;
+  $self->publickey_path($cfg->{publickey_path}) if $cfg->{publickey_path};
 
   if (! $self->publickey_path && $self->privatekey_path) {
     my $key_path = $self->privatekey_path.".pub";
