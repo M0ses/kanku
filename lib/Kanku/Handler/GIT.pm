@@ -85,12 +85,24 @@ has 'timeout' => (is=>'rw', isa=>'Int', default=>600);
 with 'Kanku::Roles::SSH';
 
 has [qw/  giturl          revision    destination
-          remote_url      cache_dir
+          remote_url
 	  gituser         gitpass     _giturl
-	  gitlab_merge_request_id
+	  gitlab_merge_request_id     remote_url
     /] => (is=>'rw',isa=>'Str');
 
 has [qw/submodules mirror recursive/] => (is=>'rw', isa=>'Bool');
+
+has 'cache_dir' => (
+  is      =>'rw',
+  isa     =>'Str',
+  builder => '_build_cache_dir',
+);
+sub _build_cache_dir {
+  my ($self) = @_;
+  return $self->job->context->{cache_dir}
+    || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
+}
+
 
 sub prepare {
   my ($self) = @_;
@@ -151,13 +163,8 @@ sub _calc_giturl {
 }
 
 sub _prepare_mirror {
-  my $self = shift;
-  my $ctx  = $self->job->context;
-  my $pkg  = __PACKAGE__;
-  my $cdir = Kanku::Config->instance->config()->{$pkg}->{cache_dir};
+  my ($self) = @_;
 
-
-  $self->cache_dir( ( $self->cache_dir || $ctx->{cache_dir} || $cdir || '' ) );
   die "No cache_dir specified!\n" if ( ! $self->cache_dir );
   die "remote_url needed when using mirror mode\n" if ( ! $self->remote_url );
 
