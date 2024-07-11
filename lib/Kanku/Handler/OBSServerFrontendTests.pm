@@ -36,6 +36,11 @@ sub gui_config {
       type  => 'text',
       label => 'Ruby Version:'
     },
+    {
+      param => 'verbose',
+      type  => 'checkbox',
+      label => 'Verbose:'
+    },
   ];
 }
 sub distributable { 1 }
@@ -50,6 +55,7 @@ has jump_host     => (is=>'rw', isa=>'Str');
 has git_url       => (is=>'rw', isa=>'Str', default => 'https://github.com/openSUSE/open-build-service.git');
 has git_revision  => (is=>'rw', isa=>'Str', default => 'master');
 has ruby_version  => (is=>'rw', isa=>'Str', default => '2.5');
+has verbose       => (is=>'rw', isa=>'Bool', default => 1);
 
 sub execute {
   my $self    = shift;
@@ -81,15 +87,20 @@ sub execute {
   my $git_url      = $self->git_url||'https://github.com/openSUSE/open-build-service.git';
   my $tmp_dir      = File::Temp->new->filename;
   my $logfile      = "~/obs-server-frontend-$job_id.log";
+
   my $log_to_file  = ">> $logfile 2>&1 || ".
     '{'.
     "  cat $logfile ; ".
     ' exit 1;'.
     '}';
 
+  my $verbose = ($self->verbose && $git_url =~ m#^https?://#)
+    ? "GIT_CURL_VERBOSE=1 "
+    : q{};
+
   my @commands = (
     "mkdir -p $tmp_dir",
-    "git clone $git_url $tmp_dir/",
+    $verbose."git clone $git_url $tmp_dir/",
     "git -C $tmp_dir checkout $git_revision",
     "cd $tmp_dir/dist/t && bundle.ruby$ruby_version config set --local path 'vendor/bundle' $log_to_file",
     "cd $tmp_dir/dist/t && bundle.ruby$ruby_version install $log_to_file",
