@@ -6,7 +6,6 @@ use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-with 'Kanku::Roles::Logger';
 
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';

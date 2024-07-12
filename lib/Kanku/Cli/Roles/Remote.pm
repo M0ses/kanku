@@ -27,7 +27,6 @@ use HTTP::Cookies;
 use HTTP::Request;
 use Carp;
 
-with 'Kanku::Roles::Logger';
 
 option 'apiurl' => (
   isa           => 'Str',

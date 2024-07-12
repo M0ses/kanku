@@ -19,7 +19,6 @@ package Kanku::Cli::setup; ## no critic (NamingConventions::Capitalization)
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::Schema';
 
 use Carp;

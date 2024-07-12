@@ -20,7 +20,6 @@ use MooseX::App::Command;
 use Moose::Util::TypeConstraints;
 extends qw(Kanku::Cli);
 
-with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';

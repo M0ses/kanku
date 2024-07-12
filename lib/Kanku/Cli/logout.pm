@@ -19,7 +19,6 @@ package Kanku::Cli::logout; ## no critic (NamingConventions::Capitalization)
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::Remote';
 
 command_short_description  'logout from your remote kanku instance';

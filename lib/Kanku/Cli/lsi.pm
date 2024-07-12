@@ -19,7 +19,6 @@ package Kanku::Cli::lsi;  ## no critic (NamingConventions::Capitalization)
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-with 'Kanku::Roles::Logger';
 
 use Net::OBS::Client::Project;
 use Kanku::Config;

@@ -27,7 +27,6 @@ With this command you can open a serial console to the domain specified
 
 ';
 
-with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::VM';
 
 option 'virt_uri' => (

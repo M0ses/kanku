@@ -32,7 +32,6 @@ domain from disk unless they are excluded with `--keep-volumes`.
 ';
 
 with 'Kanku::Cli::Roles::VM';
-with 'Kanku::Roles::Logger';
 
 option 'keep_volumes' => (
     isa           => 'ArrayRef',

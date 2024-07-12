@@ -19,7 +19,6 @@ package Kanku::Cli::rabbit;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-with 'Kanku::Roles::Logger';
 use FindBin;
 
 use Kanku::YAML;

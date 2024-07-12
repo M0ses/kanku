@@ -23,7 +23,6 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Schema';
-with 'Kanku::Roles::Logger';
 
 use Path::Class qw/dir/;
 
