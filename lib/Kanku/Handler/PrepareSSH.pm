@@ -21,15 +21,37 @@ use Kanku::Util::VM::Console;
 use Kanku::Config;
 use Path::Class qw/file/;
 
-sub gui_config {[]}
+sub gui_config {
+  [
+    {
+      param => 'enable_daemon_debug',
+      type  => 'checkbox',
+      label => 'Enable debug logging for sshd'
+    },
+  ]
+}
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
 has 'timeout' => (is=>'rw', isa=>'Int', default=>180);
 with 'Kanku::Roles::SSH';
 
-has ['public_keys', 'public_key_files' ] => (is=>'rw',isa=>'ArrayRef',lazy=>1,default=>sub { [] });
-has [qw/domain_name login_user login_pass/] => (is=>'rw',isa=>'Str');
+has ['public_keys', 'public_key_files' ] => (
+  is      =>'rw',
+  isa     =>'ArrayRef',
+  lazy    =>1,
+  default =>sub { [] }
+);
+has 'enable_daemon_debug' => (
+  is      =>'rw',
+  isa     =>'Bool',
+  lazy    => 1,
+  default => 0,
+);
+has [qw/domain_name login_user login_pass/] => (
+  is     => 'rw',
+  isa    => 'Str',
+);
 
 sub prepare {
   my $self = shift;
@@ -147,7 +169,9 @@ sub execute {
     $con->cmd("[ -f $crypto_cfg ] && sed -i -E 's/(PubkeyAcceptedKeyTypes .*)/\\1,ssh-rsa/' $crypto_cfg");
 
     # Set loglevel of vm's sshd to debug3
-    $con->cmd('[ -d /etc/ssh/sshd_config.d ] && echo "LogLevel DEBUG3" > /etc/ssh/sshd_config.d/loglevel.conf');
+    if ($self->enable_daemon_debug) {
+      $con->cmd('[ -d /etc/ssh/sshd_config.d ] && echo "LogLevel DEBUG3" > /etc/ssh/sshd_config.d/loglevel.conf');
+    }
 
     # TODO: make dynamically switchable between systemV and systemd
     $con->cmd("systemctl restart sshd.service");
@@ -200,15 +224,17 @@ The ssh daemon will be enabled and started.
 
 =head1 OPTIONS
 
-  public_keys       - An array of strings which include your public ssh key
+  public_keys         - An array of strings which include your public ssh key
 
-  public_key_files  - An array of files to get the public ssh keys from
+  public_key_files    - An array of files to get the public ssh keys from
 
-  domain_name       - name of the domain to prepare
+  domain_name         - name of the domain to prepare
 
-  login_user        - username to use when connecting domain via console
+  login_user          - username to use when connecting domain via console
 
-  login_pass        - password to use when connecting domain via console
+  login_pass          - password to use when connecting domain via console
+
+  enable_daemon_debug - Enable debug logging for sshd
 
 =head1 CONTEXT
 
