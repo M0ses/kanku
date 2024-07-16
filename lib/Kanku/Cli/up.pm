@@ -58,7 +58,7 @@ option 'pool' => (
 option 'skip_all_checks' => (
     isa           => 'Bool',
     is            => 'rw',
-    #cmd_aliases   => 'X',
+    cmd_aliases   => [qw/skip-all-checks sac/],
     documentation => 'Skip all checks when downloading from OBS server e.g.',
 );
 
