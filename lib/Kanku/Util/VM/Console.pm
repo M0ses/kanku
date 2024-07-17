@@ -358,17 +358,52 @@ sub get_ipaddress {
     $logger->debug("User already logged in.");
   }
 
-  my $wait = $opts{timeout};
-  my $ipaddress  = undef;
+  my $wait         = $opts{timeout};
+  my $ipaddress    = undef;
+  my $type_output  = $self->cmd("type -P ip wicked nmcli");
+  my @tmp          = split /\r\n/, $type_output->[0], 3;
+  my $cmd          = $tmp[1];
+  my @cmd_splitted = split '/', $cmd;
+  my $cmd_short    = pop @cmd_splitted;
+
+  my %cmd2func = (
+    ip => sub {
+      my ($self, $bin, $int) = @_;
+      my $ipaddress;
+      my $result = $self->cmd("LANG=C \\ip addr show $int 2>&1");
+
+      $logger->trace("  -- Output:\n".Dumper($result));
+
+      map { $ipaddress = $1 if m/^\s+inet\s+([0-9\.]+)\// } split /\n/, $result->[0];
+      return $ipaddress
+    },
+    wicked => sub {
+      my ($self, $bin, $int) = @_;
+      my $ipaddress;
+      my $result = $self->cmd("LANG=C $bin ifstatus $int 2>&1");
+
+      $logger->debug("  -- Output:\n".Dumper($result));
+      my @lines = split /\r\n/, $result->[0];
+      my @addr = map { ($_ =~ /^\s+addr:\s+ipv4\s+([0-9.]+)\//) ? $1 : ()  } @lines;
+      return $addr[0];
+    },
+    nmcli => sub {
+      my ($self, $bin, $int) = @_;
+      my $ipaddress;
+      my $result = $self->cmd("LANG=C $bin device show $int 2>&1");
+
+      $logger->debug("  -- Output:\n".Dumper($result));
+      my @lines = split /\r\n/, $result->[0];
+      my @addr = map { ($_ =~ /^IP4.ADDRESS[1]:\s+([0-9.]+)\//) ? $1 : ()  } @lines;
+      return $addr[0];
+    },
+  );
+
+  my $cmd_ref  = $cmd2func{$cmd_short};
 
   while ( $wait > 0) {
     # use cat for disable colors
-    my $result = $self->cmd("LANG=C \\ip addr show $opts{interface} 2>&1");
-
-    $logger->debug("  -- Output:\n".Dumper($result));
-
-    map { $ipaddress = $1 if m/^\s+inet\s+([0-9\.]+)\// } split /\n/, $result->[0];
-
+    $ipaddress = $cmd_ref->($self, $cmd, $opts{interface});
     if ($ipaddress) {
       last
     } else {
