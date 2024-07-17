@@ -30,7 +30,7 @@ sub render_template {
   my $tt = Template->new({
     INCLUDE_PATH  => Kanku::Config->instance->views_dir . '/cli/',
     INTERPOLATE   => 1,
-    POST_CHOMP    => 1,
+    POST_CHOMP    => 0,
     PLUGIN_BASE   => 'Template::Plugin::Filter',
   });
   my $result;
