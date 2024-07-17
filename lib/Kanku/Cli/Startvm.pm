@@ -14,8 +14,10 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::startvm;    ## no critic (NamingConventions::Capitalization)
+package Kanku::Cli::Startvm;
 
+use strict;
+use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
