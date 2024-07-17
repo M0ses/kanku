@@ -14,16 +14,12 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::lsi;  ## no critic (NamingConventions::Capitalization)
+package Kanku::Cli::Lsi;
 
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-
 use Net::OBS::Client::Project;
-use Kanku::Config;
-use Kanku::Config::Defaults;
-
 
 command_short_description  'list standard kanku images';
 command_long_description   'This command lists the standard kanku images which'.
@@ -42,20 +38,20 @@ option 'apiurl' => (
   is            => 'rw',
   cmd_aliases   => 'a',
   documentation => 'OBS api url',
-  default       => sub { Kanku::Config::Defaults->get(__PACKAGE__, 'apiurl') },
+  builder       => '_build_apiurl',
 );
+sub _build_apiurl {
+  Kanku::Config::Defaults->get(__PACKAGE__, 'apiurl')
+}
 
 option 'project' => (
   isa           => 'Str',
   is            => 'rw',
   cmd_aliases   => 'p',
   documentation => 'Project name',
-  default       => sub { Kanku::Config::Defaults->get(__PACKAGE__, 'project') },
+  builder       => '_build_project',
 );
-
-BEGIN {
-  Kanku::Config->initialize();
-}
+sub _build_project { Kanku::Config::Defaults->get(__PACKAGE__, 'project') }
 
 sub run {
   my ($self)  = @_;
@@ -70,28 +66,25 @@ sub run {
     %credentials,
   );
 
-  my $res  = $prj->fetch_resultlist;
-  my $reg  = '.*'.$self->name.'.*';
-  my $arch = Kanku::Config->instance->cf->{arch} || 'x86_64';
-  foreach my $tmp (@{$res->{result}}) {
-    foreach my $pkg (@{$tmp->{status}}) {
-      if ($pkg->{code} !~ /disabled|excluded/) {
-        if ($pkg->{package} =~ $reg) {
-	print <<EOF
+  my $arch    = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'arch');
+  my $res     = $prj->fetch_resultlist(arch=>$arch);
+  my $re_name = '.*'.$self->name.'.*';
+  my $re_code = qr/^(disabled|excluded|unknown)$/;
+  my $pkgs    = [];
 
-    # --- $pkg->{package}
-      ## kanku init --apiurl $apiurl --project $project --package $pkg->{package} --repository $tmp->{repository}
-      ## state: $pkg->{code}
-      project: $project
-      package: $pkg->{package}
-      repository: $tmp->{repository}
-      arch: $arch
-EOF
-  ;
-      }
-    }
+  for my $repo (@{$res->{result}}) {
+    my @active_pkgs = grep { $_->{code} !~ $re_code } @{$repo->{status}};
+    push(@{$pkgs}, grep { $_->{package} =~ $re_name } @active_pkgs);
   }
-}
+
+  my $vars    = {
+    apiurl   => $apiurl,
+    project  => $project,
+    packages => [sort { $a->{package} cmp $b->{package} } @$pkgs],
+    arch     => $arch,
+  };
+
+  print $self->render_template('lsi.tt', $vars);
 
   return 0;
 }
