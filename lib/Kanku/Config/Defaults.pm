@@ -19,7 +19,9 @@ package Kanku::Config::Defaults;
 use Moose;
 use Try::Tiny;
 use Kanku::Config;
+use Config;
 
+my ($arch, undef) = split(/-/, $Config{archname});
 my $defaults =    {
   'Kanku::Util::IPTables' =>
   {
@@ -56,7 +58,7 @@ my $defaults =    {
     # Kanku::Handler::Vagrant
     box           => 'opensuse/Tumbleweed.x86_64',
   },
-  'Kanku::Cli::lsi' => {
+  'Kanku::Cli::Lsi' => {
     apiurl => 'https://api.opensuse.org/public',
     project => 'devel:kanku:images',
   },
@@ -79,9 +81,10 @@ my $defaults =    {
     dns_domain_name => 'kanku.server',
   },
   'Kanku::Config::GlobalVars' => {
-    cache_dir  => "$::ENV{'HOME'}/.cache/kanku",
-    images_dir => '/var/lib/libvirt/images',
+    cache_dir      => "$::ENV{'HOME'}/.cache/kanku",
+    images_dir     => '/var/lib/libvirt/images',
     host_interface => 'eth0',
+    arch           => $arch,
   },
   'Kanku::Roles::SSH' => {
     logverbosity    => 0,
