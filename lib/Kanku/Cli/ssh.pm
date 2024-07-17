@@ -144,7 +144,7 @@ sub run {
     $logger->debug("\$sshcmd = >>>$cmd<<<");
     system($cmd);
     if ($?) {
-      $logger->error("Failed to execute `$cmd`");
+      $logger->error("Failed to execute `$cmd`. RC=$?");
       $ret = $? >> 8;
     }
   }
