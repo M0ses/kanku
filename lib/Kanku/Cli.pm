@@ -18,6 +18,7 @@ package Kanku::Cli;
 
 use MooseX::App qw(Color BashCompletion);
 use Moose::Util::TypeConstraints;
+use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Logger';
 with 'Kanku::Cli::Roles::View';
