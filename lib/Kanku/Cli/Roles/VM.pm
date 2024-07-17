@@ -1,5 +1,7 @@
 package Kanku::Cli::Roles::VM;
 
+use strict;
+use warnings;
 use MooseX::App::Role;
 use Kanku::Config;
 
@@ -22,9 +24,10 @@ has cfg => (
   builder       => '_build_cfg',
 );
 sub _build_cfg {
+  my ($self) = @_;
   Kanku::Config->initialize(class => 'KankuFile');
   my $cfg = Kanku::Config->instance();
-  $cfg->file($_[0]->file);
+  $cfg->file($self->file);
   return $cfg;
 }
 
