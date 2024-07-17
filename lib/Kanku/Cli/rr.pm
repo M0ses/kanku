@@ -34,10 +34,6 @@ perform a logout on the remote server
 
 ';
 
-BEGIN {
-  Kanku::Config->intialize();
-}
-
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
