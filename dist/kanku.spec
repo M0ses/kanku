@@ -292,6 +292,8 @@ common config and lib files used in kanku
 
 /usr/lib/kanku/lib/Kanku/Test/
 
+%dir /usr/lib/kanku/lib/MooseX/
+
 %package cli
 Summary:        Command line client for kanku
 Requires:       kanku-common = %{version}
