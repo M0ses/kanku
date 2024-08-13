@@ -221,14 +221,14 @@ sub update_history {
 #
 #  my $rs = $self->schema->resultset('ObsCheckHistory')->update_or_create(
 #    {
-#      api_url     => $self->api_url,
+#      obsurl      => $self->obsurl,
 #      project     => $self->project,
 #      package     => $self->package,
 #      check_time  => time(),
 #      vm_image_url=> $self->job->context->{vm_image_url},
 #    },
 #    {
-#      unique_obscheck => [$self->api_url,$self->project,$self->package],
+#      unique_obscheck => [$self->obsurl,$self->project,$self->package],
 #    },
 #  );
 #
@@ -241,7 +241,7 @@ sub get_from_history {
 # FIXME: needs to be implemented
 #  my $rs = $self->schema->resultset('ObsCheckHistory')->find(
 #    {
-#      api_url     => $self->api_url,
+#      obsurl      => $self->obsurl,
 #      project     => $self->project,
 #      package     => $self->package,
 #    },

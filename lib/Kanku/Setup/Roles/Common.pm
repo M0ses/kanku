@@ -81,21 +81,24 @@ has interactive => (
 has dns_domain_name => (
     isa           => 'Str',
     is            => 'rw',
-    builder       => '_build_defaults'
+    lazy          => 1,
+    builder       => '_build_defaults',
 );
 
 has network_name => (
     isa           => 'Str',
     is            => 'rw',
     lazy          => 1,
-    builder       => '_build_defaults'
+    builder       => '_build_defaults',
 );
 sub _build_defaults {
   my @c = caller(0);
   return unless $c[1] =~ /accessor ([\w:]+) .*/;
   my @p = split /::/, $1;
   my $v = pop @p;
-  Kanku::Config::Defaults->get(join('::', @p), $v);
+  my $l = join('::', @p);
+  my $val = Kanku::Config::Defaults->get($l, $v) || "$l\:\:$v\_IS_MISSING!";
+  return $val
 }
 
 has host_interface=> (

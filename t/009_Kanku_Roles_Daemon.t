@@ -1,16 +1,31 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
-use Test::Exception;
+use Test::More;
 use FindBin;
-use Log::Log4perl;
+use Path::Class::Dir;
 
-Log::Log4perl->init("$FindBin::Bin/etc/log_to_dev_null.conf");
+use Kanku::Config;
+
+my $skip_reason;
+
+eval "use Test::Exception";
+
+if ($@) {
+  plan skip_all => "Could not use Test::Exception";
+}
+
+use Log::Log4perl;
+BEGIN  {
+  my $logging_conf = "$FindBin::Bin/etc/debugging.conf";
+  Log::Log4perl->init($logging_conf);
+};
+
+plan tests => 6;
 
 # avoid 'only used once'
 my $xy = $FindBin::Bin;
-require_ok('Kanku::MyDaemon');
+use_ok('Kanku::MyDaemon');
 
 {
   local @ARGV=("--non-existant-option");
@@ -49,13 +64,24 @@ for my $alias (keys(%{$aliases})) {
 }
 
 {
-  Kanku::MyDaemon->new()->initialize_shutdown();
-  my $shf = "$FindBin::Bin/../var/run/009_Kanku_Roles_Daemon.t.shutdown";
+  Kanku::Config->initialize;
+  my $tmpdir = File::Temp::tempdir(CLEANUP=>1);
+  my $rundir = "$tmpdir/run/";
+  my $dir    = Path::Class::Dir->new($rundir);
+  $dir->mkpath;
+  my $daemon = Kanku::MyDaemon->new(
+    run_dir => $dir,
+    logger  => Log::Log4perl->get_logger(""),
+  );
+  $daemon->prepare_and_run;
+  $daemon->initialize_shutdown();
+  my $shf = $rundir."009_Kanku_Roles_Daemon.t.shutdown";
   ok(
     ( -f $shf ),
     "Checking shutdown file"
   );
   unlink $shf;
 }
+
 exit 0;
 

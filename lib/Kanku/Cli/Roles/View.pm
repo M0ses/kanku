@@ -1,18 +1,39 @@
 package Kanku::Cli::Roles::View;
 
 use Moose::Role;
+
 use Carp;
 use Template;
+use File::Spec;
+
 use Data::Dumper;
 use JSON::XS;
 use YAML::PP;
-use Kanku::Config;
+
+use Kanku::Config::Defaults;
+
+has include_path => (
+  is      => 'rw',
+  isa     => 'ArrayRef',
+  lazy    => 1,
+  builder => '_build_include_path',
+);
+sub _build_include_path {
+  return [
+    File::Spec->catdir($::ENV{HOME}, '.config', 'kanku', 'views', 'cli'),
+    File::Spec->catdir($::ENV{HOME}, '.kanku', 'views', 'cli'),
+    File::Spec->catdir(
+      Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'views_dir'),
+      'cli',
+    ),
+  ],
+}
 
 sub view {
   my ($self, $template, $data) = @_;
 
   my $tt = Template->new({
-    INCLUDE_PATH  => Kanku::Config->instance->views_dir . '/cli/',
+    INCLUDE_PATH  => $self->include_path,
     INTERPOLATE   => 1,
     POST_CHOMP    => 1,
     PLUGIN_BASE   => 'Template::Plugin::Filter',
@@ -28,7 +49,7 @@ sub render_template {
   my ($self, $template, $data) = @_;
 
   my $tt = Template->new({
-    INCLUDE_PATH  => Kanku::Config->instance->views_dir . '/cli/',
+    INCLUDE_PATH  => $self->include_path,
     INTERPOLATE   => 1,
     POST_CHOMP    => 0,
     PLUGIN_BASE   => 'Template::Plugin::Filter',

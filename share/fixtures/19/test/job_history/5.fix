@@ -1,0 +1,21 @@
+$HASH1 = {
+           args     => undef,
+           creation_time
+                    => 1634880978,
+           end_time => 1634883065,
+           id       => 5,
+           last_modified
+                    => 1634883065,
+           masterinfo
+                    => 1421,
+           name     => 'obs-server',
+           pwrand   => '{}',
+           result   => undef,
+           start_time
+                    => 1634880982,
+           state    => 'failed',
+           trigger_user
+                    => undef,
+           workerinfo
+                    => 'kanku-devel.kanku.site:1416:job-5-cf030b63-31ef-4ebd-a654-e16853c98f2d'
+         };

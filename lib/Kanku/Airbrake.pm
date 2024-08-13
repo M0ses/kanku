@@ -9,7 +9,7 @@ has _backtrace => (is => 'rw', isa => 'ArrayRef', default => sub {[]});
 
 sub initialize {
   my ($self, @opts) = @_;
-  my $cfg    = Kanku::Config->instance()->config();
+  my $cfg    = Kanku::Config->instance()->cf();
 
   if ( $cfg->{'Kanku::Airbrake'} ) {
     try {

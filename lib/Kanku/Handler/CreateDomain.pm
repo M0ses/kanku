@@ -17,15 +17,15 @@
 package Kanku::Handler::CreateDomain;
 
 use Moose;
-use Moose::Util::TypeConstraints;
+
 use Try::Tiny;
+use Carp;
 use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError) ;
 use File::Copy qw/copy/;
 use Path::Class::File;
 use Data::Dumper;
 use Session::Token;
 use File::Basename qw/basename/;
-use Carp;
 use File::HomeDir;
 
 use Kanku::Config;
@@ -33,6 +33,7 @@ use Kanku::Config::Defaults;
 use Kanku::Util::VM;
 use Kanku::Util::VM::Image;
 use Kanku::Util::IPTables;
+use Kanku::TypeConstraints;
 
 sub gui_config {
   [
@@ -222,8 +223,6 @@ has login_timeout => (
   is      => 'rw',
   isa     => 'Int',
 );
-
-enum 'ImageType' => [qw/kanku vagrant/];
 
 has image_type => (
   is      => 'rw',

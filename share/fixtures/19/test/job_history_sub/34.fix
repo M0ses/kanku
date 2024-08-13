@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 34,
+           job_id => 4,
+           name   => 'Kanku::Handler::GIT',
+           result => '{"prepare":{"code":0,"message":"Preparation successful"},"finalize":{"code":0,"message":"Nothing to do!"},"execute":{"code":0,"message":"git clone from url https://github.com/openSUSE/open-build-service.git and checkout of revision master was successful"}}',
+           state  => 'succeed'
+         };

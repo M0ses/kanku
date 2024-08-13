@@ -16,7 +16,7 @@ tasks:
   -
     use_module: Kanku::Handler::OBSCheck
     options:
-      api_url: https://api.opensuse.org/public
+      obsurl: https://api.opensuse.org/public
       project: devel:kanku:images
       package: SLES-12-SP5-JeOS
       repository: images_sle12_sp5

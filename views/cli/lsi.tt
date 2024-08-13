@@ -1,7 +1,8 @@
 [% FOR pkg IN packages %]
     # --- [% pkg.package %]
-      ## kanku init --apiurl [% apiurl %] --project [% project %] --package [% pkg.package %] --repository [% pkg.repository %]
+      ## kanku init --obsurl [% obsurl %] --project [% project %] --package [% pkg.package %] --repository [% pkg.repository %]
       ## state: pkg.code
+      # obsurl: [% obsurl %]
       project: [% project %]
       package: [% pkg.package %]
       repository: [% pkg.repository %]

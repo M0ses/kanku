@@ -80,7 +80,7 @@ has download_url => (
   },
 );
 
-has api_url => (
+has obsurl => (
   is      =>'rw',
   isa     =>'Str',
   lazy    => 1,
@@ -110,7 +110,7 @@ has get_image_file_from_url => (
       repository  => $self->repository,
       arch        => $self->arch,
       package     => $self->package,
-      apiurl      => $self->api_url,
+      apiurl      => $self->obsurl,
       %{$self->auth_config},
     );
     my $binlist = $build_results->binarylist();
@@ -118,7 +118,7 @@ has get_image_file_from_url => (
     my $record = $self->get_image_file_from_url_cb->($self,$binlist);
     if ( $record ) {
       $record->{url} = $self->download_url .$record->{prefix}. $record->{filename};
-      $record->{bin_url} = $self->api_url . '/build/'.$self->project.q{/}.$self->repository.q{/}.$self->arch.q{/}.$self->package."/$record->{filename}";
+      $record->{bin_url} = $self->obsurl . '/build/'.$self->project.q{/}.$self->repository.q{/}.$self->arch.q{/}.$self->package."/$record->{filename}";
       $record->{obs_username} = $build_results->user;
       $record->{obs_password} = $build_results->pass;
     }
@@ -142,7 +142,7 @@ has auth_config => (
 
     if (defined $use_oscrc) {
       if (!$use_oscrc) {
-	my $default_credentials = Kanku::Config::Defaults->get(__PACKAGE__, $self->api_url);
+	my $default_credentials = Kanku::Config::Defaults->get(__PACKAGE__, $self->obsurl);
 	my $user = Kanku::Config::Defaults->get(__PACKAGE__, 'obs_username');
 	my $pass = Kanku::Config::Defaults->get(__PACKAGE__, 'obs_password');
         if ( $default_credentials || $user || $pass) {
@@ -151,7 +151,7 @@ has auth_config => (
 	} else {
 	  $self->logger->debug("Using Net::OBS::Client config");
 	  my $net_credentials = Kanku::Config::Defaults->get('Net::OBS::Client', 'credentials');
-          $cfg = {%{$net_credentials->{$self->api_url}}} if (ref($net_credentials->{$self->api_url}) eq 'HASH');
+          $cfg = {%{$net_credentials->{$self->obsurl}}} if (ref($net_credentials->{$self->obsurl}) eq 'HASH');
 	}
       }
       $cfg->{use_oscrc} = $use_oscrc;
@@ -198,7 +198,7 @@ sub check_before_download {
           name        => $self->project,
           repository  => $self->repository,
           arch        => $self->arch,
-          apiurl      => $self->api_url,
+          apiurl      => $self->obsurl,
 	  %{$self->auth_config},
       );
 
@@ -206,7 +206,7 @@ sub check_before_download {
         my ($p, $r, $a, $u) = ( $self->project,
                                 $self->repository,
                                 $self->arch,
-                                $self->api_url,);
+                                $self->obsurl,);
         croak("Project '$p' on '$u' not ready yet.\n"
              ."Please check 'osc r $p -a $a -r $r'\n"
 	     ."Or use '--skip_all_checks' option\n"
@@ -220,7 +220,7 @@ sub check_before_download {
           project     => $self->project,
           repository  => $self->repository,
           arch        => $self->arch,
-          apiurl      => $self->api_url,
+          apiurl      => $self->obsurl,
 	  %{$self->auth_config},
       );
 
@@ -228,7 +228,7 @@ sub check_before_download {
         my ($p, $r, $a, $u, $pkg) = ($self->project,
                                      $self->repository,
                                      $self->arch,
-                                     $self->api_url,
+                                     $self->obsurl,
                                      $self->package,);
         croak("Package '$p/$pkg' not ready yet\n"
              ."Please check 'osc r $p $pkg -a $a -r $r'\n"

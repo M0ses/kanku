@@ -34,8 +34,6 @@ use Kanku::Config;
 use Kanku::Airbrake;
 use Kanku::NotifyQueue;
 
-BEGIN { Kanku::Config->initialize; }
-
 with 'Kanku::Roles::Logger';
 
 requires 'run';
@@ -43,6 +41,7 @@ requires 'run';
 has daemon_options => (
   is      => 'rw',
   isa     => 'HashRef',
+  lazy    => 1,
   builder => '_build_daemon_options',
 );
 sub _build_daemon_options {
@@ -131,6 +130,7 @@ sub print_usage {
 
 sub prepare_and_run {
   my ($self) = @_;
+  Kanku::Config->initialize();
   my $logger = $self->logger;
 
   if ($self->daemon_options->{stop}) {
@@ -139,7 +139,7 @@ sub prepare_and_run {
 
   $self->check_pid if -e $self->pid_file;
 
-  $self->logger->info("Starting service " . ref __PACKAGE__);
+  $self->logger->info("Starting service " . ref $self);
 
   my $hn  = hostfqdn() || hostname();
   my $ref = ref $self;
@@ -162,6 +162,8 @@ sub prepare_and_run {
     return 0 if fork;
   }
 
+  $self->logger->info(sprintf("Writing to pid file '%s' : %d", $self->pid_file, $$));
+
   write_file($self->pid_file, "$$");
 
   Kanku::Airbrake->initialize();
@@ -179,7 +181,7 @@ sub initialize_shutdown {
 
   # nothing should be running if no pid_file exists
   if (! -e  $self->pid_file) {
-    $logger->debug('No pidfile found, exiting');
+    $logger->info('No pidfile found, exiting');
     return 0;
   }
 
@@ -199,7 +201,7 @@ sub initialize_shutdown {
 sub finalize_shutdown {
   my ($self) = @_;
   my $logger = $self->logger;
-
+  my $pkg    = __PACKAGE__;
   $logger->debug('Removing shutdown file: '. $self->shutdown_file->stringify);
   unlink($self->shutdown_file->stringify) ||
       $logger->error('Unable to remove \''.$self->shutdown_file->stringify."': $!");
@@ -208,7 +210,7 @@ sub finalize_shutdown {
   unlink($self->pid_file->stringify) ||
       $logger->error('Unable to remove \''.$self->pid_file->stringify."': $!");
 
-  $logger->info('Shutting down service '.ref(__PACKAGE__));
+  $logger->info("Shutting down service $pkg");
 
   my $hn  = hostfqdn() || 'localhost';
   my $ref = ref($self);
@@ -227,10 +229,14 @@ sub finalize_shutdown {
 
 sub check_pid {
   my ($self) = @_;
+  my $pidfile = $self->pid_file->stringify;
+  my $pid     = read_file($pidfile) || die "Could not read $pidfile: $!";
 
-  my $pid = read_file($self->pid_file->stringify);
-
-  if (kill(0,$pid)) {
+  if ($pid == $$) {;
+    $self->logger->info("Pid matches my own pid $$");
+    return
+  }
+  if (kill(0, $pid)) {
     die "Another instance already running with pid $pid\n";
   }
 

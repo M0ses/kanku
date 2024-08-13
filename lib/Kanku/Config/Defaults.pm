@@ -23,6 +23,14 @@ use Config;
 
 my ($arch, undef) = split(/-/, $Config{archname});
 my $defaults =    {
+  'Kanku::Config::GlobalVars' => {
+    cache_dir      => "$::ENV{'HOME'}/.cache/kanku",
+    images_dir     => '/var/lib/libvirt/images',
+    views_dir      => '/usr/share/kanku/views',
+    host_interface => 'eth0',
+    arch           => $arch,
+    obsurl        => 'https://api.opensuse.org/public',
+  },
   'Kanku::Util::IPTables' =>
   {
     'iptables_chain' => 'KANKU_HOSTS',
@@ -48,18 +56,17 @@ my $defaults =    {
     login_user    => 'vagrant',
     login_pass    => 'vagrant',
   },
-  'Kanku::Cli::init' => {
+  'Kanku::Cli::Init' => {
     project       => 'devel:kanku:images',
     package       => 'openSUSE-Leap-15.6-JeOS',
     repository    => 'images_leap_15_6',
-    apiurl        => 'https://api.opensuse.org/public',
     template_path => '/etc/kanku/templates/cmd/init',
     template      => 'default',
     # Kanku::Handler::Vagrant
     box           => 'opensuse/Tumbleweed.x86_64',
+    domain_name   => 'kanku-vm',
   },
   'Kanku::Cli::Lsi' => {
-    apiurl => 'https://api.opensuse.org/public',
     project => 'devel:kanku:images',
   },
   'Kanku::Util::DoD' => {
@@ -80,12 +87,6 @@ my $defaults =    {
     network_name => 'kanku-server',
     dns_domain_name => 'kanku.server',
   },
-  'Kanku::Config::GlobalVars' => {
-    cache_dir      => "$::ENV{'HOME'}/.cache/kanku",
-    images_dir     => '/var/lib/libvirt/images',
-    host_interface => 'eth0',
-    arch           => $arch,
-  },
   'Kanku::Roles::SSH' => {
     logverbosity    => 0,
     privatekey_path => q{},
@@ -93,6 +94,24 @@ my $defaults =    {
     auth_type       => 'agent',
   },
 };
+
+has 'rcfile' => (
+  is      => 'ro',
+  isa     =>'Str',
+  default => "$::ENV{HOME}/.kankurc",
+);
+
+has 'rc' => (
+  is      => 'ro',
+  isa     => 'Str',
+  builder => '_build_rc',
+);
+
+sub _build_rc {
+  my ($self) = @_;
+  my $rc;
+  return (-f $self->rcfile) ? Kanku::YAML::LoadFile($self->rcfile) : {};
+}
 
 sub get {
   my ($self, $pkg, $var) = @_;

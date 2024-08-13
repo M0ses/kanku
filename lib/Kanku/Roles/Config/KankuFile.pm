@@ -17,10 +17,8 @@
 package Kanku::Roles::Config::KankuFile;
 
 use Moose::Role;
-use File::Spec;
-use Cwd;
 
-with 'Kanku::Roles::Config::Base';
+use Kanku::File;
 
 has 'views_dir' => (
   is      =>'rw',
@@ -28,38 +26,20 @@ has 'views_dir' => (
   default => '/usr/share/kanku/views',
 );
 
-has 'log_dir' => (
-  is=>'rw',
-  isa=>'Str',
-  builder => '_build_log_dir',
-);
-sub _build_log_dir {
-  return File::Spec->canonpath(getcwd(),'.kanku','log');
-}
-
-has '_file' => (
+sub file;
+has 'file' => (
   is      =>'rw',
   isa     =>'Str',
-  builder => '_build__file',
+  builder => '_build_file',
 );
-sub _build__file {
-  my ($self)  = @_;
-
-  # FIXME:
-  # change `KankuFile` to something like $self->kankufile
-  #
-  return File::Spec->canonpath(getcwd(), 'KankuFile');
-}
-
-sub file {
+sub _build_file {
   my ($self, $file)  = @_;
-  my $f = File::Spec->canonpath(
+  my $f = Kanku::File->lookup_file(
     $file
-    || $ENV{KANKU_CONFIG}
-    || getcwd()."/KankuFile"
-  );
-  $self->_file($f) if $f;
-  return $self->_file;
+      || $ENV{KANKU_CONFIG}
+      || "KankuFile"
+  ); 
+  return $f;
 };
 
 sub job_config {
@@ -79,5 +59,7 @@ sub job_list {
   my ($self) = @_;
   return (keys %{$self->config->{jobs}});
 }
+
+with 'Kanku::Roles::Config::Base';
 
 1;

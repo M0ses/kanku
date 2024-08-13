@@ -1,0 +1,16 @@
+$HASH1 = {
+           deleted => 1,
+           email   => 'admin@example.com',
+           id      => 1,
+           lastlogin
+                   => undef,
+           name    => 'Admin User',
+           password
+                   => '{SSHA512}j7M89DxM6SXHrQRFUMJBJF1PIF0yEivYlCQQPz3yTxVnjxnCBfY2NPvSqwpWa1P4yQvzCpf7pVdC39OA8CuZ+nzeBWE=',
+           pw_changed
+                   => undef,
+           pw_reset_code
+                   => 'VtjVYiLHPfJfQHBvhIzqS2O8ly2v1WA0',
+           username
+                   => 'admin'
+         };

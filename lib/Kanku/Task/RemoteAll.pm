@@ -36,8 +36,6 @@ Frank Schreiner, <fschreiner@suse.de>
 
 use Moose;
 
-our $VERSION = "0.0.1";
-
 with 'Kanku::Roles::Logger';
 
 use Data::Dumper;

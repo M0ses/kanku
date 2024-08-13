@@ -45,6 +45,7 @@
       commands:
         - rcnetwork restart
         - zypper -n in rabbitmq-server rabbitmq-server-plugins openvswitch kanku openssh-clients
+        - rm -rf /usr/lib/kanku/lib
         - make -C /tmp/kanku install 2>&1 |tee /tmp/make.log
         - /usr/bin/kanku setup --apache --distributed --ssl 2>&1 |tee /tmp/setup-server.log
         - cp -r /tmp/kanku/etc/jobs/examples/* /etc/kanku/jobs/
@@ -55,7 +56,7 @@
         - systemctl enable --now kanku-triggerd
         - systemctl enable --now kanku-scheduler
         - virsh net-start kanku-ovs
-        - kanku login -a http://localhost:5000/kanku -u admin -p opensuse
+        - kanku login -a http://localhost:5000/kanku -u admin -p opensuse -k None
         - /tmp/kanku/contrib/set_ip
         - rcapache2 restart
         - systemctl enable --now kanku-worker

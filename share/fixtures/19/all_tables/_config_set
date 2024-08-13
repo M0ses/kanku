@@ -1,0 +1,61 @@
+$VAR1 = {
+          'has_many' => {
+                          'fetch' => 0
+                        },
+          'might_have' => {
+                            'fetch' => 0
+                          },
+          'sets' => [
+                      {
+                        'quantity' => 'all',
+                        'class' => 'Role'
+                      },
+                      {
+                        'quantity' => 'all',
+                        'class' => 'JobHistorySub'
+                      },
+                      {
+                        'class' => 'UserRole',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'class' => 'JobHistory',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'class' => 'WsToken',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'class' => 'User',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'class' => 'WsSession',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'class' => 'StateWorker',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'class' => 'RoleRequest',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'class' => 'ImageDownloadHistory',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'class' => 'ObsCheckHistory',
+                        'quantity' => 'all'
+                      },
+                      {
+                        'quantity' => 'all',
+                        'class' => 'JobHistoryComment'
+                      }
+                    ],
+          'belongs_to' => {
+                            'fetch' => 0
+                          }
+        };

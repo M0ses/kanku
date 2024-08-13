@@ -1,4 +1,4 @@
-# Copyright (c) 2016 SUSE LLC
+# Copyright (c) 2024 SUSE LLC
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2 as
@@ -22,8 +22,12 @@ extends qw(Kanku::Cli);
 use Net::OBS::Client::Project;
 
 command_short_description  'list standard kanku images';
-command_long_description   'This command lists the standard kanku images which'.
-  ' are based on (open)SUSEs JeOS images';
+
+command_long_description   '
+This command lists the standard kanku images which  are based on (open)SUSEs
+JeOS images
+
+';
 
 option 'name' => (
   isa           => 'Str',
@@ -33,15 +37,15 @@ option 'name' => (
   default       => '',
 );
 
-option 'apiurl' => (
+option 'obsurl' => (
   isa           => 'Str',
   is            => 'rw',
   cmd_aliases   => 'a',
   documentation => 'OBS api url',
-  builder       => '_build_apiurl',
+  builder       => '_build_obsurl',
 );
-sub _build_apiurl {
-  Kanku::Config::Defaults->get(__PACKAGE__, 'apiurl')
+sub _build_obsurl {
+  return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'obsurl');
 }
 
 option 'project' => (
@@ -51,18 +55,20 @@ option 'project' => (
   documentation => 'Project name',
   builder       => '_build_project',
 );
-sub _build_project { Kanku::Config::Defaults->get(__PACKAGE__, 'project') }
+sub _build_project {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'project');
+}
 
 sub run {
   my ($self)  = @_;
-  my $apiurl  = $self->apiurl;
+  my $obsurl  = $self->obsurl;
   my $project = $self->project;
   my $cred_defaults = Kanku::Config::Defaults->get('Net::OBS::Client','credentials');
-  my %credentials = (ref($cred_defaults->{$apiurl}) eq "HASH") ? %{$cred_defaults->{$apiurl}} :();
+  my %credentials = (ref($cred_defaults->{$obsurl}) eq "HASH") ? %{$cred_defaults->{$obsurl}} :();
 
   my $prj = Net::OBS::Client::Project->new(
     name     => $project,
-    apiurl   => $apiurl,
+    apiurl   => $obsurl,
     %credentials,
   );
 
@@ -78,7 +84,7 @@ sub run {
   }
 
   my $vars    = {
-    apiurl   => $apiurl,
+    obsurl   => $obsurl,
     project  => $project,
     packages => [sort { $a->{package} cmp $b->{package} } @$pkgs],
     arch     => $arch,

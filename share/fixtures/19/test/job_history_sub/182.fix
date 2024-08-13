@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 182,
+           job_id => 24,
+           name   => 'Kanku::Handler::CreateDomain',
+           result => undef,
+           state  => 'failed'
+         };

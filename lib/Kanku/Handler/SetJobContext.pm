@@ -56,7 +56,7 @@ sub distributable { 0 }
 with 'Kanku::Roles::Handler';
 
 has [qw/
-        api_url         project         package
+        obsurl         project         package
         vm_image_file   vm_image_url    vm_template_file
         domain_name     host_interface  management_interface
         cache_dir       images_dir
@@ -123,7 +123,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
   -
     use_module: Kanku::Handler::SetJobContext
     options:
-      api_url: https://api.opensuse.org/public
+      obsurl: https://api.opensuse.org/public
       ....
 
 =head1 DESCRIPTION
@@ -135,7 +135,7 @@ This handler will set the given variables in the job context
 
 For further explaination of these options please have a look at the corresponding modules.
 
-      api_url
+      obsurl
 
       project
 

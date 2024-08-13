@@ -17,10 +17,10 @@
 package Kanku::Handler::ChangeDomainState;
 
 use Moose;
-use Moose::Util::TypeConstraints;
 
 use Kanku::Config;
 use Kanku::Util::VM;
+use Kanku::TypeConstraints;
 
 sub gui_config {
   [
@@ -31,7 +31,9 @@ sub gui_config {
     },
   ];
 }
+
 sub distributable { 1 }
+
 with 'Kanku::Roles::Handler';
 
 has [qw/domain_name login_user login_pass/] => (
@@ -41,7 +43,7 @@ has [qw/domain_name login_user login_pass/] => (
 
 has 'action' => (
   is => 'ro',
-  isa => enum([qw[reboot shutdown create destroy undefine]]),
+  isa => 'DomainAction',
 );
 
 has [qw/wait_for_network wait_for_console/] => (

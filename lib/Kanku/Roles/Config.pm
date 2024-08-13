@@ -17,36 +17,44 @@
 package Kanku::Roles::Config;
 
 use Moose::Role;
+
 use Path::Class::File;
 use Path::Class::Dir;
 use Data::Dumper;
-use Kanku::YAML;
 use YAML::PP;
 use YAML::PP::Schema::Include;
 use Try::Tiny;
 use File::HomeDir;
 use Kanku::Config::Defaults;
+use Kanku::YAML;
+use Carp;
 
-with 'Kanku::Roles::Config::Base';
-
-sub file {
+sub file;
+has file => (
+  is      => 'rw',
+  isa     => 'Object',
+  lazy    => 1,
+  builder => '_build_file',
+);
+sub _build_file {
   my ($self) = @_;
-  my $home  = File::HomeDir->my_home;
-  my @files = ("$home/.kanku/kanku-config.yml", '/etc/kanku/kanku-config.yml');
+  my $logger = $self->logger;
+  my $home   = File::HomeDir->my_home;
+  my @files = (
+    "$home/kanku/config.yml",
+    "$home/.kanku/kanku-config.yml",
+    '/etc/kanku/kanku-config.yml'
+  );
+
   for my $f (@files) {
     if (-f $f) {
-      $self->logger->trace("Found Config file: $f");
+      $logger->trace("Found Config file: $f");
       return Path::Class::File->new($f);
     }
-    $self->logger->trace("Config file: $f not found");
   }
+  return undef;
+  confess "No config files found. Please run `kanku setup ...`\n";
 }
-
-has last_modified => (
-  is        => 'rw',
-  isa       => "Int",
-  default   => 0,
-);
 
 has views_dir => (
   is        => 'rw',
@@ -112,8 +120,8 @@ sub notifiers_config {
 }
 
 sub job_config_plain {
-  my $self      = shift;
-  my $job_name  = shift;
+  my ($self, $job_name) = @_;
+
   my $conf_file = Path::Class::File->new("/etc/kanku/jobs/$job_name.yml");
   my $content   = $conf_file->slurp();
 
@@ -123,7 +131,7 @@ sub job_config_plain {
 sub job_group_config {
   my ($self, $name) = @_;
   my ($cfg, $yml);
-  #$yml = $self->job_group_config_plain($name);
+
   $cfg = $self->load_job_group_config($name);
 
   if (ref($cfg) eq 'HASH') {
@@ -156,5 +164,7 @@ sub job_group_config_plain {
 
   return $content;
 }
+
+with 'Kanku::Roles::Config::Base';
 
 1;

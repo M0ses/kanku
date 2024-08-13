@@ -20,19 +20,24 @@ use strict;
 use warnings;
 
 use MooseX::App::Role;
-use Kanku::YAML;
+
 use LWP::UserAgent;
 use JSON::XS;
 use HTTP::Cookies;
 use HTTP::Request;
 use Carp;
+use URI;
 
+use Kanku::YAML;
+use Kanku::TypeConstraints;
+use Kanku::Config::Defaults;
 
 option 'apiurl' => (
-  isa           => 'Str',
+  isa           => 'URL',
   is            => 'rw',
   cmd_aliases   => 'a',
   documentation => 'Url to your kanku remote instance',
+  required      => 1,
 );
 
 option 'user' => (
@@ -40,27 +45,24 @@ option 'user' => (
   is            => 'rw',
   cmd_aliases   => 'u',
   documentation => 'Login user to to connect to your kanku remote instance',
+  required      => 1,
 );
 
+
 option 'password' => (
-  isa           => 'Str',
+  isa           => 'Password',
   is            => 'rw',
   cmd_aliases   => 'p',
   documentation => 'Login password to connect to your kanku remote instance',
-);
-
-option 'rc_file' => (
-  isa           => 'Str',
-  is            => 'rw',
-  documentation => 'Config file to load and store settings',
-  default       => "$ENV{HOME}/.kankurc",
+  required      => 1,
 );
 
 option 'keyring' => (
-  isa           => 'Str',
+  isa           => 'KeyringBackend',
   is            => 'rw',
   cmd_aliases   => 'k',
   documentation => 'Name of keyring backend (KDEWallet/Gnome/Memory)',
+  required      => 1,
 );
 
 option 'as_admin' => (
@@ -68,26 +70,6 @@ option 'as_admin' => (
   is            => 'rw',
   cmd_aliases   => 'aa',
   documentation => 'execute remote command as admin',
-);
-
-has settings => (
-  isa           => 'HashRef',
-  is            => 'rw',
-  lazy          => 1,
-  default       => sub {
-    my $self = shift;
-    if ( -f $self->rc_file ) {
-      my $ct = Kanku::YAML::LoadFile($_[0]->rc_file);
-      if ( $ct->{apiurl} ) {
-	$self->apiurl($ct->{apiurl});
-      }
-      return $ct;
-    }
-    return {
-	apiurl	 => $self->apiurl,
-        keyring  => $self->keyring,
-    }
-  },
 );
 
 has cookie_jar => (
@@ -107,66 +89,62 @@ has cookie_jar => (
 has _cookie_jar_file => (
   is        =>'rw',
   isa       =>'Str',
+  lazy      => 1,
   required  => 1,
-  default   => "$ENV{'HOME'}/.kanku_cookiejar",
+  default   => "$::ENV{'HOME'}/.kanku_cookiejar",
 );
 
 has login_url => (
   is        => 'rw',
   isa       => 'Str',
   lazy	    => 1,
-  default   => sub { my $au = $_[0]->apiurl; $au =~ s/\/$//; "$au/rest/login.json" },
+  builder   => '_build_login_url',
 );
+sub _build_login_url {
+  my ($self) = @_;
+  my $au = $self->apiurl; 
+  $au =~ s/\/$//; 
+  return "$au/rest/login.json"
+}
 
 has logout_url => (
   is        => 'rw',
   isa       => 'Str',
   lazy	    => 1,
-  default   => sub { my $au = $_[0]->apiurl; $au =~ s/\/$//; "$au/rest/logout.json" },
+  builder   => '_build_logout_url',
 );
+sub _build_logout_url {
+  my ($self) = @_;
+  my $au = $self->apiurl;
+  $au =~ s/\/$//;
+  return "$au/rest/logout.json"
+}
 
 has ua => (
   is        => 'rw',
   isa       => 'Object',
-  default   => sub {
-    return LWP::UserAgent->new(
-        cookie_jar => $_[0]->cookie_jar,
-        ssl_opts => {
-          verify_hostname => 0,
-          SSL_verify_mode => 0x00
-        }
-    );
-  },
+  builder   => '',
+  lazy      => 1,
+  builder   => '_build_ua',
 );
+sub _build_ua {
+  return LWP::UserAgent->new(
+    cookie_jar => $_[0]->cookie_jar,
+    ssl_opts => {
+      verify_hostname => 0,
+      SSL_verify_mode => 0x00
+    },
+  );
+}
+
 
 sub connect_restapi {
-  my $self = shift;
-  my $logger  = $self->logger;
-
-  if ( ! $self->apiurl ) {
-    if ( -f $self->rc_file ) {
-      $self->settings(Kanku::YAML::LoadFile($self->rc_file));
-      $self->apiurl( $self->settings->{apiurl} || q{});
-      if ( $self->apiurl ) {
-	my $user = $self->settings->{$self->apiurl}->{user};
-	my $password = $self->settings->{$self->apiurl}->{password};
-	$self->user($user) if $user;
-	$self->password($password) if $password;
-      }
-    }
-  }
-
-  if ( ! $self->apiurl ) {
-    $logger->error('No apiurl found - Please login');
-    croak('No apiurl found!');
-  }
-
+  my ($self) = @_;
   return $self;
 }
 
 sub login {
   my $self     = shift;
-  my $settings = $self->settings;
   my $data     = { username=>$self->user,password=>$self->password };
   my $content  = encode_json($data);
   my $response = $self->ua->post( $self->login_url, Content => $content);
@@ -239,13 +217,7 @@ sub get_json {
 
   croak("No path given!\n") if ( ! $opts{path} );
 
-  if ( ! -f $self->_cookie_jar_file ) {
-    if ( -f $self->rc_file ) {
-      $self->settings();
-    } else {
-      return 0;
-    }
-  }
+  return 0 if ( ! -f $self->_cookie_jar_file );
 
   $self->ua->cookie_jar->load();
 
@@ -296,14 +268,7 @@ sub post_json {
   croak("No path given!\n") if ( ! $opts{path} );
   croak("No data given!\n") if ( ! $opts{data} );
 
-  if ( ! -f $self->_cookie_jar_file ) {
-    if ( -f $self->rc_file ) {
-      $self->settings();
-    } else {
-      return 0;
-    }
-  }
-
+  return 0 if ( ! -f $self->_cookie_jar_file );
   $self->ua->cookie_jar->load();
 
   my @param_arr;
@@ -360,13 +325,7 @@ sub put_json {
   croak("No path given!\n") if ( ! $opts{path} );
   croak("No data given!\n") if ( ! $opts{data} );
 
-  if ( ! -f $self->_cookie_jar_file ) {
-    if ( -f $self->rc_file ) {
-      $self->settings();
-    } else {
-      return 0;
-    }
-  }
+  return 0 if ( ! -f $self->_cookie_jar_file );
 
   $self->ua->cookie_jar->load();
 
@@ -424,13 +383,7 @@ sub delete_json {
 
   croak("No path given!\n") if (! $opts{path});
 
-  if ( ! -f $self->_cookie_jar_file ) {
-    if ( -f $self->rc_file ) {
-      $self->settings();
-    } else {
-      return 0;
-    }
-  }
+  return 0 if ( ! -f $self->_cookie_jar_file );
 
   $self->ua->cookie_jar->load();
 

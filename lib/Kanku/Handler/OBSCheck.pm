@@ -25,9 +25,9 @@ use Carp;
 sub gui_config {
   [
     {
-      param => 'api_url',
+      param => 'obsurl',
       type  => 'text',
-      label => 'API URL',
+      label => 'OBS API URL',
     },
     {
       param => 'skip_all_checks',
@@ -74,15 +74,15 @@ sub _build_dod_object  {
     project             => $self->project,
     package             => $self->package,
     arch                => $self->arch,
-    api_url             => $self->api_url,
+    obsurl              => $self->obsurl,
     preferred_extension => $self->preferred_extension,
     use_oscrc           => $self->use_oscrc,
   );
 }
 
-has ['api_url','project','package'] => (is=>'rw',isa=>'Str',required=>1);
+has ['obsurl','project','package'] => (is=>'rw',isa=>'Str',required=>1);
 
-has '+api_url' => (default => 'https://api.opensuse.org/public');
+has '+obsurl' => (default => 'https://api.opensuse.org/public');
 
 has ['base_url', 'repository', 'preferred_extension', 'arch'] => (is=>'rw',isa=>'Str');
 has '+preferred_extension' => (lazy => 1, default => q{});
@@ -202,7 +202,7 @@ sub execute {
   $ctx->{obs_package}    = $self->package;
   $ctx->{obs_repository} = $self->repository;
   $ctx->{obs_arch}       = $self->arch;
-  $ctx->{api_url}        = $self->api_url;
+  $ctx->{obsurl}         = $self->obsurl;
 
   if (!($ctx->{vm_image_url} or $ctx->{obs_direct_url})) {
     croak("Neither vm_image_url nor obs_direct_url found\n"
@@ -220,7 +220,7 @@ sub execute {
     code    => 0,
     state   => 'succeed',
     message => 'Sucessfully checked project '.$self->project.' under url '
-                 .$self->api_url ."\n"
+                 .$self->obsurl ."\n"
                  .' ('
                  .    "vm_image_url: $ctx->{vm_image_url}, "
                  .    "obs_direct_url: $ctx->{obs_direct_url}"
@@ -233,14 +233,14 @@ sub update_history {
 
   my $rs = $self->schema->resultset('ObsCheckHistory')->update_or_create(
     {
-      api_url     => $self->api_url,
+      obsurl     => $self->obsurl,
       project     => $self->project,
       package     => $self->package,
       check_time  => time(),
       vm_image_url=> $self->job->context->{vm_image_url},
     },
     {
-      unique_obscheck => [$self->api_url,$self->project,$self->package],
+      unique_obscheck => [$self->obsurl,$self->project,$self->package],
     },
   );
 
@@ -252,7 +252,7 @@ sub get_from_history {
   my $ctx  = $self->job->context;
   my $rs = $self->schema->resultset('ObsCheckHistory')->find(
     {
-      api_url     => $self->api_url,
+      obsurl     => $self->obsurl,
       project     => $self->project,
       package     => $self->package,
     },
@@ -283,7 +283,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
   -
     use_module: Kanku::Handler::OBSCheck
     options:
-      api_url: https://api.opensuse.org/public
+      obsurl: https://api.opensuse.org/public
       project: devel:kanku:images
       package: openSUSE-Leap-15.0-JeOS
       repository: images_leap_15_0
@@ -295,7 +295,7 @@ This handler downloads a file from a given url to the local filesystem and sets 
 
 =head1 OPTIONS
 
-  api_url             : API url to OBS server
+  obsurl             : API url to OBS server
 
   base_url            : Url to use for download
 
@@ -329,7 +329,7 @@ This handler downloads a file from a given url to the local filesystem and sets 
 
   vm_image_url
 
-  api_url
+  obsurl
 
 =head1 DEFAULTS
 

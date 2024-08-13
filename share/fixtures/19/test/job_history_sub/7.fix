@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 7,
+           job_id => 1,
+           name   => 'Kanku::Handler::GIT',
+           result => '{"error_message":"Command \'git -C /tmp/open-build-service submodule update\' failed:\\n\\nCloning into \'/tmp/open-build-service/src/backend/build\'...\\nfatal: read error: Connection timed out\\nfatal: clone of \'git://github.com/openSUSE/obs-build.git\' into submodule path \'/tmp/open-build-service/src/backend/build\' failed\\nFailed to clone \'src/backend/build\'. Retry scheduled\\nCloning into \'/tmp/open-build-service/src/backend/build\'...\\nfatal: read error: Connection timed out\\nfatal: clone of \'git://github.com/openSUSE/obs-build.git\' into submodule path \'/tmp/open-build-service/src/backend/build\' failed\\nFailed to clone \'src/backend/build\' a second time, aborting\\n\\n at /usr/lib/kanku/lib/Kanku/Handler/GIT.pm line 184.\\n"}',
+           state  => 'failed'
+         };

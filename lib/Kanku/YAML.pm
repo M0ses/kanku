@@ -3,6 +3,7 @@ package Kanku::YAML;
 use strict;
 use warnings;
 
+use Carp;
 use YAML::PP;
 use YAML::PP::Schema::Include;
 use Try::Tiny;
@@ -17,7 +18,7 @@ sub LoadFile { ## no critic (NamingConventions::Capitalization)
     $include->yp($yp);
     $res = $yp->load_file($file);
   } catch {
-    die "ERROR while parsing YAML from file '$file': $_\n"
+    confess "ERROR while parsing YAML from file '$file':\n$_\n"
   };
   return $res;
 }
@@ -29,7 +30,7 @@ sub DumpFile { ## no critic (NamingConventions::Capitalization)
   try {
     $res = YAML::PP::DumpFile($file, $content);
   } catch {
-    die "ERROR while parsing YAML from file '$file': $_\n"
+    confess "ERROR while parsing YAML from file '$file':\n$_\n";
   };
   return $res;
 }

@@ -27,7 +27,7 @@ sub encrypt {
   my $h = start \@cmd, \$in, \$out, \$err, timeout( 10 );
 
   $in = $self->message;
-  finish $h or croak "command '@cmd' returned $?";
+  finish $h or croak "command '@cmd' returned $?:$err";
 
   return $out;         ## All of cat's output
 }

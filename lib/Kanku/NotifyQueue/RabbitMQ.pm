@@ -38,7 +38,7 @@ use JSON::XS;
 
 use Kanku::Config;
 
-BEGIN { Kanku::Config->initialize(); }
+#BEGIN { Kanku::Config->initialize(); }
 
 use Kanku::RabbitMQ;
 
@@ -64,9 +64,9 @@ with 'Kanku::Roles::NotifyQueue';
 
 sub prepare {
     my ($self) = @_;
-    my $cfg    = Kanku::Config->instance();
-    my $config = $cfg->config()->{'Kanku::RabbitMQ'};
-    my $kmq    = Kanku::RabbitMQ->new(%{ $config || {}});
+    my $cfg    = Kanku::Config->instance()->cf;
+    my $config = $cfg->{'Kanku::RabbitMQ'} || {};
+    my $kmq    = Kanku::RabbitMQ->new(%{$config});
 
     $kmq->shutdown_file($self->shutdown_file);
     $kmq->connect();

@@ -16,8 +16,9 @@
 #
 package Kanku::Cli;
 
-use MooseX::App qw(Color BashCompletion);
-use Moose::Util::TypeConstraints;
+use MooseX::App qw(Color BashCompletion Kanku::APIConfig Kanku::Term);
+
+use Kanku::TypeConstraints;
 use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Logger';
@@ -31,15 +32,13 @@ option 'traceback'  => (
   documentation => 'print stacktrace on die',
 );
 
-enum 'LogLevel' => [qw/FATAL ERROR WARN INFO DEBUG TRACE/];
 option 'loglevel'  => (
   is            => 'rw',
-  isa           => 'Str',
+  isa           => 'LogLevel',
   cmd_aliases   => [qw/ll log_level log-level/],
   documentation => 'set log level',
 );
 
-enum 'OutputFormat' => [qw/json dumper yaml none pjson/];
 option 'format' => (
   isa           => 'OutputFormat',
   is            => 'rw',

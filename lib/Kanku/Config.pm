@@ -18,14 +18,22 @@ package Kanku::Config;
 
 use MooseX::Singleton;
 
+use Kanku::File;
+
+#has file => (
+#  is     => 'rw',
+#  isa    => 'ExistantFile',
+#);
+
 sub initialize {
   my ($self, %args) = @_;
-
   if ( $args{class} ) {
     with "Kanku::Roles::Config::$args{class}";
   } else {
     with 'Kanku::Roles::Config';
   }
+
+  $self->file(Kanku::File::lookup_file($args{file})) if $args{file};
 
   return $self;
 }

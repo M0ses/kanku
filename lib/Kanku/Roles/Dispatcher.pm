@@ -28,6 +28,16 @@ use Kanku::Job;
 with 'Kanku::Roles::ModLoader';
 with 'Kanku::Roles::DB';
 
+has 'config' => (
+  is      =>'rw',
+  isa     =>'Object',
+  lazy    => 1,
+  builder => '_build_config',
+);
+sub _build_config {
+  return Kanku::Config->instance;
+}
+
 has '_shutdown_detected' => (is=>'rw',isa=>'Bool',default=>0);
 
 =head1 NAME
@@ -184,7 +194,7 @@ sub cleanup_dead_jobs {
 sub run_notifiers {
   my ($self, $job, $last_task) = @_;
   my $logger    = $self->logger();
-  my $notifiers = Kanku::Config->instance()->notifiers_config($job->name());
+  my $notifiers = $self->config->notifiers_config($job->name());
 
   foreach my $notifier (@{$notifiers}) {
     try {
@@ -202,7 +212,7 @@ sub execute_notifier {
   my ($self, $options, $job, $task) = @_;
   my $logger    = $self->logger;
   my $state     = $job->state;
-  my $cfg       = Kanku::Config->instance->config->{"Kanku::Notifier"} || {};
+  my $cfg       = $self->config->{"Kanku::Notifier"} || {};
 
   $logger->debug("Job state: $state // $options->{states}");
 
@@ -256,7 +266,9 @@ sub load_job_definition {
   $self->logger->debug("Loading definition for job: ".$job->name);
 
   try {
-    $job_definition = Kanku::Config->instance()->job_config($job->name);
+    my $kci = Kanku::Config->instance;
+print STDERR __PACKAGE__.": ".ref($kci)."\n";
+    $job_definition = $kci->job_config($job->name);
   }
   catch {
     $job->exit_with_error($_);

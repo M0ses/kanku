@@ -64,6 +64,8 @@ sub run_job {
     $logger->debug('--- final_args'.$self->dump_it($defaults{final_args}));
 
     try {
+      my $start = time;
+      $logger->info("Running task with handler $defaults{module}");
       $task = Kanku::Task->new(
 	%defaults,
 	options   => $sub_task->{options} || {},
@@ -78,6 +80,9 @@ sub run_job {
       );
 
       $task->run($tr);
+      my $end = time;
+      my $duration = $end - $start;
+      $logger->info("Finished task ($defaults{module}) within $duration seconds");
       $job->state($task->state);
       die $task->result if $task->state eq 'failed';
     } catch {
@@ -126,7 +131,14 @@ sub end_job {
       $logger->error("Password for user '$user': $pw");
     }
   }
-  $logger->info("Finished job: ".$job->name." (".$job->id.") with state '".$job->state."'");
+  my $msg = sprintf(
+    "Finished job: %s (%d) with state '%s' in %s seconds",
+    $job->name,
+    $job->id,
+    $job->state,
+    $job->duration,
+  );
+  $logger->info($msg);
 }
 
 
