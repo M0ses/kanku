@@ -324,6 +324,7 @@ EOF
 %dir /usr/share/kanku/views/cli/rjob
 /usr/share/kanku/views/cli/*.tt
 /usr/share/kanku/views/cli/rjob/*.tt
+/usr/lib/kanku/lib/MooseX/App/
 /usr/lib/kanku/lib/Kanku/Cli/
 /usr/lib/kanku/lib/Kanku/Cli.pm
 /usr/lib/kanku/iptables_wrapper
