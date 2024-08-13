@@ -293,6 +293,7 @@ common config and lib files used in kanku
 /usr/lib/kanku/lib/Kanku/Test/
 
 %dir /usr/lib/kanku/lib/MooseX/
+%dir /usr/lib/kanku/lib/Kanku/TypeConstraints.pm
 
 %package cli
 Summary:        Command line client for kanku
