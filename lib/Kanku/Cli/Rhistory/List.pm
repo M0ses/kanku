@@ -76,6 +76,7 @@ option 'worker' => (
   documentation => 'filter list by workerinfo (wildcard %)',
 );
 
+option '+format' => (default=>'view');
 sub run {
   my ($self)  = @_;
   my $logger  =	$self->logger;
@@ -113,7 +114,11 @@ sub _list {
       $job->{duration} = 'Not started yet';
     }
   }
-  $self->view('jobs.tt', $data);
+  if ($self->format eq 'view') {
+    $self->view('jobs.tt', $data);
+  } else {
+    $self->print_formatted($self->format, $data);
+  }
   return 0;
 };
 

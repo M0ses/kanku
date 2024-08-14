@@ -56,6 +56,8 @@ sub _build_login_pass {
   return $self->kankufile_config->{login_pass} || q{};
 }
 
+option '+format' => (default=>'none');
+
 sub run {
   my ($self)  = @_;
   Kanku::Config->initialize(class=>'KankuFile', file=>$self->file);

@@ -38,19 +38,15 @@ show result of tasks from a specified job on your remote instance
 
 ";
 
-option 'config' => (
-  isa           => 'Str',
-  is            => 'rw',
-  cmd_aliases	=> 'c',
-  documentation => '(*) show config of remote job. Remote job name mandatory',
-);
-
 option 'filter' => (
   isa           => 'Str',
   is            => 'rw',
   cmd_aliases	=> 'f',
   documentation => 'filter job names by pattern',
+  default       => '.*',
 );
+
+option '+format' => (default => 'view');
 
 sub run {
   my ($self)  = @_;
@@ -59,15 +55,25 @@ sub run {
 
   try {
     my $kr = $self->connect_restapi();
-    my $data = $kr->get_json( path => 'gui_config/job');
-    my $job_config;
-    while ( my $j = shift @{$data->{config}}) {
-      if ( $j->{job_name} eq $self->details ) {
-	$job_config = $j;
-	last;
-      }
+    my $data = $kr->get_json(
+      path   => 'gui_config/job',
+      params => {filter => $self->filter},
+    );
+
+    #my $job_config;
+    #my $filter = $self->filter;
+    #
+    #while ( my $j = shift @{$data->{config}}) {
+    #  if ( $j->{job_name} =~ m/$filter/ ) {
+    #	$job_config = $j;
+    #	last;
+    #  }
+    #}
+    if ($self->format eq 'view') {
+      $self->view('rjob/details.tt', $data);
+    } else {
+      $self->print_formatted($self->format, $data);
     }
-    $self->print_formatted($self->format, $job_config);
   } catch {
     $logger->fatal($_);
     $ret = 1;

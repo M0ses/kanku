@@ -17,7 +17,7 @@ subtype 'ExistantFile',
 
 enum 'LogLevel' => [qw/FATAL ERROR WARN INFO DEBUG TRACE/];
 
-enum 'OutputFormat' => [qw/json dumper yaml none pjson/];
+enum 'OutputFormat' => [qw/json dumper yaml none pjson view/];
 
 enum 'KeyringBackend' => [qw/KDEWallet Gnome Memory None/];
 

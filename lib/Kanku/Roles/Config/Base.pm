@@ -36,8 +36,6 @@ has config => (
 );
 sub _build_config {
   my ($self) = @_;
-
-cluck(__PACKAGE__ . " .... FILE:  .... ". $self->file);
   return Kanku::YAML::LoadFile($self->file);
 }
 

@@ -1,0 +1,22 @@
+[% USE Filter::ANSIColor 'color' %]
+Job Name
+================================================================================
+
+[% FOREACH job IN config %]
+################################################################################
+## Job Name: [% job.job_name +%]
+################################################################################
+[% FOREACH task IN job.sub_tasks %]
+### [% task.use_module +%]
+[% FOREACH gc IN task.gui_config %]
+[% SET param = gc.param %]
+[% gc.label %]:
+    [% task.defaults.$param +%]
+
+[% END %]
+[% END %]
+[% END %]
+================================================================================
+[% FOREACH err IN errors %]
+[% err | color 'red' +%]
+[% END %]
