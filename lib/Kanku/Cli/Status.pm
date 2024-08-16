@@ -41,7 +41,6 @@ sub run {
     my $ip    = $vm->get_ipaddress();
     $logger->info("VM is running ($ip)");
     $self->print_formatted(
-      $self->format,
       {
 	domain_name => $self->domain_name,
 	state       => 'on',

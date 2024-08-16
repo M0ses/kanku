@@ -77,6 +77,11 @@ option 'worker' => (
 );
 
 option '+format' => (default=>'view');
+has template => (
+  isa           => 'Str',
+  is            => 'rw',
+  default       => 'jobs.tt',
+);
 sub run {
   my ($self)  = @_;
   my $logger  =	$self->logger;
@@ -114,11 +119,9 @@ sub _list {
       $job->{duration} = 'Not started yet';
     }
   }
-  if ($self->format eq 'view') {
-    $self->view('jobs.tt', $data);
-  } else {
-    $self->print_formatted($self->format, $data);
-  }
+
+  $self->print_formatted($data);
+
   return 0;
 };
 

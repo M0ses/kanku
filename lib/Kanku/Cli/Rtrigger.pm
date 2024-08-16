@@ -55,54 +55,52 @@ option 'config' => (
   documentation => '(*) use given config for remote job. example: -c "[]"',
 );
 
+option '+format' => (default => 'view');
+
+has 'template' => (
+  is            => 'rw',
+  isa           => 'Str',
+  default       => 'rtrigger.tt',
+);
+
 sub run {
   my ($self)  = @_;
   Kanku::Config->initialize;
   my $logger  = $self->logger;
   my $ret     = 0;
+  my $kr      = $self->connect_restapi();
+  my $json    = JSON::XS->new();
+  my $data    = {
+    data      => $self->config || [],
+    is_admin  => $self->as_admin,
+  };
+  my $path;
+  my $rdata;
 
   if ( $self->job ) {
-    try {
-      my $kr = $self->connect_restapi();
-      my $json = JSON::XS->new();
-      my $data = {
-        data     => $self->config || [],
-        is_admin => $self->as_admin,
-      };
-      my $rdata = $kr->post_json(
-        # path is only subpath, rest is added by post_json
-        path => 'job/trigger/'.$self->job,
-        data => $json->encode($data),
-      );
-
-      $self->view('rtrigger.tt', $rdata);
-    } catch {
-      $logger->error($_);
-      $ret = 1;
-    };
+    $path = 'job/trigger/'.$self->job;
   } elsif ( $self->job_group) {
-    try {
-      my $kr = $self->connect_restapi();
-      my $json = JSON::XS->new();
-      my $data = {
-	data     => $self->config || [],
-	is_admin => 1,
-      };
-      my $rdata = $kr->post_json(
-	# path is only subpath, rest is added by post_json
-	path => 'job_group/trigger/'.$self->job_group,
-	data => $json->encode($data),
-      );
-
-      $self->view('rtrigger.tt', $rdata);
-    } catch {
-      $logger->error($_);
-      $ret = 1;
-    };
+    $path = 'job_group/trigger/'.$self->job_group;
   } else {
-    $logger->error('You must at least specify a job name (<-j|--job>) or job group name (<-J|--job_group>) to trigger');
+    $logger->error(
+      'You must at least specify a job name (<-j|--job>) or job group name '
+      .'(<-J|--job_group>) to trigger'
+    );
     $ret = 1;
   }
+
+  try {
+    $rdata = $kr->post_json(
+      # path is only subpath, rest is added by post_json
+      path => $path,
+      data => $json->encode($data),
+    );
+  } catch {
+      $logger->error($_);
+      $ret = 1;
+  };
+
+  $self->print_formatted($rdata);
 
   return $ret;
 }

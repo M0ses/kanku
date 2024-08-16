@@ -48,36 +48,31 @@ option 'filter' => (
 
 option '+format' => (default => 'view');
 
+has template => (
+  is   => 'rw',
+  isa  => 'Str',
+  default => 'rjob/details.tt',
+);
+
+
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
   my $ret     = 0;
+  my $kr      = $self->connect_restapi();
+  my $data;
 
   try {
-    my $kr = $self->connect_restapi();
-    my $data = $kr->get_json(
+    $data = $kr->get_json(
       path   => 'gui_config/job',
       params => {filter => $self->filter},
     );
-
-    #my $job_config;
-    #my $filter = $self->filter;
-    #
-    #while ( my $j = shift @{$data->{config}}) {
-    #  if ( $j->{job_name} =~ m/$filter/ ) {
-    #	$job_config = $j;
-    #	last;
-    #  }
-    #}
-    if ($self->format eq 'view') {
-      $self->view('rjob/details.tt', $data);
-    } else {
-      $self->print_formatted($self->format, $data);
-    }
   } catch {
     $logger->fatal($_);
     $ret = 1;
   };
+
+  $self->print_formatted($data);
 
   return $ret;
 }

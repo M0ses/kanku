@@ -38,7 +38,12 @@ option 'job' => (
   cmd_aliases	=> 'j',
   documentation => '(*) Remote job id - mandatory',
 );
-
+option '+format' => (default => 'view');
+has 'template' => (
+  is            => 'rw',
+  isa           => 'Str',
+  default       => 'retrigger.tt',
+);
 sub run {
   my ($self) = @_;
   my $logger = $self->logger;
@@ -57,7 +62,7 @@ sub run {
       data => {is_admin => 1},
     );
 
-    $self->view('retrigger.tt', $rdata);
+    $self->print_formatted($rdata);
   } catch {
     $logger->fatal($_);
     $ret = 1;

@@ -14,7 +14,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::Rworker;
+package Kanku::Cli::Rworker::List;
 
 use strict;
 use warnings;
@@ -36,33 +36,32 @@ Show information about the remote worker status
 
 LONG_DESC
 
-option 'list' => (
+option '+format' => (default=>'view');
+
+has template => (
+  isa           => 'Str',
   is            => 'rw',
-  isa           => 'Bool',
-  cmd_aliases	=> 'l',
-  documentation => 'list all worker information',
+  default       => 'rworker.tt',
 );
+
 
 sub run {
   my ($self)  = @_;
   Kanku::Config->initialize();
   my $logger  = $self->logger;
   my $ret     = 0;
+  my $kr      = $self->connect_restapi();
+  my $data;
 
-  if ( $self->list) {
-    my $kr;
-    try {
-      my $kr = $self->connect_restapi();
-      my $data = $kr->get_json(path => 'worker/list');
-      $self->view('rworker.tt', $data);
-    } catch {
-      $logger->error($_);
-      $ret = 1;
-    };
-  } else {
-    $logger->error('You must at least add the option "-l" to list information about worker');
+  try {
+    $data = $kr->get_json(path => 'worker/list');
+  } catch {
+    $logger->error($_);
     $ret = 1;
-  }
+  };
+
+  $self->print_formatted($data);
+
   return $ret;
 }
 

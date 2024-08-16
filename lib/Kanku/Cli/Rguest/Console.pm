@@ -61,6 +61,13 @@ option 'domain' => (
   documentation => 'filter list by domain (wildcard .)',
 );
 
+option '+format' => (default => 'view');
+has 'template' => (
+  is            => 'rw',
+  isa           => 'Str',
+  default       => 'rguest/select_menu.tt',
+);
+
 sub run {
   my $self  = shift;
   Kanku::Config->initialize;
@@ -95,7 +102,7 @@ sub _print_select_menu {
   };
   return $data->{guest_list}->[0] if (@{$data->{guest_list}} < 2);
   while (1) {
-    $self->view('rguest/select_menu.tt', $data);
+    $self->print_formatted($data);
     $data->{answer} = <STDIN>;
     chomp $data->{answer};
     return 1 if ($data->{answer} eq '0');

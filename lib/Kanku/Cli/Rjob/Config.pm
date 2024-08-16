@@ -33,16 +33,26 @@ use Data::Dumper;
 
 command_short_description  'show result of tasks from a specified remote job';
 
-command_long_description   "
+command_long_description   '
 show result of tasks from a specified job on your remote instance
 
-";
+';
 
 parameter 'config' => (
   isa           => 'Str',
   is            => 'rw',
   documentation => 'show config of remote job. Remote job name mandatory',
 );
+
+
+option '+format' => (default => 'view');
+
+has template => (
+  is   => 'rw',
+  isa  => 'Str',
+  default => 'rjob/details.tt',
+);
+
 
 sub run {
   my ($self)  = @_;
@@ -52,11 +62,12 @@ sub run {
   try {
     my $kr = $self->connect_restapi();
     my $data = $kr->get_json( path => 'job/config/'.$self->config);
-    $self->print_formatted($self->format, $data->{config}) if $data;
   } catch {
     $logger->fatal($_);
     $ret = 1;
   };
+
+  $self->print_formatted($data->{config});
 
   return $ret;
 }

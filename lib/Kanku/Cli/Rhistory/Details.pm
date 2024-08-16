@@ -75,6 +75,12 @@ option 'worker' => (
   is            => 'rw',
   documentation => 'filter list by workerinfo (wildcard %)',
 );
+option '+format' => (default=>'view');
+has template => (
+  isa           => 'Str',
+  is            => 'rw',
+  default       => 'job.tt',
+);
 
 sub run {
   my ($self)  = @_;
@@ -104,7 +110,8 @@ sub _details {
 
   $self->_truncate_result($data) if ! $self->full;
 
-  $self->view('job.tt', $data);
+  $self->print_formatted($data);
+
   return;
 }
 

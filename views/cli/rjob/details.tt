@@ -1,18 +1,20 @@
 [% USE Filter::ANSIColor 'color' %]
-Job Name
-================================================================================
-
 [% FOREACH job IN config %]
 ################################################################################
-## Job Name: [% job.job_name +%]
+# Job Name: [% job.job_name | color 'green' +%]
 ################################################################################
-[% FOREACH task IN job.sub_tasks %]
-### [% task.use_module +%]
-[% FOREACH gc IN task.gui_config %]
-[% SET param = gc.param %]
-[% gc.label %]:
-    [% task.defaults.$param +%]
-
+[%- FOREACH task IN job.sub_tasks %]
+[% task.use_module | indent '### '| color 'yellow' +%]
+[%- FOREACH gc IN task.gui_config %]
+[%- SET param = gc.param %]
+[% gc.label | color 'bold white' %]
+[%- SWITCH gc.type %]
+[%- CASE 'checkbox' %]
+    [[% IF task.defaults.$param %]X[% ELSE %] [% END %]]
+[%- CASE 'text' %]
+    [%- SET text = task.defaults.$param %]
+    [% fillup_with_dots(text, 80)| color 'black on_white' %]
+[%- END %]
 [% END %]
 [% END %]
 [% END %]

@@ -61,6 +61,13 @@ option 'state' => (
   documentation => 'filter list by state of domain',
 );
 
+option '+format' => (default => 'view');
+has 'template' => (
+  is            => 'rw',
+  isa           => 'Str',
+  default       => 'rguest/list.tt',
+);
+
 sub run {
   my $self  = shift;
 
@@ -74,7 +81,7 @@ sub _list {
 
   my $data = $self->_get_filtered_guest_list();
 
-  $self->view('rguest/list.tt', $data);
+  $self->print_formatted($data);
 }
 
 sub _get_filtered_guest_list {

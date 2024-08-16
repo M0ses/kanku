@@ -46,7 +46,7 @@ sub view {
 }
 
 sub render_template {
-  my ($self, $template, $data) = @_;
+  my ($self, $data) = @_;
 
   my $tt = Template->new({
     INCLUDE_PATH  => $self->include_path,
@@ -55,20 +55,28 @@ sub render_template {
     PLUGIN_BASE   => 'Template::Plugin::Filter',
   });
   my $result;
+  if (ref($data) eq 'HASH') {
+    $data->{fillup_with_dots} = sub {
+	my $r = $_[1] - length($_[0]) - 1;
+	return (($_[0]) ? "$_[0] " : '.' ) . '.' x $r;
+    };
+  }
   # process input template, substituting variables
-  $tt->process($template, $data, \$result) || croak($tt->error()->as_string());
+  $tt->process($self->template, $data, \$result) || croak($tt->error()->as_string());
 
   return $result;
 }
 
 sub print_formatted {
-  my ($self, $format, $data) = @_;
+  my ($self, $data) = @_;
+  my $format = $self->format;
   my $func = {
     dumper => \&Data::Dumper::Dumper,
     json   => \&JSON::XS::encode_json,
     pjson   => sub { return JSON::XS->new->pretty(1)->encode(@_) },
     yaml   => \&YAML::PP::Dump,
     none   => sub { return "$_[0]\n" },
+    view   => sub { $self->render_template($_[0]); },
   };
 
   croak "Illegal format: $format" unless (ref($func->{$format}) eq 'CODE');

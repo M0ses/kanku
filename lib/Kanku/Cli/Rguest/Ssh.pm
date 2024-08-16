@@ -71,6 +71,13 @@ option 'execute' => (
   documentation => 'command to execute on kanku guest VM.',
 );
 
+option '+format' => (default => 'view');
+has 'template' => (
+  is            => 'rw',
+  isa           => 'Str',
+  default       => 'rguest/ssh.tt',
+);
+
 sub run {
   my $self  = shift;
   Kanku::Config->initialize;
@@ -99,7 +106,7 @@ sub _ssh {
     return 1;
   }
 
-  my $cmd = $self->render_template('rguest/ssh.tt', $domain->{conn_opts});
+  my $cmd = $self->render_template($domain->{conn_opts});
   system($cmd);
 
   return;

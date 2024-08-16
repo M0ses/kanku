@@ -101,6 +101,13 @@ option 'pseudo_terminal' => (
   documentation => 'force/disable pseudo terminal allocation',
 );
 
+has 'template' => (
+  is            => 'rw',
+  isa           => 'Str',
+  default       => 'ssh.tt',
+);
+
+
 use Kanku::Util::VM;
 
 sub run {
@@ -141,7 +148,7 @@ sub run {
   }
 
   if(!$ret) {
-    my $cmd = $self->render_template('ssh.tt', $vars);
+    my $cmd = $self->render_template($vars);
     $logger->debug("Calling ssh client with username `$vars->{user}` to `$vars->{ip}`");
     $logger->debug("\$sshcmd = >>>$cmd<<<");
     system($cmd);

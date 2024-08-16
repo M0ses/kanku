@@ -56,7 +56,14 @@ sub _build_login_pass {
   return $self->kankufile_config->{login_pass} || q{};
 }
 
-option '+format' => (default=>'none');
+option '+format' => (default=>'view');
+
+has template => (
+  is   => 'rw',
+  isa  => 'Str',
+  default => 'ip.tt',
+);
+
 
 sub run {
   my ($self)  = @_;
@@ -75,7 +82,7 @@ sub run {
 
   if ($ip) {
     $logger->info("IP Address: $ip");
-    $self->print_formatted($self->format, $ip);
+    $self->print_formatted({ipaddress=>$ip});
   } else {
     $logger->error('Could not find IP Address');
   }

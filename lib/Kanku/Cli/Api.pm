@@ -37,24 +37,32 @@ parameter 'uri' => (
   documentation => 'uri to send request to',
 );
 
+option '+format' => (default => 'pjson');
+
+has template => (
+  is   => 'rw',
+  isa  => 'Str',
+);
+
+
 sub run {
   my ($self) = @_;
   my $logger = $self->logger;
   my $ret    = 0;
   my $fmt    = $self->format;
+  my $data;
 
   try {
     $logger->debug("Raw data from API formatted as `$fmt`:");
     my $path = $self->uri;
     $path =~ s{\.(json|yaml|xml)$}{};
-    $self->print_formatted(
-      $self->format,
-      $self->get_json(path=>$path),
-    );
+    $data = $self->get_json(path=>$path);
   } catch {
     $logger->fatal($_);
     $ret = 1;
   };
+
+  $self->print_formatted($data);
 
   return $ret;
 }

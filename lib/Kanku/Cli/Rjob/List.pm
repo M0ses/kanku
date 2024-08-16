@@ -52,6 +52,14 @@ option 'filter' => (
   documentation => 'filter job names by pattern',
 );
 
+option '+format' => (default => 'view');
+
+has 'template' => (
+  is            => 'rw',
+  isa           => 'Str',
+  default       => 'rjob/list.tt',
+);
+
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
@@ -65,7 +73,7 @@ sub run {
     my $tmp_data = $kr->get_json( path => 'gui_config/job', params => $params);
     my @job_names = sort map { $_->{job_name} } @{$tmp_data->{config}} ;
     my $data = { job_names => \@job_names , errors => $tmp_data->{errors}};
-    $self->view('rjob/list.tt', $data);
+    $self->print_formatted($data);
   } catch {
     $logger->fatal($_);
     $ret = 1;

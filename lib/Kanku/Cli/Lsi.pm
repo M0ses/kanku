@@ -58,6 +58,12 @@ option 'project' => (
 sub _build_project {
   return Kanku::Config::Defaults->get(__PACKAGE__, 'project');
 }
+option '+format' => (default => 'view');
+has 'template' => (
+  is            => 'rw',
+  isa           => 'Str',
+  default       => 'lsi.tt',
+);
 
 sub run {
   my ($self)  = @_;
@@ -90,7 +96,7 @@ sub run {
     arch     => $arch,
   };
 
-  print $self->render_template('lsi.tt', $vars);
+  $self->print_formatted($vars);
 
   return 0;
 }
