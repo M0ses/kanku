@@ -28,9 +28,7 @@ option 'timeout' => (
   default       => 180,
 );
 with 'Kanku::Roles::SSH';
-
 with 'Kanku::Cli::Roles::VM';
-with 'Kanku::Cli::Roles::View';
 
 command_short_description  'open ssh connection to vm';
 
@@ -107,6 +105,7 @@ has 'template' => (
   default       => 'ssh.tt',
 );
 
+with 'Kanku::Cli::Roles::View';
 
 use Kanku::Util::VM;
 
