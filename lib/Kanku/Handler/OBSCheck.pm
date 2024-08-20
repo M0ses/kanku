@@ -122,13 +122,12 @@ sub execute {
 
   my $last_run  = $self->last_run_result();
   my $dod       = $self->dod_object();
-
-  if ( $self->base_url ) {
-    # prevent from errors because of missing trailing slash
-    if (  $self->base_url !~ q{/$} ) { $self->base_url($self->base_url.q{/}) }
-    $dod->base_url($self->base_url);
+  if (!$self->base_url) {
+    $self->base_url(Kanku::Config::Defaults->get(__PACKAGE__, 'base_url'));
   }
-  $dod->base_url($self->base_url)     if $self->base_url;
+  # prevent from errors because of missing trailing slash
+  $self->base_url($self->base_url.q{/}) if $self->base_url !~ q{/$};
+  $dod->base_url($self->base_url);
   $dod->repository($self->repository) if $self->repository;
 
   $self->logger->debug('Checking project: ' . $dod->project);

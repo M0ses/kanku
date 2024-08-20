@@ -20,7 +20,6 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
 use Term::ReadKey;
@@ -53,6 +52,7 @@ option 'host' => (
 option 'domain' => (
   isa           => 'Str',
   is            => 'rw',
+  cmd_aliases   =>[qw/d/],
   documentation => 'filter list by domain (wildcard .)',
 );
 
@@ -87,7 +87,6 @@ sub run {
 sub _ssh {
   my ($self) = @_;
   my $logger = $self->logger;
-  $self->state(1);
   my $data = $self->_get_filtered_guest_list();
   my $domain;
 
@@ -167,7 +166,7 @@ sub _get_filtered_guest_list {
   my @filters;
   push @filters, "host:".$self->host.".*" if $self->host;
   push @filters, "domain:".$self->domain.".*" if $self->domain;
-  push @filters, "state:".$self->state if $self->state;
+  push @filters, "state:1";
   $params->{filter} = \@filters if @filters;
   return $kr->get_json(path => "guest/list", params => $params);
 }

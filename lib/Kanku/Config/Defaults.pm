@@ -56,6 +56,9 @@ my $defaults =    {
     login_user    => 'vagrant',
     login_pass    => 'vagrant',
   },
+  'Kanku::Handler::OBSCheck' => {
+    base_url => 'https://cdn.opensuse.org/repositories/',
+  },
   'Kanku::Cli::Init' => {
     project       => 'devel:kanku:images',
     package       => 'openSUSE-Leap-15.6-JeOS',
