@@ -30,6 +30,11 @@ sub gui_config {
       label => 'OBS API URL',
     },
     {
+      param => 'base_url',
+      type  => 'text',
+      label => 'Base OBS Download/Mirror URL',
+    },
+    {
       param => 'skip_all_checks',
       type  => 'checkbox',
       label => 'Skip all checks',
@@ -94,28 +99,76 @@ has 'obsurl' => (
 
 sub _build_obsurl {
   my ($self)    = @_;
-  $self->logger->debug("CALLED: @_");
-
-  my $url = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'obsurl');
-  $self->logger->debug("OBSURL: $url");
-  return $url;
+  return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'obsurl');
 }
 
-has ['base_url', 'repository', 'preferred_extension', 'arch'] => (is=>'rw',isa=>'Str');
-has '+preferred_extension' => (lazy => 1, default => q{});
-has '+arch' => (lazy => 1, default => 'x86_64');
+has 'base_url' => (
+  is       => 'rw',
+  isa      => 'Str',
+  lazy     => 1,
+  builder  => '_build_base_url',
+);
+
+sub _build_base_url {
+  my ($self)    = @_;
+  return $self->job->context->{base_url}
+    || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'base_url');
+}
+
+has 'preferred_extension' => (
+  is=>'rw',
+  isa=>'Str',
+  lazy => 1,
+  default => q{},
+);
+
+has 'repository' => (
+  is       => 'rw',
+  isa      => 'Str',
+);
+
+has 'arch' => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  builder => '_build_arch',
+);
+
+sub _build_arch {
+  Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'arch');
+}
+
 has _changed => (is=>'rw',isa=>'Bool',default=>0);
 
 has _binary => (is=>'rw',isa=>'HashRef',lazy=>1,default=>sub { { } });
 
-has [qw/skip_check_project skip_check_package skip_download/ ] => (
-  is      => 'ro',
+has [
+  qw/
+    skip_check_project skip_check_package skip_download skip_all_checks
+    offline use_oscrc
+  /
+] => (
+  is      => 'rw',
   isa     => 'Bool',
-  default => 0,
+  lazy    => 1,
+  builder => '_build_default_bool_zero',
 );
 
-has [qw/offline skip_all_checks use_oscrc/ ] => (is => 'rw', isa => 'Bool',default => 0 );
-has [qw/use_oscrc/ ] => (is => 'rw', isa => 'Bool',default => 0);
+sub _build_default_bool_zero {
+  my ($self) = @_;
+  my @c = caller(0);
+  return 0 unless $c[1] =~ /accessor ([\w:]+) .*/;
+  my @p = split /::/, $1;
+  my $v = pop @p;
+  return $self->job->context->{$v} if exists $self->job->context->{$v};
+  my $l = join('::', @p);
+  my $val =    Kanku::Config::Defaults->get($l, $v)
+            || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', $v)
+            || 0;
+
+  return $val;
+}
+
 
 sub prepare {
   my ($self)    = @_;

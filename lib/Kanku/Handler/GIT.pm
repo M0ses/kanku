@@ -93,8 +93,9 @@ has [qw/  giturl          revision    destination
 has [qw/submodules mirror recursive/] => (is=>'rw', isa=>'Bool');
 
 has 'cache_dir' => (
-  is      =>'rw',
-  isa     =>'Str',
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
   builder => '_build_cache_dir',
 );
 sub _build_cache_dir {

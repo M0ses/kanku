@@ -50,6 +50,11 @@ sub gui_config {
       type   => 'text',
       label  => 'Gitlab Merge Request ID (requires manual fetch)',
     },
+    {
+      param  => 'ipaddress',
+      type   => 'text',
+      label  => 'IP Address of Guest (use carefully, usually set by e.g. CreateDomain)',
+    },
   ];
 }
 sub distributable { 0 }

@@ -19,6 +19,7 @@ use Kanku::Config;
 use Kanku::Schema;
 use Kanku::Util::IPTables;
 use Kanku::LibVirt::HostList;
+use Kanku::Job;
 
 use Kanku::REST::Admin::User;
 use Kanku::REST::Admin::Task;
@@ -357,6 +358,8 @@ get '/gui_config/job.:format' => sub {
       next;
     }
 
+    my $job_object = Kanku::Job->new();
+
     foreach my $sub_tasks ( @{$job_cfg}) {
         my $mod = $sub_tasks->{use_module};
         my $defaults = {};
@@ -375,8 +378,11 @@ get '/gui_config/job.:format' => sub {
         $tmp = $can->();
 
         foreach my $opt (@{$tmp}) {
-          $opt->{default} = ($opt->{secure}) ? '' : $sub_tasks->{options}->{$opt->{param}};
-          $defaults->{$opt->{param}} = ($opt->{secure}) ? '' : $sub_tasks->{options}->{$opt->{param}};
+          my $param   = $opt->{param};
+          my $default =  $sub_tasks->{options}->{$param}
+            || $mod->new(%{$sub_tasks->{options}}, job=>$job_object)->$param;
+          trace("default for $mod->$param = ", ($default||q{}));
+          $opt->{default} = $defaults->{$param} = (!$opt->{secure}) ? $default : q{};
         }
         push @{$job_config->{sub_tasks}},
             {
