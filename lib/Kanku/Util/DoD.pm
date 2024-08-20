@@ -45,8 +45,11 @@ has repository => (
 has arch => (
   is      => 'rw',
   isa     => 'Str',
-  default => 'x86_64',
+  builder => '_build_arch',
 );
+sub _build_arch {
+  Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'arch');
+}
 
 has package => (
   is      => 'rw',
@@ -57,35 +60,49 @@ has package => (
 has images_dir => (
   is      => 'rw',
   isa     => 'Str',
-  default => '/var/lib/libvirt/images',
+  builder => '_build_images_dir',
 );
+
+sub _build_images_dir {
+   Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'images_dir');
+}
 
 has base_url => (
   is      => 'rw',
   isa     => 'Str',
-  default => 'http://download.opensuse.org/repositories/',
+  builder => '_build_base_url',
 );
+
+sub _build_base_url {
+   Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'base_url');
+}
 
 has download_url => (
   is      =>'rw',
   isa     =>'Str',
   lazy    => 1,
-  default => sub {
-    my $self = shift;
-
-    my $prj = $self->project();
-    $prj =~ s{:}{:/}g;
-
-    return $self->base_url . "$prj/" . $self->repository . q{/};
-  },
+  builder => '_build_download_url',
 );
+
+sub _build_download_url {
+  my $self = shift;
+
+  my $prj = $self->project();
+  $prj =~ s{:}{:/}g;
+
+  return $self->base_url . "$prj/" . $self->repository . q{/};
+}
 
 has obsurl => (
   is      =>'rw',
   isa     =>'Str',
   lazy    => 1,
-  default => 'https://api.opensuse.org',
+  builder =>'_build_obsurl',
 );
+
+sub _build_obsurl {
+   Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'obsurl');
+}
 
 has get_image_file_from_url_cb => (
   is      => 'rw',
@@ -96,36 +113,39 @@ has get_image_file_from_url => (
   is      => 'rw',
   isa     => 'HashRef',
   lazy    => 1,
-  default => sub {
-    my ($self) = @_;
-    my $result = [];
-    my $logger = $self->logger;
-
-    $self->get_image_file_from_url_cb(\&_sub_get_image_file_from_url_cb);
-
-    confess("No project set") unless $self->project;
-
-    my $build_results = Net::OBS::Client::BuildResults->new(
-      project     => $self->project,
-      repository  => $self->repository,
-      arch        => $self->arch,
-      package     => $self->package,
-      apiurl      => $self->obsurl,
-      %{$self->auth_config},
-    );
-    my $binlist = $build_results->binarylist();
-    $logger->trace("\$binlist = ".$self->dump_it($binlist));
-    my $record = $self->get_image_file_from_url_cb->($self,$binlist);
-    if ( $record ) {
-      $record->{url} = $self->download_url .$record->{prefix}. $record->{filename};
-      $record->{bin_url} = $self->obsurl . '/build/'.$self->project.q{/}.$self->repository.q{/}.$self->arch.q{/}.$self->package."/$record->{filename}";
-      $record->{obs_username} = $build_results->user;
-      $record->{obs_password} = $build_results->pass;
-    }
-    $self->logger->trace("\$record = ".$self->dump_it($record));
-    return $record || {};
-  },
+  builder => '_build_get_image_file_from_url',
 );
+
+sub _build_get_image_file_from_url {
+  my ($self) = @_;
+  my $result = [];
+  my $logger = $self->logger;
+
+  $self->get_image_file_from_url_cb(\&_sub_get_image_file_from_url_cb);
+
+  confess("No project set") unless $self->project;
+
+
+  my $build_results = Net::OBS::Client::BuildResults->new(
+    project     => $self->project,
+    repository  => $self->repository,
+    arch        => $self->arch,
+    package     => $self->package,
+    apiurl      => $self->obsurl,
+    %{$self->auth_config},
+  );
+  my $binlist = $build_results->binarylist();
+  $logger->trace("\$binlist = ".$self->dump_it($binlist));
+  my $record = $self->get_image_file_from_url_cb->($self,$binlist);
+  if ( $record ) {
+    $record->{url} = $self->download_url .$record->{prefix}. $record->{filename};
+    $record->{bin_url} = $self->obsurl . '/build/'.$self->project.q{/}.$self->repository.q{/}.$self->arch.q{/}.$self->package."/$record->{filename}";
+    $record->{obs_username} = $build_results->user;
+    $record->{obs_password} = $build_results->pass;
+  }
+  $self->logger->trace("\$record = ".$self->dump_it($record));
+  return $record || {};
+}
 
 has [qw/skip_all_checks skip_check_project skip_check_package/ ] => (is => 'ro', isa => 'Bool',default => 0 );
 has [qw/use_oscrc/ ] => (is => 'ro', isa => 'Bool',default => 1);
@@ -134,34 +154,35 @@ has auth_config => (
   is => 'rw',
   isa => 'HashRef',
   lazy => 1,
-  default => sub {
-    my ($self)     = @_;
-    my $cfg        = {};
-    my $use_oscrc  = Kanku::Config::Defaults->get(__PACKAGE__, 'use_oscrc') || $self->use_oscrc;
-    $self->logger->debug("use_oscrc: $use_oscrc");
-
-    if (defined $use_oscrc) {
-      if (!$use_oscrc) {
-	my $default_credentials = Kanku::Config::Defaults->get(__PACKAGE__, $self->obsurl);
-	my $user = Kanku::Config::Defaults->get(__PACKAGE__, 'obs_username');
-	my $pass = Kanku::Config::Defaults->get(__PACKAGE__, 'obs_password');
-        if ( $default_credentials || $user || $pass) {
-	  $cfg->{user} = $default_credentials->{obs_username} || $user || q{};
-	  $cfg->{pass} = $default_credentials->{obs_password} || $pass || q{};
-	} else {
-	  $self->logger->debug("Using Net::OBS::Client config");
-	  my $net_credentials = Kanku::Config::Defaults->get('Net::OBS::Client', 'credentials');
-          $cfg = {%{$net_credentials->{$self->obsurl}}} if (ref($net_credentials->{$self->obsurl}) eq 'HASH');
-	}
-      }
-      $cfg->{use_oscrc} = $use_oscrc;
-    } else {
-      $cfg->{use_oscrc} = $self->use_oscrc;
-    }
-    $self->logger->debug("auth_config: ".$self->dump_it($cfg));
-    return $cfg;
-  },
+  builder => '_build_auth_config',
 );
+sub _build_auth_config {
+  my ($self)     = @_;
+  my $cfg        = {};
+  my $use_oscrc  = Kanku::Config::Defaults->get(__PACKAGE__, 'use_oscrc') || $self->use_oscrc;
+  $self->logger->debug("use_oscrc: $use_oscrc");
+
+  if (defined $use_oscrc) {
+    if (!$use_oscrc) {
+      my $default_credentials = Kanku::Config::Defaults->get(__PACKAGE__, $self->obsurl);
+      my $user = Kanku::Config::Defaults->get(__PACKAGE__, 'obs_username');
+      my $pass = Kanku::Config::Defaults->get(__PACKAGE__, 'obs_password');
+      if ( $default_credentials || $user || $pass) {
+	$cfg->{user} = $default_credentials->{obs_username} || $user || q{};
+	$cfg->{pass} = $default_credentials->{obs_password} || $pass || q{};
+      } else {
+	$self->logger->debug("Using Net::OBS::Client config");
+	my $net_credentials = Kanku::Config::Defaults->get('Net::OBS::Client', 'credentials');
+	$cfg = {%{$net_credentials->{$self->obsurl}}} if (ref($net_credentials->{$self->obsurl}) eq 'HASH');
+      }
+    }
+    $cfg->{use_oscrc} = $use_oscrc;
+  } else {
+    $cfg->{use_oscrc} = $self->use_oscrc;
+  }
+  $self->logger->debug("auth_config: ".$self->dump_it($cfg));
+  return $cfg;
+}
 
 has preferred_extension => (
   is      => 'rw',

@@ -67,6 +67,9 @@ has dod_object => (
 );
 sub _build_dod_object  {
   my ($self) = @_;
+
+  $self->logger->debug("_build_dod_object->obsurl: ".$self->obsurl);
+
   Kanku::Util::DoD->new(
     skip_all_checks     => $self->skip_all_checks,
     skip_check_project  => $self->skip_check_project,
@@ -80,9 +83,23 @@ sub _build_dod_object  {
   );
 }
 
-has ['obsurl','project','package'] => (is=>'rw',isa=>'Str',required=>1);
+has ['project','package'] => (is=>'rw',isa=>'Str',required=>1);
 
-has '+obsurl' => (default => 'https://api.opensuse.org/public');
+has 'obsurl' => (
+  is       => 'rw',
+  isa      => 'Str',
+  lazy     => 1,
+  builder  => '_build_obsurl',
+);
+
+sub _build_obsurl {
+  my ($self)    = @_;
+  $self->logger->debug("CALLED: @_");
+
+  my $url = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'obsurl');
+  $self->logger->debug("OBSURL: $url");
+  return $url;
+}
 
 has ['base_url', 'repository', 'preferred_extension', 'arch'] => (is=>'rw',isa=>'Str');
 has '+preferred_extension' => (lazy => 1, default => q{});
@@ -101,7 +118,7 @@ has [qw/offline skip_all_checks use_oscrc/ ] => (is => 'rw', isa => 'Bool',defau
 has [qw/use_oscrc/ ] => (is => 'rw', isa => 'Bool',default => 0);
 
 sub prepare {
-  my $self      = shift;
+  my ($self)    = @_;
   my $ctx       = $self->job()->context();
 
   $self->offline(1)           if ( $ctx->{offline} );
@@ -123,14 +140,19 @@ sub execute {
   my $last_run  = $self->last_run_result();
   my $dod       = $self->dod_object();
   if (!$self->base_url) {
-    $self->base_url(Kanku::Config::Defaults->get(__PACKAGE__, 'base_url'));
+    $self->base_url(
+      Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'base_url')
+    );
   }
+
   # prevent from errors because of missing trailing slash
   $self->base_url($self->base_url.q{/}) if $self->base_url !~ q{/$};
   $dod->base_url($self->base_url);
   $dod->repository($self->repository) if $self->repository;
 
-  $self->logger->debug('Checking project: ' . $dod->project);
+  $self->logger->debug('Checking project: "'.$dod->project.'"');
+  $self->logger->debug('*** base_url: "'.$dod->base_url.'"');
+  $self->logger->debug('*** obsurl: "'.$dod->obsurl.'"');
 
   my $binary    = $dod->get_image_file_from_url();
 

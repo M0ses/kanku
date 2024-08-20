@@ -29,7 +29,8 @@ my $defaults =    {
     views_dir      => '/usr/share/kanku/views',
     host_interface => 'eth0',
     arch           => $arch,
-    obsurl        => 'https://api.opensuse.org/public',
+    obsurl         => 'https://api.opensuse.org/public',
+    base_url       => 'https://cdn.opensuse.org/repositories/',
   },
   'Kanku::Util::IPTables' =>
   {

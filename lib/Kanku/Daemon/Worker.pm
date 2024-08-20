@@ -405,7 +405,12 @@ sub handle_task {
   my $job = Kanku::Job->new($data->{task_args}->{job});
   $data->{task_args}->{job}=$job;
 
-  my $task   = Kanku::Task::Local->new(%{$data->{task_args}},schema => $self->schema);
+  $self->logger->debug('$'.__PACKAGE__.'::data->{task_args} = '.$self->dump_it($data->{task_args}));
+
+  my $task   = Kanku::Task::Local->new(
+    %{$data->{task_args}},
+    schema => $self->schema,
+  );
 
   my $result;
   try {
