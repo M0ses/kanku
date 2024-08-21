@@ -381,7 +381,6 @@ get '/gui_config/job.:format' => sub {
           my $param   = $opt->{param};
           my $default =  $sub_tasks->{options}->{$param}
             || $mod->new(%{$sub_tasks->{options}}, job=>$job_object)->$param;
-          trace("default for $mod->$param = ", ($default||q{}));
           $opt->{default} = $defaults->{$param} = (!$opt->{secure}) ? $default : q{};
         }
         push @{$job_config->{sub_tasks}},
