@@ -36,7 +36,7 @@ sub _build_file {
   my ($self, $file)  = @_;
   my $f = Kanku::File->lookup_file(
     $file
-      || $ENV{KANKU_CONFIG}
+      || $::ENV{KANKU_CONFIG}
       || "KankuFile"
   ); 
   return $f;

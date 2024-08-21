@@ -41,8 +41,12 @@ option 'file' => (
   is            => 'rw',
   documentation => 'KankuFile to use',
   lazy          => 1,
-  default       => 'KankuFile',
+  builder       => '_build_file',
 );
+
+sub _build_file {
+  return $::ENV{KANKU_CONFIG} || 'KankuFile';
+}
 
 option 'log_file' => (
   isa           => 'Str',
