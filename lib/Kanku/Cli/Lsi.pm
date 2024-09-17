@@ -87,13 +87,14 @@ sub run {
   for my $repo (@{$res->{result}}) {
     my @active_pkgs = grep { $_->{code} !~ $re_code } @{$repo->{status}};
     push(@{$pkgs}, grep { $_->{package} =~ $re_name } @active_pkgs);
+    # add arch and repository key from $repo to $p (package)
+    map { my $p = $_; $p->{$_} = $repo->{$_} for qw/repository arch/;  } @{$pkgs};
   }
 
   my $vars    = {
     obsurl   => $obsurl,
     project  => $project,
     packages => [sort { $a->{package} cmp $b->{package} } @$pkgs],
-    arch     => $arch,
   };
 
   $self->print_formatted($vars);

@@ -6,4 +6,5 @@
       project: [% project %]
       package: [% pkg.package %]
       repository: [% pkg.repository %]
+      arch: [% pkg.arch %]
 [% END %]
