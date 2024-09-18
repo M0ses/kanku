@@ -1,7 +1,7 @@
 [% FOR pkg IN packages %]
     # --- [% pkg.package %]
       ## kanku init --obsurl [% obsurl %] --project [% project %] --package [% pkg.package %] --repository [% pkg.repository %]
-      ## state: pkg.code
+      ## state: [% pkg.code %]
       # obsurl: [% obsurl %]
       project: [% project %]
       package: [% pkg.package %]

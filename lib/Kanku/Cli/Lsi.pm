@@ -83,12 +83,13 @@ sub run {
   my $re_name = '.*'.$self->name.'.*';
   my $re_code = qr/^(disabled|excluded|unknown)$/;
   my $pkgs    = [];
-
   for my $repo (@{$res->{result}}) {
-    my @active_pkgs = grep { $_->{code} !~ $re_code } @{$repo->{status}};
+    my @active_pkgs;
+    for my $pkg (@{$repo->{status}}) {
+      next if $pkg->{code} =~ $re_code;
+      push @active_pkgs, {%{$pkg}, repository => $repo->{repository}, arch => $repo->{arch}};
+    }
     push(@{$pkgs}, grep { $_->{package} =~ $re_name } @active_pkgs);
-    # add arch and repository key from $repo to $p (package)
-    map { my $p = $_; $p->{$_} = $repo->{$_} for qw/repository arch/;  } @{$pkgs};
   }
 
   my $vars    = {
