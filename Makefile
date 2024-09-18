@@ -36,6 +36,7 @@ TEMPLATE_FILES = \
 	templates/cmd/setup/kanku-config.yml.tt2\
 	templates/cmd/setup/net-kanku-devel.xml.tt2\
 	templates/cmd/setup/net-kanku-ovs.xml.tt2\
+	templates/cmd/setup/net-kanku.xml.tt2\
 	templates/cmd/setup/pool-default.xml\
 	templates/cmd/setup/rabbitmq.config.tt2\
 	templates/examples-vm/obs-server-26.tt2\
