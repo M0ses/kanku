@@ -191,9 +191,8 @@ sub run {
     }
   }
 
-  my $memory;
   try {
-    $memory = Kanku::Util::VM::Image->string_to_bytes($self->memory);
+    Kanku::Util::VM::Image->string_to_bytes($self->memory);
   } catch {
     $logger->fatal($_);
     $ret = 1;
@@ -215,7 +214,7 @@ sub run {
   # define template variables for replacement
   my $vars = {
 	domain_name   => $self->domain_name,
-        domain_memory => $memory,
+        domain_memory => $self->memory,
 	domain_cpus   => $self->vcpu,
 	default_job   => $self->default_job,
         project       => $self->project,
