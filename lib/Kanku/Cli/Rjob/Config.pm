@@ -58,10 +58,11 @@ sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
   my $ret     = 0;
+  my $data;
 
   try {
     my $kr = $self->connect_restapi();
-    my $data = $kr->get_json( path => 'job/config/'.$self->config);
+    $data = $kr->get_json( path => 'job/config/'.$self->config);
   } catch {
     $logger->fatal($_);
     $ret = 1;

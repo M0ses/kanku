@@ -14,7 +14,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::Snapshoti::Remove;
+package Kanku::Cli::Snapshot::Remove;
 
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
