@@ -53,13 +53,6 @@ has job_local_routing_key => (is=>'rw', isa=>'Str');
 
 has wait_for_workers => (is=>'ro',isa=>'Int',default=>1);
 
-has config => (
-  is      => 'rw',
-  isa     => 'HashRef',
-  lazy    => 1,
-  default => sub { Kanku::Config->instance->cf->{ref($_[0])} || {}; }
-);
-
 has rabbit_config => (
   is      => 'rw',
   isa     => 'HashRef',

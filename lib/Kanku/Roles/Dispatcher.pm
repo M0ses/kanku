@@ -198,7 +198,7 @@ sub run_notifiers {
 
   foreach my $notifier (@{$notifiers}) {
     try {
-    $self->execute_notifier($notifier,$job,$last_task);
+      $self->execute_notifier($notifier, $job, $last_task);
     }
     catch {
       my $e = $_;
@@ -267,7 +267,6 @@ sub load_job_definition {
 
   try {
     my $kci = Kanku::Config->instance;
-print STDERR __PACKAGE__.": ".ref($kci)."\n";
     $job_definition = $kci->job_config($job->name);
   }
   catch {
