@@ -28,7 +28,6 @@ Use the URL http://localhost:5000
 ';
 
 use Carp;
-use File::Slurp;
 use File::HomeDir;
 
 sub run {
@@ -72,7 +71,7 @@ sub run {
     return 0;
   }
 
-  write_file($pid_file, $pid);
+  path($pid_file)->spew($pid);
   $logger->info("Started webserver with pid: $pid");
   $logger->info('Please connect to http://localhost:5000');
 

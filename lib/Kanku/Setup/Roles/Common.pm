@@ -24,7 +24,6 @@ use English qw/-no_match_vars/;
 use Const::Fast;
 use File::Which;
 use File::Copy;
-use File::Slurp qw/read_file write_file edit_file/;
 use Template;
 
 use Kanku::Config::Defaults;
@@ -135,7 +134,7 @@ EOF
 
   $self->_backup_config_file($dconf);
 
-  my @lines = read_file($dconf);
+  my @lines = path($dconf)->lines;
   my $user  = $opts{user};
   my $group = 'libvirt';
   my $defaults = {
@@ -159,7 +158,7 @@ EOF
     push @lines, "$key = \"$defaults->{$key}\"\n" unless $seen->{$key};
   }
 
-  write_file($dconf, @lines);
+  path($dconf)->spew(@lines);
 
   # add user to group libvirt
   if ($user) {
@@ -213,7 +212,7 @@ EOF
   $logger->debug("Setting user $user in $conf");
   $self->_backup_config_file($conf);
 
-  edit_file { s/^#?(user\s*=\s*).*/$1"$user"/ } $conf;
+  path($conf)->edit_lines(sub { s/^#?(user\s*=\s*).*/$1"$user"/ });
 
   return;
 }
@@ -255,7 +254,7 @@ EOF
   );
 
   return 0 unless $choice;
-  my $xml = read_file($self->_tt_config->{INCLUDE_PATH}.'/pool-default.xml');
+  my $xml = path($self->_tt_config->{INCLUDE_PATH}.'/pool-default.xml')->slurp;
   my $pool = $vmm->define_storage_pool($xml);
   $pool->create();
   $pool->set_autostart(1);
@@ -422,11 +421,10 @@ EOF
   if ($choice) {
     my $sudoers_file = '/etc/sudoers.d/kanku';
     $logger->info("Adding commands for user $user in $sudoers_file");
-    write_file(
-      $sudoers_file,
+    path($sudoers_file)->spew(
       "$user ALL=NOPASSWD: /usr/lib/kanku/ss_netstat_wrapper".
       ",/usr/lib/kanku/iptables_wrapper\n"
-    )
+    );
   }
 
   return;

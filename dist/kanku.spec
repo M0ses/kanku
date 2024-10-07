@@ -56,7 +56,6 @@ BuildRequires:  perl(Dancer2::Plugin::WebSocket)
 BuildRequires:  perl(Expect)
 BuildRequires:  perl(File::HomeDir)
 BuildRequires:  perl(File::LibMagic)
-BuildRequires:  perl(File::Slurp)
 BuildRequires:  perl(IO::Interactive)
 BuildRequires:  perl(IO::Uncompress::UnXz)
 BuildRequires:  perl(IPC::Run)
@@ -304,7 +303,6 @@ Requires(pre):  sudo
 Requires:       (perl(Passwd::Keyring::Gnome) if gnome-keyring)
 Requires:       (perl(Passwd::Keyring::KDEWallet) if kwalletd5)
 Requires:       perl(IO::Interactive)
-Requires:       perl(File::Slurp)
 Requires:       perl(Net::AMQP::RabbitMQ)
 Requires:       openssh-clients
 

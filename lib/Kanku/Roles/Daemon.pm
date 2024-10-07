@@ -19,7 +19,6 @@ package Kanku::Roles::Daemon;
 use Moose::Role;
 
 use File::Basename;
-use File::Slurp;
 use Getopt::Long;
 use Path::Class::File;
 use Path::Class::Dir;
@@ -164,7 +163,7 @@ sub prepare_and_run {
 
   $self->logger->info(sprintf("Writing to pid file '%s' : %d", $self->pid_file, $$));
 
-  write_file($self->pid_file, "$$");
+  path($self->pid_file)->spew("$$");
 
   Kanku::Airbrake->initialize();
 
@@ -185,7 +184,7 @@ sub initialize_shutdown {
     return 0;
   }
 
-  my $pid = read_file($self->pid_file->stringify);
+  my $pid = path($self->pid_file->stringify)->slurp;
 
   if (kill(0,$pid)) {
     $self->shutdown_file->touch();
@@ -230,7 +229,7 @@ sub finalize_shutdown {
 sub check_pid {
   my ($self) = @_;
   my $pidfile = $self->pid_file->stringify;
-  my $pid     = read_file($pidfile) || die "Could not read $pidfile: $!";
+  my $pid     = path($pidfile)->slurp || die "Could not read $pidfile: $!";
 
   if ($pid == $$) {;
     $self->logger->info("Pid matches my own pid $$");

@@ -23,8 +23,8 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 use Try::Tiny;
-use File::Slurp;
 use File::HomeDir;
+use Path::Tiny;
 
 command_short_description  'stop local webserver';
 
@@ -41,7 +41,7 @@ sub run {
   my $ret       = 0;
 
   try {
-    if (my $pid = read_file($pid_file)) {
+    if (my $pid = path($pid_file)->slurp) {
       kill(9, $pid) || $logger->error("Error while killing $pid: $!");
       unlink($pid_file) || $logger->error("Error while deleting $pid_file: $!");
       $logger->info("Stopped webserver with pid: $pid");
