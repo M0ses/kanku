@@ -24,8 +24,6 @@ extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Schema';
 
-use Path::Class qw/dir/;
-
 use Kanku::Setup::Server::Distributed;
 
 command_short_description  'Kanku CA management.';
@@ -67,7 +65,7 @@ sub run {
 
   my $setup = Kanku::Setup::Server::Distributed->new(
     _ssl     => 1,
-    ca_path  => dir($self->ca_path),
+    ca_path  => path($self->ca_path),
     _apache  => 0,
   );
   $setup->_create_ca();

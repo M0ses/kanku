@@ -2,7 +2,7 @@ package Kanku::Setup::LibVirt::Network;
 
 use Moose;
 use Kanku::YAML;
-use Path::Class qw/file/;
+use Path::Tiny;
 use Net::IP;
 use POSIX 'setsid';
 use IPC::Run qw/run/;
@@ -57,13 +57,13 @@ has iptables_autostart_json => (
 sub dnsmasq_cfg_file {
   my ($self, $name) = @_;
   confess("No name given") unless $name;
-  return file("/var/lib/libvirt/dnsmasq/$name.conf");
+  return path("/var/lib/libvirt/dnsmasq/$name.conf");
 }
 
 sub dnsmasq_pid_file {
   my ($self, $name) = @_;
   confess("No name given") unless $name;
-  return file("/run/libvirt/network/$name.pid");
+  return path("/run/libvirt/network/$name.pid");
 }
 
 sub bridges {

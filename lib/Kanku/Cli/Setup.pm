@@ -23,7 +23,6 @@ with 'Kanku::Cli::Roles::Schema';
 
 use Carp;
 use Cwd;
-use Path::Class qw/file dir/;
 use File::HomeDir;
 use DBIx::Class::Migration;
 use Sys::Virt;
@@ -245,16 +244,6 @@ sub run {
   } elsif ($self->worker) {
     $setup = Kanku::Setup::Worker->new(
       master          => $self->master,
-#      user            => $self->user,
-#      images_dir      => $self->images_dir,
-#      apiurl          => $self->apiurl,
-#      osc_user        => $self->osc_user,
-#      osc_pass        => $self->osc_pass,
-#      _ssl            => $self->ssl,
-#      _apache         => $self->apache,
-#      _devel          => 1,
-#      interactive     => $self->interactive,
-#      dns_domain_name => $self->dns_domain_name,
     );
   } else {
     croak('No valid setup mode found');

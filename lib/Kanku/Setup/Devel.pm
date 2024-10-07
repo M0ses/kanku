@@ -2,7 +2,6 @@ package Kanku::Setup::Devel;
 
 use Moose;
 use Carp;
-use Path::Class qw/dir file/;
 use English qw/-no_match_vars/;
 use File::HomeDir;
 use Kanku::Util;
@@ -106,11 +105,11 @@ sub setup {
 sub _create_osc_rc {
   my $self  = shift;
 
-  my $rc        = file($self->homedir,'.config/osc/oscrc');
-  my $rc_old    = file($self->homedir,'.oscrc');
+  my $rc        = path($self->homedir,'.config/osc/oscrc');
+  my $rc_old    = path($self->homedir,'.oscrc');
 
-  return 0 if (-e $rc_old);
-  return 0 if (-e $rc);
+  return 0 if ($rc_old->exists);
+  return 0 if ($rc->exists);
 
   my $choice = $self->_query_interactive(<<'EOF'
 No oscrc found in your home!
@@ -123,7 +122,7 @@ EOF
 
   return 0 unless $choice;
 
-  $rc->parent->mkpath unless -d $rc->parent;
+  $rc->parent->mkdir;
 
   if ( ! $self->apiurl ) {
      my $default = 'https://api.opensuse.org';
@@ -176,9 +175,9 @@ EOF
 sub _create_local_settings_dir {
   my $self = shift;
 
-  my $dir  = dir($self->homedir,'.kanku');
+  my $dir  = path($self->homedir,'.kanku');
 
-  (-d $dir ) || $dir->mkpath();
+  $dir->mkdir();
 
   return $self->_chown($dir);
 }
