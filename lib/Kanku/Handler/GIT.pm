@@ -18,10 +18,10 @@ package Kanku::Handler::GIT;
 
 use Moose;
 
-use Path::Class qw/file dir/;
-use IPC::Run qw/run/;
 use URI;
 use Try::Tiny;
+use Path::Tiny
+use IPC::Run qw/run/;
 
 sub gui_config {
   [
@@ -170,17 +170,19 @@ sub _prepare_mirror {
   die "remote_url needed when using mirror mode\n" if ( ! $self->remote_url );
 
   my $remote_uri = URI->new($self->remote_url);
-  my $mirror_dir = dir($self->cache_dir(),'git',$remote_uri->host,$remote_uri->path);
+  my $mirror_dir = path($self->cache_dir(), 'git', $remote_uri->host, $remote_uri->path);
 
   my @io;
   my @cmd;
 
-  if ( -d $mirror_dir ) {
+  if ( $mirror_dir->is_dir ) {
     @cmd = ('git', '-C', $mirror_dir->stringify, 'remote', 'update');
   } else {
-    if ( ! -d $mirror_dir->parent ) {
-      $self->logger->info(sprintf("Creating parent for mirror dir '%s'",$mirror_dir->parent));
-      $mirror_dir->parent->mkpath;
+    if (!$mirror_dir->parent->is_dir) {
+      $self->logger->info(
+	sprintf("Creating parent for mirror dir '%s'",$mirror_dir->parent->stringify)
+      );
+      $mirror_dir->parent->mkdir;
     }
     @cmd = ( 'git', 'clone');
     push @cmd, '--recursive' if $self->recursive;

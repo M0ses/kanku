@@ -19,7 +19,7 @@ package Kanku::Handler::PrepareSSH;
 use Moose;
 use Kanku::Util::VM::Console;
 use Kanku::Config;
-use Path::Class qw/file/;
+use Path::Tiny;
 
 sub gui_config {
   [
@@ -99,7 +99,7 @@ sub prepare {
     foreach my $file ( @{ $self->public_key_files } ) {
       $self->logger->debug("-- Reading public_key_files: $file");
       $file_counter++;
-      my $fh = file($file);
+      my $fh = path($file);
 
       my $key = $fh->slurp();
       push(@{ $self->public_keys },$key);

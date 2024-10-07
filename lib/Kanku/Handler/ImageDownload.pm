@@ -18,13 +18,13 @@ package Kanku::Handler::ImageDownload;
 
 use Moose;
 use Kanku::Util::CurlHttpDownload;
-use Path::Class qw/dir file/;
-use feature 'say';
-use File::Copy;
 use Try::Tiny;
+use Path::Tiny;
 use Archive::Cpio;
+
 use Kanku::Config;
 use Kanku::Config::Defaults;
+
 extends 'Kanku::Handler::HTTPDownload';
 
 sub gui_config {[]}

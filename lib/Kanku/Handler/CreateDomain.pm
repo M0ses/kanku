@@ -18,15 +18,11 @@ package Kanku::Handler::CreateDomain;
 
 use Moose;
 
-use Try::Tiny;
 use Carp;
-use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError) ;
-use File::Copy qw/copy/;
-use Path::Class::File;
+use Try::Tiny;
+use Path::Tiny;
 use Data::Dumper;
 use Session::Token;
-use File::Basename qw/basename/;
-use File::HomeDir;
 
 use Kanku::Config;
 use Kanku::Config::Defaults;
@@ -303,7 +299,7 @@ sub execute {
   $logger->debug("additional_disks:".$self->dump_it($self->additional_disks));
 
 
-  my $final_file = ($ctx->{tmp_image_file} ) ? basename($ctx->{tmp_image_file}->filename) : $self->vm_image_file;
+  my $final_file = ($ctx->{tmp_image_file} ) ? path($ctx->{tmp_image_file})->basename : $self->vm_image_file;
 
   if ($self->root_disk_size) {
     croak("Using Kanku::Handler::ResizeImage AND root_disk_size is not supported") if $ctx->{tmp_image_file};
@@ -631,7 +627,7 @@ sub _create_image_file_from_cache {
   my $supported_formats = join('|', keys %suffix2format);
   $self->logger->debug("file: --- $file");
   my $cache_dir = ($file =~ m#/#) ? '' : $self->cache_dir;
-  my $in = Path::Class::File->new($cache_dir, $file);
+  my $in = path($cache_dir, $file);
 
   $self->logger->debug("Using file ".$in->stringify);
   if ( $file =~ /\.($supported_formats)(\.(gz|bz2|xz))?$/ ) {
