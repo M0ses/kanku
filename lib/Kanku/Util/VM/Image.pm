@@ -21,9 +21,8 @@ use Moose;
 use Sys::Virt;
 use Sys::Virt::Stream;
 use Try::Tiny;
+use Path::Tiny;
 use File::LibMagic;
-use File::Temp;
-use File::Copy;
 use IO::Uncompress::AnyUncompress qw/anyuncompress $AnyUncompressError/;
 use Carp;
 use JSON::XS;
@@ -45,7 +44,7 @@ has '_temp_source_file' => (
   is=>'rw',
   isa => 'Object',
   lazy => 1,
-  default => sub { return File::Temp->new(SUFFIX => '.img' ) },
+  default => sub { return tempfile(SUFFIX => '.img' ) },
 );
 
 has '+uri'       => ( default => 'qemu:///system');
@@ -177,7 +176,7 @@ sub resize_image {
   my $cfg = Kanku::Config->instance();
   my $tmp;
 
-  $img = Path::Class::File->new($cfg->cache_dir, $img) unless ($img =~ m#/#);
+  $img = path($cfg->cache_dir, $img) unless ($img =~ m#/#);
 
   # 0 means that format is the same as suffix
   my %supported_formats = (
@@ -189,17 +188,18 @@ sub resize_image {
 
   my $supported_suf = join q{|}, keys %supported_formats;
 
-  if ( $img =~ /[.]($supported_suf)(\.xz|\.gz|\.bz2)?$/ ) {
+  if ( $img->stringify =~ /[.]($supported_suf)(\.xz|\.gz|\.bz2)?$/ ) {
     my $ext         = $1;
     my $compression = $2 || q{};
     if ( $size ) {
       my $template = 'XXXXXXXX';
       my $format = '-f ' . ( $supported_formats{$ext} || $ext );
-      $tmp = File::Temp->new(
-                                 TEMPLATE => $template,
-                                 DIR      => $cfg->cache_dir,
-                                 SUFFIX   => ".$ext",
-                               );
+      $tmp = tempfile(
+               TEMPLATE => $template,
+               DIR      => $cfg->cache_dir,
+               SUFFIX   => ".$ext",
+             );
+
       if ($compression)  {
         $self->logger->debug("--- uncompress '$img' to '$tmp'");
         my $input = (ref $img) ? $img->stringify : $img;
@@ -207,8 +207,9 @@ sub resize_image {
           or croak("anyuncompress failed: $AnyUncompressError\n");
       } else {
         $self->logger->debug("--- copying image '$img' to '$tmp'");
-        copy($img, $tmp) or croak("Copy failed: $!");
+        $img->copy($tmp);
       }
+
       $self->logger->debug("--- trying to resize image '$tmp' to $size (format: $format)");
       my @out = `qemu-img resize $format $tmp $size`;
       my $ec = $? >> 8;

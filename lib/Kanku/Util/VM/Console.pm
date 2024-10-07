@@ -17,12 +17,12 @@
 package Kanku::Util::VM::Console;
 
 use Moose;
+use Carp;
 use Expect;
 use Data::Dumper;
-use Kanku::Config;
-use Path::Class qw/file/;
-use Carp;
 use Time::HiRes qw/usleep/;
+use Path::Tiny;
+use Kanku::Config;
 
 with 'Kanku::Roles::Logger';
 
@@ -60,10 +60,8 @@ sub init {
   } elsif ($cfg->{$pkg}->{log_to_file} && $self->job_id) {
     $logger->debug("Config -> $pkg (log_to_file): $cfg->{$pkg}->{log_to_file}");
 
-    my $lf = file($cfg->{$pkg}->{log_dir},"job-".$self->job_id."-console.log");
-    if (! -d $lf->parent() ) {
-      $lf->parent->mkpath();
-    }
+    my $lf = path($cfg->{$pkg}->{log_dir},"job-".$self->job_id."-console.log");
+    $lf->parent->mkdir;
     $logger->debug("Setting logfile '".$lf->stringify()."'");
     $exp->log_file($lf->stringify());
     $self->log_stdout(0);
