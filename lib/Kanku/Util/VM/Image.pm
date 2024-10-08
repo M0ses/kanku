@@ -393,7 +393,7 @@ sub _check_source_file {
   my $fmt  = '-f ' . $self->format;
 
   my $tmp_fh = $self->_temp_source_file();
-  my $tmp_fn = $tmp_fh->filename;
+  my $tmp_fn = $tmp_fh->stringify;
 
   $self->source_file($tmp_fn);
 
