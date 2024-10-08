@@ -218,7 +218,7 @@ sub finalize_shutdown {
   }
   catch {
     $logger->error($_);
-  }
+  };
 
   $logger->info("Shutting down service $pkg");
 
