@@ -22,9 +22,12 @@ use Kanku::Config;
 use Config;
 
 my ($arch, undef) = split(/-/, $Config{archname});
+
+my $home = $::ENV{HOME} || (getpwuid($<))[7];
+
 my $defaults =    {
   'Kanku::Config::GlobalVars' => {
-    cache_dir      => "$::ENV{'HOME'}/.cache/kanku",
+    cache_dir      => "$home/.cache/kanku",
     images_dir     => '/var/lib/libvirt/images',
     views_dir      => '/usr/share/kanku/views',
     host_interface => 'eth0',
@@ -102,7 +105,7 @@ my $defaults =    {
 has 'rcfile' => (
   is      => 'ro',
   isa     =>'Str',
-  default => "$::ENV{HOME}/.kankurc",
+  default => "$home/.kankurc",
 );
 
 has 'rc' => (

@@ -19,7 +19,7 @@ package Kanku::Cli::Urlwrapper;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use File::Path qw/make_path/;
+use Path::Tiny;
 
 use Net::OBS::LWP::UserAgent;
 
@@ -53,7 +53,7 @@ has '_outdir' => (
   isa           => 'Object',
   is            => 'rw',
   default       => sub {
-    return File::Temp->newdir();
+    return tempdir(CLEANUP=>1);
   },
 );
 
@@ -120,42 +120,27 @@ sub run {
 sub ask_for_outdir {
   my ($self) = @_;
   print "Where should the Kankufile be saved (empty for temporary directory)?\n";
-  my $dir = <STDIN>;
+  my $dir = <>;
   chomp($dir);
   if ($dir) {
-    if (! -d $dir) {
-      make_path($dir) || die "Could not create $dir: $!";
+    my $KankuFile = path($dir, 'KankuFile');
+    if ($KankuFile->exists) {
+      print "$dir/KankuFile already exists. Would you like to overwrite? [yN]\n";
+      my $ask = <>;
+      chomp $ask;
+      return 1 unless ($ask =~ /^y(es)?$/i);
+    } else {
+      path($dir)->mkdir;
     }
     $self->outdir($dir);
-  } elsif ( -f "$dir/KankuFile") {
-    print "$dir/KankuFile already exists. Would you like to overwrite? [yN]\n";
-    my $ask = <STDIN>;
-    chomp $ask;
-    exit 1 unless ($ask =~ /^y/i);
   }
-}
-
-sub _slurp {
-  my ($self, $file) = @_;
-  my $fh;
-  open($fh, '<', $file) || die "Could not open $file: $!\n";
-  my @ret = <$fh>;
-  close $fh;
-  return @ret;
-}
-
-sub _spew {
-  my ($self, $file, $c) = @_;
-  my $fh;
-  open($fh, '>', $file) || die "Could not open $file: $!\n";
-  print $fh $_ for @{$c};
-  close $fh || die "Could not close $file: $!\n";
+  return;
 }
 
 sub check_domain {
   my ($self) = @_;
   my $domain;
-  my @lines = $self->_slurp($self->_KankuFile);
+  my @lines = path($self->_KankuFile)->lines;
   foreach my $l (@lines) {
     if ($l =~ /^domain_name:\s*(.*)/) {
       $domain = $1;
@@ -174,13 +159,13 @@ sub check_domain {
       print "1) reconfigure KankuFile\n";
       print "2) remove domain\n";
       print "*) exit\n";
-      my $sel = <STDIN>;
+      my $sel = <>;
       chomp $sel;
       if ($sel eq "1") {
         print "Please enter new domain name\n";
-        my $new_domain_name = <STDIN>;
+        my $new_domain_name = <>;
         chomp $new_domain_name;
-        my @in = $self->_slurp($self->_KankuFile);
+        my @in = path($self->_KankuFile)->lines;
         my @out;
         for my $l (@in) {
           if ($l =~ s/domain_name:.*/domain_name: $sel/) {
@@ -189,7 +174,7 @@ sub check_domain {
           }
           push @out, $l;
         }
-        $self->_spew($self->_KankuFile, \@in);
+        path($self->_KankuFile)->spew(@in);
       } elsif ($sel eq "2") {
         `kanku destroy`;
         die "Could not remove domain $dom\n" if $?;
@@ -228,7 +213,7 @@ sub query_for_sig {
     print "Signature checking failed!\n";
     print "It's not recommended to proceed\n";
     print "Proceed anyway? (y|N)\n";
-    my $sel = <STDIN>;
+    my $sel = <>;
     if ($sel =~ /y/i) {
       print "YOU HAVE BEEN WARNED ;-)\n";
     } else {
@@ -241,7 +226,7 @@ sub query_exit {
 
   print "$msg\n" if $msg;
   print "Keep shell alive? (y|Y|n|N)\n";
-  my $in = <STDIN>;
+  my $in = <>;
 
   exec $ENV{'SHELL'} if $in =~ /^y/i;
 
@@ -264,7 +249,7 @@ sub select_url {
     $cnt++;
   }
 
-  my $in = <STDIN>;
+  my $in = <>;
   chomp $in;
   my $data = @{$urls}[int($in)-1];
   $self->_must_be_signed($data->{signed});
@@ -306,6 +291,7 @@ sub get_file {
   }
   return 1;
 }
+
 __PACKAGE__->meta->make_immutable;
 
 1;

@@ -17,7 +17,7 @@
 package Kanku::Handler::OBSServerFrontendTests;
 
 use Moose;
-use File::Temp;
+use Path::Tiny;
 
 sub gui_config {
   [
@@ -85,7 +85,7 @@ sub execute {
   my $ruby_version = $self->ruby_version || '2.5';
   my $git_revision = $self->git_revision||'master';
   my $git_url      = $self->git_url||'https://github.com/openSUSE/open-build-service.git';
-  my $tmp_dir      = File::Temp->new->filename;
+  my $tmp_dir      = tempdir()->stringify;
   my $logfile      = "~/obs-server-frontend-$job_id.log";
 
   my $log_to_file  = ">> $logfile 2>&1 || ".

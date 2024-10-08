@@ -28,15 +28,17 @@ Use the URL http://localhost:5000
 ';
 
 use Carp;
-use File::HomeDir;
+use Path::Tiny;
+
+with 'Kanku::Roles::Helpers';
 
 sub run {
   my ($self)    = @_;
   my $logger    = $self->logger;
-  my $hd        = File::HomeDir->my_home;
-  my $pid_file  = "$hd/.kanku/ui.pid";
+  my $hd        = $self->my_home;
+  my $pid_file  = path($hd, qw/.kanku ui.pid/);
 
-  if ( -f $pid_file ) {
+  if ($pid_file->is_file) {
     $logger->warn('WebUI already running!');
     $logger->info('*** Please run stopui before or connect to http://localhost:5000 ***');
     return 1;
@@ -49,7 +51,7 @@ sub run {
     local $| = 1;
 
     # remove pid_file if child die`s
-    $SIG{__DIE__} = sub { unlink $pid_file };
+    $SIG{__DIE__} = sub { $pid_file->remove };
 
     my $log_file = "$hd/.kanku/ui.log";
 
@@ -71,7 +73,7 @@ sub run {
     return 0;
   }
 
-  path($pid_file)->spew($pid);
+  $pid_file->spew($pid);
   $logger->info("Started webserver with pid: $pid");
   $logger->info('Please connect to http://localhost:5000');
 

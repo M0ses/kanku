@@ -2,7 +2,6 @@ requires        'Test::More'              , 0;
 requires        'YAML'                    , 0;
 requires        'Moose'                   , 0;
 requires        'Dancer2'                 , 0.160000;
-requires        'Path::Class'             , 0;
 requires        'Sys::Virt'               , 0;
 requires        'MooseX::Singleton'       , 0;
 requires        'Dancer2::Plugin::REST'   , 0;

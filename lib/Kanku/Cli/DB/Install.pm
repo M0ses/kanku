@@ -21,7 +21,7 @@ extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::DB';
 
-use File::Path;
+use Path::Tiny;
 use DBIx::Class::Migration;
 
 command_short_description 'Initialize database';
@@ -45,16 +45,16 @@ sub run {
     target_dir	   => $self->share_dir,
   );
 
-  my $dbdir = $self->_dbdir;
-  if (! -d $dbdir) {
-    if (-e $dbdir) {
+  my $dbdir = path($self->_dbdir);
+  if (!$dbdir->is_dir) {
+    if ($dbdir->exists) {
       $logger->error(
 	"File '$dbdir' already exists, but is no directory! Exiting..."
       );
       return 1;
     }
     $logger->debug('Creating _dbdir: '.$self->_dbdir);
-    File::Path::make_path($self->_dbdir);
+    $self->_dbdir->mkdir;
   }
 
   $migration->install_if_needed(default_fixture_sets => ['install']);

@@ -23,8 +23,9 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 use Try::Tiny;
-use File::HomeDir;
 use Path::Tiny;
+
+with 'Kanku::Roles::Helpers';
 
 command_short_description  'stop local webserver';
 
@@ -36,7 +37,7 @@ This command stops the local webserver, providing the ui
 sub run {
   my ($self)    = @_;
   my $logger    = $self->logger;
-  my $hd        = File::HomeDir->my_home;
+  my $hd        = $self->my_home;
   my $pid_file  = "$hd/.kanku/ui.pid";
   my $ret       = 0;
 

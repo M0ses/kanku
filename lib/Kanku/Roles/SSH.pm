@@ -19,7 +19,7 @@ package Kanku::Roles::SSH;
 use Moose::Role;
 
 use Carp;
-use File::Basename;
+use Path::Tiny;
 use Libssh::Session q(:all);
 
 use Kanku::Config::Defaults;
@@ -178,8 +178,9 @@ sub connect {
   $logger->debug("Connecting to $ip (Timeout: $timeout)!");
 
   if ( $self->auth_type eq 'publickey') {
-    my $identity = basename($self->privatekey_path);
-    my $sshdir  = dirname($self->privatekey_path);
+    my $privkey  = path($self->privatekey_path);
+    my $identity = $privkey->basename;
+    my $sshdir   = $privkey->dirname;
     $options{Identity} = $identity if $identity;
     $options{SshDir}   = $sshdir   if $sshdir;
     $key_auth=1;

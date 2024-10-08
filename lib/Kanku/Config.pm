@@ -20,11 +20,6 @@ use MooseX::Singleton;
 
 use Kanku::File;
 
-#has file => (
-#  is     => 'rw',
-#  isa    => 'ExistantFile',
-#);
-
 sub initialize {
   my ($self, %args) = @_;
   if ( $args{class} ) {
@@ -33,7 +28,7 @@ sub initialize {
     with 'Kanku::Roles::Config';
   }
 
-  $self->file(Kanku::File::lookup_file($args{file})) if $args{file};
+  $self->file(Kanku::File::lookup_file($args{file})->stringify) if $args{file};
 
   return $self;
 }

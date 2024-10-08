@@ -37,32 +37,26 @@ has 'ca_pass' => (
 # TODO: Check if lazy and default are still required
 has 'cacertfile' => (
   is      =>'rw',
-  isa     =>'Str',
-  lazy    => 1,
-  default => ''
+  isa     =>'Object',
 );
 
 # TODO: Check if lazy and default are still required
 has 'certfile' => (
   is      =>'rw',
-  isa     =>'Str',
-  lazy    => 1,
-  default => ''
+  isa     =>'Object',
 );
 
 # TODO: Check if lazy and default are still required
 has 'keyfile' => (
   is      =>'rw',
-  isa     =>'Str',
-  lazy    => 1,
-  default => ''
+  isa     =>'Object',
 );
 
 has 'ovs_ip_prefix' => (
   is      =>'rw',
   isa     =>'Str',
   lazy    => 1,
-  default => '192.168.199'
+  default => '192.168.199',
 );
 
 sub setup {
@@ -328,11 +322,11 @@ subjectAltName                  = @alt_names
 
   if ($self->_apache) {
     my $apachecrt = path("/etc/apache2/ssl.crt/server.crt");
-    my $apachekey = path("/etc/apache2/ssl.key/server.key");
     $self->certfile->copy($apachecrt) unless $apachecrt->exists;
-    if (! -f $apachekey) {
-    $self->keyfile->copy($apachekey) unless $apachekey->exists;
     $apachecrt->chmod(0444);
+
+    my $apachekey = path("/etc/apache2/ssl.key/server.key");
+    $self->keyfile->copy($apachekey) unless $apachekey->exists;
     $apachekey->chmod(0440);
   }
 
@@ -414,7 +408,7 @@ sub _setup_ovs_hooks {
 /usr/bin/perl /usr/lib/kanku/network-setup.pl \$@
 ");
 
-  chmod oct(755), "/etc/libvirt/hooks/network";
+  path("/etc/libvirt/hooks/network")->chmod(0755);
 
   $self->_run_system_cmd("systemctl", "restart", "libvirtd.service");
 }

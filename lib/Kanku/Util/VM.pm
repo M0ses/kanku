@@ -18,16 +18,17 @@ package Kanku::Util::VM;
 
 use Moose;
 
+use Net::IP;
+use Try::Tiny;
+use Path::Tiny;
+use XML::XPath;
+
 use Sys::Virt;
 use Sys::Virt::Stream;
 use Sys::Virt::StorageVol;
+
 use Expect;
 use Template;
-use Cwd;
-use Net::IP;
-use XML::XPath;
-use Try::Tiny;
-use File::Path qw/make_path/;
 
 with 'Kanku::Roles::Logger';
 
@@ -149,8 +150,11 @@ has host_dir_9p => (
   is      => 'rw',
   isa     => 'Str',
   lazy    => 1,
-  default => sub { getcwd() }
+  builder => '_build_host_dir_9p',
 );
+sub _build_host_dir_9p {
+  return Path::Tiny->cwd->stringify
+}
 
 has accessmode_9p => (
   is      => 'rw',
@@ -187,23 +191,21 @@ has 'log_stdout'     => (is => 'rw', isa => 'Bool', default => 1);
 
 sub process_template {
   my ($self,$disk_xml) = @_;
+  
   my $logger = $self->logger;
 
-  # some useful options (see below for full list)
   my $template_path = '/etc/kanku/templates';
+
   my $config = {
     INCLUDE_PATH => $template_path,
-    INTERPOLATE  => 1,               # expand "$var" in plain text
-    POST_CHOMP   => 1,               # cleanup whitespace
-    #PRE_PROCESS  => 'header',        # prefix each template
-    #EVAL_PERL    => 1,               # evaluate Perl code blocks
-    #RELATIVE     => 1
+    INTERPOLATE  => 1,
+    POST_CHOMP   => 1,
   };
 
   my $host_feature = $self->_get_hw_virtualization;
   die "Hardware doesn't support kvm" if ! $host_feature;
   $logger->debug("Found hardware virtualization: '$host_feature'");
-  # create Template object
+
   my $template  = Template->new($config);
 
 
@@ -257,17 +259,14 @@ sub process_template {
 
   $logger->debug(" --- use_9p:".$self->use_9p);
   if ( $self->use_9p ) {
-    $logger->debug(" --- host_dir_9p:".$self->host_dir_9p);
-    if (! -d $self->host_dir_9p) {
-      $logger->debug(" --- host_dir_9p does not exists. Trying to create");
-      make_path($self->host_dir_9p) || die "Could not create host_dir_9p '".$self->host_dir_9p."': $!";
-    }
-
+    my $hd9p = path($self->host_dir_9p);
+    $logger->debug(" --- host_dir_9p: $hd9p");
+    $hd9p->mkdir;
     $logger->debug(" --- accesmode_9p: ".$self->accessmode_9p);
 
     $vars->{domain}->{hostshare} = "
     <filesystem type='mount' accessmode='".$self->accessmode_9p."'>
-      <source dir='".$self->host_dir_9p."'/>
+      <source dir='$hd9p'/>
       <target dir='kankushare'/>
       <alias name='fs0'/>
     </filesystem>

@@ -306,7 +306,7 @@ sub execute {
     my $img_obj = Kanku::Util::VM::Image->new();
     $logger->debug("CreateDomain: resizing to ". $self->root_disk_size);
     $ctx->{tmp_image_file} = $img_obj->resize_image($final_file, $self->root_disk_size);
-    $final_file = $ctx->{tmp_image_file}->filename;
+    $final_file = $ctx->{tmp_image_file}->stringify;
   }
 
   my ($vol, $image) = $self->_create_image_file_from_cache({file=>$final_file}, 0, $self->domain_name);
@@ -626,8 +626,8 @@ sub _create_image_file_from_cache {
   );
   my $supported_formats = join('|', keys %suffix2format);
   $self->logger->debug("file: --- $file");
-  my $cache_dir = ($file =~ m#/#) ? '' : $self->cache_dir;
-  my $in = path($cache_dir, $file);
+  my @parts = ($file =~ m#/#) ? ($file) : ($self->cache_dir, $file);
+  my $in = path(@parts);
 
   $self->logger->debug("Using file ".$in->stringify);
   if ( $file =~ /\.($supported_formats)(\.(gz|bz2|xz))?$/ ) {

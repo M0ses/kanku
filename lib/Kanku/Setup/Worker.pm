@@ -2,11 +2,10 @@ package Kanku::Setup::Worker;
 
 use Moose;
 use Carp;
-use File::Copy;
+use Path::Tiny;
 use Net::Domain qw/hostfqdn/;
 
 with 'Kanku::Setup::Roles::Common';
-#with 'Kanku::Setup::Roles::Server';
 with 'Kanku::Roles::Logger';
 
 has [qw/mq_host mq_vhost mq_user mq_pass/] => (is=>'ro','isa'=>'Str');
@@ -113,7 +112,7 @@ sub _setup_ovs_hooks {
 /usr/bin/perl /usr/lib/kanku/network-setup.pl \$@
 ");
 
-  chmod oct(755), "/etc/libvirt/hooks/network";
+  path("/etc/libvirt/hooks/network")->chmod(0755);
   $self->_run_system_cmd("systemctl", "restart", "libvirtd.service");
 }
 

@@ -4,13 +4,15 @@ use Moose::Role;
 
 use Carp;
 use Template;
-use File::Spec;
+use Path::Tiny;
 
 use Data::Dumper;
 use JSON::XS;
 use YAML::PP;
 
 use Kanku::Config::Defaults;
+
+with 'Kanku::Roles::Helpers';
 
 has include_path => (
   is      => 'rw',
@@ -19,14 +21,16 @@ has include_path => (
   builder => '_build_include_path',
 );
 sub _build_include_path {
+  my ($self) = @_;
+  my $vd = Kanku::Config::Defaults->get(
+             'Kanku::Config::GlobalVars',
+	     'views_dir',
+	   );
   return [
-    File::Spec->catdir($::ENV{HOME}, '.config', 'kanku', 'views', 'cli'),
-    File::Spec->catdir($::ENV{HOME}, '.kanku', 'views', 'cli'),
-    File::Spec->catdir(
-      Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'views_dir'),
-      'cli',
-    ),
-  ],
+    path($self->my_home, qw/.config kanku views cli/)->stringify,
+    path($self->my_home, qw/.kanku views cli/)->stringify,
+    path($vd, 'cli')->stringify,
+  ];
 }
 
 sub view {

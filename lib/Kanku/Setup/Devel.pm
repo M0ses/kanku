@@ -2,28 +2,35 @@ package Kanku::Setup::Devel;
 
 use Moose;
 use Carp;
+use Path::Tiny;
 use English qw/-no_match_vars/;
-use File::HomeDir;
+
 use Kanku::Util;
+use Kanku::File;
+
 with 'Kanku::Setup::Roles::Common';
 with 'Kanku::Roles::Logger';
+with 'Kanku::Roles::Helpers';
 
 has homedir => (
     isa           => 'Str',
     is            => 'rw',
     lazy          => 1,
-    default       => sub {
-      # dbi:SQLite:dbname=/home/frank/.kanku/kanku-schema.db
-      return File::HomeDir->users_home($_[0]->user);
-    },
+    builder       => '_build_homedir',
 );
+sub _build_homedir {
+  return $_[0]->users_home($_[0]->user);
+}
 
 has _dbfile => (
         isa     => 'Str',
         is      => 'rw',
         lazy    => 1,
-        default => sub { $_[0]->homedir.'/.kanku/kanku-schema.db' },
+	builder => '_build__dbfile',
 );
+sub _build__dbfile {
+  return $_[0]->homedir.'/.kanku/kanku-schema.db'
+}
 
 has apiurl => (
   isa    => 'Str',
@@ -70,7 +77,7 @@ sub setup {
   $self->_create_default_network;
 
   $self->_setup_nested_kvm;
-  my $home  = File::HomeDir->users_home($self->user);
+  my $home  = $self->users_home($self->user);
   my $gconf = "$home/.kanku/kanku-config.yml";
 
   $self->_backup_config_file($gconf);
@@ -94,7 +101,7 @@ sub setup {
     }
   );
 
-  my ($user, $passwd, $uid, $gid ) = getpwuid(getpwnam($self->user));
+  my ($user, $passwd, $uid, $gid ) = getpwnam($self->user);
   chown($uid, $gid, $gconf) || die "Could not chown ($uid, $gid, $gconf): $!\n";
 
   $logger->info('Developer mode setup successfully finished!');
@@ -168,18 +175,18 @@ EOF
 ;
 
   $rc->spew($rc_txt);
-  $self->_chown($rc);
+  Kanku::File::chown($self->user, $rc);
   return 0;
 }
 
 sub _create_local_settings_dir {
-  my $self = shift;
+  my ($self) = @_;
 
   my $dir  = path($self->homedir,'.kanku');
 
   $dir->mkdir();
 
-  return $self->_chown($dir);
+  return Kanku::File::chown($self->user, $dir);
 }
 
 sub _ask_for_user {

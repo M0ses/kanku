@@ -18,16 +18,16 @@ package Kanku::Roles::Config;
 
 use Moose::Role;
 
-use Path::Class::File;
-use Path::Class::Dir;
+use Carp;
+use Try::Tiny;
+use Path::Tiny;
 use Data::Dumper;
 use YAML::PP;
 use YAML::PP::Schema::Include;
-use Try::Tiny;
-use File::HomeDir;
+
+
 use Kanku::Config::Defaults;
 use Kanku::YAML;
-use Carp;
 
 sub file;
 has file => (
@@ -39,7 +39,10 @@ has file => (
 sub _build_file {
   my ($self) = @_;
   my $logger = $self->logger;
-  my $home   = File::HomeDir->my_home;
+  my $home   = $::ENV{HOME}
+               || (getpwuid($<))[7]
+	       || croak("Could not determine home for current user id: $<\n");
+
   my @files = (
     "$home/kanku/config.yml",
     "$home/.kanku/kanku-config.yml",
@@ -49,7 +52,7 @@ sub _build_file {
   for my $f (@files) {
     if (-f $f) {
       $logger->trace("Found Config file: $f");
-      return Path::Class::File->new($f);
+      return path($f);
     }
   }
   return undef;
@@ -122,7 +125,7 @@ sub notifiers_config {
 sub job_config_plain {
   my ($self, $job_name) = @_;
 
-  my $conf_file = Path::Class::File->new("/etc/kanku/jobs/$job_name.yml");
+  my $conf_file = path("/etc/kanku/jobs/$job_name.yml");
   my $content   = $conf_file->slurp();
 
   return $content;
@@ -159,7 +162,7 @@ sub load_job_group_config {
 
 sub job_group_config_plain {
   my ($self, $name) = @_;
-  my $conf_file = Path::Class::File->new("/etc/kanku/job_groups/$name.yml");
+  my $conf_file = path("/etc/kanku/job_groups/$name.yml");
   my $content   = $conf_file->slurp();
 
   return $content;

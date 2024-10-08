@@ -21,7 +21,7 @@ use Moose;
 use Sys::Virt;
 use Sys::Virt::Stream;
 use Try::Tiny;
-use Path::Tiny;
+use Path::Tiny qw/path tempfile/;
 use File::LibMagic;
 use IO::Uncompress::AnyUncompress qw/anyuncompress $AnyUncompressError/;
 use Carp;

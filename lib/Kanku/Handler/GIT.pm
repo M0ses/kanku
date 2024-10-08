@@ -20,7 +20,7 @@ use Moose;
 
 use URI;
 use Try::Tiny;
-use Path::Tiny
+use Path::Tiny;
 use IPC::Run qw/run/;
 
 sub gui_config {

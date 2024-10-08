@@ -17,15 +17,16 @@
 package Kanku::Setup::Roles::Common;
 
 use Moose::Role;
-use Sys::Virt;
-use IPC::Run qw/run timeout/;
-use Carp;
-use English qw/-no_match_vars/;
-use Const::Fast;
-use File::Which;
-use File::Copy;
-use Template;
 
+use Carp;
+use Template;
+use Sys::Virt;
+use Path::Tiny;
+use Const::Fast;
+use IPC::Run qw/run timeout/;
+use English qw/-no_match_vars/;
+
+use Kanku::File;
 use Kanku::Config::Defaults;
 
 const my $MAX_NETWORK_NUMBER => 255;
@@ -327,14 +328,14 @@ EOF
 
 sub _create_systemd_conf {
   my ($self, $sn)   = @_;
-  my $sd_path  = "/etc/systemd/network/";
+  my $sd_path  = path("/etc/systemd/network/");
   my $nn       = $self->network_name();
-  my $of       = "$sd_path/$nn.conf";
+  my $of       = path("$sd_path/$nn.conf");
 
-  if (! -d $sd_path) {
+  if (!$sd_path->exists) {
     $self->logger->debug("Directory $sd_path does not exist! Skipping creation of systemd config.");
     $self->logger->info("Skipping creation of systemd config.");
-  } elsif (-f $of) {
+  } elsif ($of->exists) {
     $self->logger->debug("File $of already exists");
     $self->logger->info("Skipping creation of systemd config.");
   } else {
@@ -347,9 +348,7 @@ Name=$nn
 DNS=192.168.$sn.1
 Domains=$dns
 EOF
-    open(my $fh, '>', $of) || croak("Could not open $of: $!");
-    print $fh $content || croak("Could not write to $of: $!");
-    close $fh || croak("Could not close $of: $!");
+    $of->spew($content);
   }
   return;
 }
@@ -388,19 +387,6 @@ sub _run_system_cmd {    ## no critic (Subroutines::ProhibitUnusedPrivateSubrout
     stderr      => $err,
     stdout	=> $out,
   };
-}
-
-sub _chown {
-  my  ($self, @opts) = @_;
-  my ($login,$pass,$uid,$gid) = getpwnam $self->user;
-  $login || croak($self->user." not in passwd file\n");
-
-  while (my $fn = shift @opts) {
-    $self->logger->debug("_chown '$fn' ($uid/$gid)");
-    chown $uid, $gid, $fn || croak($OS_ERROR);
-  }
-
-  return;
 }
 
 sub _set_sudoers {     ## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
@@ -463,7 +449,7 @@ sub _setup_database {    ## no critic (Subroutines::ProhibitUnusedPrivateSubrout
   # setup database if needed
   $migration->install_if_needed(default_fixture_sets => ['install']);
 
-  $self->_chown($self->_dbfile);
+  Kanku::File::chown($self->user, $self->_dbfile);
 
   return;
 }
@@ -485,32 +471,27 @@ sub _setup_nested_kvm {
     die "No proper cpu type found!\n";
   }
 
-  open(P, '<', $pfile) || die "Could not open $pfile: $!\n";
-  my @p = <P>;
-  close P;
-
+  my @p = path($pfile)->lines;
   chomp $p[0];
 
   return if ( $p[0] eq 'Y');
 
   $self->_backup_config_file("/etc/modprobe.d/kvm-nested.conf");
 
-  open(M, '>', '/etc/modprobe.d/kvm-nested.conf')
-    || die "Could not open /etc/modprobe.d/kvm-nested.conf: $!";
-
+  my @options;
   if ($kmod eq 'kvm_intel') {
-    print M <<EOF;
-options kvm-intel nested=1
-options kvm-intel enable_shadow_vmcs=1
-options kvm-intel enable_apicv=1
-options kvm-intel ept=1
-EOF
+    @options = (
+      'options kvm-intel nested=1',
+      'options kvm-intel enable_shadow_vmcs=1',
+      'options kvm-intel enable_apicv=1',
+      'options kvm-intel ept=1',
+    );
   } else {
-    print M <<EOF;
-options kvm-amd nested=1
-EOF
+    @options = ('options kvm-amd nested=1');
   }
-  close M;
+
+  path('/etc/modprobe.d/kvm-nested.conf')->spew(@options);
+
   `modprobe -r $kmod`;
   `modprobe -a $kmod`;
 
@@ -538,11 +519,11 @@ sub _query_interactive {
 
 sub _backup_config_file {
   my ($self, $rc) = @_;
-  my $src = $rc;
+  my $src = path($rc);
   my $dst = "$rc.kanku-bak".time().q{.}.$PID;
-  if (-e $src) {
-    File::Copy::cp($src, $dst);
-    $self->logger->debug("Create backup of config $src -> $dst");
+  if ($src->exists) {
+    $self->logger->debug("Creating backup of config $src -> $dst");
+    $src->copy($dst);
   } else {
     $self->logger->debug("No backup of config $src - File does not exist");
   }
@@ -551,13 +532,13 @@ sub _backup_config_file {
 
 sub _create_ssh_keys {
   my ($self)  = @_;
-  my $ssh_dir = '/etc/kanku/ssh';
-  my $id_rsa  = "$ssh_dir/id_rsa";
-  if (! -f $id_rsa ) {
-    -d $ssh_dir || mkdir $ssh_dir;
+  my $ssh_dir = path('/etc/kanku/ssh');
+  my $id_rsa  = path($ssh_dir, 'id_rsa');
+  if (!$id_rsa->exists) {
+    $ssh_dir->mkdir;
     `ssh-keygen -b 2048 -t rsa -f $id_rsa -q -N ""`
   }
-  $self->_chown($id_rsa, "$id_rsa.pub");
+  Kanku::File::chown($self->user, $id_rsa, "$id_rsa.pub");
 }
 
 1;

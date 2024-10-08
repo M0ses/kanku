@@ -6,7 +6,6 @@ use MooseX::App::Role;
 
 use Cwd;
 use Carp;
-use File::Basename qw/dirname basename/;
 
 use Kanku::YAML;
 use Kanku::File;

@@ -19,16 +19,17 @@ package Kanku::Handler::Vagrant;
 use strict;
 use warnings;
 
-use Archive::Tar;
 use Moose;
-use File::Path qw(make_path);
-use Try::Tiny;
+
+use URI;
 use Carp;
+use JSON::XS;
+use Try::Tiny;
+use Path::Tiny;
+use Archive::Tar;
+
 use Kanku::Config::Defaults;
 use Net::OBS::LWP::UserAgent;
-use LWP::UserAgent;
-use JSON::XS;
-use URI;
 
 sub gui_config {
   [
@@ -176,7 +177,7 @@ sub execute {
   }
 
   my $cache_dir = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
-  ( -d $cache_dir ) || make_path($cache_dir);
+  path($cache_dir)->mkdir;
   my $duri     = URI->new($durl);
   my $dpath    = $duri->path;
   my @parts    = split('/', $dpath);
@@ -217,6 +218,7 @@ sub execute {
 
 sub update_history {
   my ($self) = @_;
+
 # FIXME: needs to be implemented
 #
 #  my $rs = $self->schema->resultset('ObsCheckHistory')->update_or_create(
@@ -238,6 +240,7 @@ sub update_history {
 sub get_from_history {
   my $self = shift;
   my $ctx  = $self->job->context;
+
 # FIXME: needs to be implemented
 #  my $rs = $self->schema->resultset('ObsCheckHistory')->find(
 #    {
@@ -251,6 +254,7 @@ sub get_from_history {
 #
 #  $ctx->{vm_image_url} = $rs->vm_image_url;
 #
+
   return {
     code    => 0,
     state   => 'succeed',

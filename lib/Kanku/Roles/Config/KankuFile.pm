@@ -39,7 +39,7 @@ sub _build_file {
       || $::ENV{KANKU_CONFIG}
       || "KankuFile"
   ); 
-  return $f;
+  return "$f";
 };
 
 sub job_config {

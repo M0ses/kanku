@@ -18,13 +18,12 @@ package Kanku::Handler::CopyProfile;
 
 use Moose;
 use Carp qw(croak);
-use File::Glob qw(:globally);
-use File::Find;
 
 use Kanku::Config::Defaults;
 
 sub gui_config {[]}
 sub distributable { 0 }
+
 with 'Kanku::Roles::Handler';
 
 has timeout         => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);

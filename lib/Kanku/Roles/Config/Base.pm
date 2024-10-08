@@ -18,12 +18,11 @@ package Kanku::Roles::Config::Base;
 
 use Moose::Role;
 use Carp qw/longmess cluck/;
-use File::Basename;
-use File::HomeDir;
-use File::stat;
+use Path::Tiny;
 use Kanku::YAML;
 
 with 'Kanku::Roles::Logger';
+with 'Kanku::Roles::Helpers';
 
 requires "file";
 requires "job_config";
@@ -47,16 +46,16 @@ has cf => (
 );
 sub _build_cf {
   my ($self) = @_;
-  my $home  = File::HomeDir->my_home;
+  my $home  = $self->my_home;
   my @search_path = (
     "$home/.config/kanku/",
     "$home/.kanku/",
     '/etc/kanku/',
   );
   for my $sp (@search_path) {
-    my $f = File::Spec->canonpath($sp.'/kanku-config.yml');
-    if (-f $f) {
-      $self->logger->debug("Found Config file `$f`!");
+    my $f = path($sp.'/kanku-config.yml');
+    if ($f->is_file) {
+      $self->logger->debug("Found Config file '$f'!");
       return Kanku::YAML::LoadFile($f);
     }
     $self->logger->debug("Config file '$f' not found!");
@@ -73,12 +72,12 @@ has last_modified => (
 
 sub job_list {
   my ($self) = @_;
-  return (map { basename($_) =~ m/^(.*)\.yml$/; $1; } glob('/etc/kanku/jobs/*.yml'));
+  return (map { path($_)->basename =~ m/^(.*)\.yml$/; $1; } glob('/etc/kanku/jobs/*.yml'));
 }
 
 sub job_group_list {
   my ($self) = @_;
-  return (map { basename($_) =~ m/^(.*)\.yml$/; $1; } glob('/etc/kanku/job_groups/*.yml'));
+  return (map { path($_)->basename =~ m/^(.*)\.yml$/; $1; } glob('/etc/kanku/job_groups/*.yml'));
 }
 
 1;

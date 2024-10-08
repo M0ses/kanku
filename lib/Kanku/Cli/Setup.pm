@@ -23,7 +23,6 @@ with 'Kanku::Cli::Roles::Schema';
 
 use Carp;
 use Cwd;
-use File::HomeDir;
 use DBIx::Class::Migration;
 use Sys::Virt;
 use Sys::Hostname;

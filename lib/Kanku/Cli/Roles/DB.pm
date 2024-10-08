@@ -20,8 +20,7 @@ use strict;
 use warnings;
 use MooseX::App::Role;
 
-use File::Basename qw/dirname/;
-use File::HomeDir;
+use Path::Tiny;
 
 use Kanku::YAML;
 
@@ -58,7 +57,7 @@ sub _build_dbfile {
   my ($self) = @_;
   return $self->server
     ? '/var/lib/kanku/db/kanku-schema.db'
-    : $self->homedir.'/.kanku/kanku-schema.db';
+    : path($self->homedir, qw/.kanku kanku-schema.db/)->stringfy;
 }
 
 option 'homedir' => (
@@ -69,7 +68,7 @@ option 'homedir' => (
   builder       => '_build_homedir',
 );
 sub _build_homedir {
-      return File::HomeDir->users_home($ENV{USER});
+      return $_[0]->my_home;
 }
 
 option 'share_dir' => (
@@ -106,7 +105,7 @@ has _dbdir => (
 );
 sub _build__dbdir {
   my ($self) = @_;
-  return dirname($self->dbfile);
+  return path($self->dbfile)->dirname;
 }
 with 'Kanku::Cli::Roles::Schema';
 
