@@ -191,24 +191,7 @@ urlwrapper:
 	install -m 644 public/images/48/kanku.png $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/kanku.png
 	install -m 644 public/images/64/kanku.png $(DESTDIR)/usr/share/icons/hicolor/64x64/apps/kanku.png
 
-test-kankufiles: centos-current icinga openQA rabbitmq-opensuse simple multivm test-snapshot
-
-centos-current:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.centos-current && kanku destroy && kanku up && kanku destroy
-icinga:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.icinga2 && kanku destroy && kanku up && kanku destroy
-openQA:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.openQA && kanku destroy && kanku up && kanku destroy
-rabbitmq-opensuse:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.rabbitmq-opensuse && kanku destroy && kanku up && kanku destroy
-simple:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.simple && kanku destroy && kanku up && kanku destroy
-multivm:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.multivm && kanku destroy && kanku up && kanku destroy
-
-test-snapshot:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.test-snapshot && kanku destroy && kanku up && kanku destroy
-
-
+test-kankufiles:
+	make -C KankuFile.examples/ test-kankufiles
 
 .PHONY: dist install lib cover check test public views bin sbin

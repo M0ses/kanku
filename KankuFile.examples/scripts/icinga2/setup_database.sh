@@ -17,6 +17,7 @@ ICINGAWEB2_ADMIN_USER=admin
 ICINGAWEB2_ADMIN_GROUP=admin
 ICINGAWEB2_ADMIN_PASS=opensuse
 
+ICINGAWEB2_SCHEMA_FILE=/usr/share/icingaweb2/schema/mysql.schema.sql
 
 ################################################################################
 # MAIN
@@ -41,7 +42,7 @@ systemctl restart icinga2
 mysql -e "create database $ICINGAWEB2_DB_NAME"
 mysql -e "CREATE USER '$ICINGAWEB2_DB_USER'@'localhost' IDENTIFIED BY '$ICINGAWEB2_DB_PASS'"
 mysql -e "GRANT ALL PRIVILEGES ON $ICINGAWEB2_DB_NAME.* TO '$ICINGAWEB2_DB_USER'@'localhost'"
-mysql -D icingaweb2 < /usr/share/doc/icingaweb2/schema/mysql.schema.sql
+mysql -D icingaweb2 < $ICINGAWEB2_SCHEMA_FILE
 PWHASH=`openssl passwd -1 $ICINGAWEB2_ADMIN_PASS`
 mysql -e "INSERT INTO icingaweb_user (name, active, password_hash) VALUES ('$ICINGAWEB2_ADMIN_USER', 1, '$PWHASH')" $ICINGAWEB2_DB_NAME
 

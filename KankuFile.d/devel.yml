@@ -51,7 +51,7 @@
       commands:
         - zypper -n in kanku-cli
         - make -C /tmp/kanku install configs
-        - "rclibvirtd stop;perl -p -i -e 's/192.168.122/192.168.128/g' /etc/libvirt/qemu/networks/default.xml ; rclibvirtd start"
+        - "systemctl stop libvirtd;perl -p -i -e 's/192.168.122/192.168.128/g' /etc/libvirt/qemu/networks/default.xml ; systemctl start libvirtd"
         - kanku setup --traceback --devel --user kanku
   -
     use_module: Kanku::Handler::ExecuteCommandViaSSH
@@ -61,5 +61,6 @@
         - ssh-keygen -t rsa -b 4086 -N '' -f /home/kanku/.ssh/id_rsa
         - mkdir prj
         - cp /tmp/kanku/KankuFile.examples/KankuFile.simple prj/KankuFile
-        - chmod 755 /home/kanku
+        - kanku help
+        #- chmod 755 /home/kanku
         - eval `ssh-agent` && ssh-add && cd prj && kanku up > /tmp/kanku-up.log 2>&1
