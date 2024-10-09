@@ -210,7 +210,7 @@ sub finalize_shutdown {
   }
   catch {
     $logger->error($_);
-  }
+  };
 
   $logger->debug('Removing PID file: '. $self->pid_file->stringify);
   try {
