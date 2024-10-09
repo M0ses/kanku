@@ -89,6 +89,7 @@ BuildRequires:  perl(LWP::UserAgent)
 BuildRequires:  perl(Mail::Sendmail)
 BuildRequires:  perl(Net::AMQP::RabbitMQ)
 BuildRequires:  perl(UUID)
+BuildRequires:  perl(Path::Tiny) >= 0.125
 
 Requires:       kanku-cli = %{version}
 Requires:       kanku-dispatcher = %{version}
@@ -177,6 +178,7 @@ Requires:       perl(Test::Simple)
 Requires:       perl(XML::Structured)
 Requires:       perl(XML::XPath)
 Requires:       perl(YAML::PP)
+Requires:       perl(Path::Tiny) >= 0.125
 # DBD::SQLite is also provided by perl-DBD-SQLite-Amalgamation
 # but perl-DBD-SQLite-Amalgamation is breaks with SQL syntax errors
 # at job_histroy_sub table

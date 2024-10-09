@@ -261,7 +261,7 @@ sub process_template {
   if ( $self->use_9p ) {
     my $hd9p = path($self->host_dir_9p);
     $logger->debug(" --- host_dir_9p: $hd9p");
-    $hd9p->mkdir;
+    $hd9p->mkdir();
     $logger->debug(" --- accesmode_9p: ".$self->accessmode_9p);
 
     $vars->{domain}->{hostshare} = "
