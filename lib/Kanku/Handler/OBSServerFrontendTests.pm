@@ -17,7 +17,7 @@
 package Kanku::Handler::OBSServerFrontendTests;
 
 use Moose;
-use Path::Tiny;
+use Path::Tiny qw/tempdir/;
 
 sub gui_config {
   [
