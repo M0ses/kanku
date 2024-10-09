@@ -203,7 +203,7 @@ sub resize_image {
       if ($compression)  {
         $self->logger->debug("--- uncompress '$img' to '$tmp'");
         my $input = (ref $img) ? $img->stringify : $img;
-        my $status = anyuncompress $input => $tmp->filename
+        my $status = anyuncompress $input => $tmp->stringify
           or croak("anyuncompress failed: $AnyUncompressError\n");
       } else {
         $self->logger->debug("--- copying image '$img' to '$tmp'");
