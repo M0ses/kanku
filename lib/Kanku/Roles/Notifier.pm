@@ -32,6 +32,8 @@ has job_id => ( is=>'ro', isa => 'Int', required => 1);
 
 has kanku_url => ( is=>'ro', isa => 'Undef|Str');
 
+has context => ( is=>'ro', isa => 'HashRef', required => 1);
+
 sub get_template_data {
     my ($self) = @_;
     return {
@@ -40,6 +42,7 @@ sub get_template_data {
       full_message  => $self->full_message,
       job_id        => $self->job_id,
       kanku_url     => $self->kanku_url,
+      context       => $self->context || {},
     };
 }
 

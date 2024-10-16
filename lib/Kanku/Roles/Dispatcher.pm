@@ -236,6 +236,7 @@ sub execute_notifier {
     state     => $state,
     duration  => ($job->end_time > $job->start_time) ? $job->end_time - $job->start_time : 0,
     kanku_url => $cfg->{'kanku_url'} || "http://localhost/kanku",
+    context   => $job->context,
   );
 
   my $jname = $job->name;

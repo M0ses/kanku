@@ -36,10 +36,10 @@ sub prepare {
     $self->logger->debug(
       "Setting from config(environment) \$ENV{$env_var} = ".
       $self->environment->{$env_var}.
-      " (Backup: '".$ENV{$env_var}."')"
+      " (Backup: '".($::ENV{$env_var}||q{})."')"
     );
-    $self->_env_backup->{$env_var} = $ENV{$env_var};
-    $ENV{$env_var} = $self->environment->{$env_var};
+    $self->_env_backup->{$env_var} = $::ENV{$env_var};
+    $::ENV{$env_var} = $self->environment->{$env_var};
     $vars{$env_var}=1;
   }
 
@@ -50,10 +50,10 @@ sub prepare {
     $self->logger->debug(
       "Setting from job context \$ENV{$n_env_var} = ".
       $ctx->{$env_var}.
-      " (Backup: '".$ENV{$n_env_var}."')"
+      " (Backup: '".($::ENV{$n_env_var}||q{})."')"
     );
-    $self->_env_backup->{$n_env_var} = $ENV{$n_env_var};
-    $ENV{$n_env_var} = $ctx->{$env_var};
+    $self->_env_backup->{$n_env_var} = $::ENV{$n_env_var};
+    $::ENV{$n_env_var} = $ctx->{$env_var};
     $vars{$n_env_var}=1;
   }
 

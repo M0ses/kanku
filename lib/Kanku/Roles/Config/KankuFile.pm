@@ -51,8 +51,9 @@ sub job_config {
 }
 
 sub notifiers_config {
-	# no notifiers in KankuFile
-	return []
+  my ($self, $job_name) = @_;
+  my $nc = $self->config->{notifiers};
+  return (ref($nc->{$job_name}) eq 'ARRAY') ? $nc->{$job_name} : [];
 }
 
 sub job_list {
