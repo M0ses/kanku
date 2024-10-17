@@ -17,35 +17,47 @@
 package Kanku::Roles::Config;
 
 use Moose::Role;
-use Path::Class::File;
-use Path::Class::Dir;
+
+use Carp;
+use Try::Tiny;
+use Path::Tiny;
 use Data::Dumper;
-use Kanku::YAML;
 use YAML::PP;
 use YAML::PP::Schema::Include;
-use Try::Tiny;
-use File::HomeDir;
 
-with 'Kanku::Roles::Config::Base';
 
-sub file {
+use Kanku::Config::Defaults;
+use Kanku::YAML;
+
+sub file;
+has file => (
+  is      => 'rw',
+  isa     => 'Object',
+  lazy    => 1,
+  builder => '_build_file',
+);
+sub _build_file {
   my ($self) = @_;
-  my $home  = File::HomeDir->my_home;
-  my @files = ("$home/.kanku/kanku-config.yml", '/etc/kanku/kanku-config.yml');
+  my $logger = $self->logger;
+  my $home   = $::ENV{HOME}
+               || (getpwuid($<))[7]
+	       || croak("Could not determine home for current user id: $<\n");
+
+  my @files = (
+    "$home/kanku/config.yml",
+    "$home/.kanku/kanku-config.yml",
+    '/etc/kanku/kanku-config.yml'
+  );
+
   for my $f (@files) {
     if (-f $f) {
-      $self->logger->trace("Found Config file: $f");
-      return Path::Class::File->new($f);
+      $logger->trace("Found Config file: $f");
+      return path($f);
     }
-    $self->logger->trace("Config file: $f not found");
   }
+  return undef;
+  confess "No config files found. Please run `kanku setup ...`\n";
 }
-
-has last_modified => (
-  is        => 'rw',
-  isa       => "Int",
-  default   => 0,
-);
 
 has views_dir => (
   is        => 'rw',
@@ -57,10 +69,14 @@ has cache_dir => (
   is        =>'rw',
   isa       =>'Str',
   lazy      => 1,
-  default   => sub {
-    return $_[0]->config()->{cache_dir};
-  }
+  builder   => '_build_cache_dir',
 );
+sub _build_cache_dir {
+  my ($self) = @_;
+  return
+    $self->config->{cache_dir}
+    || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
+}
 
 sub job_config {
   my ($self, $job_name) = @_;
@@ -107,9 +123,9 @@ sub notifiers_config {
 }
 
 sub job_config_plain {
-  my $self      = shift;
-  my $job_name  = shift;
-  my $conf_file = Path::Class::File->new("/etc/kanku/jobs/$job_name.yml");
+  my ($self, $job_name) = @_;
+
+  my $conf_file = path("/etc/kanku/jobs/$job_name.yml");
   my $content   = $conf_file->slurp();
 
   return $content;
@@ -118,7 +134,7 @@ sub job_config_plain {
 sub job_group_config {
   my ($self, $name) = @_;
   my ($cfg, $yml);
-  #$yml = $self->job_group_config_plain($name);
+
   $cfg = $self->load_job_group_config($name);
 
   if (ref($cfg) eq 'HASH') {
@@ -146,10 +162,12 @@ sub load_job_group_config {
 
 sub job_group_config_plain {
   my ($self, $name) = @_;
-  my $conf_file = Path::Class::File->new("/etc/kanku/job_groups/$name.yml");
+  my $conf_file = path("/etc/kanku/job_groups/$name.yml");
   my $content   = $conf_file->slurp();
 
   return $content;
 }
+
+with 'Kanku::Roles::Config::Base';
 
 1;

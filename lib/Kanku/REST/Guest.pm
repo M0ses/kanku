@@ -20,7 +20,7 @@ sub list {
   my $filters  = {};
 
   foreach my $filter (@$filter_p) {
-    if ($filter =~ /^(domain|host|worker):(.*)$/) {
+    if ($filter =~ /^(domain|host|worker|state):(.*)$/) {
       $filters->{$1} = $2;
     } else {
       $filters->{domain} = $filter;
@@ -49,6 +49,7 @@ sub list {
 	my $dom_name          = $dom->get_name;
         next if ($filters->{domain} && $dom_name !~ /^$filters->{domain}$/);
 	my ($state, $reason)  = $dom->get_state();
+	next if ($filters->{state} && $state != $filters->{state});
 	my $ipt = Kanku::Util::IPTables->new(domain_name => $dom_name);
 	my $dom_id = "$dom_name:$host->{hostname}";
         my $fwp = $ipt->get_forwarded_ports_for_domain();

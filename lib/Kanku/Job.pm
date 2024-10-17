@@ -99,6 +99,12 @@ sub exit_with_error {
   die $error;
 }
 
+sub duration {
+  my ($self) = @_;
+  return undef unless $self->start_time && $self->end_time;
+  return $self->end_time - $self->start_time;
+}
+
 __PACKAGE__->meta->make_immutable;
 
 1;

@@ -18,11 +18,8 @@ package Kanku::Handler::ExecuteCommandOnHost;
 
 use Moose;
 
-use Path::Class qw/file dir/;
-use namespace::autoclean;
-use IPC::Run qw/run/;
-use URI;
-
+sub gui_config {[]}
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
 has commands => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
@@ -30,8 +27,6 @@ has commands => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has _env_backup => (is=>'rw', isa=>'HashRef', default => sub {{}});
-
-sub distributable { 1 }
 
 sub prepare {
   my ($self) = @_;
@@ -41,10 +36,10 @@ sub prepare {
     $self->logger->debug(
       "Setting from config(environment) \$ENV{$env_var} = ".
       $self->environment->{$env_var}.
-      " (Backup: '".$ENV{$env_var}."')"
+      " (Backup: '".($::ENV{$env_var}||q{})."')"
     );
-    $self->_env_backup->{$env_var} = $ENV{$env_var};
-    $ENV{$env_var} = $self->environment->{$env_var};
+    $self->_env_backup->{$env_var} = $::ENV{$env_var};
+    $::ENV{$env_var} = $self->environment->{$env_var};
     $vars{$env_var}=1;
   }
 
@@ -55,10 +50,10 @@ sub prepare {
     $self->logger->debug(
       "Setting from job context \$ENV{$n_env_var} = ".
       $ctx->{$env_var}.
-      " (Backup: '".$ENV{$n_env_var}."')"
+      " (Backup: '".($::ENV{$n_env_var}||q{})."')"
     );
-    $self->_env_backup->{$n_env_var} = $ENV{$n_env_var};
-    $ENV{$n_env_var} = $ctx->{$env_var};
+    $self->_env_backup->{$n_env_var} = $::ENV{$n_env_var};
+    $::ENV{$n_env_var} = $ctx->{$env_var};
     $vars{$n_env_var}=1;
   }
 
@@ -116,16 +111,16 @@ Here is an example how to configure the module in your jobs file or KankuFile
   -
     use_module: Kanku::Handler::ExecuteCommandOnHost
     options:
-      environment: 
+      environment:
         CURL_CA_BUNDLE: /path/to/my/ca
-      context2env: 
+      context2env:
         ipaddress:
       commands:
         - curl https://$IPADDRESS/
-        
+
 =head1 DESCRIPTION
 
-This handler allows the execution of arbitrary commands on the host system, 
+This handler allows the execution of arbitrary commands on the host system,
 e.g. for checking access rules from a remote site instead of localhost inside
 the test vm.
 

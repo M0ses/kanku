@@ -1,0 +1,271 @@
+$VAR1 = {
+          'errors' => [],
+          'guest_list' => {
+                            'obs-server-unstable:kanku-worker1' => {
+                                                                     'host' => 'kanku-worker1',
+                                                                     'domain_name' => 'obs-server-unstable',
+                                                                     'forwarded_ports' => {
+                                                                                            '10.144.17.1' => {
+                                                                                                               '49016' => [
+                                                                                                                            '22',
+                                                                                                                            'ssh'
+                                                                                                                          ],
+                                                                                                               '49018' => [
+                                                                                                                            '443',
+                                                                                                                            'https'
+                                                                                                                          ],
+                                                                                                               '49017' => [
+                                                                                                                            '80',
+                                                                                                                            'http'
+                                                                                                                          ]
+                                                                                                             }
+                                                                                          },
+                                                                     'nics' => [],
+                                                                     'state' => 1
+                                                                   },
+                            'jump-host:kanku-worker2' => {
+                                                           'state' => 1,
+                                                           'nics' => [],
+                                                           'forwarded_ports' => {
+                                                                                  '10.144.17.1' => {
+                                                                                                     '49005' => [
+                                                                                                                  '22',
+                                                                                                                  'ssh'
+                                                                                                                ],
+                                                                                                     '49004' => [
+                                                                                                                  '80',
+                                                                                                                  'http'
+                                                                                                                ]
+                                                                                                   }
+                                                                                },
+                                                           'host' => 'kanku-worker2',
+                                                           'domain_name' => 'jump-host'
+                                                         },
+                            'wizard-install-unstable-sle:kanku-worker1' => {
+                                                                             'host' => 'kanku-worker1',
+                                                                             'domain_name' => 'wizard-install-unstable-sle',
+                                                                             'nics' => [],
+                                                                             'forwarded_ports' => {
+                                                                                                    '10.144.17.1' => {
+                                                                                                                       '49007' => [
+                                                                                                                                    '80',
+                                                                                                                                    'http'
+                                                                                                                                  ],
+                                                                                                                       '49008' => [
+                                                                                                                                    '443',
+                                                                                                                                    'https'
+                                                                                                                                  ],
+                                                                                                                       '49006' => [
+                                                                                                                                    '22',
+                                                                                                                                    'ssh'
+                                                                                                                                  ]
+                                                                                                                     }
+                                                                                                  },
+                                                                             'state' => 1
+                                                                           },
+                            'obs-server-210-vdi:kanku-worker1' => {
+                                                                    'domain_name' => 'obs-server-210-vdi',
+                                                                    'host' => 'kanku-worker1',
+                                                                    'nics' => [],
+                                                                    'forwarded_ports' => {
+                                                                                           '10.144.17.1' => {
+                                                                                                              '49024' => [
+                                                                                                                           '80',
+                                                                                                                           'http'
+                                                                                                                         ],
+                                                                                                              '49026' => [
+                                                                                                                           '443',
+                                                                                                                           'https'
+                                                                                                                         ],
+                                                                                                              '49023' => [
+                                                                                                                           '22',
+                                                                                                                           'ssh'
+                                                                                                                         ]
+                                                                                                            }
+                                                                                         },
+                                                                    'state' => 1
+                                                                  },
+                            'NOSU:kanku-worker2' => {
+                                                      'domain_name' => 'NOSU',
+                                                      'host' => 'kanku-worker2',
+                                                      'nics' => [],
+                                                      'forwarded_ports' => {
+                                                                             '10.144.17.1' => {
+                                                                                                '49022' => [
+                                                                                                             '443',
+                                                                                                             'https'
+                                                                                                           ],
+                                                                                                '49021' => [
+                                                                                                             '80',
+                                                                                                             'http'
+                                                                                                           ],
+                                                                                                '49020' => [
+                                                                                                             '22',
+                                                                                                             'ssh'
+                                                                                                           ]
+                                                                                              }
+                                                                           },
+                                                      'state' => 1
+                                                    },
+                            'obs-server-210-vmdk:kanku-worker1' => {
+                                                                     'state' => 1,
+                                                                     'domain_name' => 'obs-server-210-vmdk',
+                                                                     'host' => 'kanku-worker1',
+                                                                     'nics' => [],
+                                                                     'forwarded_ports' => {
+                                                                                            '10.144.17.1' => {
+                                                                                                               '49028' => [
+                                                                                                                            '80',
+                                                                                                                            'http'
+                                                                                                                          ],
+                                                                                                               '49027' => [
+                                                                                                                            '22',
+                                                                                                                            'ssh'
+                                                                                                                          ],
+                                                                                                               '49029' => [
+                                                                                                                            '443',
+                                                                                                                            'https'
+                                                                                                                          ]
+                                                                                                             }
+                                                                                          }
+                                                                   },
+                            'dki-opensuse-42_2:kanku-worker2' => {
+                                                                   'forwarded_ports' => {},
+                                                                   'nics' => [],
+                                                                   'domain_name' => 'dki-opensuse-42_2',
+                                                                   'host' => 'kanku-worker2',
+                                                                   'state' => 1
+                                                                 },
+                            'dki-opensuse-42_3:kanku-worker1' => {
+                                                                   'state' => 1,
+                                                                   'host' => 'kanku-worker1',
+                                                                   'domain_name' => 'dki-opensuse-42_3',
+                                                                   'nics' => [],
+                                                                   'forwarded_ports' => {}
+                                                                 },
+                            'obs-server-unstable-vdi:kanku-worker1' => {
+                                                                         'state' => 1,
+                                                                         'host' => 'kanku-worker1',
+                                                                         'domain_name' => 'obs-server-unstable-vdi',
+                                                                         'nics' => [],
+                                                                         'forwarded_ports' => {
+                                                                                                '10.144.17.1' => {
+                                                                                                                   '49034' => [
+                                                                                                                                '80',
+                                                                                                                                'http'
+                                                                                                                              ],
+                                                                                                                   '49035' => [
+                                                                                                                                '443',
+                                                                                                                                'https'
+                                                                                                                              ],
+                                                                                                                   '49033' => [
+                                                                                                                                '22',
+                                                                                                                                'ssh'
+                                                                                                                              ]
+                                                                                                                 }
+                                                                                              }
+                                                                       },
+                            'obs-server-unstable-install-iso:kanku-worker1' => {
+                                                                                 'host' => 'kanku-worker1',
+                                                                                 'domain_name' => 'obs-server-unstable-install-iso',
+                                                                                 'nics' => [],
+                                                                                 'forwarded_ports' => {
+                                                                                                        '10.144.17.1' => {
+                                                                                                                           '49030' => [
+                                                                                                                                        '22',
+                                                                                                                                        'ssh'
+                                                                                                                                      ],
+                                                                                                                           '49031' => [
+                                                                                                                                        '80',
+                                                                                                                                        'http'
+                                                                                                                                      ],
+                                                                                                                           '49032' => [
+                                                                                                                                        '443',
+                                                                                                                                        'https'
+                                                                                                                                      ]
+                                                                                                                         }
+                                                                                                      },
+                                                                                 'state' => 1
+                                                                               },
+                            'upgrade-latest:kanku-worker1' => {
+                                                                'state' => 1,
+                                                                'forwarded_ports' => {
+                                                                                       '10.144.17.1' => {
+                                                                                                          '49014' => [
+                                                                                                                       '80',
+                                                                                                                       'http'
+                                                                                                                     ],
+                                                                                                          '49015' => [
+                                                                                                                       '443',
+                                                                                                                       'https'
+                                                                                                                     ],
+                                                                                                          '49013' => [
+                                                                                                                       '22',
+                                                                                                                       'ssh'
+                                                                                                                     ]
+                                                                                                        }
+                                                                                     },
+                                                                'nics' => [],
+                                                                'host' => 'kanku-worker1',
+                                                                'domain_name' => 'upgrade-latest'
+                                                              },
+                            'wizard-install-unstable-leap:kanku-worker1' => {
+                                                                              'domain_name' => 'wizard-install-unstable-leap',
+                                                                              'host' => 'kanku-worker1',
+                                                                              'forwarded_ports' => {
+                                                                                                     '10.144.17.1' => {
+                                                                                                                        '49011' => [
+                                                                                                                                     '80',
+                                                                                                                                     'http'
+                                                                                                                                   ],
+                                                                                                                        '49012' => [
+                                                                                                                                     '443',
+                                                                                                                                     'https'
+                                                                                                                                   ],
+                                                                                                                        '49009' => [
+                                                                                                                                     '22',
+                                                                                                                                     'ssh'
+                                                                                                                                   ]
+                                                                                                                      }
+                                                                                                   },
+                                                                              'nics' => [],
+                                                                              'state' => 1
+                                                                            },
+                            'obs-server-unstable-vmdk:kanku-worker2' => {
+                                                                          'state' => 1,
+                                                                          'forwarded_ports' => {},
+                                                                          'nics' => [],
+                                                                          'host' => 'kanku-worker2',
+                                                                          'domain_name' => 'obs-server-unstable-vmdk'
+                                                                        },
+                            'podman-services:kanku-worker2' => {
+                                                                 'domain_name' => 'podman-services',
+                                                                 'host' => 'kanku-worker2',
+                                                                 'nics' => [],
+                                                                 'forwarded_ports' => {
+                                                                                        '10.144.17.1' => {
+                                                                                                           '49002' => [
+                                                                                                                        '80',
+                                                                                                                        'http'
+                                                                                                                      ],
+                                                                                                           '49001' => [
+                                                                                                                        '22',
+                                                                                                                        'ssh'
+                                                                                                                      ],
+                                                                                                           '49003' => [
+                                                                                                                        '443',
+                                                                                                                        'https'
+                                                                                                                      ]
+                                                                                                         }
+                                                                                      },
+                                                                 'state' => 1
+                                                               },
+                            'upgrade-29to210:kanku-worker1' => {
+                                                                 'host' => 'kanku-worker1',
+                                                                 'domain_name' => 'upgrade-29to210',
+                                                                 'forwarded_ports' => {},
+                                                                 'nics' => [],
+                                                                 'state' => 1
+                                                               }
+                          }
+        };

@@ -6,7 +6,17 @@ domain_name: kanku-devel
 default_job: devel
 
 jobs:
-###### JOB:
+ __ALL__:
+   - test
+   - cleanup
+   - devel
+   - cleanup
+   - sostw
  sostw: !include KankuFile.d/server-openSUSE-Tumbleweed.yml
  devel: !include KankuFile.d/devel.yml
  test: !include KankuFile.d/test.yml
+ cleanup:
+   -
+    use_module: Kanku::Handler::SetJobContext
+   -
+    use_module: Kanku::Handler::RemoveDomain

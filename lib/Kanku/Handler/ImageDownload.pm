@@ -18,22 +18,21 @@ package Kanku::Handler::ImageDownload;
 
 use Moose;
 use Kanku::Util::CurlHttpDownload;
-use Path::Class qw/dir file/;
-use feature 'say';
-use File::Copy;
 use Try::Tiny;
+use Path::Tiny;
 use Archive::Cpio;
+
 use Kanku::Config;
 use Kanku::Config::Defaults;
+
 extends 'Kanku::Handler::HTTPDownload';
 
-with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
-
-has ['vm_image_file','url'] => (is=>'rw',isa=>'Str');
-has ['offline'] => (is=>'rw',isa=>'Bool',default=>0);
-
+sub gui_config {[]}
 sub distributable { 1 }
+with 'Kanku::Roles::Handler';
+
+has [qw/vm_image_file url/] => (is=>'rw', isa=>'Str');
+has 'offline'               => (is=>'rw', isa=>'Bool', default=>0);
 
 sub prepare {
   my $self = shift;
@@ -73,8 +72,10 @@ sub execute {
     cache_dir => $cfg->cache_dir,
   );
 
+
   my @_of = split '/', $self->url;
-  $curl->output_file(pop @_of);
+  my $_outfile = ($ctx->{vagrant_boxfile}) ? $ctx->{vagrant_boxfile} : pop @_of;
+  $curl->output_file($_outfile);
 
   $logger->debug("Using output file: ".$curl->output_file);
 
@@ -192,6 +193,8 @@ sub remove_old_images {
   }
   $rs->delete;
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

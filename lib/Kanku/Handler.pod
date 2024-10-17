@@ -1,10 +1,10 @@
-=head1 NAME 
+=head1 NAME
 
 Kanku::Handler - Documentation about Kanku::Handler::* modules
 
 =head1 DESCRIPTION
 
-Kanku handler modules are used to run a specific task. 
+Kanku handler modules are used to run a specific task.
 They have to provide the following three methods:
 
 =over
@@ -17,7 +17,7 @@ They have to provide the following three methods:
 
 =back
 
-which are executed in this order. 
+which are executed in this order.
 
 =head1 MODULES
 

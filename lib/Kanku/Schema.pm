@@ -1,6 +1,6 @@
 use utf8;
 package Kanku::Schema;
-our $VERSION=18;
+our $VERSION=19;
 # Created by DBIx::Class::Schema::Loader
 # DO NOT MODIFY THE FIRST PART OF THIS FILE
 

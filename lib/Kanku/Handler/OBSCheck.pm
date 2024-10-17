@@ -21,87 +21,157 @@ use Kanku::Util::DoD;
 use Try::Tiny;
 use Data::Dumper;
 use Carp;
+
+sub gui_config {
+  [
+    {
+      param => 'obsurl',
+      type  => 'text',
+      label => 'OBS API URL',
+    },
+    {
+      param => 'base_url',
+      type  => 'text',
+      label => 'Base OBS Download/Mirror URL',
+    },
+    {
+      param => 'skip_all_checks',
+      type  => 'checkbox',
+      label => 'Skip all checks',
+    },
+    {
+      param => 'project',
+      type  => 'text',
+      label => 'Project',
+    },
+    {
+      param => 'package',
+      type  => 'text',
+      label => 'Package',
+    },
+    {
+      param => 'repository',
+      type  => 'text',
+      label => 'Repository',
+    },
+    {
+      param => 'preferred_extension',
+      type  => 'text',
+      label => 'Extension (qcow2, raw, etc.)',
+    },
+  ];
+}
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
 
 has dod_object => (
   is      =>'rw',
   isa     =>'Object',
   lazy    => 1,
-  default => sub  {
-    my $self = shift;
-    Kanku::Util::DoD->new(
-      skip_all_checks     => $self->skip_all_checks,
-      skip_check_project  => $self->skip_check_project,
-      skip_check_package  => $self->skip_check_package,
-      project             => $self->project,
-      package             => $self->package,
-      arch                => $self->arch,
-      api_url             => $self->api_url,
-      preferred_extension => $self->preferred_extension,
-      use_oscrc           => $self->use_oscrc,
-    );
-  },
+  builder => '_build_dod_object',
+);
+sub _build_dod_object  {
+  my ($self) = @_;
+
+  $self->logger->debug("_build_dod_object->obsurl: ".$self->obsurl);
+
+  Kanku::Util::DoD->new(
+    skip_all_checks     => $self->skip_all_checks,
+    skip_check_project  => $self->skip_check_project,
+    skip_check_package  => $self->skip_check_package,
+    project             => $self->project,
+    package             => $self->package,
+    arch                => $self->arch,
+    obsurl              => $self->obsurl,
+    preferred_extension => $self->preferred_extension,
+    use_oscrc           => $self->use_oscrc,
+  );
+}
+
+has ['project','package'] => (is=>'rw',isa=>'Str',required=>1);
+
+has 'obsurl' => (
+  is       => 'rw',
+  isa      => 'Str',
+  lazy     => 1,
+  builder  => '_build_obsurl',
 );
 
-has ['api_url','project','package'] => (is=>'rw',isa=>'Str',required=>1);
+sub _build_obsurl {
+  my ($self)    = @_;
+  return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'obsurl');
+}
 
-has '+api_url' => (default => 'https://api.opensuse.org/public');
+has 'base_url' => (
+  is       => 'rw',
+  isa      => 'Str',
+  lazy     => 1,
+  builder  => '_build_base_url',
+);
 
-has ['base_url', 'repository', 'preferred_extension', 'arch'] => (is=>'rw',isa=>'Str');
-has '+preferred_extension' => (lazy => 1, default => q{});
-has '+arch' => (lazy => 1, default => 'x86_64');
+sub _build_base_url {
+  my ($self)    = @_;
+  return $self->job->context->{base_url}
+    || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'base_url');
+}
+
+has 'preferred_extension' => (
+  is=>'rw',
+  isa=>'Str',
+  lazy => 1,
+  default => q{},
+);
+
+has 'repository' => (
+  is       => 'rw',
+  isa      => 'Str',
+);
+
+has 'arch' => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  builder => '_build_arch',
+);
+
+sub _build_arch {
+  Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'arch');
+}
+
 has _changed => (is=>'rw',isa=>'Bool',default=>0);
 
 has _binary => (is=>'rw',isa=>'HashRef',lazy=>1,default=>sub { { } });
 
-has [qw/skip_check_project skip_check_package skip_download/ ] => (is => 'ro', isa => 'Bool',default => 0 );
-has [qw/offline skip_all_checks use_oscrc/ ] => (is => 'rw', isa => 'Bool',default => 0 );
-has [qw/use_oscrc/ ] => (is => 'rw', isa => 'Bool',default => 0);
-
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'api_url',
-          type  => 'text',
-          label => 'API URL',
-        },
-        {
-          param => 'skip_all_checks',
-          type  => 'checkbox',
-          label => 'Skip all checks',
-        },
-        {
-          param => 'project',
-          type  => 'text',
-          label => 'Project',
-        },
-        {
-          param => 'package',
-          type  => 'text',
-          label => 'Package',
-        },
-        {
-          param => 'repository',
-          type  => 'text',
-          label => 'Repository',
-        },
-        {
-          param => 'preferred_extension',
-          type  => 'text',
-          label => 'Extension (qcow2, raw, etc.)',
-        },
-      ];
-  },
+has [
+  qw/
+    skip_check_project skip_check_package skip_download skip_all_checks
+    offline use_oscrc
+  /
+] => (
+  is      => 'rw',
+  isa     => 'Bool',
+  lazy    => 1,
+  builder => '_build_default_bool_zero',
 );
 
+sub _build_default_bool_zero {
+  my ($self) = @_;
+  my @c = caller(0);
+  return 0 unless $c[1] =~ /accessor ([\w:]+) .*/;
+  my @p = split /::/, $1;
+  my $v = pop @p;
+  return $self->job->context->{$v} if exists $self->job->context->{$v};
+  my $l = join('::', @p);
+  my $val =    Kanku::Config::Defaults->get($l, $v)
+            || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', $v)
+            || 0;
+
+  return $val;
+}
+
+
 sub prepare {
-  my $self      = shift;
+  my ($self)    = @_;
   my $ctx       = $self->job()->context();
 
   $self->offline(1)           if ( $ctx->{offline} );
@@ -122,16 +192,20 @@ sub execute {
 
   my $last_run  = $self->last_run_result();
   my $dod       = $self->dod_object();
-
-  if ( $self->base_url ) {
-    # prevent from errors because of missing trailing slash
-    if (  $self->base_url !~ q{/$} ) { $self->base_url($self->base_url.q{/}) }
-    $dod->base_url($self->base_url);
+  if (!$self->base_url) {
+    $self->base_url(
+      Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'base_url')
+    );
   }
-  $dod->base_url($self->base_url)     if $self->base_url;
+
+  # prevent from errors because of missing trailing slash
+  $self->base_url($self->base_url.q{/}) if $self->base_url !~ q{/$};
+  $dod->base_url($self->base_url);
   $dod->repository($self->repository) if $self->repository;
 
-  $self->logger->debug('Checking project: ' . $dod->project);
+  $self->logger->debug('Checking project: "'.$dod->project.'"');
+  $self->logger->debug('*** base_url: "'.$dod->base_url.'"');
+  $self->logger->debug('*** obsurl: "'.$dod->obsurl.'"');
 
   my $binary    = $dod->get_image_file_from_url();
 
@@ -202,7 +276,7 @@ sub execute {
   $ctx->{obs_package}    = $self->package;
   $ctx->{obs_repository} = $self->repository;
   $ctx->{obs_arch}       = $self->arch;
-  $ctx->{api_url}        = $self->api_url;
+  $ctx->{obsurl}         = $self->obsurl;
 
   if (!($ctx->{vm_image_url} or $ctx->{obs_direct_url})) {
     croak("Neither vm_image_url nor obs_direct_url found\n"
@@ -220,7 +294,7 @@ sub execute {
     code    => 0,
     state   => 'succeed',
     message => 'Sucessfully checked project '.$self->project.' under url '
-                 .$self->api_url ."\n"
+                 .$self->obsurl ."\n"
                  .' ('
                  .    "vm_image_url: $ctx->{vm_image_url}, "
                  .    "obs_direct_url: $ctx->{obs_direct_url}"
@@ -233,14 +307,14 @@ sub update_history {
 
   my $rs = $self->schema->resultset('ObsCheckHistory')->update_or_create(
     {
-      api_url     => $self->api_url,
+      obsurl     => $self->obsurl,
       project     => $self->project,
       package     => $self->package,
       check_time  => time(),
       vm_image_url=> $self->job->context->{vm_image_url},
     },
     {
-      unique_obscheck => [$self->api_url,$self->project,$self->package],
+      unique_obscheck => [$self->obsurl,$self->project,$self->package],
     },
   );
 
@@ -252,7 +326,7 @@ sub get_from_history {
   my $ctx  = $self->job->context;
   my $rs = $self->schema->resultset('ObsCheckHistory')->find(
     {
-      api_url     => $self->api_url,
+      obsurl     => $self->obsurl,
       project     => $self->project,
       package     => $self->package,
     },
@@ -283,7 +357,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
   -
     use_module: Kanku::Handler::OBSCheck
     options:
-      api_url: https://api.opensuse.org/public
+      obsurl: https://api.opensuse.org/public
       project: devel:kanku:images
       package: openSUSE-Leap-15.0-JeOS
       repository: images_leap_15_0
@@ -295,7 +369,7 @@ This handler downloads a file from a given url to the local filesystem and sets 
 
 =head1 OPTIONS
 
-  api_url             : API url to OBS server
+  obsurl             : API url to OBS server
 
   base_url            : Url to use for download
 
@@ -329,7 +403,7 @@ This handler downloads a file from a given url to the local filesystem and sets 
 
   vm_image_url
 
-  api_url
+  obsurl
 
 =head1 DEFAULTS
 

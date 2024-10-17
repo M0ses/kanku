@@ -17,12 +17,12 @@
 package Kanku::Util::CurlHttpDownload;
 
 use Moose;
-use File::Temp qw/ :mktemp /;
-use File::Copy;
-use Path::Class::File;
-use Path::Class::Dir;
+use Path::Tiny;
+
 use Net::OBS::LWP::UserAgent;
+
 use Kanku::Config;
+
 with 'Kanku::Roles::Logger';
 
 has output_dir => (
@@ -74,7 +74,7 @@ sub download {
     if ( $self->output_dir ) {
       $self->logger->warn('ATTENTION: You have set output_dir _and_ output_file - output_file will be preferred');
     }
-    $file = Path::Class::File->new($self->cache_dir,$self->output_file);
+    $file = path($self->cache_dir,$self->output_file);
   }
   elsif ( $self->output_dir )
   {
@@ -84,7 +84,7 @@ sub download {
     my @parts = split(/\//,$url);
     my $fn    = pop @parts;
     my @od_parts = split(/\//,$od);
-    $file     = Path::Class::File->new('/',@od_parts,$fn);
+    $file     = path('/',@od_parts,$fn);
   }
   else
   {
@@ -102,9 +102,9 @@ sub download {
       my $neo_ua   = Net::OBS::LWP::UserAgent->new();
       $self->_set_credentials($neo_ua, $url);
 
-      if (! -d $file->parent) {
+      if (!$file->parent->is_dir) {
         $self->logger->info('Creating directory '.$file->parent->stringify);
-        $file->parent->mkpath;
+        $file->parent->mkdir;
       }
 
       my $res = $neo_ua->mirror(

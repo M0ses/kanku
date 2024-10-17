@@ -28,8 +28,8 @@ sub list {
   # "trigger_user",
   # "pwrand",
 
-  my $states = ($self->params->{state}) 
-    ? $self->params->{state} 
+  my $states = ($self->params->{state})
+    ? $self->params->{state}
     : [qw/succeed running failed dispatching/];
 
 

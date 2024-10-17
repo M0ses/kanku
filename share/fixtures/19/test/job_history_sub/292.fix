@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 292,
+           job_id => 45,
+           name   => 'Kanku::Handler::PortForward',
+           result => '{"finalize":{"message":"Nothing to do!","code":0},"execute":{"message":"Created port forwarding for dki-opensuse-15-3 (192.168.199.142) port list: (tcp:22)","code":0},"prepare":{"message":"Nothing to do!","code":0}}',
+           state  => 'succeed'
+         };

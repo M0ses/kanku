@@ -17,15 +17,16 @@
 package Kanku::Handler::CopyProfile;
 
 use Moose;
-use namespace::autoclean;
 use Carp qw(croak);
-use File::Glob qw(:globally);
-use File::Find;
 
-use Kanku::Config;
 use Kanku::Config::Defaults;
 
+sub gui_config {[]}
+sub distributable { 0 }
+
 with 'Kanku::Roles::Handler';
+
+has timeout         => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 with 'Kanku::Roles::SSH';
 
 has _results    => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
@@ -35,19 +36,16 @@ has tasks       => ( is=>'rw',
 		       Kanku::Config::Defaults->get(__PACKAGE__, 'tasks');
 		     },
 		   );
+
 has users       => ( is=>'rw',
                      isa=>'ArrayRef',
 		     default => sub {
 		       Kanku::Config::Defaults->get(__PACKAGE__, 'users');
 		     },
 		   );
-has timeout     => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 
 has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});
-
-
-sub distributable { 0 }
 
 sub execute {
   my ($self)  = @_;
@@ -98,7 +96,7 @@ sub cp {
   $src =~ s#/$##;
   $dst =~ s#~/##;
   $dst =~ s#/$##;
-  my $cmd = "scp $rec-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null $src $usr\@$ctx->{ipaddress}:$dst";
+  my $cmd = "scp $rec-oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -q $src $usr\@$ctx->{ipaddress}:$dst";
   $self->logger->info("Executing command: $cmd");
   my @out = `$cmd`;
   push @{$self->_results}, {
@@ -156,45 +154,80 @@ __END__
 
 =head1 NAME
 
-Kanku::Handler::ExecuteCommandViaSSH
+Kanku::Handler::CopyProfile
 
 =head1 SYNOPSIS
 
 Here is an example how to configure the module in your jobs file or KankuFile
 
   -
-    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    use_module: Kanku::Handler::CopyProfile
     options:
-      context2env:
-        ipaddress:
-      environment:
-        test: value
-      publickey_path: /home/m0ses/.ssh/id_rsa.pub
-      privatekey_path: /home/m0ses/.ssh/id_rsa
-      passphrase: MySecret1234
-      username: kanku
-      ipaddress: 192.168.199.17
-      commands:
-        - rm /etc/shadow
+      users:
+        - root
+	- kanku
+      tasks:
+	- cmd: cp
+	  src: ~/.gitconfig
+	- cmd: cp
+	  src: ~/.vimrc
+	- cmd: cp
+	  src: ~/.vim/
+	  recursive: 1
+	- cmd: mkdir
+	  path: ~/.config/
+	- cmd: cp
+	  src: ~/.config/osc/
+	  dst: ~/.config/osc/
+	  recursive: 1
+	- cmd: chown
+	  owner: kanku:users
+	  recursive: 1
+	  path: ~/.config/
+	- cmd: chmod
+	  mode: 700
+	  path: ~/.config/
 
 =head1 DESCRIPTION
 
-This handler will connect to the ipaddress stored in job context and excute the configured commands
+This handler could help to configure your environment by copying files,
+creating directories and change permissions.
+
+Its recommended to create a config section named 'Kanku::Handler::CopyProfile'
+in your kanku-config.yml and set the defaults there.
+
+In a KankuFile it should be used without and options.
 
 
 =head1 OPTIONS
 
+      users             : array of users to deploy your Profile
+
+      tasks             : array of tasks to execute for profle deployment. Each
+                          task requires a 'cmd'. 'cmd' can be one of the following
+			  * cp (uses scp)
+			    * src
+			    * dst
+			    * recursive
+                          * chmod
+			    * mode
+			    * path
+			    * recursive
+                          * chown
+			    * owner
+			    * path
+			    * recursive
+			  * mkdir
+			    * path
       commands          : array of commands to execute
 
-
-SEE ALSO L<Kanku::Roles::SSH>
 
 
 =head1 CONTEXT
 
 =head2 getters
 
-SEE ALSO L<Kanku::Roles::SSH>
+NONE
 
 =head2 setters
 
@@ -202,6 +235,6 @@ NONE
 
 =head1 DEFAULTS
 
-SEE ALSO L<Kanku::Roles::SSH>
+SEE ALSO L<Kanku::Roles::SSH> AND L<kanku-config.yml>
 
 =cut

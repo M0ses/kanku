@@ -1,15 +1,15 @@
 #!/bin/bash
 
 
-RUNNING=`kanku rhistory -l|grep -P "State\s+:\s+(running|dispatching)"`
+RUNNING=1
 
-while [ -n "$RUNNING" ];do
-  RUNNING=`kanku rhistory -l|grep -P "State\s+:\s+(running|dispatching)"`
-  sleep 10
+while [ $RUNNING -gt 0 ];do
+  RUNNING=$(kanku rhistory list --state running --state dispatching --ll FATAL --format json|json_xs -e 'print $_->{total_entries};' -t none)
+  sleep 1
 done
 
-STATE=`kanku rhistory -l|grep -P "State\s+:.*"|perl -p -e 's/^\s*State\s+:\s+(.*)/$1/'`
+SUCCEED=$(kanku rhistory list --state succeed --ll FATAL --format json|json_xs -e 'print $_->{total_entries};' -t none)
 
-[ "$STATE" == "succeed" ] && exit 0
+[ $SUCCEED -gt 0 ] && exit 0
 
 exit 1

@@ -2,8 +2,6 @@ package Kanku::Setup::Server::Standalone;
 
 use Moose;
 
-use Path::Class qw/file/;
-
 with 'Kanku::Setup::Roles::Common';
 with 'Kanku::Setup::Roles::Server';
 with 'Kanku::Roles::Logger';
@@ -16,7 +14,7 @@ sub setup {
 
 
   $self->_dbfile(
-    file('/var/lib/kanku/db/kanku-schema.db')->stringify
+    path('/var/lib/kanku/db/kanku-schema.db')
   );
 
   $self->user("kankurun");
@@ -31,7 +29,7 @@ sub setup {
     "kanku-config.yml.tt2",
     "/etc/kanku/kanku-config.yml",
     {
-       db_file => $self->_dbfile,
+       db_file => $self->_dbfile->stringify,
        use_publickey => 1
     }
   );

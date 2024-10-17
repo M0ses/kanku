@@ -9,7 +9,7 @@ BEGIN {
   if (@t) {
     require Carp;
     Carp->import('verbose');
-    $SIG{__DIE__} = sub { Carp::confess(@_) };
+    $::SIG{__DIE__} = sub { Carp::confess(@_) };
   }
 }
 

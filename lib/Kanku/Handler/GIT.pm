@@ -18,86 +18,92 @@ package Kanku::Handler::GIT;
 
 use Moose;
 
-use Data::Dumper;
-use Path::Class qw/file dir/;
-use namespace::autoclean;
-use IPC::Run qw/run/;
 use URI;
 use Try::Tiny;
+use Path::Tiny;
+use IPC::Run qw/run/;
 
+sub gui_config {
+  [
+    {
+      param  => 'giturl',
+      type   => 'text',
+      label  => 'Git URL (required)',
+    },
+    {
+      param  => 'gituser',
+      type   => 'text',
+      label  => 'Git User',
+    },
+    {
+      param  => 'gitpass',
+      type   => 'password',
+      label  => 'Git Password',
+      secure => 1,
+    },
+    {
+      param  => 'destination',
+      type   => 'text',
+      label  => 'Destination',
+    },
+    {
+      param  => 'revision',
+      type   => 'text',
+      label  => 'Revision',
+    },
+    {
+      param  => 'mirror',
+      type   => 'checkbox',
+      label  => 'Mirror mode',
+    },
+    {
+      param  => 'remote_url',
+      type   => 'text',
+      label  => 'Remote Url (only for mirror mode)',
+    },
+    {
+      param  => 'gitlab_merge_request_id',
+      type   => 'text',
+      label  => 'Gitlab Merge Request ID (requires manual fetch)',
+    },
+    {
+      param  => 'submodules',
+      type   => 'checkbox',
+      label  => 'Init and checkout submodules',
+    },
+    {
+      param  => 'recursive',
+      type   => 'checkbox',
+      label  => 'Clone recursivly (including submodules)',
+    },
+  ];
+}
+sub distributable { 0 }
 with 'Kanku::Roles::Handler';
+
+has 'timeout' => (is=>'rw', isa=>'Int', default=>600);
 with 'Kanku::Roles::SSH';
 
 has [qw/  giturl          revision    destination
-          remote_url      cache_dir
+          remote_url
 	  gituser         gitpass     _giturl
-	  gitlab_merge_request_id
+	  gitlab_merge_request_id     remote_url
     /] => (is=>'rw',isa=>'Str');
 
-has ['submodules' , 'mirror', 'recursive'] => (is=>'rw',isa=>'Bool');
+has [qw/submodules mirror recursive/] => (is=>'rw', isa=>'Bool');
 
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param  => 'giturl',
-          type   => 'text',
-          label  => 'Git URL (required)',
-        },
-        {
-          param  => 'gituser',
-          type   => 'text',
-          label  => 'Git User',
-        },
-        {
-          param  => 'gitpass',
-          type   => 'password',
-          label  => 'Git Password',
-          secure => 1,
-        },
-        {
-          param  => 'destination',
-          type   => 'text',
-          label  => 'Destination',
-        },
-        {
-          param  => 'revision',
-          type   => 'text',
-          label  => 'Revision',
-        },
-        {
-          param  => 'mirror',
-          type   => 'checkbox',
-          label  => 'Mirror mode',
-        },
-        {
-          param  => 'remote_url',
-          type   => 'text',
-          label  => 'Remote Url (only for mirror mode)',
-        },
-        {
-          param  => 'gitlab_merge_request_id',
-          type   => 'text',
-          label  => 'Gitlab Merge Request ID (requires manual fetch)',
-        },
-        {
-          param  => 'submodules',
-          type   => 'checkbox',
-          label  => 'Init and checkout submodules',
-        },
-        {
-          param  => 'recursive',
-          type   => 'checkbox',
-          label  => 'Clone recursivly (including submodules)',
-        },
-      ];
-  }
+has 'cache_dir' => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  builder => '_build_cache_dir',
 );
+sub _build_cache_dir {
+  my ($self) = @_;
+  return $self->job->context->{cache_dir}
+    || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
+}
 
-has 'timeout' => (is=>'rw', isa=>'Int', default=>600);
 
 sub prepare {
   my ($self) = @_;
@@ -158,28 +164,25 @@ sub _calc_giturl {
 }
 
 sub _prepare_mirror {
-  my $self = shift;
-  my $ctx  = $self->job->context;
-  my $pkg  = __PACKAGE__;
-  my $cdir = Kanku::Config->instance->config()->{$pkg}->{cache_dir};
+  my ($self) = @_;
 
-
-  $self->cache_dir( ( $self->cache_dir || $ctx->{cache_dir} || $cdir || '' ) );
   die "No cache_dir specified!\n" if ( ! $self->cache_dir );
   die "remote_url needed when using mirror mode\n" if ( ! $self->remote_url );
 
   my $remote_uri = URI->new($self->remote_url);
-  my $mirror_dir = dir($self->cache_dir(),'git',$remote_uri->host,$remote_uri->path);
+  my $mirror_dir = path($self->cache_dir(), 'git', $remote_uri->host, $remote_uri->path);
 
   my @io;
   my @cmd;
 
-  if ( -d $mirror_dir ) {
+  if ( $mirror_dir->is_dir ) {
     @cmd = ('git', '-C', $mirror_dir->stringify, 'remote', 'update');
   } else {
-    if ( ! -d $mirror_dir->parent ) {
-      $self->logger->info(sprintf("Creating parent for mirror dir '%s'",$mirror_dir->parent));
-      $mirror_dir->parent->mkpath;
+    if (!$mirror_dir->parent->is_dir) {
+      $self->logger->info(
+	sprintf("Creating parent for mirror dir '%s'",$mirror_dir->parent->stringify)
+      );
+      $mirror_dir->parent->mkdir;
     }
     @cmd = ( 'git', 'clone');
     push @cmd, '--recursive' if $self->recursive;
@@ -202,7 +205,7 @@ sub execute {
   my $user    = $ctx->{gituser} || $self->gituser;
 
   my $recursive = ($self->recursive) ? '--recursive' : q{};
-  
+
   # clone git repository
   try {
     my $cmd_clone = "git clone $recursive ".$self->_giturl.(( $self->destination ) ? " " . $self->destination : '');
@@ -248,6 +251,7 @@ sub execute {
 }
 
 __PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__
