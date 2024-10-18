@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 97,
+           job_id => 14,
+           name   => 'Kanku::Handler::SetJobContext',
+           result => '{"prepare":{"message":"Nothing to do!","code":0},"finalize":{"code":0,"message":"Nothing to do!"},"execute":{"code":0,"state":"succeed","message":"Sucessfully prepared job context"}}',
+           state  => 'succeed'
+         };

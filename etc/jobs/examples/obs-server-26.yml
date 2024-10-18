@@ -11,7 +11,7 @@ tasks:
   -
     use_module: Kanku::Handler::OBSCheck
     options:
-      api_url: https://api.opensuse.org
+      obsurl: https://api.opensuse.org
       project: OBS:Server:2.6
       package: OBS-Appliance-qcow2
   -

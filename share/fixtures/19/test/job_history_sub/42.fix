@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 42,
+           job_id => 5,
+           name   => 'Kanku::Handler::CreateDomain',
+           result => '{"prepare":{"message":"Nothing todo","code":0},"execute":{"message":"Create domain obs-server (192.168.199.72) successfully","code":0},"finalize":{"message":"Nothing to do!","code":0}}',
+           state  => 'succeed'
+         };

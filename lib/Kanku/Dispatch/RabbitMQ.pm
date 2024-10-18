@@ -26,8 +26,6 @@ it under the same terms as Perl itself.
 
 use Moose;
 
-our $VERSION = "0.0.1";
-
 use JSON::XS;
 use POSIX;
 use Try::Tiny;
@@ -55,18 +53,11 @@ has job_local_routing_key => (is=>'rw', isa=>'Str');
 
 has wait_for_workers => (is=>'ro',isa=>'Int',default=>1);
 
-has config => (
-  is      => 'rw',
-  isa     => 'HashRef',
-  lazy    => 1,
-  default => sub { Kanku::Config->instance->config->{ref($_[0])} || {}; }
-);
-
 has rabbit_config => (
   is      => 'rw',
   isa     => 'HashRef',
   lazy    => 1,
-  default => sub { Kanku::Config->instance->config->{"Kanku::RabbitMQ"} || {}; }
+  default => sub { Kanku::Config->instance->cf->{"Kanku::RabbitMQ"} || {}; }
 );
 
 has active_workers => (
@@ -91,7 +82,7 @@ sub run {
     $logger->warn($_);
   };
 
-  my $mp = scalar(@{Kanku::Config->instance->config->{'Kanku::LibVirt::HostList'}||[]}) || 1;
+  my $mp = scalar(@{Kanku::Config->instance->cf->{'Kanku::LibVirt::HostList'}||[]}) || 1;
   $logger->debug("max_processes: $mp\n");
 
   my $pid1 = fork();
@@ -391,7 +382,6 @@ sub check_task {
   my ($self,$mod) = @_;
 
   $self->load_module($mod);
-
   return $mod->distributable();
 }
 

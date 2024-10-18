@@ -17,12 +17,12 @@
 package Kanku::Util::VM::Console;
 
 use Moose;
+use Carp;
 use Expect;
 use Data::Dumper;
-use Kanku::Config;
-use Path::Class qw/file/;
-use Carp;
 use Time::HiRes qw/usleep/;
+use Path::Tiny;
+use Kanku::Config;
 
 with 'Kanku::Roles::Logger';
 
@@ -60,10 +60,8 @@ sub init {
   } elsif ($cfg->{$pkg}->{log_to_file} && $self->job_id) {
     $logger->debug("Config -> $pkg (log_to_file): $cfg->{$pkg}->{log_to_file}");
 
-    my $lf = file($cfg->{$pkg}->{log_dir},"job-".$self->job_id."-console.log");
-    if (! -d $lf->parent() ) {
-      $lf->parent->mkpath();
-    }
+    my $lf = path($cfg->{$pkg}->{log_dir},"job-".$self->job_id."-console.log");
+    $lf->parent->mkdir;
     $logger->debug("Setting logfile '".$lf->stringify()."'");
     $exp->log_file($lf->stringify());
     $self->log_stdout(0);
@@ -94,7 +92,7 @@ sub init {
     $exp->expect(
       5,
       [
-        qr/(Press any key to continue.|ISOLINUX|Automatic boot in|The highlighted entry will be executed automatically in)/ => sub {
+        qr/(Welcome to GRUB!|Press any key to continue.|ISOLINUX|Automatic boot in|The highlighted entry will be executed automatically in)/ => sub {
           $logger->debug("Seen bootloader");
           $self->bootloader_seen(1);
           if ($_[0]->match =~ /(Press any key to continue\.|The highlighted entry will be executed automatically in)/) {
@@ -314,7 +312,7 @@ sub cmd {
             my $exp=shift;
             my $rc = $exp->before();
             my @l = split /\r\n/, $rc;
-            $rc = int($l[1]);
+            $rc = int($l[1]||0);
             if ($rc) {
               $logger->warn("Execution of command '$cmd' failed with return code '$rc'");
             } else {
@@ -344,7 +342,7 @@ sub get_ipaddress {
   my $do_logout = 0;
 
   my $save_timeout = $self->cmd_timeout;
- 
+
   $self->cmd_timeout(600);
 
   croak 'Please specify an interface!' unless $opts{interface};
@@ -358,17 +356,52 @@ sub get_ipaddress {
     $logger->debug("User already logged in.");
   }
 
-  my $wait = $opts{timeout};
-  my $ipaddress  = undef;
+  my $wait         = $opts{timeout};
+  my $ipaddress    = undef;
+  my $type_output  = $self->cmd("type -P ip wicked nmcli");
+  my @tmp          = split /\r\n/, $type_output->[0], 3;
+  my $cmd          = $tmp[1];
+  my @cmd_splitted = split '/', $cmd;
+  my $cmd_short    = pop @cmd_splitted;
+
+  my %cmd2func = (
+    ip => sub {
+      my ($self, $bin, $int) = @_;
+      my $ipaddress;
+      my $result = $self->cmd("LANG=C \\ip addr show $int 2>&1");
+
+      $logger->trace("  -- Output:\n".Dumper($result));
+
+      map { $ipaddress = $1 if m/^\s+inet\s+([0-9\.]+)\// } split /\n/, $result->[0];
+      return $ipaddress
+    },
+    wicked => sub {
+      my ($self, $bin, $int) = @_;
+      my $ipaddress;
+      my $result = $self->cmd("LANG=C $bin ifstatus $int 2>&1");
+
+      $logger->debug("  -- Output:\n".Dumper($result));
+      my @lines = split /\r\n/, $result->[0];
+      my @addr = map { ($_ =~ /^\s+addr:\s+ipv4\s+([0-9.]+)\//) ? $1 : ()  } @lines;
+      return $addr[0];
+    },
+    nmcli => sub {
+      my ($self, $bin, $int) = @_;
+      my $ipaddress;
+      my $result = $self->cmd("LANG=C $bin device show $int 2>&1");
+
+      $logger->debug("  -- Output:\n".Dumper($result));
+      my @lines = split /\r\n/, $result->[0];
+      my @addr = map { ($_ =~ /^IP4.ADDRESS[1]:\s+([0-9.]+)\//) ? $1 : ()  } @lines;
+      return $addr[0];
+    },
+  );
+
+  my $cmd_ref  = $cmd2func{$cmd_short};
 
   while ( $wait > 0) {
     # use cat for disable colors
-    my $result = $self->cmd("LANG=C \\ip addr show $opts{interface} 2>&1");
-
-    $logger->debug("  -- Output:\n".Dumper($result));
-
-    map { $ipaddress = $1 if m/^\s+inet\s+([0-9\.]+)\// } split /\n/, $result->[0];
-
+    $ipaddress = $cmd_ref->($self, $cmd, $opts{interface});
     if ($ipaddress) {
       last
     } else {
@@ -381,7 +414,7 @@ sub get_ipaddress {
 
   $self->logout if $do_logout;
 
-  if (! $ipaddress) { 
+  if (! $ipaddress) {
     croak "Could not get ip address for interface $opts{interface} within "
       . "$opts{timeout} seconds.";
   }

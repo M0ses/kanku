@@ -18,13 +18,15 @@ package Kanku::Roles::SSH;
 
 use Moose::Role;
 
-use Data::Dumper;
-use Libssh::Session q(:all);
-use namespace::autoclean;
 use Carp;
-use Kanku::Config;
+use Path::Tiny;
+use Libssh::Session q(:all);
+
+use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Logger';
+
+requires 'timeout';
 
 has 'passphrase' => (
   is	  => 'rw',
@@ -36,23 +38,23 @@ has 'privatekey_path' => (
   is	  => 'rw',
   isa	  => 'Str',
   lazy	  => 1,
-  default => sub { 
-    return $_[0]->job->context->{privatekey_path}
-    || Kanku::Config->instance()->config()->{'Kanku::Roles::SSH'}->{privatekey_path}
-    || '';
-  }
+  builder => '_build_privatekey_path',
 );
+sub _build_privatekey_path {
+  return $_[0]->job->context->{privatekey_path}
+    || Kanku::Config::Defaults->get('Kanku::Roles::SSH', 'privatekey_path');
+}
 
 has 'publickey_path' => (
   is	  => 'rw',
   isa	  => 'Str',
   lazy	  => 1,
-  default => sub {
-    return $_[0]->job->context->{publickey_path}
-    || Kanku::Config->instance()->config()->{'Kanku::Roles::SSH'}->{publickey_path}
-    || '';
-  }
+  builder => '_build_publickey_path',
 );
+sub _build_publickey_path {
+  return $_[0]->job->context->{publickey_path}
+    || Kanku::Config::Defaults->get('Kanku::Roles::SSH', 'publickey_path');
+}
 
 has 'ipaddress' => (
   is	  => 'rw',
@@ -97,15 +99,11 @@ has auth_type => (
   is=>'rw',
   isa=>'Str',
   lazy => 1,
-  default=>
-  sub {
-    my $cfg = Kanku::Config->instance->config();
-    my $pkg = __PACKAGE__;
-
-    # agent has to stay default for cli tool
-    return $cfg->{$pkg}->{auth_type} || 'agent';
-  }
+  builder => '_build_auth_type',
 );
+sub _build_auth_type {
+  return Kanku::Config::Defaults->get('Kanku::Roles::SSH', 'auth_type');
+}
 
 has ENV => (
   is=>'rw',
@@ -114,14 +112,25 @@ has ENV => (
   default=> sub {{}}
 );
 
+has 'logverbosity' => (
+  is      => 'rw',
+  isa     => 'Int',
+  lazy    => 1,
+  builder => '_build_logverbosity',
+);
+sub _build_logverbosity {
+  return Kanku::Config::Defaults->get('Kanku::Roles::SSH', 'logverbosity');
+}
+
+
 sub get_defaults {
-  my $self = shift;
-  my $logger  = $self->logger;
-  my $cfg = Kanku::Config->instance->config();
+  my ($self) = @_;
+  my $logger = $self->logger;
+  my $cfg    = Kanku::Config::Defaults->get('Kanku::Roles::SSH');
 
   if (! $self->privatekey_path ) {
-    if ( $cfg->{'Kanku::Roles::SSH'}->{privatekey_path} ) {
-      $self->privatekey_path($cfg->{'Kanku::Roles::SSH'}->{privatekey_path});
+    if ( $cfg->{privatekey_path} ) {
+      $self->privatekey_path($cfg->{privatekey_path});
     } elsif ( $::ENV{HOME} ) {
       my $key_path = "$::ENV{HOME}/.ssh/id_rsa";
       $self->privatekey_path($key_path) if ( -f $key_path);
@@ -130,7 +139,7 @@ sub get_defaults {
 
   $logger->debug(' - get_defaults: privatekey_path - '.$self->privatekey_path);
 
-  $self->publickey_path($cfg->{'Kanku::Roles::SSH'}->{publickey_path}) if $cfg->{'Kanku::Roles::SSH'}->{publickey_path};
+  $self->publickey_path($cfg->{publickey_path}) if $cfg->{publickey_path};
 
   if (! $self->publickey_path && $self->privatekey_path) {
     my $key_path = $self->privatekey_path.".pub";
@@ -146,26 +155,52 @@ sub connect {
   my ($self)  = @_;
   my $logger  = $self->logger;
 
-  my $ssh = Libssh::Session->new();
-  $ssh->options(Host => $self->ipaddress, Port => $self->port);
-
-  $self->ssh($ssh);
 
   my $results = [];
   my $ip      = $self->ipaddress;
+  my $port    = $self->port;
+  my $timeout = $self->connect_timeout;
 
-  $logger->debug("Connecting to $ip");
+  my $cc      = 0; # Connection Counter
 
-  my $connect_count=0;
+  $logger->info("Connecting to $ip (Timeout: $timeout)!");
 
-  while ($ssh->connect() != SSH_OK) {
-    croak("Could not connect to $ip: $!") if ($connect_count > $self->connect_timeout);
-    $connect_count++;
-    $logger->trace("Trying to reconnect: connect_count: ".$connect_count." timeout: ".$self->connect_timeout);
-    sleep 1;
+  my $ssh;
+  my $key_auth = ( $self->auth_type eq 'agent') ? 1 : 0;
+  my %options = (
+      Host => $ip,
+      Port => $port,
+      User => $self->username,
+      LogVerbosity => Kanku::Config::Defaults->get(
+	'Kanku::Roles::SSH', 'logverbosity'),
+    );
+
+  $logger->debug("Connecting to $ip (Timeout: $timeout)!");
+
+  if ( $self->auth_type eq 'publickey') {
+    my $privkey  = path($self->privatekey_path);
+    my $identity = $privkey->basename;
+    my $sshdir   = $privkey->dirname;
+    $options{Identity} = $identity if $identity;
+    $options{SshDir}   = $sshdir   if $sshdir;
+    $key_auth=1;
   }
 
-  $logger->debug("Connected successfully to $ip after $connect_count retries.");
+  while ($cc < $timeout) {
+    $ssh = Libssh::Session->new(SkipKeyProblem=>1);
+    $ssh->options(%options);
+    if ($ssh->connect(connect_only=>1) != SSH_OK) {
+      my $e = $ssh->error;
+      $logger->trace("Retry connecting ($cc): $e");
+      sleep 1;
+    } else {
+      $logger->debug("Connected successfully to $ip after $cc retries.");
+      $timeout = 0;
+    }
+    $cc++;
+  }
+
+  $self->ssh($ssh);
 
   $logger->debug(' - SSH_AUTH_SOCK: '.($::ENV{SSH_AUTH_SOCK} || q{}));
   $logger->debug(
@@ -177,32 +212,29 @@ sub connect {
           "passphrase : " . ( $self->passphrase || '' )       . "\n".
           "password   : " . ( $self->password || '' )         . "\n"
   );
-
-  $ssh->options(User=>$self->username) if $self->username;
-  $ssh->options(Identity=>$self->privatekey_path) if $self->privatekey_path;
-
   my $auth_result;
 
-  if ( $self->auth_type eq 'publickey' or $self->auth_type eq 'agent' ) {
-    $auth_result = $ssh->auth_publickey_auto(
-      $self->username,
-      $self->publickey_path,
-      $self->privatekey_path,
-      $self->passphrase
-    );
+  if ( $key_auth ) {
+    $auth_result = $ssh->auth_publickey_auto();
   } elsif ( $self->auth_type eq 'password' ) {
-    $auth_result = $ssh->auth_password($self->username, $self->password);
+    $logger->debug('Using password authentication');
+    $auth_result = $ssh->auth_password(password => $self->password);
   } else {
     croak("ssh auth_type not known!\n");
   }
 
   if ($auth_result != SSH_AUTH_SUCCESS) {
+    my $type = $self->auth_type;
+    my $user = $self->username;
     my $msg = "";
-    my @err = $ssh->error;
-    if ( $self->auth_type eq 'agent' ) {
-      $msg = " Have you added your ssh key to ssh-agent by running ssh-add?";
+    my $err = $ssh->error || q{};
+    if ( $type eq 'agent' ) {
+      $msg = "Have you added your ssh key to ssh-agent by running ssh-add?";
+    } elsif ($type eq 'publickey') {
+      $msg = "Using pubkey auth (pub/priv): "
+             . $self->publickey_path.'/'.$self->privatekey_path."\n";
     }
-    croak("Could not authenticate!$msg @err\n");
+    croak("Could not authenticate as user $user ($type)! $err\n$msg");
   }
 
   return $ssh;

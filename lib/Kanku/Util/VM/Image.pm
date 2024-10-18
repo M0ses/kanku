@@ -21,11 +21,13 @@ use Moose;
 use Sys::Virt;
 use Sys::Virt::Stream;
 use Try::Tiny;
+use Path::Tiny qw/path tempfile/;
 use File::LibMagic;
-use File::Temp;
-use File::Copy;
 use IO::Uncompress::AnyUncompress qw/anyuncompress $AnyUncompressError/;
 use Carp;
+use JSON::XS;
+
+with 'Kanku::Roles::Logger';
 
 use Kanku::Util::VM::Console;
 use Kanku::Config;
@@ -42,7 +44,7 @@ has '_temp_source_file' => (
   is=>'rw',
   isa => 'Object',
   lazy => 1,
-  default => sub { return File::Temp->new(SUFFIX => '.img' ) },
+  default => sub { return tempfile(SUFFIX => '.img' ) },
 );
 
 has '+uri'       => ( default => 'qemu:///system');
@@ -75,30 +77,31 @@ has vmm => (
   },
 );
 
-has logger => (
-  is => 'rw',
-  isa => 'Object',
-  lazy => 1,
-  default => sub { return Log::Log4perl->get_logger() },
-);
-
 sub create_volume {
-  my ($self) = @_;
+  my ($self)   = @_;
+  my $logger   = $self->logger;
+  my $vol_name = $self->vol_name || q{};
+  my $vol_fmt  = $self->format;
 
   $self->delete_volume();
 
-  $self->logger->info('Creating volume "'. ($self->vol_name || q{}).'" with format '.$self->format);
+  $logger->info("Creating volume `$vol_name` with format $vol_fmt");
+
+  my $size = ($self->source_file)
+    ? $self->get_image_size()
+    : $self->string_to_bytes($self->size)
+  ;
 
   my $xml  =
       '<volume type="file">'
-    . ' <name>' . $self->vol_name . '</name>'
-    . ' <capacity unit="bytes">'. $self->get_image_size() .'</capacity>'
+    . ' <name>' . $vol_name . '</name>'
+    . ' <capacity unit="bytes">'. $size .'</capacity>'
     . ' <target>'
-    . '  <format type="'.$self->format.'"/>'
+    . '  <format type="'.$vol_fmt.'"/>'
     . ' </target>'
     . '</volume>';
 
-  $self->logger->debug("create_volume: xml -\n$xml");
+  $logger->debug("create_volume: xml -\n$xml");
   my $vol;
   try {
       $vol  = $self->pool->create_volume($xml);
@@ -106,7 +109,7 @@ sub create_volume {
   }
   catch {
     my ($e) = @_;
-    $self->logger->fatal("Error: $e");
+    $logger->fatal("Error: $e");
     if (ref $e eq 'Sys::Virt::Error'){
       croak($e->stringify);
     } else {
@@ -143,22 +146,25 @@ sub delete_volume {
 
 sub get_image_size {
   my ($self) = @_;
+  my $src    = $self->source_file || q{};
+  my $logger = $self->logger;
+  my $t_size = 0;
 
-  if ( $self->source_file ) {
-    my $file = File::LibMagic->new();
-    my $info = $file->info_from_filename($self->source_file);
-
-    if ( $info->{description} =~ /^QEMU QCOW Image .* (\d+) bytes/ ) {
-      $self->logger->debug("QCOW Image size: $1");
-      return $1;
-    } else {
-      my @stat = stat($self->source_file);
-      return $stat[7];
-    }
+  if ( $src && -f $src ) {
+    my $cmd = "qemu-img info --output json $src";
+    open(my $pipe, '-|', $cmd) || croak "Failed to create pipe '$cmd': $!";
+    my @json = <$pipe>;
+    $logger->debug("JSON: @json");
+    close $pipe || croak "Could not close pipe: $!";
+    my $info = decode_json("@json");
+    $t_size = $info->{'virtual-size'};
+  } else {
+    croak("source_file not given or source_file ($src) does not exists.");
   }
+
   my $vol  = $self->vol_name;
-  my $size = $self->_string2bytes($self->size);
-  $self->logger->debug(" -------- size: $size");
+  my $size = $self->string_to_bytes($t_size);
+  $logger->debug(" -------- size: $size");
 
   croak("Size of volume '$vol' could not be determined\n") unless $size;
 
@@ -170,7 +176,7 @@ sub resize_image {
   my $cfg = Kanku::Config->instance();
   my $tmp;
 
-  $img = Path::Class::File->new($cfg->cache_dir, $img) unless ($img =~ m#/#);
+  $img = path($cfg->cache_dir, $img) unless ($img =~ m#/#);
 
   # 0 means that format is the same as suffix
   my %supported_formats = (
@@ -182,26 +188,28 @@ sub resize_image {
 
   my $supported_suf = join q{|}, keys %supported_formats;
 
-  if ( $img =~ /[.]($supported_suf)(\.xz|\.gz|\.bz2)?$/ ) {
+  if ( $img->stringify =~ /[.]($supported_suf)(\.xz|\.gz|\.bz2)?$/ ) {
     my $ext         = $1;
     my $compression = $2 || q{};
     if ( $size ) {
       my $template = 'XXXXXXXX';
       my $format = '-f ' . ( $supported_formats{$ext} || $ext );
-      $tmp = File::Temp->new(
-                                 TEMPLATE => $template,
-                                 DIR      => $cfg->cache_dir,
-                                 SUFFIX   => ".$ext",
-                               );
+      $tmp = tempfile(
+               TEMPLATE => $template,
+               DIR      => $cfg->cache_dir,
+               SUFFIX   => ".$ext",
+             );
+
       if ($compression)  {
         $self->logger->debug("--- uncompress '$img' to '$tmp'");
         my $input = (ref $img) ? $img->stringify : $img;
-        my $status = anyuncompress $input => $tmp->filename
+        my $status = anyuncompress $input => $tmp->stringify
           or croak("anyuncompress failed: $AnyUncompressError\n");
       } else {
         $self->logger->debug("--- copying image '$img' to '$tmp'");
-        copy($img, $tmp) or croak("Copy failed: $!");
+        $img->copy($tmp);
       }
+
       $self->logger->debug("--- trying to resize image '$tmp' to $size (format: $format)");
       my @out = `qemu-img resize $format $tmp $size`;
       my $ec = $? >> 8;
@@ -217,20 +225,26 @@ sub resize_image {
   return $tmp;
 }
 
-sub _string2bytes {
-  my ($self, $size) = @_;
+sub string_to_bytes {
+  my ($self, $string) = @_;
+  $string = $self if (!ref($self) && !$string);
 
-  my $sh = {
-             b => 1,                   k => 1024 ,
-             m => 1024*1024,           g => 1024*1024*1024,
-             t => 1024*1024*1024*1024, p => 1024*1024*1024*1024*1024
-           };
+  my $unit_to_factor = {
+    b => 1,
+    k => 1024 ,
+    m => 1024*1024,
+    g => 1024*1024*1024,
+    t => 1024*1024*1024*1024,
+    p => 1024*1024*1024*1024*1024
+ };
 
-  $size =~ /^(\d+)([bkmgtp]m?)?/i;
+  croak "Invalid input: `$string`" unless ($string =~ m/^(\d+)([bkmgtp]b?)?/i);
 
-  my $f = ($2) ? $sh->{lc $2} : 1;
+  my $val    = $1;
+  my $unit   = lc($2||'b');
+  my $factor = $unit_to_factor->{$unit};
 
-  return ($1 || 0) * $f;
+  return ($val*$factor);
 }
 
 sub _copy_volume {
@@ -267,7 +281,7 @@ sub _copy_volume {
 
 sub _expand_raw_image {
   my ($self, $st) = @_;
-  my $final_size = $self->_string2bytes($self->final_size);
+  my $final_size = $self->string_to_bytes($self->final_size);
   if ( $self->format eq 'raw' && $final_size > $self->_total_sent ) {
     my $to_read = $final_size - $self->_total_sent;
     my $nbytes  = $self->_nbytes;
@@ -379,7 +393,7 @@ sub _check_source_file {
   my $fmt  = '-f ' . $self->format;
 
   my $tmp_fh = $self->_temp_source_file();
-  my $tmp_fn = $tmp_fh->filename;
+  my $tmp_fn = $tmp_fh->stringify;
 
   $self->source_file($tmp_fn);
 

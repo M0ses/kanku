@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 72,
+           job_id => 9,
+           name   => 'Kanku::Handler::ExecuteCommandViaSSH',
+           result => '{"error_message":"Aborted job because of TERM signal at /usr/lib/kanku/lib/Kanku/Task.pm line 142.\\n"}',
+           state  => 'failed'
+         };

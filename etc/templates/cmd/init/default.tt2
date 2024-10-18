@@ -1,0 +1,49 @@
+#
+domain_name: [% domain_name %]
+default_job: [% default_job %]
+login_user: root
+login_pass: kankudai
+
+jobs:
+ [% default_job %]:
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      host_interface: eth0
+  -
+    use_module: Kanku::Handler::OBSCheck
+    options:
+      obsurl: [% obsurl %]
+      # Please have a look at
+      # kanku lsi
+      # to find more official Images
+      project: [% project %]
+      package: [% package %]
+      repository: [% repository %]
+      arch: [% arch %]
+      use_oscrc: 0
+  -
+    use_module: Kanku::Handler::ImageDownload
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: [% domain_memory %]
+      vcpu: [% domain_cpus %]
+      use_9p: 1
+[% IF pool %]
+      # Please be aware that enabling a pool my bind a KankuFile to specific
+      # libvirtd configuration.
+      # KankuFiles containing the pool parameter are not supposed to be commited
+      # into projects SCM's
+      # pool_name: [% pool %]
+[% END %]
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  # Kanku::Handler::CopyProfile configuration in kanku-config.yml required
+  -
+    use_module: Kanku::Handler::CopyProfile
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - echo "Just for testing ssh connection"

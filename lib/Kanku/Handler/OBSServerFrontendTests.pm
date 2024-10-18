@@ -17,47 +17,45 @@
 package Kanku::Handler::OBSServerFrontendTests;
 
 use Moose;
-use namespace::autoclean;
-use File::Temp;
+use Path::Tiny qw/tempdir/;
 
+sub gui_config {
+  [
+    {
+      param => 'git_url',
+      type  => 'text',
+      label => 'Git URL:'
+    },
+    {
+      param => 'git_revision',
+      type  => 'text',
+      label => 'Git Revision:'
+    },
+    {
+      param => 'ruby_version',
+      type  => 'text',
+      label => 'Ruby Version:'
+    },
+    {
+      param => 'verbose',
+      type  => 'checkbox',
+      label => 'Verbose:'
+    },
+  ];
+}
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::SSH';
 
 has timeout       => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
+with 'Kanku::Roles::SSH';
+
 has environment   => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has context2env   => (is=>'rw', isa=>'HashRef', default => sub {{}});
 has jump_host     => (is=>'rw', isa=>'Str');
 has git_url       => (is=>'rw', isa=>'Str', default => 'https://github.com/openSUSE/open-build-service.git');
 has git_revision  => (is=>'rw', isa=>'Str', default => 'master');
 has ruby_version  => (is=>'rw', isa=>'Str', default => '2.5');
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'git_url',
-          type  => 'text',
-          label => 'Git URL:'
-        },
-        {
-          param => 'git_revision',
-          type  => 'text',
-          label => 'Git Revision:'
-        },
-        {
-          param => 'ruby_version',
-          type  => 'text',
-          label => 'Ruby Version:'
-        },
-      ];
-  }
-);
-
-
-sub distributable { 1 }
+has verbose       => (is=>'rw', isa=>'Bool', default => 1);
 
 sub execute {
   my $self    = shift;
@@ -87,17 +85,22 @@ sub execute {
   my $ruby_version = $self->ruby_version || '2.5';
   my $git_revision = $self->git_revision||'master';
   my $git_url      = $self->git_url||'https://github.com/openSUSE/open-build-service.git';
-  my $tmp_dir      = File::Temp->new->filename;
+  my $tmp_dir      = tempdir()->stringify;
   my $logfile      = "~/obs-server-frontend-$job_id.log";
+
   my $log_to_file  = ">> $logfile 2>&1 || ".
     '{'.
     "  cat $logfile ; ".
     ' exit 1;'.
     '}';
 
+  my $verbose = ($self->verbose && $git_url =~ m#^https?://#)
+    ? "GIT_CURL_VERBOSE=1 "
+    : q{};
+
   my @commands = (
     "mkdir -p $tmp_dir",
-    "git clone $git_url $tmp_dir/",
+    $verbose."git clone $git_url $tmp_dir/",
     "git -C $tmp_dir checkout $git_revision",
     "cd $tmp_dir/dist/t && bundle.ruby$ruby_version config set --local path 'vendor/bundle' $log_to_file",
     "cd $tmp_dir/dist/t && bundle.ruby$ruby_version install $log_to_file",
@@ -153,7 +156,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
 
 =head1 DESCRIPTION
 
-This handler will connect to the given ipaddress and execute the OBS server 
+This handler will connect to the given ipaddress and execute the OBS server
 frontend test suite (smoketests)
 
 

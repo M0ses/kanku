@@ -4,7 +4,7 @@ __PACKAGE__->table('ws_session');
 __PACKAGE__->add_columns(
     session_token => { data_type => 'varchar', size => 32 },
     user_id       => { data_type => 'integer' },
-    # session states: 
+    # session states:
     # =  0  - initiated
     # >  0 - permission level (authenticated)
     # = -1  - authentication failed

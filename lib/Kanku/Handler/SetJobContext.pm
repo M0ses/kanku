@@ -17,13 +17,51 @@
 package Kanku::Handler::SetJobContext;
 
 use Moose;
-use feature 'say';
-use Data::Dumper;
+
+sub gui_config {
+  [
+    {
+      param => 'images_dir',
+      type  => 'text',
+      label => 'Image Directory',
+    },
+    {
+      param => 'domain_name',
+      type  => 'text',
+      label => 'Domain Name',
+    },
+    {
+      param => 'vm_template_file',
+      type  => 'text',
+      label => 'VM Template File',
+    },
+    {
+      param => 'offline',
+      type  => 'checkbox',
+      label => 'Offline Mode',
+    },
+    {
+      param => 'domain_autostart',
+      type  => 'checkbox',
+      label => 'Autostart domain',
+    },
+    {
+      param  => 'gitlab_merge_request_id',
+      type   => 'text',
+      label  => 'Gitlab Merge Request ID (requires manual fetch)',
+    },
+    {
+      param  => 'ipaddress',
+      type   => 'text',
+      label  => 'IP Address of Guest (use carefully, usually set by e.g. CreateDomain)',
+    },
+  ];
+}
+sub distributable { 0 }
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Logger';
 
 has [qw/
-        api_url         project         package
+        obsurl         project         package
         vm_image_file   vm_image_url    vm_template_file
         domain_name     host_interface  management_interface
         cache_dir       images_dir
@@ -49,52 +87,12 @@ has [qw/
   tmp_image_file
 /] => (is => 'rw', isa => 'Object|Undef');
 
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'images_dir',
-          type  => 'text',
-          label => 'Image Directory',
-        },
-        {
-          param => 'domain_name',
-          type  => 'text',
-          label => 'Domain Name',
-        },
-        {
-          param => 'vm_template_file',
-          type  => 'text',
-          label => 'VM Template File',
-        },
-        {
-          param => 'offline',
-          type  => 'checkbox',
-          label => 'Offline Mode',
-        },
-        {
-          param => 'domain_autostart',
-          type  => 'checkbox',
-          label => 'Autostart domain',
-        },
-        {
-          param  => 'gitlab_merge_request_id',
-          type   => 'text',
-          label  => 'Gitlab Merge Request ID (requires manual fetch)',
-        },
-      ];
-  }
-);
-
 sub execute {
   my $self = shift;
   my $ctx  = $self->job()->context();
   for my $var (qw/
     domain_name vm_template_file host_interface images_dir cache_dir ipaddress
-    login_user login_pass 
+    login_user login_pass
     privatekey_path publickey_path
     host_dir_9p accessmode_9p
     vm_image_file management_interface snapshot_name domain_autostart
@@ -113,6 +111,7 @@ sub execute {
   };
 }
 
+__PACKAGE__->meta->make_immutable;
 
 1;
 
@@ -129,7 +128,7 @@ Here is an example how to configure the module in your jobs file or KankuFile
   -
     use_module: Kanku::Handler::SetJobContext
     options:
-      api_url: https://api.opensuse.org/public
+      obsurl: https://api.opensuse.org/public
       ....
 
 =head1 DESCRIPTION
@@ -141,7 +140,7 @@ This handler will set the given variables in the job context
 
 For further explaination of these options please have a look at the corresponding modules.
 
-      api_url
+      obsurl
 
       project
 

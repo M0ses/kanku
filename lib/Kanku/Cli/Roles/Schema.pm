@@ -18,7 +18,9 @@ package Kanku::Cli::Roles::Schema;
 
 use strict;
 use warnings;
+
 use MooseX::App::Role;
+
 use Kanku::YAML;
 use Kanku::Schema;
 
@@ -26,10 +28,12 @@ has schema => (
   is => 'rw',
   isa => 'Object',
   lazy => 1,
-  default => sub {
-    my $cfg_yaml    = Kanku::YAML::LoadFile('/etc/kanku/dancer/config.yml');
-    return Kanku::Schema->connect($cfg_yaml->{plugins}->{DBIC}->{default}->{dsn});
-  },
+  builder => '_build_schema',
 );
+
+sub _build_schema {
+  my $cfg_yaml    = Kanku::YAML::LoadFile('/etc/kanku/dancer/config.yml');
+  return Kanku::Schema->connect($cfg_yaml->{plugins}->{DBIC}->{default}->{dsn});
+}
 
 1;

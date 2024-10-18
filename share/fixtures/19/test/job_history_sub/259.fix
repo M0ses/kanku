@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 259,
+           job_id => 41,
+           name   => 'Kanku::Handler::PrepareSSH',
+           result => '{"finalize":{"code":0,"message":"Nothing to do!"},"execute":{"code":0,"message":"Successfully prepared dki-opensuse-15-1 for ssh connections\\n"},"prepare":{"code":0,"message":"Successfully finished prepare and loaded keys from 1 files"}}',
+           state  => 'succeed'
+         };

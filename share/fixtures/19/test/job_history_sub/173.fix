@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 173,
+           job_id => 23,
+           name   => 'Kanku::Handler::ImageDownload',
+           result => '{"execute":{"state":"succeed","message":"Sucessfully downloaded image to /var/cache/kanku/Kanku_Leap_15.0_JeOS.x86_64-0.0.1-Buildlp150.8.115.qcow2"},"finalize":{"code":0,"message":"Nothing to do!"},"prepare":{"message":"Preparation finished successfully","state":"succeed"}}',
+           state  => 'succeed'
+         };

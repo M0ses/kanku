@@ -18,16 +18,18 @@ package Kanku::Daemon::Dispatcher;
 
 use Moose;
 use Try::Tiny;
+
+with 'Kanku::Roles::Daemon';
+
 use Kanku::Dispatch::Local;
 use Kanku::Dispatch::RabbitMQ;
 
-with 'Kanku::Roles::Daemon';
 
 sub run {
   my ($self) = @_;
   my $cfg = Kanku::Config->instance();
 
-  my $mod = $cfg->config->{dispatcher} || "Kanku::Dispatch::Local";
+  my $mod = $cfg->cf->{dispatcher} || "Kanku::Dispatch::Local";
   my $daemon = $mod->new();
   try {
     $daemon->run();

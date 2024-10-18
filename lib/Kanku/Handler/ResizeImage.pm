@@ -17,37 +17,28 @@
 package Kanku::Handler::ResizeImage;
 
 use Moose;
-use Path::Class::File;
-use Data::Dumper;
-use File::Temp;
-use File::Copy;
-use Carp;
+
+use Path::Tiny;
+
 use Kanku::Config;
 use Kanku::Util::VM::Image;
 
+sub gui_config {
+  [
+    {
+      param => 'disk_size',
+      type  => 'text',
+      label => 'New disk size',
+    },
+  ];
+}
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
 has [qw/
       vm_image_file
       disk_size
 /] => (is => 'rw',isa=>'Str');
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'disk_size',
-          type  => 'text',
-          label => 'New disk size',
-        },
-      ];
-  },
-);
-
-sub distributable { return -1; }
 
 sub execute {
   my $self = shift;
@@ -56,8 +47,8 @@ sub execute {
   my ($tmp);
 
   my $img  = ($ctx->{vm_image_file} =~ m#/#)
-    ? $ctx->{vm_image_file}
-    : Path::Class::File->new($cfg->cache_dir, $ctx->{vm_image_file});
+    ? path($ctx->{vm_image_file})
+    : path($cfg->cache_dir, $ctx->{vm_image_file});
   my $size = $self->disk_size;
 
   my $img_obj = Kanku::Util::VM::Image->new();
@@ -66,6 +57,8 @@ sub execute {
 
   return "Sucessfully resized image '$ctx->{tmp_image_file}' to $size";
 }
+
+__PACKAGE__->meta->make_immutable;
 
 1;
 

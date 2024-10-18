@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 128,
+           job_id => 17,
+           name   => 'Kanku::Handler::PortForward',
+           result => '{"error_message":"No host_interface given. Can not determine host_ipaddress at /usr/lib/kanku/lib/Kanku/Util/IPTables.pm line 49.\\n"}',
+           state  => 'failed'
+         };

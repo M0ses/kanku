@@ -17,11 +17,10 @@
 package Kanku::Util::IPTables;
 
 use Moose;
-use File::Which;
 use JSON::MaybeXS;
 use Carp;
 
-use Kanku::Config;
+use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Logger';
 
@@ -42,30 +41,32 @@ has host_ipaddress => (
   is      =>'rw',
   isa     =>'Str',
   lazy    => 1,
-  default =>sub {
-    my $host_interface = $_[0]->host_interface;
-    if (! $host_interface ) {
-      my $cfg  = Kanku::Config->instance->cf;
-      $host_interface = $cfg->{'Kanku::Util::IPTables'}->{host_interface};
-    }
-
-    die "No host_interface given. Can not determine host_ipaddress" if (! $host_interface );
-
-    $_[0]->logger->debug("Using host_interface: $host_interface");
-
-    # use cat for disable colors
-    my $cmd = "LANG=C ip addr show " . $host_interface . "|cat";
-    $_[0]->logger->debug("Executing command: '$cmd'");
-    my @out = `$cmd`;
-
-    for my $line (@out) {
-      if ( $line =~ /^\s*inet\s+([0-9\.]*)(\/\d+)?\s.*/ ) {
-        return $1
-      }
-    }
-    return '';
-  }
+  builder => '_build_host_interface',
 );
+sub _build_host_interface {
+  my ($self) = @_;
+  my $host_interface = $self->host_interface
+    || Kanku::Config::Defaults->get(
+	 'Kanku::Config::GlobalVars',
+	 'host_interface'
+       );
+
+  die "No host_interface given. Can not determine host_ipaddress" if (! $host_interface );
+
+  $self->logger->debug("Using host_interface: $host_interface");
+
+  # use cat for disable colors
+  my $cmd = "LANG=C ip addr show " . $host_interface . "|cat";
+  $self->logger->debug("Executing command: '$cmd'");
+  my @out = `$cmd`;
+
+  for my $line (@out) {
+    if ( $line =~ /^\s*inet\s+([0-9\.]*)(\/\d+)?\s.*/ ) {
+      return $1
+    }
+  }
+  return '';
+}
 
 has 'domain_autostart' => (
   is      => 'rw',
@@ -74,9 +75,9 @@ has 'domain_autostart' => (
 );
 
 sub get_forwarded_ports_for_domain {
-  my $self        = shift;
-  my $domain_name = shift || $self->domain_name;
-  my $result      = { };
+  my ($self, $domain_name) = @_;
+  my $result               = { };
+  $domain_name           ||= $self->domain_name;
 
   die "No domain_name given. Cannot procceed\n" if (! $domain_name);
 
@@ -102,17 +103,17 @@ sub get_forwarded_ports_for_domain {
 }
 
 sub get_active_rules_for_domain {
-  my $self        = shift;
-  my $domain_name = shift || $self->domain_name;
-  my $chain       = $self->iptables_chain;
-  my $result      = {filter =>{$chain=>[]}, nat=>{$chain=>[]}};
+  my ($self, $domain_name) = @_;
+  $domain_name           ||= $self->domain_name;
+  my $chain                = $self->iptables_chain;
+  my $result               = {filter =>{$chain=>[]}, nat=>{$chain=>[]}};
 
   die "No domain_name given. Cannot procceed\n" if (! $domain_name);
 
   for my $table ('nat', 'filter') {
     if ($self->chain_exists($table)) {
       for my $rule ($self->_get_rules_from_chain($table)) {
-        push(@{$result->{$table}->{$chain}},$rule->{line_number}) if (($rule->{domain_name}||q{}) eq  $domain_name);
+        push(@{$result->{$table}->{$chain}},$rule->{line_number}) if (($rule->{domain_name}||q{}) eq $domain_name);
       }
     }
   }
@@ -121,17 +122,19 @@ sub get_active_rules_for_domain {
 }
 
 sub cleanup_rules_for_domain {
-  my $self        = shift;
-  my $domain_name = shift || $self->domain_name;
-  my $rules       = $self->get_active_rules_for_domain($domain_name);
-  my $sudo        = $self->sudo();
-  my $wrapper     = $self->iptables_wrapper;
+  my ($self, $domain_name) = @_;
+  $domain_name           ||= $self->domain_name;
+  my $rules                = $self->get_active_rules_for_domain($domain_name);
+  my $sudo                 = $self->sudo();
+  my $wrapper              = $self->iptables_wrapper;
+  my $logger               = $self->logger;
 
   foreach my $table (keys(%{$rules})) {
     foreach my $chain (keys(%{$rules->{$table}})) {
       foreach my $line_number (reverse(@{$rules->{$table}->{$chain}})) {
-        my $cmd = $sudo."$wrapper D:$table:$chain:$line_number";
-        my @out = `$cmd 2>&1`;
+        my $cmd = $sudo."$wrapper D:$table:$chain:$line_number 2>&1";
+        $logger->debug("executing `$cmd`");
+        my @out = `$cmd`;
         if ($?) {
           die "Error while deleting rules by executing command: $?\n\t$cmd\n\n@out"
         }
@@ -141,8 +144,7 @@ sub cleanup_rules_for_domain {
 }
 
 sub add_forward_rules_for_domain {
-  my $self          = shift;
-  my %opts          = @_;
+  my ($self, %opts) = @_;
   my $start_port    = $opts{start_port};
   my $forward_rules = $opts{forward_rules};
   my $sudo          = $self->sudo();
@@ -265,7 +267,7 @@ sub chain_exists {
   my @rules;
   $table  ||= 'filter';
   $chain  ||= $self->iptables_chain;
-  my $cmd  = "$sudo $wrapper L:$table:$chain";
+  my $cmd  = "$sudo $wrapper L:$table:$chain 2>&1";
   my @lines = `$cmd`;
 
   return 1 unless $?;
@@ -276,13 +278,14 @@ sub chain_exists {
 
 sub _get_rules_from_chain {
   my ($self, $table, $chain) = @_;
-  my $sudo = $self->sudo();
+  my $sudo                   = $self->sudo();
+  my $logger                 = $self->logger;
+  $table                   ||= 'filter';
+  $chain                   ||= $self->iptables_chain;
+  my $wrapper                = $self->iptables_wrapper;
+  my $cmd                    = "$sudo $wrapper L:$table:$chain 2>&1";
   my @rules;
-  $table    ||= 'filter';
-  $chain    ||= $self->iptables_chain;
-  my $wrapper = $self->iptables_wrapper;
-  my $cmd     = "$sudo $wrapper L:$table:$chain";
-
+  $logger->debug("Executing `$cmd`");
   my @lines = `$cmd`;
 
   confess "Error while creating iptables chain($?):\n\t$cmd\n\n@lines\n" if $?;
@@ -343,13 +346,16 @@ sub _get_rules_from_chain {
 }
 
 sub _check_chain {
-  my ($self) = @_;
-
+  my ($self)  = @_;
+  my $logger  = $self->logger;
   my $wrapper = $self->iptables_wrapper;
   my $sudo    = $self->sudo();
   my $chain   = $self->iptables_chain;
-  my $cmd  = "$wrapper L:filter:$chain";
-  my $out  = `$sudo$cmd 2>&1`;
+
+  my $cmd     = "$sudo$wrapper L:filter:$chain 2>&1";
+  $logger->debug("Executing `$cmd`");
+  my $out     = `$cmd`;
+
   if ($out =~ /iptables: No chain\/target\/match by that name./ ) {
     $cmd = "$wrapper N:filter:$chain";
     $out  = `$sudo$cmd 2>&1`;
@@ -360,10 +366,7 @@ sub _check_chain {
 }
 
 sub _find_free_ports {
-  my $self        = shift;
-  my $start_port  = shift;
-  my $count       = shift;
-  my $proto       = shift;
+  my ($self, $start_port, $count, $proto) = @_;
   # TODO: make usable for tcp and udp
   my $port2check  = $start_port || 49000;
   my @result      = ();
@@ -384,9 +387,13 @@ has _used_ports => (
   is      => 'rw',
   isa     => 'HashRef',
   lazy    => 1,
-  default => sub {
+
+  builder => '_build__used_ports',
+);
+
+sub _build__used_ports {
     # TODO: make usable for tcp and udp
-    my $self    = shift;
+    my ($self)  = @_;
     my $hostip  = $self->host_ipaddress;
     my $result  = {};
     my $sudo    = $self->sudo;
@@ -425,8 +432,6 @@ has _used_ports => (
     }
     return $result;
   }
-);
-
 sub sudo {
   return ($> != 0) ? "sudo -n " : q{};
 }

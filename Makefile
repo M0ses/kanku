@@ -18,6 +18,7 @@ CONFIG_DIRS		= \
 TEMPLATE_DIRS = \
 	etc/kanku/templates\
 	etc/kanku/templates/cmd\
+	etc/kanku/templates/cmd/init\
 	etc/kanku/templates/cmd/setup\
 	etc/kanku/templates/cmd/setup/etc\
 	etc/kanku/templates/examples-vm/\
@@ -25,7 +26,8 @@ TEMPLATE_DIRS = \
 TEMPLATE_FILES = \
 	templates/with-spice.tt2\
 	templates/vm-x86_64-uefi-tpm2.0.tt2\
-	templates/cmd/init.tt2\
+	templates/cmd/init/default.tt2\
+	templates/cmd/init/vagrant.tt2\
 	templates/cmd/setup/kanku.conf.mod_perl.tt2\
 	templates/cmd/setup/kanku.conf.mod_proxy.tt2\
 	templates/cmd/setup/kanku-vhost.conf.tt2\
@@ -34,6 +36,7 @@ TEMPLATE_FILES = \
 	templates/cmd/setup/kanku-config.yml.tt2\
 	templates/cmd/setup/net-kanku-devel.xml.tt2\
 	templates/cmd/setup/net-kanku-ovs.xml.tt2\
+	templates/cmd/setup/net-kanku.xml.tt2\
 	templates/cmd/setup/pool-default.xml\
 	templates/cmd/setup/rabbitmq.config.tt2\
 	templates/examples-vm/obs-server-26.tt2\
@@ -61,7 +64,12 @@ install: install_dirs install_full_dirs install_services install_docs configs te
 	install -m 644 dist/_etc_apache2_conf.d_kanku-worker.conf $(DESTDIR)/etc/apache2/conf.d/kanku-worker.conf
 
 bashcomp:
-	PERL5LIB=./lib ./bin/kanku bash_completion > $(DESTDIR)/etc/bash_completion.d/kanku.sh
+	# FIXME: This is only a temporary workaround until we got upstream
+	#        MooseX/App/Plugin/BashCompletion bug fixed.
+	#        ATM its not able to handle subcommands like in 
+	#        `kanku rguest console` properly.
+	#PERL5LIB=./lib ./bin/kanku bash_completion > $(DESTDIR)/etc/bash_completion.d/kanku.sh
+	cp dist/_etc_bash_completion.d_kanku.sh $(DESTDIR)/etc/bash_completion.d/kanku.sh
 
 configs: config_dirs config_files
 
@@ -183,24 +191,7 @@ urlwrapper:
 	install -m 644 public/images/48/kanku.png $(DESTDIR)/usr/share/icons/hicolor/48x48/apps/kanku.png
 	install -m 644 public/images/64/kanku.png $(DESTDIR)/usr/share/icons/hicolor/64x64/apps/kanku.png
 
-test-kankufiles: centos-current icinga openQA rabbitmq-opensuse simple multivm test-snapshot
-
-centos-current:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.centos-current && kanku destroy && kanku up && kanku destroy
-icinga:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.icinga2 && kanku destroy && kanku up && kanku destroy
-openQA:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.openQA && kanku destroy && kanku up && kanku destroy
-rabbitmq-opensuse:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.rabbitmq-opensuse && kanku destroy && kanku up && kanku destroy
-simple:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.simple && kanku destroy && kanku up && kanku destroy
-multivm:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.multivm && kanku destroy && kanku up && kanku destroy
-
-test-snapshot:
-	export KANKU_CONFIG=KankuFile.examples/KankuFile.test-snapshot && kanku destroy && kanku up && kanku destroy
-
-
+test-kankufiles:
+	make -C KankuFile.examples/ test-kankufiles
 
 .PHONY: dist install lib cover check test public views bin sbin
