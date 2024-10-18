@@ -10,14 +10,9 @@ with 'Kanku::Roles::Notifier';
 with 'Kanku::Roles::Logger';
 
 sub notify {
-  my ($self, $text) = @_;
-
-  #my $template_path = Kanku::Config->instance->views_dir . '/notifier/';
-
-  #$self->logger->debug("Using template_path: $template_path");
+  my ($self) = @_;
 
   my $config = {
-    #INCLUDE_PATH  => $template_path,
     INTERPOLATE   => 1,
     POST_CHOMP    => 1,
     PLUGIN_BASE   => 'Template::Plugin',
@@ -32,22 +27,8 @@ sub notify {
   $template->process(\$input, $self->get_template_data(), \$output)
                || die $template->error()->as_string();
 
-  # Take 'fatal' as fallback because it's the lowest loglevel
-  my $ll = $self->options->{loglevel} || 'fatal';
-  my $ll2int = {
-    trace => $TRACE,
-    debug => $DEBUG,
-    info  => $INFO,
-    warn  => $WARN,
-    error => $ERROR,
-    fatal => $FATAL,
-  };
-  my $loglevel = $ll2int->{$ll};
-  if ($loglevel) {
-    $self->logger->log($loglevel, $output);
-  } else {
-    $self->logger->error("Unknown loglevel configured: '$ll'");
-  }
+  my $fh = (uc($self->options->{template}) eq 'STDERR') ? \*STDERR : \*STDOUT;
+  print $fh $output;
   return;
 }
 
