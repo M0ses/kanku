@@ -312,7 +312,7 @@ sub cmd {
             my $exp=shift;
             my $rc = $exp->before();
             my @l = split /\r\n/, $rc;
-            $rc = int($l[1]);
+            $rc = int($l[1]||0);
             if ($rc) {
               $logger->warn("Execution of command '$cmd' failed with return code '$rc'");
             } else {
