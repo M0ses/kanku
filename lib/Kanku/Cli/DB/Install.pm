@@ -53,8 +53,8 @@ sub run {
       );
       return 1;
     }
-    $logger->debug('Creating _dbdir: '.$self->_dbdir);
-    $self->_dbdir->mkdir;
+    $logger->debug("Creating _dbdir: $_dbdir");
+    $_dbdir->mkdir;
   }
 
   $migration->install_if_needed(default_fixture_sets => ['install']);
