@@ -25,5 +25,7 @@ jobs:
       password:
       commands:
         # enable key based ssh auth for user root
-        - sudo cp .ssh/authorized_keys /root/.ssh/
+        - |+
+          sudo test -d ~root/.ssh || sudo mkdir -p ~root/.ssh || true
+          sudo cp .ssh/authorized_keys ~root/.ssh/ || true
         - echo "Just testing ssh connection"
