@@ -57,7 +57,7 @@ sub _build_dbfile {
   my ($self) = @_;
   return $self->server
     ? '/var/lib/kanku/db/kanku-schema.db'
-    : path($self->homedir, qw/.kanku kanku-schema.db/)->stringfy;
+    : path($self->homedir, qw/.kanku kanku-schema.db/)->stringify;
 }
 
 option 'homedir' => (
