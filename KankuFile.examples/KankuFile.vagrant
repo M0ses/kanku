@@ -38,8 +38,9 @@ jobs:
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
-        - zypper -n in kanku-cli make
-        - git clone https://github.com/M0ses/kanku.git && git -C kanku checkout fix_issue_59 && make -C kanku lib templates
+        - zypper ar obs://devel:kanku:staging dks
+        - zypper --gpg-auto-import-keys ref -s
+        - zypper -n in kanku-cli
         - kanku setup --devel --user kanku
         # END
         - "chown kanku -R /home/kanku/.ssh"
