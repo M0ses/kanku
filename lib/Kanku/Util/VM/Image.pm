@@ -151,12 +151,7 @@ sub get_image_size {
   my $t_size = 0;
 
   if ( $src && -f $src ) {
-    my $cmd = "qemu-img info --output json $src";
-    open(my $pipe, '-|', $cmd) || croak "Failed to create pipe '$cmd': $!";
-    my @json = <$pipe>;
-    $logger->debug("JSON: @json");
-    close $pipe || croak "Could not close pipe: $!";
-    my $info = decode_json("@json");
+    my $info = $self->get_image_info;
     $t_size = $info->{'virtual-size'};
   } else {
     croak("source_file not given or source_file ($src) does not exists.");
@@ -169,6 +164,26 @@ sub get_image_size {
   croak("Size of volume '$vol' could not be determined\n") unless $size;
 
   return $size;
+}
+
+sub get_image_info {
+  my ($self, $lsrc) = @_;
+  my $src    = $lsrc || $self->source_file || q{};
+  my $logger = $self->logger;
+  my $info;
+
+  if ( $src && -f $src ) {
+    my $cmd = "qemu-img info --output json $src";
+    open(my $pipe, '-|', $cmd) || croak "Failed to create pipe '$cmd': $!";
+    my @json = <$pipe>;
+    $logger->debug("JSON: @json");
+    close $pipe || croak "Could not close pipe: $!";
+    $info = decode_json("@json");
+  } else {
+    croak("source_file not given or source_file ($src) does not exists.");
+  }
+
+  return $info;
 }
 
 sub resize_image {
