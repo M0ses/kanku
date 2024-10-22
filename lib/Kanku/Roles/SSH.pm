@@ -61,34 +61,34 @@ has 'ipaddress' => (
   is	  => 'rw',
   isa	  => 'Str',
   lazy    => 1,
-  default => sub { $_[0]->job->context->{ipaddress} || '' }
+  builder => sub { $_[0]->job->context->{ipaddress} || '' }
 );
 
 has 'username' => (
   is	  => 'rw',
   isa	  => 'Str',
   lazy    => 1,
-  default => 'root'
+  builder => sub { 'root' },
 );
 
 has 'password' => (
   is	  => 'rw',
   isa	  => 'Str',
   lazy    => 1,
-  default => 'kankudai'
+  builder => sub { 'kankudai' },
 );
 
 has 'port' => (
   is	  => 'rw',
   isa	  => 'Int',
   lazy    => 1,
-  default => 22,
+  builder => sub { 22 },
 );
 
 has 'connect_timeout' => (
   is	  => 'rw',
   isa	  => 'Int',
-  default => 300
+  builder => sub { 300 },
 );
 
 has [ qw/job ssh/ ] => (
@@ -107,10 +107,10 @@ sub _build_auth_type {
 }
 
 has ENV => (
-  is=>'rw',
-  isa=>'HashRef',
-  lazy => 1,
-  default=> sub {{}}
+  is      =>'rw',
+  isa     =>'HashRef',
+  lazy    => 1,
+  builder => sub {{}},
 );
 
 has 'logverbosity' => (
