@@ -274,6 +274,7 @@ common config and lib files used in kanku
 /usr/lib/kanku/lib/Kanku/YAML.pm
 /usr/lib/kanku/lib/Kanku/Logger.pm
 /usr/lib/kanku/lib/Kanku/File.pm
+/usr/lib/kanku/lib/Kanku/Helpers.pm
 
 %dir /usr/lib/kanku/lib/Kanku/WebSocket
 /usr/lib/kanku/lib/Kanku/WebSocket/Notification.pm
