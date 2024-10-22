@@ -23,7 +23,6 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
 use Term::ReadKey;
