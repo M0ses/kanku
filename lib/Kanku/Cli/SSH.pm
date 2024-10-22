@@ -19,6 +19,10 @@ package Kanku::Cli::SSH;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+with 'Kanku::Cli::Roles::VM';
+
+use Kanku::Util::VM;
+
 # timeout must be defined before consuming role
 #
 option 'timeout' => (
@@ -27,8 +31,6 @@ option 'timeout' => (
   documentation => 'Timeout to use for ssh',
   default       => 180,
 );
-with 'Kanku::Roles::SSH';
-with 'Kanku::Cli::Roles::VM';
 
 command_short_description  'open ssh connection to vm';
 
@@ -38,16 +40,16 @@ by calling the `ssh` command.
 
 ';
 
-option 'user' => (
+option 'ssh_user' => (
   isa           => 'Str',
   is            => 'rw',
   cmd_aliases   => 'u',
   documentation => 'Login user to use for ssh',
   lazy          => 1,
-  builder       => '_build_user',
+  builder       => '_build_ssh_user',
 );
 
-sub _build_user {
+sub _build_ssh_user {
   my ($self) = @_;
   my $u = $self->kankufile_config->{ssh_user} || $self->kankufile_config->{login_user} || 'kanku';
   return $u
@@ -107,10 +109,6 @@ has 'template' => (
   default       => 'ssh.tt',
 );
 
-with 'Kanku::Cli::Roles::View';
-
-use Kanku::Util::VM;
-
 sub run {
   my ($self) = @_;
   Kanku::Config->initialize(class=>'KankuFile', file=>$self->file);
@@ -121,7 +119,7 @@ sub run {
     x11_forward   => $self->x11_forward,
     agent_forward => $self->agent_forward,
     execute       => $self->execute,
-    user          => $self->user,
+    user          => $self->ssh_user,
     port          => $self->port,
     ip            => $self->ipaddress,
   };
