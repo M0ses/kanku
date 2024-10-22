@@ -21,7 +21,6 @@ extends qw(Kanku::Cli);
 
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
 use POSIX qw/floor/;
@@ -104,9 +103,9 @@ sub _list {
     limit    => $self->limit || 10,
     page     => $self->page || 1,
     state    => $self->state || [],
-    job_name => $self->job_name || q{},
   };
   $params->{filter} = "worker:" . $self->worker if ($self->worker);
+  $params->{filter} = "name:" . $self->job_name if ($self->job_name);
   $params->{show_only_latest_results} = 1 if $self->latest;
 
   my $data = $kr->get_json( path => 'jobs/list' , params => $params );
