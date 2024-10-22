@@ -19,12 +19,12 @@ use Kanku::Task::Local;
 use Kanku::Job;
 use Kanku::Airbrake;
 use Kanku::Util;
+use Kanku::Helpers;
 
 with 'Kanku::Roles::Logger';
 with 'Kanku::Roles::ModLoader';
 with 'Kanku::Roles::DB';
 with 'Kanku::Roles::Daemon';
-with 'Kanku::Roles::Helpers';
 
 has child_pids            => (is=>'rw', isa => 'ArrayRef'
                               , default => sub {[]});

@@ -73,7 +73,6 @@ sub gui_config {
 }
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
-with 'Kanku::Roles::Helpers';
 
 has [qw/
       domain_name           vm_image_file

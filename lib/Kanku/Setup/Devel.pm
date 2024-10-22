@@ -7,7 +7,7 @@ use English qw/-no_match_vars/;
 
 use Kanku::Util;
 use Kanku::File;
-use Kanku::Roles::Helpers;
+use Kanku::Helpers;
 
 with 'Kanku::Setup::Roles::Common';
 with 'Kanku::Roles::Logger';

@@ -10,9 +10,8 @@ use Data::Dumper;
 use JSON::XS;
 use YAML::PP;
 
+use Kanku::Helpers;
 use Kanku::Config::Defaults;
-
-with 'Kanku::Roles::Helpers';
 
 has include_path => (
   is      => 'rw',

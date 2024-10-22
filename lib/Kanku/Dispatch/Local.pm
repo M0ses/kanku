@@ -23,9 +23,9 @@ use Try::Tiny;
 with 'Kanku::Roles::Logger';
 with 'Kanku::Roles::Dispatcher';
 with 'Kanku::Roles::Daemon';
-with 'Kanku::Roles::Helpers';
 
 use Kanku::Task;
+use Kanku::Helpers;
 
 has 'max_processes' => (is=>'rw',isa=>'Int',default=>1);
 

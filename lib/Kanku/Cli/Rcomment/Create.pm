@@ -10,7 +10,6 @@ extends qw(Kanku::Cli);
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
-with 'Kanku::Roles::Helpers';
 
 use Term::ReadKey;
 use POSIX;

@@ -38,9 +38,9 @@ use JSON::XS;
 use UUID ':all';
 use Try::Tiny;
 use Carp qw/longmess/;
+use Kanku::Helpers;
 
 with 'Kanku::Roles::Logger';
-with 'Kanku::Roles::Helpers';
 
 =head1 ATTRIBUTES
 
