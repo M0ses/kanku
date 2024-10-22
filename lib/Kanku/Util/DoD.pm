@@ -25,11 +25,11 @@ use Net::OBS::Client::Project;
 use Net::OBS::Client::Package;
 use Kanku::Util::CurlHttpDownload;
 use Kanku::Config;
+use Kanku::Helpers;
 use Kanku::Config::Defaults;
 use Carp qw/confess croak/;
 
 with 'Kanku::Roles::Logger';
-with 'Kanku::Roles::Helpers';
 
 has project => (
   is      => 'rw',
@@ -135,7 +135,7 @@ sub _build_get_image_file_from_url {
     %{$self->auth_config},
   );
   my $binlist = $build_results->binarylist();
-  $logger->trace("\$binlist = ".$self->dump_it($binlist));
+  $logger->trace("\$binlist = ".Kanku::Helpers->dump_it($binlist));
   my $record = $self->get_image_file_from_url_cb->($self,$binlist);
   if ( $record ) {
     $record->{url} = $self->download_url .$record->{prefix}. $record->{filename};
@@ -143,7 +143,7 @@ sub _build_get_image_file_from_url {
     $record->{obs_username} = $build_results->user;
     $record->{obs_password} = $build_results->pass;
   }
-  $self->logger->trace("\$record = ".$self->dump_it($record));
+  $self->logger->trace("\$record = ".Kanku::Helpers->dump_it($record));
   return $record || {};
 }
 
@@ -180,7 +180,7 @@ sub _build_auth_config {
   } else {
     $cfg->{use_oscrc} = $self->use_oscrc;
   }
-  $self->logger->debug("auth_config: ".$self->dump_it($cfg));
+  $self->logger->debug("auth_config: ".Kanku::Helpers->dump_it($cfg));
   return $cfg;
 }
 

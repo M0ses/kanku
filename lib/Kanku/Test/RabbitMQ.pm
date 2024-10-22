@@ -4,8 +4,7 @@ use Moose;
 use Net::AMQP::RabbitMQ;
 use JSON::MaybeXS;
 use Term::ANSIColor;
-
-with 'Kanku::Roles::Helpers';
+use Kanku::Helpers;
 
 has config => (
    is     => 'rw',
@@ -170,7 +169,7 @@ sub send {
   }
   my $routing_key = $self->config->{routing_key} || '#';
 
-  $logger->info($self->dump_it($notification));
+  $logger->info(Kanku::Helpers->dump_it($notification));
 
   my $msg = encode_json($notification);
 

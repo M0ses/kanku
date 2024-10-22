@@ -27,8 +27,8 @@ sub _build_include_path {
 	     'views_dir',
 	   );
   return [
-    path($self->my_home, qw/.config kanku views cli/)->stringify,
-    path($self->my_home, qw/.kanku views cli/)->stringify,
+    path(Kanku::Helpers->my_home, qw/.config kanku views cli/)->stringify,
+    path(Kanku::Helpers->my_home, qw/.kanku views cli/)->stringify,
     path($vd, 'cli')->stringify,
   ];
 }

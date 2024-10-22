@@ -1,6 +1,4 @@
-package Kanku::Roles::Helpers;
-
-use Moose::Role;
+package Kanku::Helpers;
 
 use Carp;
 use User::pwent;

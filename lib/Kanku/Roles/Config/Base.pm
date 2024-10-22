@@ -19,10 +19,10 @@ package Kanku::Roles::Config::Base;
 use Moose::Role;
 use Carp qw/longmess cluck/;
 use Path::Tiny;
+use Kanku::Helpers;
 use Kanku::YAML;
 
 with 'Kanku::Roles::Logger';
-with 'Kanku::Roles::Helpers';
 
 requires "file";
 requires "job_config";
@@ -46,7 +46,7 @@ has cf => (
 );
 sub _build_cf {
   my ($self) = @_;
-  my $home  = $self->my_home;
+  my $home  = Kanku::Helpers->my_home;
   my @search_path = (
     "$home/.config/kanku/",
     "$home/.kanku/",

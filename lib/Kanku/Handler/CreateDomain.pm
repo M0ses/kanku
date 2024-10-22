@@ -30,6 +30,7 @@ use Kanku::Util::VM;
 use Kanku::Util::VM::Image;
 use Kanku::Util::IPTables;
 use Kanku::TypeConstraints;
+use Kanku::Helpers;
 
 sub gui_config {
   [
@@ -296,7 +297,7 @@ sub execute {
     $logger->debug("Using default network_bridge : '".$self->network_bridge."'");
   }
 
-  $logger->debug("additional_disks:".$self->dump_it($self->additional_disks));
+  $logger->debug("additional_disks:".Kanku::Helpers->dump_it($self->additional_disks));
 
 
   my $final_file = ($ctx->{tmp_image_file} ) ? path($ctx->{tmp_image_file})->basename : $self->vm_image_file;

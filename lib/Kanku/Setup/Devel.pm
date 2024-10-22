@@ -7,10 +7,10 @@ use English qw/-no_match_vars/;
 
 use Kanku::Util;
 use Kanku::File;
+use Kanku::Roles::Helpers;
 
 with 'Kanku::Setup::Roles::Common';
 with 'Kanku::Roles::Logger';
-with 'Kanku::Roles::Helpers';
 
 has homedir => (
     isa           => 'Str',
@@ -77,7 +77,7 @@ sub setup {
   $self->_create_default_network;
 
   $self->_setup_nested_kvm;
-  my $home  = $self->users_home($self->user);
+  my $home  = Kanku::Helpers->users_home($self->user);
   my $gconf = "$home/.kanku/kanku-config.yml";
 
   $self->_backup_config_file($gconf);

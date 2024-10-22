@@ -29,13 +29,12 @@ Use the URL http://localhost:5000
 
 use Carp;
 use Path::Tiny;
-
-with 'Kanku::Roles::Helpers';
+use Kanku::Helpers;
 
 sub run {
   my ($self)    = @_;
   my $logger    = $self->logger;
-  my $hd        = $self->my_home;
+  my $hd        = Kanku::Helpers->my_home;
   my $pid_file  = path($hd, qw/.kanku ui.pid/);
 
   if ($pid_file->is_file) {

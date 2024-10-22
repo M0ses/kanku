@@ -109,7 +109,7 @@ sub connect {
 
   $SIG{PIPE} = 'IGNORE';
 
-  $logger->debug(__PACKAGE__."->connect to opts:".$self->dump_it(\%opts));
+  $logger->debug(__PACKAGE__."->connect to opts:".Kanku::Helpers->dump_it(\%opts));
   $self->queue(Net::AMQP::RabbitMQ->new());
 
   my @connect_opts = (
@@ -126,7 +126,7 @@ sub connect {
     }
   );
 
-  $logger->debug("Trying to connect to rabbitmq with the following options: ".$self->dump_it(\@connect_opts));
+  $logger->debug("Trying to connect to rabbitmq with the following options: ".Kanku::Helpers->dump_it(\@connect_opts));
 
   my $connect_success = 0;
   while (! $connect_success ) {
@@ -188,7 +188,7 @@ sub recv {
   my $msg;
   try {
     $msg = $self->queue->recv(@opts);
-    $logger->trace("Recieved data:".$self->dump_it($msg)) if $msg;
+    $logger->trace("Recieved data:".Kanku::Helpers->dump_it($msg)) if $msg;
   } catch {
     $logger->error('Error while receiving message on queue "'.$self->queue_name.'/'.$self->routing_key.'": '.$_);
     $self->reconnect();
@@ -212,8 +212,8 @@ sub publish {
   $logger->trace("Publishing for message:");
   $logger->trace("  channel    : '" . $self->channel        . "'");
   $logger->trace("  routing_key: '" . $self->routing_key    . "'");
-  $logger->trace("  data       : '" . $self->dump_it($data) . "'");
-  $logger->trace("  opts       : '" . $self->dump_it($opts) . "'");
+  $logger->trace("  data       : '" . Kanku::Helpers->dump_it($data) . "'");
+  $logger->trace("  opts       : '" . Kanku::Helpers->dump_it($opts) . "'");
 
   try {
     my $ans = $self->queue->publish($self->channel, $self->routing_key, $data, $opts);

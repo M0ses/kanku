@@ -25,12 +25,12 @@ Kanku::Task - single task which executes a Handler
 use Moose;
 with 'Kanku::Roles::Logger';
 with 'Kanku::Roles::ModLoader';
-with 'Kanku::Roles::Helpers';
 
 use Kanku::Config;
 use Kanku::Job;
 use Kanku::JobList;
 use Kanku::Task::Local;
+use Kanku::Helpers;
 use JSON::XS;
 use Try::Tiny;
 
@@ -141,7 +141,7 @@ sub run {
     }
 
     my $res = $tr->run();
-    $logger->trace("Got result from task:\n".$self->dump_it($res));
+    $logger->trace("Got result from task:\n".Kanku::Helpers->dump_it($res));
     $state  = $res->{state};
     if ($state eq 'failed') {
       $result = encode_json({error_message=>$res->{error_message}});
@@ -153,7 +153,7 @@ sub run {
     my $e = $_;
     $e = $e->stringify if (ref($e) eq 'Sys::Virt::Error');
     if (ref $e) {
-      $logger->error($self->dump_it($e));
+      $logger->error(Kanku::Helpers->dump_it($e));
     } else {
       $logger->error($e);
     }

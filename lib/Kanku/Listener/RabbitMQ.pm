@@ -5,9 +5,9 @@ use Net::AMQP::RabbitMQ;
 use JSON::XS;
 use Try::Tiny;
 use Kanku::Config;
+use Kanku::Helpers;
 
 with 'Kanku::Roles::Logger';
-with 'Kanku::Roles::Helpers';
 
 has config => ( is => 'rw', isa => 'HashRef');
 
@@ -51,7 +51,7 @@ sub connect_listener {
     }
   ]);
 
-  $logger->debug('Starting listner with the following options: '.$self->dump_it($self->connect_opts));
+  $logger->debug('Starting listner with the following options: '.Kanku::Helpers->dump_it($self->connect_opts));
 
   $mq->connect(@{$self->connect_opts});
 

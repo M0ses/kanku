@@ -30,6 +30,7 @@ use JSON::XS;
 use POSIX;
 use Try::Tiny;
 use Carp;
+use Kanku::Helpers;
 use Kanku::RabbitMQ;
 use Kanku::Task;
 use Kanku::Task::Local;
@@ -39,7 +40,6 @@ use Kanku::Task::RemoteAll;
 with 'Kanku::Roles::Dispatcher';
 with 'Kanku::Roles::ModLoader';
 with 'Kanku::Roles::Daemon';
-with 'Kanku::Roles::Helpers';
 
 has kmq => (is=>'rw',isa=>'Object');
 
@@ -96,11 +96,11 @@ sub run {
       my $msg = $rmq->recv(1000);
       if ($msg ) {
 	  my $data;
-	  $logger->trace("got message: ".$self->dump_it($msg));
+	  $logger->trace("got message: ".Kanku::Helpers->dump_it($msg));
 	  my $body = $msg->{body};
 	  try {
 	    $data = decode_json($body);
-	    $logger->trace("Received data for dispatcher: ".$self->dump_it($data));
+	    $logger->trace("Received data for dispatcher: ".Kanku::Helpers->dump_it($data));
 	    if ($data->{action} eq "worker_heartbeat") {
 	      $logger->trace("Received heartbeat from worker: $data->{hostname} sent at $data->{current_time}");
 	      delete $data->{action};
@@ -124,7 +124,7 @@ sub run {
 	   info        => encode_json($data),
 	});
       }
-      $logger->trace('Active Workers('.time().'): ' . $self->dump_it($self->active_workers));
+      $logger->trace('Active Workers('.time().'): ' . Kanku::Helpers->dump_it($self->active_workers));
       last if ( $self->detect_shutdown );
     }
   }
@@ -141,7 +141,7 @@ sub run {
         try {
           my $res = $self->run_job($job);
           $logger->debug("Got result from run_job");
-          $logger->trace($self->dump_it($res));
+          $logger->trace(Kanku::Helpers->dump_it($res));
         }
         catch {
           $logger->error("raised exception");
@@ -242,7 +242,7 @@ sub run_job {
     sleep 1;
   }
 
-  $logger->trace("List of all applications:\n" . $self->dump_it($applications));
+  $logger->trace("List of all applications:\n" . Kanku::Helpers->dump_it($applications));
 
   # pa = prefered_application
   my ($pa, $declined_applications) = $self->score_applications($applications);
@@ -264,8 +264,8 @@ sub run_job {
   $self->start_job($job);
 
   $job->workerinfo($pa->{worker_fqhn}.":".$pa->{worker_pid}.":".$self->job_remote_routing_key);
-  $logger->trace("Result of job offer:\n".$self->dump_it($result));
-  $logger->trace("  -- args:\n".$self->dump_it($args));
+  $logger->trace("Result of job offer:\n".Kanku::Helpers->dump_it($result));
+  $logger->trace("  -- args:\n".Kanku::Helpers->dump_it($args));
 
   my $last_task;
 
@@ -337,7 +337,7 @@ sub run_task {
   my $un = $job->trigger_user || "";
   $logger->debug("--- trigger_user $un");
   $defaults{final_args}->{domain_name} =~ s{^($un-)?}{$un-}smx if ($un && $defaults{final_args}->{domain_name});
-  $logger->trace('--- final_args = '.$self->dump_it($defaults{final_args}));
+  $logger->trace('--- final_args = '.Kanku::Helpers->dump_it($defaults{final_args}));
 
   my $task = Kanku::Task->new(
     %defaults,
@@ -406,7 +406,7 @@ sub send_job_offer {
   my $logger = $self->logger;
 
   $logger->debug("Offering job for prefered_application $prefered_application->{worker_fqhn}");
-  $logger->trace("\$prefered_application = ".$self->dump_it($prefered_application));
+  $logger->trace("\$prefered_application = ".Kanku::Helpers->dump_it($prefered_application));
 
   $rmq->publish(
     $prefered_application->{answer_key},
@@ -467,7 +467,7 @@ sub advertise_job {
 
   while(! %$all_applications ) {
 
-    $logger->debug('Publishing application (routing key: kanku.to_all_workers): '.$self->dump_it($data));
+    $logger->debug('Publishing application (routing key: kanku.to_all_workers): '.Kanku::Helpers->dump_it($data));
 
     $rmq->publish(
       'kanku.to_all_workers',
@@ -483,7 +483,7 @@ sub advertise_job {
     while ( my $msg = $rmq->recv(1000) ) {
       if ($msg ) {
           my $data;
-          $logger->trace("got message:\n".$self->dump_it($msg));
+          $logger->trace("got message:\n".Kanku::Helpers->dump_it($msg));
           my $body = $msg->{body};
           try {
             $data = decode_json($body);

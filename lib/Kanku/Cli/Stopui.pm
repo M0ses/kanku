@@ -25,7 +25,7 @@ extends qw(Kanku::Cli);
 use Try::Tiny;
 use Path::Tiny;
 
-with 'Kanku::Roles::Helpers';
+use Kanku::Helpers;
 
 command_short_description  'stop local webserver';
 
@@ -37,7 +37,7 @@ This command stops the local webserver, providing the ui
 sub run {
   my ($self)    = @_;
   my $logger    = $self->logger;
-  my $hd        = $self->my_home;
+  my $hd        = Kanku::Helpers->my_home;
   my $pid_file  = "$hd/.kanku/ui.pid";
   my $ret       = 0;
 

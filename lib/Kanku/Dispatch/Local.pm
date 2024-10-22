@@ -47,7 +47,7 @@ sub run_job {
 
   return 1 if (! $args);
 
-  $logger->trace("  -- args: ".$self->dump_it($args));
+  $logger->trace("  -- args: ".Kanku::Helpers->dump_it($args));
 
   my $task;
 
@@ -61,7 +61,7 @@ sub run_job {
     my $un = $job->trigger_user;
     $logger->debug("--- trigger_user $un");
     $defaults{final_args}->{domain_name} =~ s{^($un-)?}{$un-}smx if ($un && exists $defaults{final_args}->{domain_name});
-    $logger->debug('--- final_args'.$self->dump_it($defaults{final_args}));
+    $logger->debug('--- final_args'.Kanku::Helpers->dump_it($defaults{final_args}));
 
     try {
       my $start = time;
