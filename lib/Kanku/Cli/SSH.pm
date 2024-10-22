@@ -43,12 +43,14 @@ option 'user' => (
   is            => 'rw',
   cmd_aliases   => 'u',
   documentation => 'Login user to use for ssh',
+  lazy          => 1,
   builder       => '_build_user',
 );
 
 sub _build_user {
   my ($self) = @_;
-  return $self->kankufile_config->{ssh_user} || 'kanku';
+  my $u = $self->kankufile_config->{ssh_user} || $self->kankufile_config->{login_user} || 'kanku';
+  return $u
 }
 
 sub _build_domain_name {
