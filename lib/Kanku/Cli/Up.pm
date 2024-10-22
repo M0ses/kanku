@@ -123,8 +123,17 @@ sub run {
 
   my $jobs = [];
 
-  if ($self->job_group && ref($config->{job_groups}->{$self->job_group}) eq 'ARRAY') {
-    $jobs = $config->{job_groups}->{$self->job_group};
+  if ($self->job_group) {
+    if (ref($config->{job_groups}->{$self->job_group}) eq 'ARRAY') {
+      $jobs = $config->{job_groups}->{$self->job_group};
+    } else {
+      $logger->error(
+	sprintf("No job_group with name '%s' found in your KankuFile '%s'",
+	  $self->job_group,
+	  $self->file,
+	)
+      );
+    }
   } elsif (ref($self->job_name) eq 'ARRAY') {
     for (my $i=0; $i <= @{$self->job_name}; $i++) {
       push @$jobs, $self->job_name->[$i+1] if $self->job_name->[$i+1];
