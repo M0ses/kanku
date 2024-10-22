@@ -180,17 +180,23 @@ sub execute {
   my $uri  = URI->new($provider->{url});
   my $path = $uri->path;
 
-  my $code = 300;
+  my $code = 0;
   my $durl = $provider->{url};
 
   $logger->debug("Download URL for libvirt provider: $durl");
 
-  while ($code < 400) {
-    $res  = $ua->head($durl);
+  my $tua     = LWP::UserAgent->new(requests_redirectable=>[]);
+  while ($code < 400 ) {
+    $logger->debug("Fetching URL: '$durl");
+    $res  = $tua->head($durl);
+    if ($res->code == 501) {
+      $logger->warn("Got 501, trying GET method on '$durl'");
+      $res  = $tua->get($durl);
+    }
     $code = $res->code;
+    $logger->debug("Got $code on '$durl'");
     last if $code == 200;
     $durl = $res->header('Location');
-    $logger->debug("new location: $durl");
   }
 
   my $cache_dir = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
@@ -201,6 +207,7 @@ sub execute {
 
   my @parts    = split('/', $dpath);
   my $dfile    = pop @parts;
+  $dfile       = substr($dfile, 0, 31);
   my $box_file = $self->box;
   $box_file    =~ s#/#--#g;
   $cache_dir   =~ s#/+$##;
@@ -215,13 +222,24 @@ sub execute {
     file => $outfile,
   );
 
-  my $tar = Archive::Tar->new($outfile);
-  my @box_files = $tar->get_files('box.img');
+  $logger->debug("Extracting box.img from $outfile");
+
+  my @box_files = `tar -tf $outfile box.img`;
   croak('Unknown vagrant box file format') if @box_files > 1 || !@box_files;
-  my $qcow2 = $outfile;
-  $qcow2 =~ s#.tar.gz$#.qcow2#;
-  $box_files[0]->extract($qcow2);
-  $ctx->{vm_image_file} = $qcow2;
+  my $box = $outfile;
+  $box =~ s#.tar.gz$#.unknown#;
+  `tar -Oxf $outfile box.img > $box`;
+  my $info = Kanku::Util::VM::Image->new()->get_image_info($box);
+  my $format = $info->{format} ||
+    croak(
+      "Could not determine box image format.\n" .
+      "Check manually: 'qemu-img info $box'"
+    )
+  ;
+  my $tbox = path($box);
+  $box =~ s#.unknown$#.$format#;
+  $tbox->move($box);
+  $ctx->{vm_image_file} = $box;
   $ctx->{image_type}    = 'vagrant';
 
   $self->update_history;
@@ -229,7 +247,7 @@ sub execute {
   return {
     code    => 0,
     state   => 'succeed',
-    message => "Downloaded $durl -> $outfile",
+    message => "Downloaded $durl ->\n $outfile ->\n  $box",
   };
 }
 
