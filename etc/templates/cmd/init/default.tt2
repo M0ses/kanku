@@ -47,3 +47,7 @@ jobs:
     options:
       commands:
         - echo "Just for testing ssh connection"
+
+job_groups:
+  all:
+    - [% default_job %]

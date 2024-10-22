@@ -52,6 +52,13 @@ option 'job_name' => (
     documentation => 'jobs to run',
 );
 
+option 'job_group' => (
+    isa           => 'Str',
+    is            => 'rw',
+    cmd_aliases   => 'jg',
+    documentation => 'job group to run',
+);
+
 option 'pool' => (
     isa           => 'Str',
     is            => 'rw',
@@ -116,8 +123,8 @@ sub run {
 
   my $jobs = [];
 
-  if ($self->job_name && ($self->job_name->[1]||q{}) eq '__ALL__' && ref($config->{jobs}->{__ALL__}) eq 'ARRAY') {
-    $jobs = $config->{jobs}->{__ALL__};
+  if ($self->job_group && ref($config->{job_groups}->{$self->job_group}) eq 'ARRAY') {
+    $jobs = $config->{job_groups}->{$self->job_group};
   } elsif (ref($self->job_name) eq 'ARRAY') {
     for (my $i=0; $i <= @{$self->job_name}; $i++) {
       push @$jobs, $self->job_name->[$i+1] if $self->job_name->[$i+1];
