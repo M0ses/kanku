@@ -1,1 +1,1 @@
-ssh[% agent_forward ? ' -A' : '' %][% x11_forward ? ' -X' : '' %][% term || ''  %] -l [% user %] -p [% port %] -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -q [% ip %] [% execute ? '"' _ execute _ '"' : '' %]
+ssh[% agent_forward ? ' -A' : '' %][% x11_forward ? ' -X' : '' %][% term || ''  %] -l [% user %] -p [% port %] -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null [% ip %] [% execute ? '"' _ execute _ '"' : '' %]

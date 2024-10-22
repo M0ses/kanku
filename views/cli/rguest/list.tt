@@ -2,50 +2,50 @@
 ##### Guest List:
 [% FOREACH guest IN guest_list.keys.sort %]
 ================================================================================
-[% IF guest_list.$guest.state == 1 %]
+[% IF guest_list.$guest.state == 1 -%]
 [% guest_list.$guest.domain_name | color 'green' +%] ([% guest_list.$guest.host %])
-[% ELSE %]
+[% ELSE -%]
 [% guest_list.$guest.domain_name | color 'yellow' +%] ([% guest_list.$guest.host %])
-[% END %]
-[% IF guest_list.$guest.forwarded_ports.size > 0 %]
+[% END -%]
+[% IF guest_list.$guest.forwarded_ports.size > 0 -%]
   FORWARDED PORTS:
-[% FOREACH ip IN guest_list.$guest.forwarded_ports.keys %]
-    [% ip +%]:
-[% FOREACH port IN guest_list.$guest.forwarded_ports.$ip.keys.sort %]
+[% FOREACH ip IN guest_list.$guest.forwarded_ports.keys -%]
+    [% ip %]:
+[% FOREACH port IN guest_list.$guest.forwarded_ports.$ip.keys.sort -%]
 [% IF
      guest_list.$guest.forwarded_ports.$ip.$port.0 == '443'
   || guest_list.$guest.forwarded_ports.$ip.$port.1 == 'https'
-%]
-          https://[% ip %]:[% port +%]
+-%]
+          https://[% ip %]:[% port %]
 [% ELSIF
      guest_list.$guest.forwarded_ports.$ip.$port.0 == '80'
   || guest_list.$guest.forwarded_ports.$ip.$port.1 == 'http'
-%]
-          http://[% ip %]:[% port +%]
+-%]
+          http://[% ip %]:[% port %]
 [% ELSIF
      guest_list.$guest.forwarded_ports.$ip.$port.0 == '22'
   || guest_list.$guest.forwarded_ports.$ip.$port.1 == 'ssh'
-%]
+-%]
           [% INCLUDE 'ssh.tt' %]
-[% ELSE %]
+[% ELSE -%]
           Unkown port forwarding: [% port %] --> [% guest_list.$guest.forwarded_ports.$ip.$port.0 +%]
-[% END %]
-[% END %]
-[% END %]
-[% ELSE %]
+[% END -%]
+[% END -%]
+[% END -%]
+[% ELSE -%]
 [% "No forwarded ports found" | color 'yellow' +%]
-[% END %]
+[% END -%]
 
-[% IF guest_list.$guest.nics.size > 0 %]
+[% IF guest_list.$guest.nics.size > 0 -%]
   Network Interfaces:
-[% FOREACH nic IN guest_list.$guest.nics %]
+[% FOREACH nic IN guest_list.$guest.nics -%]
     * [% nic.name +%]
-[% FOREACH addr IN nic.addrs %]
+[% FOREACH addr IN nic.addrs -%]
       * [% addr.addr +%] / [% addr.prefix +%]
-[% END %]
-[% END %]
-[% ELSE %]
+[% END -%]
+[% END -%]
+[% ELSE -%]
 [% "No network interfaces found" | color 'yellow' +%]
-[% END %]
+[% END -%]
 
-[% END %]
+[% END -%]
