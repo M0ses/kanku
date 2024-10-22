@@ -19,7 +19,7 @@ package Kanku::Handler::PrepareSSH;
 use Moose;
 use Kanku::Util::VM::Console;
 use Kanku::Config;
-use Path::Tiny;
+use Path::Tiny qw/path tempfile/;
 
 sub gui_config {
   [
@@ -124,14 +124,25 @@ sub execute {
 
   if (($ctx->{image_type}||q{}) eq 'vagrant') {
     $self->username($self->login_user);
-    $self->password($self->login_pass);
-    $self->auth_type('password');
+    my $key = Kanku::Config::Defaults->get('Kanku::Handler::Vagrant', 'vagrant_privkey');
+    my $tmpdir = path($::ENV{HOME}, '.ssh');
+    $tmpdir->mkdir unless $tmpdir->exists;
+    my $um = umask 0077;
+    my $tpriv = tempfile(DIR => $tmpdir);
+    my $tpub  = path("$tpriv.pub");
+    $self->privatekey_path($tpriv->absolute->stringify);
+    $self->publickey_path($tpub->absolute->stringify);
+    $self->auth_type('publickey');
+    $tpriv->spew($key);
+    `ssh-keygen -f $tpriv -y > $tpub`;
+    umask $um;
     $self->connect();
     $self->exec_command(
       "cat <<EOF > \$HOME/.ssh/authorized_keys\n" .
       "$str\n" .
       "EOF\n"
     );
+    $tpub->remove;
   } else {
     my $default_user = 'kanku';
     my $con = Kanku::Util::VM::Console->new(

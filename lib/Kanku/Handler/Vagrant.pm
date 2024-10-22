@@ -152,16 +152,30 @@ sub execute {
   my $ctx    = $self->job()->context();
   my $logger = $self->logger;
 
+  if ( $self->offline ) {
+    return $self->get_from_history();
+  }
+
+
   # FIXME: offline needs to be implemented
   my $ua     = LWP::UserAgent->new();
   my $url    = $self->base_url.'/'.$self->box;
-  my $res    = $ua->get($url, 'Accept' => 'application/json');
+  $logger->debug("Searching for libvirt provider in $url");
 
+  my $res    = $ua->get($url, 'Accept' => 'application/json');
   croak($res->status_line) unless $res->code == 200;
 
   my $json = decode_json($res->content);
+
   my $box_data = $self->_get_data_by_version($json);
   my $provider = $self->_get_provider('libvirt', $box_data);
+
+  if (!$provider) {
+    croak(
+      "Could not find libvirt provider for box.".
+      " Please check the following url! $url"
+    );
+  }
 
   my $uri  = URI->new($provider->{url});
   my $path = $uri->path;
@@ -169,17 +183,22 @@ sub execute {
   my $code = 300;
   my $durl = $provider->{url};
 
+  $logger->debug("Download URL for libvirt provider: $durl");
+
   while ($code < 400) {
     $res  = $ua->head($durl);
     $code = $res->code;
-    $durl = $res->header('Location');
     last if $code == 200;
+    $durl = $res->header('Location');
+    $logger->debug("new location: $durl");
   }
 
   my $cache_dir = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
   path($cache_dir)->mkdir;
+
   my $duri     = URI->new($durl);
   my $dpath    = $duri->path;
+
   my @parts    = split('/', $dpath);
   my $dfile    = pop @parts;
   my $box_file = $self->box;
@@ -205,35 +224,31 @@ sub execute {
   $ctx->{vm_image_file} = $qcow2;
   $ctx->{image_type}    = 'vagrant';
 
-  return {
-    state => 'succeed',
-    message => "Downloaded $durl -> $outfile",
-  };
+  $self->update_history;
+
   return {
     code    => 0,
     state   => 'succeed',
-    message => 'FIXME: message required',
+    message => "Downloaded $durl -> $outfile",
   };
 }
 
 sub update_history {
   my ($self) = @_;
 
-# FIXME: needs to be implemented
-#
-#  my $rs = $self->schema->resultset('ObsCheckHistory')->update_or_create(
-#    {
-#      obsurl      => $self->obsurl,
-#      project     => $self->project,
-#      package     => $self->package,
-#      check_time  => time(),
-#      vm_image_url=> $self->job->context->{vm_image_url},
-#    },
-#    {
-#      unique_obscheck => [$self->obsurl,$self->project,$self->package],
-#    },
-#  );
-#
+  my $rs = $self->schema->resultset('ObsCheckHistory')->update_or_create(
+    {
+      obsurl      => $self->base_url,
+      project     => $self->box,
+      package     => $self->box_version,
+      check_time  => time(),
+      vm_image_url=> $self->job->context->{vm_image_url},
+    },
+    {
+      unique_obscheck => [$self->base_url, $self->box, $self->box_version],
+    },
+  );
+
   return;
 }
 
@@ -241,19 +256,18 @@ sub get_from_history {
   my $self = shift;
   my $ctx  = $self->job->context;
 
-# FIXME: needs to be implemented
-#  my $rs = $self->schema->resultset('ObsCheckHistory')->find(
-#    {
-#      obsurl      => $self->obsurl,
-#      project     => $self->project,
-#      package     => $self->package,
-#    },
-#  );
-#
-#  croak('Could not found last entry in database') if (! $rs);
-#
-#  $ctx->{vm_image_url} = $rs->vm_image_url;
-#
+  my $rs = $self->schema->resultset('ObsCheckHistory')->find(
+    {
+      obsurl      => $self->base_url,
+      project     => $self->box,
+      package     => $self->box_version,
+    },
+  );
+
+  croak('Could not found last entry in database') if (! $rs);
+
+  $ctx->{vm_image_url} = $rs->vm_image_url;
+
 
   return {
     code    => 0,

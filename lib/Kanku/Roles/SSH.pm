@@ -20,6 +20,7 @@ use Moose::Role;
 
 use Carp;
 use Path::Tiny;
+use Data::Dumper;
 use Libssh::Session q(:all);
 
 use Kanku::Config::Defaults;
@@ -167,25 +168,35 @@ sub connect {
 
   my $ssh;
   my $key_auth = ( $self->auth_type eq 'agent') ? 1 : 0;
+  my $lv_str2const = {
+    SSH_LOG_NOLOG     => SSH_LOG_NOLOG,
+    SSH_LOG_WARNING   => SSH_LOG_WARNING,
+    SSH_LOG_PROTOCOL  => SSH_LOG_PROTOCOL,
+    SSH_LOG_PACKET    => SSH_LOG_PACKET,
+    SSH_LOG_FUNCTIONS => SSH_LOG_FUNCTIONS,
+  };
+  my $lv = Kanku::Config::Defaults->get(
+    'Kanku::Roles::SSH',
+    'logverbosity'
+  );
   my %options = (
       Host => $ip,
       Port => $port,
       User => $self->username,
-      LogVerbosity => Kanku::Config::Defaults->get(
-	'Kanku::Roles::SSH', 'logverbosity'),
+      LogVerbosity => $lv_str2const->{$lv} || 0,
     );
 
   $logger->debug("Connecting to $ip (Timeout: $timeout)!");
 
   if ( $self->auth_type eq 'publickey') {
     my $privkey  = path($self->privatekey_path);
-    my $identity = $privkey->basename;
+    my $identity = $privkey->absolute->stringify;
     my $sshdir   = $privkey->dirname;
     $options{Identity} = $identity if $identity;
     $options{SshDir}   = $sshdir   if $sshdir;
     $key_auth=1;
   }
-
+  $logger->debug("Options: ".Dumper(\%options));
   while ($cc < $timeout) {
     $ssh = Libssh::Session->new(SkipKeyProblem=>1);
     $ssh->options(%options);
