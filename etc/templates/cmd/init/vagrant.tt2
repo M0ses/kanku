@@ -16,6 +16,7 @@ jobs:
       vcpu: [% domain_cpus %]
       use_9p: 1
       mnt_dir_9p: /vagrant
+      template: with-spice.tt2
   -
     use_module: Kanku::Handler::PrepareSSH
   -
