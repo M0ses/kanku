@@ -24,6 +24,7 @@ extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Schema';
 
+use Path::Tiny;
 use Kanku::Setup::Server::Distributed;
 
 command_short_description  'Kanku CA management.';
