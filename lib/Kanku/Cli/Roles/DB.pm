@@ -68,7 +68,7 @@ option 'homedir' => (
   builder       => '_build_homedir',
 );
 sub _build_homedir {
-      return $_[0]->my_home;
+  return Kanku::Helpers->my_home;
 }
 
 option 'share_dir' => (

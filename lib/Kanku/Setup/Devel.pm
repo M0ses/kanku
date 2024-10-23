@@ -19,7 +19,7 @@ has homedir => (
     builder       => '_build_homedir',
 );
 sub _build_homedir {
-  return $_[0]->users_home($_[0]->user);
+  return Kanku::Helpers->users_home($_[0]->user);
 }
 
 has _dbfile => (
