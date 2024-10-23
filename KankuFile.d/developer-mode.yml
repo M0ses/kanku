@@ -53,14 +53,10 @@
         - make -C /tmp/kanku install configs
         - "systemctl stop libvirtd;perl -p -i -e 's/192.168.122/192.168.128/g' /etc/libvirt/qemu/networks/default.xml ; systemctl start libvirtd"
         - kanku setup --traceback --devel --user kanku
+        - 'echo "kanku ALL=(ALL:ALL) NOPASSWD: ALL" > /usr/etc/sudoers.d/kanku'
   -
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       username: kanku
       commands:
-        - ssh-keygen -t rsa -b 4086 -N '' -f /home/kanku/.ssh/id_rsa
-        - mkdir prj
-        - cp /tmp/kanku/KankuFile.examples/KankuFile.simple prj/KankuFile
-        - kanku help
-        #- chmod 755 /home/kanku
-        - eval `ssh-agent` && ssh-add && cd prj && kanku up > /tmp/kanku-up.log 2>&1
+        - prove /tmp/kanku/t/*.td

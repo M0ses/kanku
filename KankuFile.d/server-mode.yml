@@ -18,6 +18,8 @@
     options:
       disk_size: 100G
   -
+    use_module: Kanku::Handler::RemoveDomain
+  -
     use_module: Kanku::Handler::CreateDomain
     options:
       memory: 6G
