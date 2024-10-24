@@ -135,7 +135,7 @@ sub setup {
 
   $self->logger->fatal("PLEASE REMEMBER YOUR CA PASSWORD: ".$self->ca_pass) if $self->ca_pass;
 
-  return;
+  return 0;
 }
 
 sub _create_ca {

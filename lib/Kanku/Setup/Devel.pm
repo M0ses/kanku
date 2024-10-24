@@ -106,7 +106,7 @@ sub setup {
 
   $logger->info('Developer mode setup successfully finished!');
   $logger->info('Please reboot to make sure, libvirtd is coming up properly');
-  return;
+  return 0;
 }
 
 sub _create_osc_rc {
