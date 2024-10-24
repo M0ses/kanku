@@ -26,7 +26,6 @@ use Carp;
 use JSON::XS;
 use Try::Tiny;
 use Path::Tiny;
-use Archive::Tar;
 
 use Kanku::Config::Defaults;
 use Net::OBS::LWP::UserAgent;
@@ -228,7 +227,11 @@ sub execute {
   croak('Unknown vagrant box file format') if @box_files > 1 || !@box_files;
   my $box = $outfile;
   $box =~ s#.tar.gz$#.unknown#;
-  `tar -Oxf $outfile box.img > $box`;
+  # If tar fails to extract 
+  # (e.g. with the error messag "tar: invalid tar magic"
+  # then retry with bsdtar.
+  # E.g. OBS generates tar files which only can be extracted with bsdtar
+  `tar -Oxf $outfile box.img > $box || bsdtar -Oxf $outfile box.img > $box`;
   my $info = Kanku::Util::VM::Image->new()->get_image_info($box);
   my $format = $info->{format} ||
     croak(
