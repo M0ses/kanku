@@ -1,0 +1,18 @@
+[% USE Filter::ANSIColor 'color' %]
+[% "Summary:" | color 'bold' %] [% summary %]
+
+[% "Description:" | color 'bold' %]
+
+[% description %]
+
+
+[% "Domain Name :" | color 'bold' %] [% domain_name %]
+[% "Default Job :" | color 'bold' %] [% default_job %]
+[% "Login User  :" | color 'bold' %] [% login_user %]
+
+[% "Jobs:" | color 'bold' %]
+
+[% FOREACH job IN jobs.keys -%]
+  - [% job %]
+[% END -%]
+
