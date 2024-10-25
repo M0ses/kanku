@@ -19,7 +19,8 @@ package Kanku::Cli::Urlwrapper;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use Path::Tiny;
+use Try::Tiny;
+use Path::Tiny qw/path tempdir/;
 
 use Net::OBS::LWP::UserAgent;
 
@@ -105,7 +106,7 @@ sub run {
   my $url    = $self->url || $self->select_url;
   $url =~ s#kanku(|s)://#http$1://#;
   $self->ask_for_outdir;
-  $self->_cwd(cwd());
+  $self->_cwd(path('.')->realpath->stringify);
   chdir $self->outdir;
   $self->get_file($url, $self->_KankuFile);
   $self->check_signature($url);
@@ -120,13 +121,13 @@ sub run {
 sub ask_for_outdir {
   my ($self) = @_;
   print "Where should the Kankufile be saved (empty for temporary directory)?\n";
-  my $dir = <>;
+  my $dir = <STDIN>;
   chomp($dir);
   if ($dir) {
     my $KankuFile = path($dir, 'KankuFile');
     if ($KankuFile->exists) {
       print "$dir/KankuFile already exists. Would you like to overwrite? [yN]\n";
-      my $ask = <>;
+      my $ask = <STDIN>;
       chomp $ask;
       return 1 unless ($ask =~ /^y(es)?$/i);
     } else {
@@ -151,7 +152,7 @@ sub check_domain {
   die "Could not find domain_name in " unless $domain;
 
   my $remove_domain;
-  my $vm = Kanku::Util::VM->new();
+  my $vm = Kanku::Util::VM->new(domain_name=>$domain);
 
   for my $dom ( $vm->vmm->list_all_domains() ) {
     if ($dom->get_name eq $domain) {
@@ -159,11 +160,11 @@ sub check_domain {
       print "1) reconfigure KankuFile\n";
       print "2) remove domain\n";
       print "*) exit\n";
-      my $sel = <>;
+      my $sel = <STDIN>;
       chomp $sel;
       if ($sel eq "1") {
         print "Please enter new domain name\n";
-        my $new_domain_name = <>;
+        my $new_domain_name = <STDIN>;
         chomp $new_domain_name;
         my @in = path($self->_KankuFile)->lines;
         my @out;
@@ -213,7 +214,7 @@ sub query_for_sig {
     print "Signature checking failed!\n";
     print "It's not recommended to proceed\n";
     print "Proceed anyway? (y|N)\n";
-    my $sel = <>;
+    my $sel = <STDIN>;
     if ($sel =~ /y/i) {
       print "YOU HAVE BEEN WARNED ;-)\n";
     } else {
@@ -226,7 +227,7 @@ sub query_exit {
 
   print "$msg\n" if $msg;
   print "Keep shell alive? (y|Y|n|N)\n";
-  my $in = <>;
+  my $in = <STDIN>;
 
   exec $ENV{'SHELL'} if $in =~ /^y/i;
 
@@ -249,7 +250,7 @@ sub select_url {
     $cnt++;
   }
 
-  my $in = <>;
+  my $in = <STDIN>;
   chomp $in;
   my $data = @{$urls}[int($in)-1];
   $self->_must_be_signed($data->{signed});
