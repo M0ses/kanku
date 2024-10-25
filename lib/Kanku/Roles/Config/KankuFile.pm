@@ -17,51 +17,50 @@
 package Kanku::Roles::Config::KankuFile;
 
 use Moose::Role;
-use Path::Class::File;
-use Path::Class::Dir;
-use Data::Dumper;
-use Cwd;
 
-with 'Kanku::Roles::Config::Base';
+use Kanku::File;
 
-has 'log_dir' => (is=>'rw',isa=>'Object',default=>sub {Path::Class::Dir->new(getcwd(),'.kanku','log')});
+has 'views_dir' => (
+  is      =>'rw',
+  isa     =>'Str',
+  default => '/usr/share/kanku/views',
+);
 
-has '_file'   => (is=>'rw',isa=>'Object', default => sub { Path::Class::File->new(getcwd(),'KankuFile') });
-
-sub file {
+sub file;
+has 'file' => (
+  is      =>'rw',
+  isa     =>'Str',
+  builder => '_build_file',
+);
+sub _build_file {
   my ($self, $file)  = @_;
-  if ($file) {
-    $self->_file(Path::Class::File->new($file));
-  } elsif ($ENV{KANKU_CONFIG}) {
-    $self->_file(Path::Class::File->new($ENV{KANKU_CONFIG}));
-  }
-
-  return $self->_file;
+  my $f = Kanku::File->lookup_file(
+    $file
+      || $::ENV{KANKU_CONFIG}
+      || "KankuFile"
+  ); 
+  return "$f";
 };
 
 sub job_config {
-  my $self      = shift;
-  my $job_name  = shift;
+  my ($self, $job_name) = @_;
 
-  return {tasks=>$self->config->{jobs}->{$job_name}};
+  return {
+    tasks => $self->config->{jobs}->{$job_name}
+  };
 }
 
 sub notifiers_config {
-	# no notifiers in KankuFile
-	return []
+  my ($self, $job_name) = @_;
+  my $nc = $self->config->{notifiers};
+  return (ref($nc->{$job_name}) eq 'ARRAY') ? $nc->{$job_name} : [];
 }
 
 sub job_list {
-  return keys(%{$_[0]->config->{jobs}});
+  my ($self) = @_;
+  return (keys %{$self->config->{jobs}});
 }
 
-has cache_dir => (
-  is        =>'rw',
-  isa       =>'Str',
-  lazy      => 1,
-  default   => sub {
-    return Path::Class::Dir->new($ENV{HOME},".cache","kanku")->stringify;
-  }
-);
+with 'Kanku::Roles::Config::Base';
 
 1;

@@ -17,16 +17,16 @@
 package Kanku::Roles::Daemon;
 
 use Moose::Role;
+
+use Carp;
+use Try::Tiny;
+use Path::Tiny;
 use Getopt::Long;
-use Path::Class::File;
-use Path::Class::Dir;
 use POSIX ':sys_wait_h';
-use Log::Log4perl;
 use Data::Dumper;
 use JSON::XS;
 use Sys::Hostname;
 use Net::Domain qw/hostfqdn/;
-use Carp;
 
 use Kanku::Config;
 use Kanku::Airbrake;
@@ -39,79 +39,85 @@ requires 'run';
 has daemon_options => (
   is      => 'rw',
   isa     => 'HashRef',
-  default => sub {
-    my ($self) = @_;
-    my $opts = {};
-    GetOptions(
-      $opts,
-      'stop',
-      'foreground|f',
-    ) || croak($self->print_usage());
-    return $opts;
-  },
+  lazy    => 1,
+  builder => '_build_daemon_options',
 );
+sub _build_daemon_options {
+  my ($self) = @_;
+  my $opts = {};
+  GetOptions(
+    $opts,
+    'stop',
+    'foreground|f',
+   ) || croak($self->print_usage());
+   return $opts;
+}
 
 has daemon_basename => (
-  is => 'rw',
-  isa => 'Str',
-  default => sub { Path::Class::File->new($0)->basename },
+  is      => 'rw',
+  isa     => 'Str',
+  builder => '_build_daemon_basename',
 );
-
-has logger_conf => (
-  is => 'rw',
-  isa => 'Str',
-  default => '/etc/kanku/logging/default.conf',
-);
+sub _build_daemon_basename {
+  return path($0)->basename;
+}
 
 has run_dir => (
   is => 'rw',
   isa => 'Object',
-  default => sub {
-    my $rd = Path::Class::Dir->new('/run/kanku');
-    return $rd;
-  },
+  builder => '_build_run_dir',
 );
+sub _build_run_dir {
+    return path('/run/kanku');
+}
 
 has pid_file => (
   is      => 'rw',
   isa     => 'Object',
   lazy    => 1,
-  default => sub {
-    my ($self) = @_;
-    Path::Class::File->new($self->run_dir,$self->daemon_basename.'.pid');
-  },
+  builder => '_build_pid_file',
 );
+sub _build_pid_file {
+  my ($self) = @_;
+  path($self->run_dir,$self->daemon_basename.'.pid');
+}
 
 has shutdown_file => (
   is      => 'rw',
   isa     => 'Object',
   lazy    => 1,
-  default => sub {
-    my ($self) = @_;
-    Path::Class::File->new($self->run_dir,$self->daemon_basename.'.shutdown');
-  },
+  builder => '_build_shutdown_file',
 );
+sub _build_shutdown_file {
+  my ($self) = @_;
+  path($self->run_dir,$self->daemon_basename.'.shutdown');
+}
 
 has airbrake => (
   is      => 'rw',
   isa     => 'Object',
   lazy    => 1,
-  default => sub  { Kanku::Airbrake->instance() },
+  builder => '_build_airbrake',
 );
+sub _build_airbrake { return Kanku::Airbrake->instance(); }
 
 has notify_queue => (
   is      => 'rw',
   isa     => 'Object',
   lazy    => 1,
-  default => sub {
-    my $q = Kanku::NotifyQueue->new(
-      shutdown_file => $_[0]->shutdown_file,
-      logger        => $_[0]->logger
-    );
-    $q->prepare;
-    return $q;
-  },
+  builder => '_build_notify_queue',
 );
+sub _build_notify_queue {
+  my ($self) = @_;
+  $self->logger->debug("self->shutdown_file: ".$self->shutdown_file);
+  my $q      = Kanku::NotifyQueue->new(
+    shutdown_file => $self->shutdown_file,
+    logger        => $self->logger
+  );
+  $self->logger->debug("q->shutdown_file: ".$self->shutdown_file);
+  $q->prepare;
+  return $q;
+}
 
 sub print_usage {
   my ($self) = @_;
@@ -122,19 +128,16 @@ sub print_usage {
 
 sub prepare_and_run {
   my ($self) = @_;
-
   Kanku::Config->initialize();
-
-  $self->setup_logging();
+  my $logger = $self->logger;
 
   if ($self->daemon_options->{stop}) {
-    $self->initialize_shutdown;
-    exit 0;
+    return $self->initialize_shutdown;
   }
 
-  $self->check_pid if -e $self->pid_file;
+  $self->check_pid if $self->pid_file->exists;
 
-  $self->logger->info("Starting service " . ref __PACKAGE__);
+  $self->logger->info("Starting service " . ref $self);
 
   my $hn  = hostfqdn() || hostname();
   my $ref = ref $self;
@@ -154,10 +157,12 @@ sub prepare_and_run {
 
   # daemonize
   if (! $self->daemon_options->{foreground}) {
-    exit 0 if fork;
+    return 0 if fork;
   }
 
-  $self->pid_file->spew("$$");
+  $self->logger->info(sprintf("Writing to pid file '%s' : %d", $self->pid_file, $$));
+
+  path($self->pid_file)->spew("$$");
 
   Kanku::Airbrake->initialize();
 
@@ -165,25 +170,17 @@ sub prepare_and_run {
 
   $self->finalize_shutdown();
 
-  exit 0;
-}
-
-sub setup_logging {
-  my ($self) = @_;
-
-  if ( $self->daemon_options->{foreground} ) {
-    $self->logger_conf('/etc/kanku/logging/console.conf');
-  }
-  Log::Log4perl->init($self->logger_conf);
+  return 0;
 }
 
 sub initialize_shutdown {
   my ($self) = @_;
+  my $logger = $self->logger;
 
   # nothing should be running if no pid_file exists
-  if (! -e  $self->pid_file) {
-    $self->logger->debug('No pidfile found, exiting');
-    exit 0;
+  if (!$self->pid_file->exists) {
+    $logger->info('No pidfile found, exiting');
+    return 0;
   }
 
   my $pid = $self->pid_file->slurp;
@@ -191,25 +188,39 @@ sub initialize_shutdown {
   if (kill(0,$pid)) {
     $self->shutdown_file->touch();
   } else {
-    $self->logger->warn("Process $pid seems to be died unexpectedly");
-    $self->pid_file->remove() or
-      $self->logger->error('Unable to remove \''.$self->pid_file."': $!");
+    $logger->warn("Process $pid seems to be died unexpectedly");
+    try {
+      $self->pid_file->remove();
+    }
+    catch {
+      $logger->error($_);
+    };
   }
 
-  return;
+  return 0;
 }
 
 sub finalize_shutdown {
   my ($self) = @_;
+  my $logger = $self->logger;
+  my $pkg    = __PACKAGE__;
+  $logger->debug('Removing shutdown file: '. $self->shutdown_file->stringify);
+  try {
+    $self->shutdown_file->remove;
+  }
+  catch {
+    $logger->error($_);
+  };
 
-  $self->logger->trace('Removing shutdown file: '. $self->shutdown_file->stringify);
-  $self->shutdown_file->remove() or
-      $self->logger->error('Unable to remove \''.$self->shutdown_file."': $!");
-  $self->logger->trace('Removing PID file: '. $self->pid_file->stringify);
-  $self->pid_file->remove() or
-      $self->logger->error('Unable to remove \''.$self->pid_file."': $!");
+  $logger->debug('Removing PID file: '. $self->pid_file->stringify);
+  try {
+    $self->pid_file->remove;
+  }
+  catch {
+    $logger->error($_);
+  };
 
-  $self->logger->info('Shutting down service '.ref(__PACKAGE__));
+  $logger->info("Shutting down service $pkg");
 
   my $hn  = hostfqdn() || 'localhost';
   my $ref = ref($self);
@@ -227,23 +238,27 @@ sub finalize_shutdown {
 }
 
 sub check_pid {
-  my ($self) = @_;
+  my ($self)   = @_;
+  my $pid      = $self->pid_file->slurp ;
 
-  my $pid = $self->pid_file->slurp;
+  if ($pid == $$) {;
+    $self->logger->info("Pid matches my own pid $$");
+    return
+  }
 
-  if (kill(0,$pid)) {
+  if (kill(0, $pid)) {
     die "Another instance already running with pid $pid\n";
   }
 
   $self->logger->warn("Process $pid seems to be died unexpectedly");
-  $self->pid_file->remove();
+  $self->pid_file->remove;
 
   return;
 }
 
 sub detect_shutdown {
   my ($self) = @_;
-  return 1 if ( -f $self->shutdown_file );
+  return 1 if $self->shutdown_file->is_file;
   return 0;
 }
 

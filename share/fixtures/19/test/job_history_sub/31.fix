@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 31,
+           job_id => 4,
+           name   => 'Kanku::Handler::RemoveDomain',
+           result => '{"prepare":{"message":"Aggregated results:\\n*** Host: worker-to_all_hosts-6932cdf0-9147-474c-b7fa-10df50ce96ff: ***\\nNothing to do!","code":0},"finalize":{"code":0,"message":"Aggregated results:\\n*** Host: worker-to_all_hosts-6932cdf0-9147-474c-b7fa-10df50ce96ff: ***\\nNothing to do!"},"execute":{"code":0,"message":"Aggregated results:\\n*** Host: worker-to_all_hosts-6932cdf0-9147-474c-b7fa-10df50ce96ff: ***\\nSuccessfully removed domain obs-server"}}',
+           state  => 'succeed'
+         };

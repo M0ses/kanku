@@ -2,14 +2,12 @@ package Kanku::Listener::RabbitMQ;
 
 use Moose;
 use Net::AMQP::RabbitMQ;
-use Data::Dumper;
 use JSON::XS;
-use Log::Log4perl;
 use Try::Tiny;
 use Kanku::Config;
+use Kanku::Helpers;
 
 with 'Kanku::Roles::Logger';
-with 'Kanku::Roles::Helpers';
 
 has config => ( is => 'rw', isa => 'HashRef');
 
@@ -20,8 +18,7 @@ has connect_opts => ( is => 'rw', isa => 'ArrayRef');
 sub connect_listener {
   my ($self) = @_;
   my $config = $self->config;
-
-  my $logger = $self->daemon->logger;
+  my $logger = $self->logger;
 
   my $lcfg = $config;
   my $host           = $lcfg->{host} || 'localhost';
@@ -54,7 +51,7 @@ sub connect_listener {
     }
   ]);
 
-  $logger->debug('Starting listner with the following options: '.$self->dump_it($self->connect_opts));
+  $logger->debug('Starting listner with the following options: '.Kanku::Helpers->dump_it($self->connect_opts));
 
   $mq->connect(@{$self->connect_opts});
 
@@ -114,7 +111,7 @@ sub normalize_trigger_config {
 sub wait_for_events {
   my ($self, $mq, $qname) = @_;
   my $config = $self->config;
-  my $logger = $self->daemon->logger;
+  my $logger = $self->logger;
 
   my $channel = $config->{channel} || 1;
   my $routing_prefix = $config->{routing_prefix} || 'opensuse.obs';
@@ -177,7 +174,7 @@ sub wait_for_events {
 
 sub trigger_jobs {
   my ($self, $jcfg) = @_;
-  my $logger = $self->logger();
+  my $logger = $self->logger;
   my $schema = $self->daemon->schema;
 
   foreach my $job_name (@$jcfg) {

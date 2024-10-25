@@ -2,8 +2,6 @@ package Kanku::Daemon::Worker;
 
 use Moose;
 
-our $VERSION = "0.0.1";
-
 use POSIX;
 use JSON::XS;
 use Try::Tiny;
@@ -21,12 +19,12 @@ use Kanku::Task::Local;
 use Kanku::Job;
 use Kanku::Airbrake;
 use Kanku::Util;
+use Kanku::Helpers;
 
 with 'Kanku::Roles::Logger';
 with 'Kanku::Roles::ModLoader';
 with 'Kanku::Roles::DB';
 with 'Kanku::Roles::Daemon';
-with 'Kanku::Roles::Helpers';
 
 has child_pids            => (is=>'rw', isa => 'ArrayRef'
                               , default => sub {[]});
@@ -170,7 +168,7 @@ sub listen_on_queue {
         $logger->debug('Got action from msg: ' . ($data->{action}||q{}));
 
 	if ( $data->{action} eq 'send_task_to_all_workers' ) {
-          $logger->trace('$data ='.$self->dump_it($data));
+          $logger->trace('$data ='.Kanku::Helpers->dump_it($data));
 	  my $answer = {
 	    action => 'task_confirmation',
 	    task_id => $data->{task_id},
@@ -178,7 +176,7 @@ sub listen_on_queue {
 	    # to distinguish the results per worker host
 	    answer_key => $self->local_key_name
 	  };
-	  $logger->debug($self->dump_it($data));
+	  $logger->debug(Kanku::Helpers->dump_it($data));
 	  $self->remote_key_name($data->{answer_key});
 	  $kmq->publish(
 	    $self->remote_key_name,
@@ -237,7 +235,7 @@ sub handle_advertisement {
   $logger->debug("Starting to handle advertisement");
 
   if ( $data->{answer_key} ) {
-      $logger->debug("\$data = ".$self->dump_it($data));
+      $logger->debug("\$data = ".Kanku::Helpers->dump_it($data));
       $self->remote_key_name($data->{answer_key});
       my $job_id = $data->{job_id};
       $self->local_key_name("job-$job_id-".$self->worker_id);
@@ -260,7 +258,7 @@ sub handle_advertisement {
         action        => 'apply_for_job'
       };
       $logger->debug("Sending application for job_id $job_id with routing_key ".$self->remote_key_name);
-      $logger->trace("\$application =".$self->dump_it($application));
+      $logger->trace("\$application =".Kanku::Helpers->dump_it($application));
 
       my $json    = encode_json($application);
       $kmq->publish(
@@ -276,8 +274,8 @@ sub handle_advertisement {
         my $body = decode_json($msg->{body});
         if ( $body->{action} eq 'offer_job' ) {
           $logger->info("Starting with job ".$job_id);
-          $logger->trace("\$msg =".$self->dump_it($msg));
-          $logger->trace("\$body =".$self->dump_it($body));
+          $logger->trace("\$msg =".Kanku::Helpers->dump_it($msg));
+          $logger->trace("\$body =".Kanku::Helpers->dump_it($body));
 
           $self->handle_job($job_id,$job_kmq);
         } elsif ( $body->{action} eq 'decline_application' ) {
@@ -286,8 +284,8 @@ sub handle_advertisement {
           $self->local_key_name('');
         } else {
           $logger->error("Answer on application for job $job_id unknown");
-          $logger->trace("\$msg =".$self->dump_it($msg));
-          $logger->trace("\$body =".$self->dump_it($body));
+          $logger->trace("\$msg =".Kanku::Helpers->dump_it($msg));
+          $logger->trace("\$body =".Kanku::Helpers->dump_it($body));
         }
       } else {
           $logger->error("Got no answer for application (job_id: $job_id)");
@@ -296,7 +294,7 @@ sub handle_advertisement {
       $job_kmq->destroy_queue();
   } else {
     $logger->error('No answer queue found. Ignoring advertisement');
-    $logger->debug($self->dump_it($data));
+    $logger->debug(Kanku::Helpers->dump_it($data));
   }
 
   return;
@@ -389,7 +387,7 @@ sub handle_job {
       $logger->debug("Got finished_job for job_id: $job_id");
     } else {
       $logger->debug("Unknown answer when waitingin for finish_job:");
-      $logger->trace("\$task_body =".$self->dump_it($task_body));
+      $logger->trace("\$task_body =".Kanku::Helpers->dump_it($task_body));
     }
   };
 
@@ -407,7 +405,12 @@ sub handle_task {
   my $job = Kanku::Job->new($data->{task_args}->{job});
   $data->{task_args}->{job}=$job;
 
-  my $task   = Kanku::Task::Local->new(%{$data->{task_args}},schema => $self->schema);
+  $self->logger->debug('$'.__PACKAGE__.'::data->{task_args} = '.Kanku::Helpers->dump_it($data->{task_args}));
+
+  my $task   = Kanku::Task::Local->new(
+    %{$data->{task_args}},
+    schema => $self->schema,
+  );
 
   my $result;
   try {
@@ -439,7 +442,7 @@ sub _send_task_result {
       job           => $job->to_json
   };
 
-  $logger->trace("\$answer = ".$self->dump_it($answer));
+  $logger->trace("\$answer = ".Kanku::Helpers->dump_it($answer));
 
   $job_kmq->publish(
     $self->remote_key_name,

@@ -1,0 +1,65 @@
+---
+  -
+    use_module: Kanku::Handler::SetJobContext
+    options:
+      host_interface: eth0
+      login_user: root
+      login_pass: kankudai
+  -
+    use_module: Kanku::Handler::OBSCheck
+    options:
+      project: devel:kanku:images
+      package: openSUSE-Tumbleweed-JeOS:ext4
+      repository: images_tumbleweed
+  -
+    use_module: Kanku::Handler::ImageDownload
+  -
+    use_module: Kanku::Handler::ResizeImage
+    options:
+      disk_size: 100G
+  -
+    use_module: Kanku::Handler::RemoveDomain
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 6G
+      vcpu: 2
+      use_9p: 1
+      pwrand:
+        users:
+          - root
+          - kanku
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/perl/openSUSE_Tumbleweed/devel:kanku:perl.repo
+        - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/staging/openSUSE_Tumbleweed/devel:kanku:staging.repo
+        - zypper --gpg-auto-import-keys ref -s
+        # Only for development
+        - zypper -n in make apache2 sqlite3
+  # Install kanku server mode and run tests
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - rcnetwork restart
+        - zypper -n in rabbitmq-server rabbitmq-server-plugins openvswitch kanku openssh-clients
+        - rm -rf /usr/lib/kanku/lib
+        - make -C /tmp/kanku install 2>&1 |tee /tmp/make.log
+        - /usr/bin/kanku setup --apache --distributed --ssl > /tmp/setup-server.log 2>&1 || { cat /tmp/setup-server.log; exit 1; }
+        - cp -r /tmp/kanku/etc/jobs/examples/* /etc/kanku/jobs/
+        - cp /tmp/kanku/etc/job_groups/examples/* /etc/kanku/job_groups/
+        - systemctl enable --now kanku-iptables
+        - systemctl enable --now kanku-web
+        - systemctl enable --now kanku-dispatcher
+        - systemctl enable --now kanku-triggerd
+        - systemctl enable --now kanku-scheduler
+        - virsh net-start kanku-ovs
+        - kanku login -a http://localhost:5000/kanku -u admin -p opensuse -k None
+        - /tmp/kanku/contrib/set_ip
+        - rcapache2 restart
+        - systemctl enable --now kanku-worker
+        - /tmp/kanku/contrib/wait_for_job.sh

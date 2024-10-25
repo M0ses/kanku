@@ -1,0 +1,21 @@
+$HASH1 = {
+           args     => undef,
+           creation_time
+                    => 1635153844,
+           end_time => 1635154063,
+           id       => 22,
+           last_modified
+                    => 1635154063,
+           masterinfo
+                    => 32610,
+           name     => 'dki-opensuse-15_1',
+           pwrand   => '{}',
+           result   => undef,
+           start_time
+                    => 1635153959,
+           state    => 'failed',
+           trigger_user
+                    => undef,
+           workerinfo
+                    => 'kanku-devel.kanku.site:21906:job-22-7e70f647-8793-4751-93c4-6c9c09c05d6c'
+         };

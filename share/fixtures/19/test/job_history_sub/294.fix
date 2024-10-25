@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 294,
+           job_id => 45,
+           name   => 'Kanku::Handler::CleanupIPTables',
+           result => '{"finalize":{"code":0,"message":"Nothing to do!"},"prepare":{"code":0,"message":"Nothing to do!"},"execute":{"message":"Successfully cleaned up iptables rules for domain dki-opensuse-15-3","code":0}}',
+           state  => 'succeed'
+         };

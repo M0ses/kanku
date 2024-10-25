@@ -17,57 +17,110 @@
 package Kanku::Handler::CreateDomain;
 
 use Moose;
+
+use Carp;
 use Try::Tiny;
-use IO::Uncompress::AnyUncompress qw(anyuncompress $AnyUncompressError) ;
-use File::Copy qw/copy/;
-use Path::Class::File;
+use Path::Tiny;
 use Data::Dumper;
 use Session::Token;
-use File::Basename qw/basename/;
-use Carp;
-use File::HomeDir;
 
 use Kanku::Config;
 use Kanku::Config::Defaults;
 use Kanku::Util::VM;
 use Kanku::Util::VM::Image;
 use Kanku::Util::IPTables;
+use Kanku::TypeConstraints;
+use Kanku::Helpers;
 
+sub gui_config {
+  [
+    {
+      param => 'forward_port_list',
+      type  => 'text',
+      label => 'List of Forwarded Ports'
+    },
+    {
+      param => 'network_name',
+      type  => 'text',
+      label => 'Name of libvirt network'
+    },
+    {
+      param => 'network_bridge',
+      type  => 'text',
+      label => 'Name of network bridge'
+    },
+    {
+      param => 'domain_autostart',
+      type  => 'checkbox',
+      label => 'Set autostart for domain on host startup',
+    },
+    {
+      param => 'vcpu',
+      type  => 'text',
+      label => 'Number of CPUs for new domain',
+    },
+    {
+      param => 'memory',
+      type  => 'text',
+      label => 'Memory size for new domain',
+    },
+    {
+      param => 'template',
+      type  => 'text',
+      label => 'Template for domain xml',
+    },
+  ];
+}
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
 has [qw/
       domain_name           vm_image_file
       login_user            login_pass
-      images_dir            ipaddress
+      forward_port_list     ipaddress
       management_interface  management_network
-      forward_port_list     images_dir
       short_hostname	    memory
       network_bridge        template
 /] => (is => 'rw',isa=>'Str');
 
 has 'network_name' => (
-  is     => 'rw',
-  isa    =>'Str',
-  lazy   => 1,
-  default => sub { Kanku::Config::Defaults->get(__PACKAGE__,'network_name') },
+  is      => 'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  builder => '_build_network_name',
 );
+sub _build_network_name {
+  return
+    $_[0]->job->context->{network_name}
+    || Kanku::Config::Defaults->get(__PACKAGE__,'network_name');
+}
 
 has 'pool_name' => (
-  is     => 'rw',
-  isa    =>'Str',
-  lazy   => 1,
-  default => sub { Kanku::Config::Defaults->get(__PACKAGE__,'pool_name') },
+  is      => 'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  builder => '_build_pool_name',
 );
+sub _build_pool_name {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'pool_name');
+}
 
-has '+memory'         => ( default => 1024*1024 );
+has '+memory'         => ( builder => '_build_memory' );
+sub _build_memory {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'memory');
+}
 
-has '+management_interface' => ( default => '');
+has 'vcpu' => (
+  is      => 'rw',
+  isa     =>'Int',
+  builder => '_build_vcpu',
+);
+sub _build_vcpu {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'vcpu');
+}
 
-has '+management_network'   => ( default => '');
-
-has [qw/vcpu/] => (is => 'rw',isa=>'Int');
-
-has '+vcpu'           => ( default => 1 );
+has '+management_interface' => ( default => q{});
+has '+management_network'   => ( default => q{});
 
 has [qw/
         use_9p
@@ -78,17 +131,32 @@ has [qw/
 	no_wait_for_bootloader
 /]      => (is => 'rw',isa=>'Bool',default => 0);
 
-has "+images_dir"     => (default=>"/var/lib/libvirt/images");
-
-has ['cache_dir']     => (
+has "images_dir"     => (
   is      => 'rw',
   isa     => 'Str',
-  default => sub {
-    return Kanku::Config->instance->cache_dir;
-  },
+  builder => '_build_images_dir',
 );
+sub _build_images_dir {
+  return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'images_dir');
+}
 
-has ['mnt_dir_9p']    => (is => 'rw', isa => 'Str', default => '/tmp/kanku');
+has 'cache_dir'     => (
+  is      => 'rw',
+  isa     => 'Str',
+  builder => '_build_cache_dir',
+);
+sub _build_cache_dir {
+  return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'cache_dir');
+}
+
+has 'mnt_dir_9p' => (
+  is => 'rw',
+  isa => 'Str',
+  builder => '_build_mnt_dir_9p',
+);
+sub _build_mnt_dir_9p {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'mnt_dir_9p');
+}
 
 has ['host_dir_9p']    => (is => 'rw', isa => 'Str');
 
@@ -103,7 +171,14 @@ has ['_root_disk']    => (is => 'rw', isa => 'Object');
 
 has 'root_disk_size'  => (is => 'rw', isa => 'Str');
 
-has 'root_disk_bus'  => (is => 'rw', isa => 'Str', default => 'virtio');
+has 'root_disk_bus'  => (
+  is => 'rw',
+  isa => 'Str',
+  builder => '_build_root_disk_bus',
+);
+sub _build_root_disk_bus {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'root_disk_bus');
+}
 
 has empty_disks => (
   is => 'rw',
@@ -117,51 +192,6 @@ has additional_disks => (
   isa => 'ArrayRef',
   lazy => 1,
   default => sub {[]}
-);
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'forward_port_list',
-          type  => 'text',
-          label => 'List of Forwarded Ports'
-        },
-        {
-          param => 'network_name',
-          type  => 'text',
-          label => 'Name of libvirt network'
-        },
-        {
-          param => 'network_bridge',
-          type  => 'text',
-          label => 'Name of network bridge'
-        },
-        {
-          param => 'domain_autostart',
-          type  => 'checkbox',
-          label => 'Set autostart for domain on host startup',
-        },
-        {
-          param => 'vcpu',
-          type  => 'text',
-          label => 'Number of CPUs for new domain',
-        },
-        {
-          param => 'memory',
-          type  => 'text',
-          label => 'Memory size for new domain',
-        },
-        {
-          param => 'template',
-          type  => 'text',
-          label => 'Template for domain xml',
-        },
-      ];
-  }
 );
 
 has installation => (
@@ -190,10 +220,22 @@ has login_timeout => (
   isa     => 'Int',
 );
 
-sub distributable { 1 };
+has image_type => (
+  is      => 'rw',
+  isa     => 'ImageType',
+  lazy    => 1,
+  builder => '_build_image_type',
+);
+
+sub _build_image_type {
+  my ($self) = @_;
+  my $ctx  = $self->job()->context();
+  my $d    = Kanku::Config::Defaults->get(__PACKAGE__, 'image_type');
+  return $ctx->{image_type} || $d;
+}
 
 sub prepare {
-  my $self = shift;
+  my ($self) = @_;
   my $ctx  = $self->job()->context();
 
   $self->domain_name($ctx->{domain_name})       if ( ! $self->domain_name && $ctx->{domain_name});
@@ -204,6 +246,7 @@ sub prepare {
   $self->accessmode_9p($ctx->{accessmode_9p})   if ( ! $self->accessmode_9p  && $ctx->{accessmode_9p});
   $self->cache_dir($ctx->{cache_dir})           if ($ctx->{cache_dir});
   $self->domain_autostart(1)                    if ($ctx->{domain_autostart});
+  $self->no_wait_for_bootloader(1)              if $self->image_type eq 'vagrant';
 
   $ctx->{management_interface} = $self->management_interface
     if $self->management_interface;
@@ -217,6 +260,7 @@ sub prepare {
   }
   $self->logger->debug("*** vm_image_file: ".$self->vm_image_file);
   $self->logger->debug("*** tmp_image_file: ".$ctx->{tmp_image_file}) if $ctx->{tmp_image_file};
+  $self->logger->debug("*** image_type: ".$self->image_type);
 
   return {
     code    => 0,
@@ -252,17 +296,17 @@ sub execute {
     $logger->debug("Using default network_bridge : '".$self->network_bridge."'");
   }
 
-  $logger->debug("additional_disks:".Dumper($self->additional_disks));
+  $logger->debug("additional_disks:".Kanku::Helpers->dump_it($self->additional_disks));
 
 
-  my $final_file = ($ctx->{tmp_image_file} ) ? basename($ctx->{tmp_image_file}->filename) : $self->vm_image_file;
+  my $final_file = ($ctx->{tmp_image_file} ) ? path($ctx->{tmp_image_file})->basename : $self->vm_image_file;
 
   if ($self->root_disk_size) {
     croak("Using Kanku::Handler::ResizeImage AND root_disk_size is not supported") if $ctx->{tmp_image_file};
     my $img_obj = Kanku::Util::VM::Image->new();
     $logger->debug("CreateDomain: resizing to ". $self->root_disk_size);
     $ctx->{tmp_image_file} = $img_obj->resize_image($final_file, $self->root_disk_size);
-    $final_file = $ctx->{tmp_image_file}->filename;
+    $final_file = $ctx->{tmp_image_file}->stringify;
   }
 
   my ($vol, $image) = $self->_create_image_file_from_cache({file=>$final_file}, 0, $self->domain_name);
@@ -277,8 +321,8 @@ sub execute {
 
   my $pkg = __PACKAGE__;
   my $network_name = $self->network_name
-    || Kanku::Config->instance->cf->{$pkg}->{network_name}
-    || 'kanku-devel';
+    || $ctx->{network_name}
+    || Kanku::Config::Defaults->get(__PACKAGE__, 'network_name');
 
   my $vm = Kanku::Util::VM->new(
       vcpu                  => $self->vcpu,
@@ -317,6 +361,7 @@ sub execute {
 
   $vm->template_file($self->template) if ($self->template);
 
+  $logger->info("Creating domain ".$self->domain_name);
   $vm->create_domain();
 
   if ($self->domain_autostart) {
@@ -325,20 +370,24 @@ sub execute {
   }
 
   $ctx->{tmp_image_file} = undef if exists $ctx->{tmp_image_file};
+  if ($self->image_type ne 'vagrant') {
+    my $con = $vm->console();
 
-  my $con = $vm->console();
+    $con->cmd_timeout($self->default_console_timeout);
+    $con->login_timeout($self->login_timeout) if $self->login_timeout;
 
-  $con->cmd_timeout($self->default_console_timeout);
-  $con->login_timeout($self->login_timeout) if $self->login_timeout;
+    if (@{$self->installation}) {
+      $self->_handle_installation($con);
+    }
 
-  if (@{$self->installation}) {
-    $self->_handle_installation($con);
-  }
-
-  if ($self->skip_login) {
-    $con->wait_for_login_prompt;
+    if ($self->skip_login) {
+      $con->wait_for_login_prompt;
+    } else {
+      $self->_prepare_vm_via_console($con, $vm);
+    }
   } else {
-    $self->_prepare_vm_via_console($con, $vm);
+    $logger->info('Image Type "'.$self->image_type.'". Skipping VM preparation via console');
+    $ctx->{ipaddress} = $vm->get_ipaddress();
   }
 
   return {
@@ -577,8 +626,8 @@ sub _create_image_file_from_cache {
   );
   my $supported_formats = join('|', keys %suffix2format);
   $self->logger->debug("file: --- $file");
-  my $cache_dir = ($file =~ m#/#) ? '' : $self->cache_dir;
-  my $in = Path::Class::File->new($cache_dir, $file);
+  my @parts = ($file =~ m#/#) ? ($file) : ($self->cache_dir, $file);
+  my $in = path(@parts);
 
   $self->logger->debug("Using file ".$in->stringify);
   if ( $file =~ /\.($supported_formats)(\.(gz|bz2|xz))?$/ ) {
@@ -620,6 +669,9 @@ sub _create_image_file_from_cache {
 
   return ($vol, $image);
 }
+
+__PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__
@@ -761,6 +813,10 @@ If configured a port_forward_list, it tries to find the next free port and confi
  cache_dir
 
  domain_autostart
+
+ network_name
+
+ image_type
 
 =head2 setters
 

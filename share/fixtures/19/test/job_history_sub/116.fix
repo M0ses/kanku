@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 116,
+           job_id => 16,
+           name   => 'Kanku::Handler::OBSCheck',
+           result => '{"prepare":{"message":"Preparation finished successfully","state":"succeed"},"execute":{"state":"succeed","code":0,"message":"Sucessfully checked project devel:kanku:images under url https://api.opensuse.org/public\\n (vm_image_url: http://download.opensuse.org/repositories/devel:/kanku:/images/images_leap_15_0/Kanku_Leap_15.0_JeOS.x86_64-0.0.1-Buildlp150.8.115.qcow2, obs_direct_url: https://api.opensuse.org/public/build/devel:kanku:images/images_leap_15_0/x86_64/openSUSE-Leap-15.0-JeOS?view=cpio)"},"finalize":{"code":0,"message":"Nothing to do!"}}',
+           state  => 'succeed'
+         };

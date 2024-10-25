@@ -9,7 +9,7 @@ tasks:
   -
     use_module: Kanku::Handler::OBSCheck
     options:
-      api_url: https://api.opensuse.org/public
+      obsurl: https://api.opensuse.org/public
       project: devel:kanku:images
       repository: images_fedora_34
       package: Fedora-34

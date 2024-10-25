@@ -17,26 +17,22 @@
 package Kanku::Dispatch::Local;
 
 use Moose;
+use JSON::XS;
+use Try::Tiny;
 
 with 'Kanku::Roles::Logger';
 with 'Kanku::Roles::Dispatcher';
 with 'Kanku::Roles::Daemon';
-with 'Kanku::Roles::Helpers';
 
-use Kanku::Config;
-use Kanku::Job;
 use Kanku::Task;
-use JSON::XS;
-use Try::Tiny;
+use Kanku::Helpers;
 
 has 'max_processes' => (is=>'rw',isa=>'Int',default=>1);
 
-
 sub run_job {
-  my $self    = shift;
-  my $job     = shift;
-  my $logger  = $self->logger();
-  my $schema  = $self->schema();
+  my ($self, $job) = @_;
+  my $logger       = $self->logger();
+  my $schema       = $self->schema();
 
   my $job_definition = $self->load_job_definition($job);
   if ( ! $job_definition) {
@@ -51,7 +47,7 @@ sub run_job {
 
   return 1 if (! $args);
 
-  $logger->trace("  -- args: ".$self->dump_it($args));
+  $logger->trace("  -- args: ".Kanku::Helpers->dump_it($args));
 
   my $task;
 
@@ -65,9 +61,11 @@ sub run_job {
     my $un = $job->trigger_user;
     $logger->debug("--- trigger_user $un");
     $defaults{final_args}->{domain_name} =~ s{^($un-)?}{$un-}smx if ($un && exists $defaults{final_args}->{domain_name});
-    $logger->debug('--- final_args'.$self->dump_it($defaults{final_args}));
+    $logger->debug('--- final_args'.Kanku::Helpers->dump_it($defaults{final_args}));
 
     try {
+      my $start = time;
+      $logger->info("Running task with handler $defaults{module}");
       $task = Kanku::Task->new(
 	%defaults,
 	options   => $sub_task->{options} || {},
@@ -82,6 +80,9 @@ sub run_job {
       );
 
       $task->run($tr);
+      my $end = time;
+      my $duration = $end - $start;
+      $logger->info("Finished task ($defaults{module}) within $duration seconds");
       $job->state($task->state);
       die $task->result if $task->state eq 'failed';
     } catch {
@@ -117,6 +118,7 @@ sub initialize {
 
 sub end_job {
   my ($self, $job, $task) = @_;
+  my $logger              = $self->logger;
   if ($task) {
     $job->state(($job->skipped) ? 'skipped' : $task->state);
   } else {
@@ -126,10 +128,17 @@ sub end_job {
   $job->update_db();
   if (ref($job->context->{pwrand}) eq 'HASH') {
     while ( my ($user, $pw) = each %{$job->context->{pwrand}}) {
-      $self->logger->error("Password for user '$user': $pw");
+      $logger->error("Password for user '$user': $pw");
     }
   }
-  $self->logger->debug("Finished job: ".$job->name." (".$job->id.") with state '".$job->state."'");
+  my $msg = sprintf(
+    "Finished job: %s (%d) with state '%s' in %s seconds",
+    $job->name,
+    $job->id,
+    $job->state,
+    $job->duration,
+  );
+  $logger->info($msg);
 }
 
 

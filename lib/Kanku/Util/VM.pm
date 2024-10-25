@@ -18,19 +18,23 @@ package Kanku::Util::VM;
 
 use Moose;
 
+use Net::IP;
+use Try::Tiny;
+use Path::Tiny;
+use XML::XPath;
+
 use Sys::Virt;
 use Sys::Virt::Stream;
+use Sys::Virt::StorageVol;
+
 use Expect;
 use Template;
-use Cwd;
-use Net::IP;
-use Sys::Virt::StorageVol;
-use XML::XPath;
-use Try::Tiny;
-use File::Path qw/make_path/;
+
+with 'Kanku::Roles::Logger';
 
 use Kanku::Util::VM::Console;
 use Kanku::Util::VM::Image;
+
 
 has [qw/
       image_file    domain_name   vcpu        memory
@@ -49,6 +53,7 @@ has running_remotely => ( is => 'rw', isa => 'Bool', default => 0 );
 has empty_disks      => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has additional_disks => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has keep_volumes     => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
+has '+domain_name'   => ( required => 1);
 has '+uri'           => ( default => 'qemu:///system');
 has '+template_file' => ( default => q{});
 has '+snapshot_name' => ( default => 'current');
@@ -127,13 +132,6 @@ has console => (
   }
 );
 
-has logger => (
-  is => 'rw',
-  isa => 'Object',
-  lazy => 1,
-  default => sub { Log::Log4perl->get_logger(); }
-);
-
 has wait_for_network => (
   is => 'rw',
   isa => 'Int',
@@ -152,8 +150,11 @@ has host_dir_9p => (
   is      => 'rw',
   isa     => 'Str',
   lazy    => 1,
-  default => sub { getcwd() }
+  builder => '_build_host_dir_9p',
 );
+sub _build_host_dir_9p {
+  return Path::Tiny->cwd->stringify
+}
 
 has accessmode_9p => (
   is      => 'rw',
@@ -190,23 +191,21 @@ has 'log_stdout'     => (is => 'rw', isa => 'Bool', default => 1);
 
 sub process_template {
   my ($self,$disk_xml) = @_;
+  
   my $logger = $self->logger;
 
-  # some useful options (see below for full list)
   my $template_path = '/etc/kanku/templates';
+
   my $config = {
     INCLUDE_PATH => $template_path,
-    INTERPOLATE  => 1,               # expand "$var" in plain text
-    POST_CHOMP   => 1,               # cleanup whitespace
-    #PRE_PROCESS  => 'header',        # prefix each template
-    #EVAL_PERL    => 1,               # evaluate Perl code blocks
-    #RELATIVE     => 1
+    INTERPOLATE  => 1,
+    POST_CHOMP   => 1,
   };
 
   my $host_feature = $self->_get_hw_virtualization;
   die "Hardware doesn't support kvm" if ! $host_feature;
   $logger->debug("Found hardware virtualization: '$host_feature'");
-  # create Template object
+
   my $template  = Template->new($config);
 
 
@@ -260,17 +259,14 @@ sub process_template {
 
   $logger->debug(" --- use_9p:".$self->use_9p);
   if ( $self->use_9p ) {
-    $logger->debug(" --- host_dir_9p:".$self->host_dir_9p);
-    if (! -d $self->host_dir_9p) {
-      $logger->debug(" --- host_dir_9p does not exists. Trying to create");
-      make_path($self->host_dir_9p) || die "Could not create host_dir_9p '".$self->host_dir_9p."': $!";
-    }
-
+    my $hd9p = path($self->host_dir_9p);
+    $logger->debug(" --- host_dir_9p: $hd9p");
+    $hd9p->mkdir();
     $logger->debug(" --- accesmode_9p: ".$self->accessmode_9p);
 
     $vars->{domain}->{hostshare} = "
     <filesystem type='mount' accessmode='".$self->accessmode_9p."'>
-      <source dir='".$self->host_dir_9p."'/>
+      <source dir='$hd9p'/>
       <target dir='kankushare'/>
       <alias name='fs0'/>
     </filesystem>
@@ -291,11 +287,11 @@ sub process_template {
   } else {
     $logger->warn("No template file found!");
     $logger->warn("Using internal template!");
-    my $template;
     my $start = tell DATA;
-    while ( <DATA> ) { $template .= $_ };
+    local $/; # enable localized slurp mode
+    my $data = <DATA>;
     seek DATA, $start,0;
-    $input = \$template;
+    $input = \$data;
     $logger->trace("template:\n${$input}");
   }
   my $output = '';
@@ -668,13 +664,13 @@ sub get_disk_list {
 }
 
 sub state {
-  my $self    	= shift;
-  my %opts    	= @_;
-  my $dom       = $self->dom;
+  my ($self, %opts) = @_;
+  my $logger        = $self->logger;
+  my $dom           = $self->dom;
 
   if ($dom) {
     my $info = $dom->get_info();
-    $self->logger->debug("State: $info->{state}");
+    $logger->trace("State: $info->{state}");
     if ( $info->{state} == 5 ) {
       return "off";
     } elsif ( $info->{state} == 1 ) {
@@ -719,6 +715,10 @@ sub _get_ip_from_dhcp {
 
   my $wait = $self->wait_for_network;
 
+  $self->logger->debug("Trying to get ip address via dhcp (Timeout: $wait)");
+
+  my $err_msg ="Could not find ipaddress from dhcp within $wait seconds";
+
   while ( $wait > 0) {
       my @nics = $dom->get_interface_addresses(
                    Sys::Virt::Domain::INTERFACE_ADDRESSES_SRC_LEASE
@@ -744,15 +744,14 @@ sub _get_ip_from_dhcp {
 
       sleep 1;
 
-      $self->logger->debug("Could not get ip address from interface using net-dhcp-leases.");
-      $self->logger->debug("Waiting another $wait seconds for network to come up");
+      $self->logger->trace("Could not get ip address from interface using net-dhcp-leases.");
+      $self->logger->trace("Waiting another $wait seconds for network to come up");
 
   }
 
-  if (! $ipaddress) {
-    die "Could not get ip address for interface within "
-      . $self->wait_for_network." seconds.";
-  }
+  croak($err_msg) unless $ipaddress;
+
+  $self->logger->debug("Found ipaddress $ipaddress via dhcp.");
 
   return $self->ipaddress($ipaddress);
 

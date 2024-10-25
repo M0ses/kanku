@@ -4,8 +4,7 @@ use Moose;
 use Net::AMQP::RabbitMQ;
 use JSON::MaybeXS;
 use Term::ANSIColor;
-
-with 'Kanku::Roles::Helpers';
+use Kanku::Helpers;
 
 has config => (
    is     => 'rw',
@@ -56,7 +55,7 @@ has output_plugin=> (
 
 
 sub connect {
-  my ($self) = @_; 
+  my ($self) = @_;
   my $logger = $self->logger;
   $self->_mq(Net::AMQP::RabbitMQ->new());
 
@@ -87,7 +86,7 @@ sub connect {
 };
 
 sub listen {
-  my ($self) = @_; 
+  my ($self) = @_;
   my $logger = $self->logger;
   my $mq     = $self->_mq;
   my $cfg    = $self->config;
@@ -122,8 +121,8 @@ sub listen {
   # Bind the new queue to the exchange using the routing key
   $logger->info("Binding queue");
   $self->_mq->queue_bind(
-    $self->channel, 
-    $self->_queuename, 
+    $self->channel,
+    $self->_queuename,
     $cfg->{exchange},
     $cfg->{routing_key} || '',
   );
@@ -131,7 +130,7 @@ sub listen {
   $logger->info("Start consuming queue");
   # Request that messages be sent and receive them until interrupted
   $mq->consume($self->channel, $self->_queuename);
-   
+
   my $output_plugin = $_output_plugins->{$self->output_plugin};
   die "No output_plugin ".$self->output_plugin."found!\n" if ! $output_plugin;
 
@@ -139,7 +138,7 @@ sub listen {
   $logger->debug("Waiting for new messages ...");
 
   while (1) {
-   $stime = time(); 
+   $stime = time();
    while (my $msg = $mq->recv($wtime)) {
      $etime = time() - $stime; $stime=time();
      $output_plugin->(
@@ -152,7 +151,7 @@ sub listen {
    $cnt++;
    $logger->trace("nothing found in last $wtime ms ($cnt sec elapsed)");
   }
-} 
+}
 
 sub send {
   my ($self) = @_;
@@ -170,7 +169,7 @@ sub send {
   }
   my $routing_key = $self->config->{routing_key} || '#';
 
-  $logger->info($self->dump_it($notification));
+  $logger->info(Kanku::Helpers->dump_it($notification));
 
   my $msg = encode_json($notification);
 
@@ -205,7 +204,7 @@ sub props {
 }
 
 sub disconnect {
-  my ($self) = @_; 
+  my ($self) = @_;
   my $logger = $self->logger;
   $logger->info("Disconnecting from message queue");
   $self->_mq->disconnect;

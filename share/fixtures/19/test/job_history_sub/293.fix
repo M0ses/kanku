@@ -1,0 +1,7 @@
+$HASH1 = {
+           id     => 293,
+           job_id => 45,
+           name   => 'Kanku::Handler::ExecuteCommandViaConsole',
+           result => '{"finalize":{"message":"Nothing to do!","code":0},"execute":{"subresults":[{"exit_status":0,"message":["rcnetwork restart"],"command":"rcnetwork restart"},{"exit_status":0,"command":"hostname -f","message":["hostname -f\\r\\ndki-opensuse-15-3"]}],"message":"All commands on console executed successfully","code":0},"prepare":{"message":"Nothing todo","code":0}}',
+           state  => 'succeed'
+         };

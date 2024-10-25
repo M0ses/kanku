@@ -29,7 +29,7 @@ __PACKAGE__->table("obs_check_history");
   is_auto_increment: 1
   is_nullable: 0
 
-=head2 api_url
+=head2 obsurl
 
   data_type: 'text'
   is_nullable: 1
@@ -59,7 +59,7 @@ __PACKAGE__->table("obs_check_history");
 __PACKAGE__->add_columns(
   "id",
   { data_type => "integer", is_auto_increment => 1, is_nullable => 0 },
-  "api_url",
+  "obsurl",
   { data_type => "text", is_nullable => 1 },
   "project",
   { data_type => "text", is_nullable => 1 },
@@ -85,11 +85,11 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 UNIQUE CONSTRAINTS
 
-=head2 C<api_url_project_package_unique>
+=head2 C<obsurl_project_package_unique>
 
 =over 4
 
-=item * L</api_url>
+=item * L</obsurl>
 
 =item * L</project>
 
@@ -100,8 +100,8 @@ __PACKAGE__->set_primary_key("id");
 =cut
 
 __PACKAGE__->add_unique_constraint(
-  "api_url_project_package_unique",
-  ["api_url", "project", "package"],
+  "obsurl_project_package_unique",
+  ["obsurl", "project", "package"],
 );
 
 

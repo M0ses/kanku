@@ -54,7 +54,6 @@ BuildRequires:  perl(Dancer2::Plugin::DBIC)
 BuildRequires:  perl(Dancer2::Plugin::REST)
 BuildRequires:  perl(Dancer2::Plugin::WebSocket)
 BuildRequires:  perl(Expect)
-BuildRequires:  perl(File::HomeDir)
 BuildRequires:  perl(File::LibMagic)
 BuildRequires:  perl(IO::Interactive)
 BuildRequires:  perl(IO::Uncompress::UnXz)
@@ -64,10 +63,10 @@ BuildRequires:  perl(Log::Log4perl)
 BuildRequires:  perl(Moose)
 BuildRequires:  perl(MooseX::App)
 BuildRequires:  perl(MooseX::Singleton)
+BuildRequires:  perl(MooseX::ClassAttribute)
 BuildRequires:  perl(Net::IP)
 BuildRequires:  perl(Net::OBS::Client) >= 0.1.3
 BuildRequires:  perl(Libssh::Session)
-BuildRequires:  perl(Path::Class)
 BuildRequires:  perl(Plack)
 BuildRequires:  perl(Sys::Virt)
 BuildRequires:  perl(Template)
@@ -90,6 +89,7 @@ BuildRequires:  perl(LWP::UserAgent)
 BuildRequires:  perl(Mail::Sendmail)
 BuildRequires:  perl(Net::AMQP::RabbitMQ)
 BuildRequires:  perl(UUID)
+BuildRequires:  perl(Path::Tiny) >= 0.125
 
 Requires:       kanku-cli = %{version}
 Requires:       kanku-dispatcher = %{version}
@@ -158,7 +158,6 @@ Requires:       perl(Dancer2::Plugin::Auth::Extensible::Provider::DBIC)
 Requires:       perl(Dancer2::Plugin::DBIC)
 Requires:       perl(Dancer2::Plugin::REST)
 Requires:       perl(Expect)
-Requires:       perl(File::HomeDir)
 Requires:       perl(File::LibMagic)
 Requires:       perl(IO::Uncompress::UnXz)
 Requires:       perl(IPC::Run)
@@ -167,10 +166,10 @@ Requires:       perl(Log::Log4perl)
 Requires:       perl(Moose)
 Requires:       perl(MooseX::App)
 Requires:       perl(MooseX::Singleton)
+Requires:       perl(MooseX::ClassAttribute)
 Requires:       perl(Net::IP)
 Requires:       perl(Net::OBS::Client) >= 0.1.2
 Requires:       perl(Libssh::Session)
-Requires:       perl(Path::Class)
 Requires:       perl(Sys::Virt)
 Requires:       perl(Template)
 Requires:       perl(Template::Plugin::Filter::ANSIColor)
@@ -179,6 +178,7 @@ Requires:       perl(Test::Simple)
 Requires:       perl(XML::Structured)
 Requires:       perl(XML::XPath)
 Requires:       perl(YAML::PP)
+Requires:       perl(Path::Tiny) >= 0.125
 # DBD::SQLite is also provided by perl-DBD-SQLite-Amalgamation
 # but perl-DBD-SQLite-Amalgamation is breaks with SQL syntax errors
 # at job_histroy_sub table
@@ -187,6 +187,9 @@ Requires:       perl(Archive::Cpio)
 Requires:       perl(LWP::Protocol::https)
 Requires:       perl(Mail::Sendmail)
 Requires:       perl(UUID)
+Requires:       tar
+Requires:       bsdtar
+Requires:       procps
 %if 0%{?suse_version}
 Requires:       openssl(cli)
 %else
@@ -223,11 +226,13 @@ common config and lib files used in kanku
 
 %dir /etc/kanku/templates
 %dir /etc/kanku/templates/cmd
+%dir /etc/kanku/templates/cmd/init
 %dir /etc/kanku/templates/cmd/setup
 %config /etc/kanku/templates/default-vm.tt2
 %config /etc/kanku/templates/with-spice.tt2
 %config /etc/kanku/templates/vm-x86_64-uefi-tpm2.0.tt2
-%config /etc/kanku/templates/cmd/init.tt2
+%config /etc/kanku/templates/cmd/init/default.tt2
+%config /etc/kanku/templates/cmd/init/vagrant.tt2
 %config /etc/kanku/templates/cmd/setup/*
 %dir    /etc/kanku/templates/examples-vm/
 %config /etc/kanku/templates/examples-vm/obs-server-26.tt2
@@ -269,6 +274,9 @@ common config and lib files used in kanku
 /usr/lib/kanku/lib/Kanku/NotifyQueue.pm
 /usr/lib/kanku/lib/Kanku/GPG.pm
 /usr/lib/kanku/lib/Kanku/YAML.pm
+/usr/lib/kanku/lib/Kanku/Logger.pm
+/usr/lib/kanku/lib/Kanku/File.pm
+/usr/lib/kanku/lib/Kanku/Helpers.pm
 
 %dir /usr/lib/kanku/lib/Kanku/WebSocket
 /usr/lib/kanku/lib/Kanku/WebSocket/Notification.pm
@@ -284,6 +292,9 @@ common config and lib files used in kanku
 /usr/lib/kanku/lib/Kanku/Dispatch/Local.pm
 
 /usr/lib/kanku/lib/Kanku/Test/
+
+%dir /usr/lib/kanku/lib/MooseX/
+/usr/lib/kanku/lib/Kanku/TypeConstraints.pm
 
 %package cli
 Summary:        Command line client for kanku
@@ -316,6 +327,7 @@ EOF
 %dir /usr/share/kanku/views/cli/rjob
 /usr/share/kanku/views/cli/*.tt
 /usr/share/kanku/views/cli/rjob/*.tt
+/usr/lib/kanku/lib/MooseX/App/
 /usr/lib/kanku/lib/Kanku/Cli/
 /usr/lib/kanku/lib/Kanku/Cli.pm
 /usr/lib/kanku/iptables_wrapper

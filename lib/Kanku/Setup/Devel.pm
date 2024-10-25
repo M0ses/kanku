@@ -2,10 +2,13 @@ package Kanku::Setup::Devel;
 
 use Moose;
 use Carp;
-use Path::Class qw/dir file/;
+use Path::Tiny;
 use English qw/-no_match_vars/;
-use File::HomeDir;
+
 use Kanku::Util;
+use Kanku::File;
+use Kanku::Helpers;
+
 with 'Kanku::Setup::Roles::Common';
 with 'Kanku::Roles::Logger';
 
@@ -13,18 +16,21 @@ has homedir => (
     isa           => 'Str',
     is            => 'rw',
     lazy          => 1,
-    default       => sub {
-      # dbi:SQLite:dbname=/home/frank/.kanku/kanku-schema.db
-      return File::HomeDir->users_home($_[0]->user);
-    },
+    builder       => '_build_homedir',
 );
+sub _build_homedir {
+  return Kanku::Helpers->users_home($_[0]->user);
+}
 
 has _dbfile => (
         isa     => 'Str',
         is      => 'rw',
         lazy    => 1,
-        default => sub { $_[0]->homedir.'/.kanku/kanku-schema.db' },
+	builder => '_build__dbfile',
 );
+sub _build__dbfile {
+  return $_[0]->homedir.'/.kanku/kanku-schema.db'
+}
 
 has apiurl => (
   isa    => 'Str',
@@ -71,7 +77,7 @@ sub setup {
   $self->_create_default_network;
 
   $self->_setup_nested_kvm;
-  my $home  = File::HomeDir->users_home($self->user);
+  my $home  = Kanku::Helpers->users_home($self->user);
   my $gconf = "$home/.kanku/kanku-config.yml";
 
   $self->_backup_config_file($gconf);
@@ -91,25 +97,26 @@ sub setup {
        cache_dir      => "$home/.cache/kanku",
        arch           => $arch,
        official_image_repo => $arch2repo->{$arch},
+       host_interface => $self->host_interface,
     }
   );
 
-  my ($user, $passwd, $uid, $gid ) = getpwuid(getpwnam($self->user));
+  my ($user, $passwd, $uid, $gid ) = getpwnam($self->user);
   chown($uid, $gid, $gconf) || die "Could not chown ($uid, $gid, $gconf): $!\n";
 
   $logger->info('Developer mode setup successfully finished!');
   $logger->info('Please reboot to make sure, libvirtd is coming up properly');
-  return;
+  return 0;
 }
 
 sub _create_osc_rc {
   my $self  = shift;
 
-  my $rc        = file($self->homedir,'.config/osc/oscrc');
-  my $rc_old    = file($self->homedir,'.oscrc');
+  my $rc        = path($self->homedir,'.config/osc/oscrc');
+  my $rc_old    = path($self->homedir,'.oscrc');
 
-  return 0 if (-e $rc_old);
-  return 0 if (-e $rc);
+  return 0 if ($rc_old->exists);
+  return 0 if ($rc->exists);
 
   my $choice = $self->_query_interactive(<<'EOF'
 No oscrc found in your home!
@@ -122,7 +129,7 @@ EOF
 
   return 0 unless $choice;
 
-  $rc->parent->mkpath unless -d $rc->parent;
+  $rc->parent->mkdir;
 
   if ( ! $self->apiurl ) {
      my $default = 'https://api.opensuse.org';
@@ -168,18 +175,18 @@ EOF
 ;
 
   $rc->spew($rc_txt);
-  $self->_chown($rc);
+  Kanku::File::chown($self->user, $rc);
   return 0;
 }
 
 sub _create_local_settings_dir {
-  my $self = shift;
+  my ($self) = @_;
 
-  my $dir  = dir($self->homedir,'.kanku');
+  my $dir  = path($self->homedir,'.kanku');
 
-  (-d $dir ) || $dir->mkpath();
+  $dir->mkdir();
 
-  return $self->_chown($dir);
+  return Kanku::File::chown($self->user, $dir);
 }
 
 sub _ask_for_user {

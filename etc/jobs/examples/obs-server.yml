@@ -15,7 +15,7 @@ tasks:
     options:
       # base_url: http://192.168.129.1
       # preferred_extension: qcow2
-      api_url: https://api.opensuse.org/public
+      obsurl: https://api.opensuse.org/public
       project: OBS:Server:Unstable
       package: OBS-Appliance:qcow2
       skip_all_checks: 1

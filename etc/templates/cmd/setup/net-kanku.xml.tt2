@@ -1,0 +1,15 @@
+<network connections='1'>
+  <name>kanku-net</name>
+  <forward mode='nat'>
+    <nat>
+      <port start='1024' end='65535'/>
+    </nat>
+  </forward>
+  <bridge name='virbr0' stp='on' delay='0'/>
+  <domain name='[% dns_domain_name %]' localOnly='yes'/>
+  <ip address='192.168.199.1' netmask='255.255.255.0'>
+    <dhcp>
+      <range start='192.168.199.18' end='192.168.199.254'/>
+    </dhcp>
+  </ip>
+</network>

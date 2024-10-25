@@ -20,8 +20,16 @@ use Moose;
 use Kanku::Config;
 use Kanku::Util::VM;
 
-use Path::Class::File;
-use Data::Dumper;
+sub gui_config {
+  [
+    {
+      param => 'wait_for_console',
+      type  => 'checkbox',
+      label => 'Wait for console'
+    },
+  ];
+}
+sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
 has [qw/
@@ -30,27 +38,17 @@ has [qw/
       login_pass
       management_interface
 /] => (is => 'rw',isa=>'Str');
-# TODO: implement wait_for_*
-has [qw/wait_for_network wait_for_console/] => (is => 'rw',isa=>'Bool',lazy=>1,default=>1);
-has [qw/allow_ip_change/] => (is => 'rw',isa=>'Bool',lazy=>1,default=>0);
-has [qw/timeout/] => (is => 'rw',isa=>'Int',lazy=>1,default=>600);
-has [qw/login_timeout/] => (is => 'rw',isa=>'Int',lazy=>1,default=>0);
 
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'wait_for_console',
-          type  => 'checkbox',
-          label => 'Wait for console'
-        },
-      ];
-  }
+has [qw/wait_for_network wait_for_console/] => (
+  is => 'rw',
+  isa=>'Bool',
+  lazy=>1,
+  default=>1,
 );
-sub distributable { 1 };
+
+has [qw/allow_ip_change/] => (is => 'rw', isa=>'Bool', lazy=>1, default=>0);
+has [qw/timeout/]         => (is => 'rw', isa=>'Int' , lazy=>1, default=>600);
+has [qw/login_timeout/]   => (is => 'rw', isa=>'Int' , lazy=>1, default=>0);
 
 sub prepare {
   my $self = shift;
@@ -112,6 +110,8 @@ sub execute {
   };
 }
 
+__PACKAGE__->meta->make_immutable;
+
 1;
 
 __END__
@@ -142,7 +142,7 @@ This handler reboots the VM and optional waits for network and console.
 
 
     wait_for_console : wait for console login
- 
+
     wait_for_network : wait until network is up again
 
     timeout :          wait only <seconds>
@@ -162,7 +162,7 @@ This handler reboots the VM and optional waits for network and console.
 =head1 DEFAULTS
 
     wait_for_console : 1 (true)
- 
+
     wait_for_network : 1 (true)
 
     timeout          : 600 seconds

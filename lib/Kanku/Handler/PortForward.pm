@@ -17,9 +17,19 @@
 package Kanku::Handler::PortForward;
 
 use Moose;
-use Kanku::Config;
+use Kanku::Config::Defaults;
 use Kanku::Util::IPTables;
 
+sub gui_config {
+  [
+    {
+      param => 'forward_port_list',
+      type  => 'text',
+      label => 'List of Forwarded Ports'
+    },
+  ];
+}
+sub distributable { 0 }
 with 'Kanku::Roles::Handler';
 
 has [qw/ipaddress domain_name forward_port_list host_interface/] => (is => 'rw',isa=>'Str');
@@ -31,34 +41,18 @@ has '+domain_name' => (
 
 has '+host_interface' => (
   lazy => 1,
-  default => sub {
-    my $pkg = __PACKAGE__;
-    my $cfg = Kanku::Config->instance()->config();
-    return  
-     $_[0]->job()->context()->{host_interface} 
-     || $cfg->{$pkg}->{host_interface}
-     || '' 
-   },
+  builder => '_build_host_interface',
 );
+sub _build_host_interface {
+  my ($self) = @_;
+  return
+    $self->job()->context()->{host_interface}
+    || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'host_interface');
+}
 
 has '+ipaddress' => (
   lazy => 1,
   default => sub { $_[0]->job()->context()->{ipaddress} || '' }
-);
-
-has gui_config => (
-  is => 'ro',
-  isa => 'ArrayRef',
-  lazy => 1,
-  default => sub {
-      [
-        {
-          param => 'forward_port_list',
-          type  => 'text',
-          label => 'List of Forwarded Ports'
-        },
-      ];
-  }
 );
 
 sub execute {
