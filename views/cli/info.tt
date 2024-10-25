@@ -2,10 +2,7 @@
 [% "Summary:" | color 'bold' %] [% info.summary %]
 
 [% "Description:" | color 'bold' %]
-
 [% info.description %]
-
-
 [% "Domain Name :" | color 'bold' %] [% domain_name %]
 [% "Default Job :" | color 'bold' %] [% default_job %]
 [% "Login User  :" | color 'bold' %] [% login_user %]
