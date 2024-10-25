@@ -1,3 +1,11 @@
+info:
+  summary: SHORT DESCRIPTION OF YOUR VAGRANT IMAGE BASED KankuFile
+  description: |+
+               # Here you can add a description of your KankuFile
+               # Please describe its purpose and what it's doing.
+               #
+               # Enjoy YLWK!
+
 domain_name: [% domain_name %]
 default_job: [% default_job %]
 ssh_user: vagrant
@@ -30,3 +38,15 @@ jobs:
           sudo test -d ~root/.ssh || sudo mkdir -p ~root/.ssh || true
           sudo cp .ssh/authorized_keys ~root/.ssh/ || true
         - echo "Just testing ssh connection"
+
+notifiers:
+  idm:
+    -
+      use_module: Kanku::Notifier::Console
+      options:
+        template: |+
+          [% USE Filter::ANSIColor 'color' %]
+          ****
+          **** Your text for [% context.ipaddress | color 'red' %] goes here
+          ****
+      states: succeed

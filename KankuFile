@@ -1,24 +1,27 @@
-summary: Kanku development jobs
-description: |+
-             jobs:
-               - kanku up -j sm # create tested kanku vm in server mode
-               - kanku up -j dm # create tested kanku vm in developer mode
-               - kanku up -j tm # create kanku vm in testing mode and run resonable test suites
-               - kanku up -j cl # cleanup - remove domains like `kanku destroy` does (for usage in job_groups)
+info:
+  summary: Kanku development jobs
+  description: |+
+               jobs:
+                 - kanku up -j sm # create tested kanku vm in server mode
+                 - kanku up -j dm # create tested kanku vm in developer mode
+                 - kanku up -j tm # create kanku vm in testing mode and run resonable test suites
+                 - kanku up -j cl # cleanup - remove domains like `kanku destroy` does (for usage in job_groups)
              
-             Enjoy!
+               Enjoy YLWK!
+
 domain_name: kanku-devel
 default_job: devel
 
 jobs:
  sm: !include KankuFile.d/server-mode.yml
  dm: !include KankuFile.d/developer-mode.yml
- tm:  !include KankuFile.d/test.yml
+ tm: !include KankuFile.d/test.yml
  cl:
    -
     use_module: Kanku::Handler::SetJobContext
    -
     use_module: Kanku::Handler::RemoveDomain
+
 job_groups:
  all:
    - tm

@@ -1,9 +1,9 @@
 [% USE Filter::ANSIColor 'color' %]
-[% "Summary:" | color 'bold' %] [% summary %]
+[% "Summary:" | color 'bold' %] [% info.summary %]
 
 [% "Description:" | color 'bold' %]
 
-[% description %]
+[% info.description %]
 
 
 [% "Domain Name :" | color 'bold' %] [% domain_name %]
