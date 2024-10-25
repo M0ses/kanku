@@ -59,14 +59,14 @@ job_groups:
     - [% default_job %]
 
 notifiers:
-  idm:
+  tasks:
     -
       use_module: Kanku::Notifier::Console
       options:
         template: |+
-          [% USE Filter::ANSIColor 'color' %]
+          [% "\[% USE Filter::ANSIColor 'color' %\]" %]
           ****
-          **** Your text for [% context.ipaddress | color 'red' %] goes here
+          **** Your text for [% "\[% context.ipaddress | color 'red' %\]" %] goes here
           ****
       states: succeed
 
