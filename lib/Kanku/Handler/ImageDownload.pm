@@ -64,12 +64,16 @@ sub execute {
       die "Neither vm_image_url nor obs_direct_url found in context"
     }
   }
-  my $cfg  = Kanku::Config->instance();
+
+  my $cache_dir  = Kanku::Config::Defaults->get(
+    'Kanku::Config::GlobalVars', 
+    'cache_dir',
+  );
 
   my $curl = Kanku::Util::CurlHttpDownload->new(
     url       => $self->url,
     etag      => $self->get_etag,
-    cache_dir => $cfg->cache_dir,
+    cache_dir => $cache_dir,
   );
 
 
