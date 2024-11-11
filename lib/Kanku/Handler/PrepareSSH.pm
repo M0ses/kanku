@@ -177,17 +177,26 @@ sub execute {
 
     # Hack for Fedora 33
     my $crypto_cfg = '/etc/crypto-policies/back-ends/opensshserver.config';
-    $con->cmd("[ -f $crypto_cfg ] && sed -i -E 's/(PubkeyAcceptedKeyTypes .*)/\\1,ssh-rsa/' $crypto_cfg");
+    $con->cmd("[ ! -f $crypto_cfg ] || sed -i -E 's/(PubkeyAcceptedKeyTypes .*)/\\1,ssh-rsa/' $crypto_cfg");
 
     # Set loglevel of vm's sshd to debug3
     if ($self->enable_daemon_debug) {
-      $con->cmd('[ -d /etc/ssh/sshd_config.d ] && echo "LogLevel DEBUG3" > /etc/ssh/sshd_config.d/loglevel.conf');
+      $con->cmd('[ ! -d /etc/ssh/sshd_config.d ] || echo "LogLevel DEBUG3" > /etc/ssh/sshd_config.d/loglevel.conf');
     }
 
-    # TODO: make dynamically switchable between systemV and systemd
-    $con->cmd("systemctl restart sshd.service");
+    # This is required because openssh-server service unit name depends on the distribution
+    # and calling by an alias/link may cause problems in ubuntu base distros
+    # opensuse/suse/fedora: sshd.service
+    # ubuntu/debian: ssh.service
+    $con->cmd(
+      'IFS=" " read -ra ADDR <<< '.
+      '`systemctl list-unit-files --all *ssh*.service|grep --color=none ssh.*\.service|grep -Pv "(alias|static|@)"` '.
+      '&& SSHD_SERVICE="${ADDR[0]}" '.
+      '&& export SSHD_SERVICE'
+    );
+    $con->cmd('test -n "$SSHD_SERVICE" && systemctl restart $SSHD_SERVICE || echo "SSHD_SERVICE empty"');
 
-    $con->cmd("systemctl enable --now sshd.service");
+    $con->cmd('test -n "$SSHD_SERVICE" && systemctl enable --now $SSHD_SERVICE || echo "SSHD_SERVICE empty"');
 
     $con->logout();
   }
