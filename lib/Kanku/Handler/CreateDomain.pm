@@ -489,15 +489,7 @@ sub _prepare_vm_via_console {
   $self->_setup_hostname($con);
 
   # make sure that dhcp server gets updated
-  if ( $self->management_interface ) {
-    $con->cmd(
-      "ifdown " . $self->management_interface,
-      "ifup " . $self->management_interface,
-    );
-  } else {
-    $logger->warn("No management_interface set. Your dhcp-server will not get updated hostname");
-  };
-
+  $con->network_restart;
 
   if ( ! $self->skip_network ) {
     %opts = (mode => 'console') if $self->management_interface or $self->running_remotely;

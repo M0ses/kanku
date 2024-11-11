@@ -39,6 +39,27 @@ has ['login_timeout'] => (is=>'rw', isa=>'Int', default => 300);
 has '+log_stdout' => (default=>1);
 has '+no_wait_for_bootloader' => (default=>0);
 
+has 'management_interface' => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  builder => 'guess_management_interface'
+);
+
+has 'context2env' => (
+  is      => 'rw',
+  isa     => 'HashRef',
+  lazy    => 1,
+  default => sub { {} },
+);
+
+has 'network_tooling' => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  builder => 'guess_network_tooling'
+);
+
 sub init {
   my $self = shift;
   my $cfg_ = Kanku::Config->instance();
@@ -79,7 +100,7 @@ sub init {
   $exp->expect(
     $timeout,
       [
-        'Escape character is \^\]' => sub {
+        qr'Escape character is ' => sub {
           $_[0]->clear_accum();
           $self->console_connected(1);
           $logger->debug("Found Console");
@@ -92,12 +113,25 @@ sub init {
     $exp->expect(
       5,
       [
-        qr/(Welcome to GRUB!|Press any key to continue.|ISOLINUX|Automatic boot in|The highlighted entry will be executed automatically in)/ => sub {
+        qr/(
+	  Welcome\ to\ GRUB!|
+	  Press\ any\ key\ to\ continue.|
+	  ISOLINUX|
+	  Automatic\ boot\ in|
+	  The\ highlighted\ entry\ will\ be\ executed\ automatically\ in|
+	  GNU\ GRUB\ \ version\ [\d.]+|
+          The\ selected\ entry\ will\ be\ started\ automatically\ in
+	)/smx => sub {
           $logger->debug("Seen bootloader");
           $self->bootloader_seen(1);
-          if ($_[0]->match =~ /(Press any key to continue\.|The highlighted entry will be executed automatically in)/) {
+	  my $qr = qr{(
+	    GNU\ GRUB\ \ version\ [\d.]+|
+            Press\ any\ key\ to\ continue\.|
+            The\ highlighted\ entry\ will\ be\ executed\ automatically\ in
+	  )}smx;
+          if ($_[0]->match =~ $qr) {
+            $logger->debug("Seen grub bootloader");
             $self->grub_seen(1);
-            $logger->debug("Seen bootloader grub");
           }
         }
       ]
@@ -184,6 +218,10 @@ sub login {
       ],
   );
   $exp->send("export TERM=dumb\n");
+  for my ($env, $val) (each %{$self->context2env}) {
+    $val =~ s/'/\'/g;
+    $exp->send("export $env='$val'\n");
+  }
 
   my $hn = $self->short_hostname();
   my $prompt = $self->prompt_regex;
@@ -358,11 +396,8 @@ sub get_ipaddress {
 
   my $wait         = $opts{timeout};
   my $ipaddress    = undef;
-  my $type_output  = $self->cmd("type -P ip wicked nmcli");
-  my @tmp          = split /\r\n/, $type_output->[0], 3;
-  my $cmd          = $tmp[1];
-  my @cmd_splitted = split '/', $cmd;
-  my $cmd_short    = pop @cmd_splitted;
+  my $cmd          = $self->guess_network_tooling;
+  my $cmd_short    = $cmd->basename;
 
   my %cmd2func = (
     ip => sub {
@@ -392,7 +427,7 @@ sub get_ipaddress {
 
       $logger->debug("  -- Output:\n".Dumper($result));
       my @lines = split /\r\n/, $result->[0];
-      my @addr = map { ($_ =~ /^IP4.ADDRESS[1]:\s+([0-9.]+)\//) ? $1 : ()  } @lines;
+      my @addr = map {$_ =~ qr{^IP4.ADDRESS\[1\]:\s+([\d.]+)/?.*$} ? $1 : ()} @lines;
       return $addr[0];
     },
   );
@@ -424,7 +459,47 @@ sub get_ipaddress {
   return $ipaddress
 }
 
+sub guess_management_interface {
+  my ($self) = @_;
+  my $logger = $self->logger;
 
+  my $out = $self->cmd("ls -1 /sys/class/net/");
+  my @lines = split(/\r?\n/, $out->[0]);
+  # remove command line 'ls -1 /sys/class/net/'
+  shift @lines;
+
+  $self->management_interface(
+    [map { $_ =~ /^(em\d+|lan\d+|eth\d+|en.*)/ } @lines]->[0] ||
+    q{}
+  );
+
+  $logger->debug("Guessed management_interface: ".($self->management_interface||'NONE'));
+
+  return $self->management_interface;
+}
+
+sub guess_network_tooling {
+  my ($self) = @_;
+  my $type_output  = $self->cmd("type -P ip wicked nmcli||true");
+  my @tmp          = split /\r\n/, $type_output->[0], 3;
+  # use index no. 1 because 0 contains the command `type -P ...`
+  my $cmd          = path($tmp[1]);
+  return $cmd;
+}
+
+sub network_restart {
+  my ($self) = @_;
+  my %cmd2func = (
+    ip     => "ifdown %s;ifup %s",
+    wicked => "ifdown %s;ifup %s",
+    nmcli  => "nmcli device disconnect %s;nmcli device connect %s",
+  );
+  my $cmd      = $self->network_tooling;
+  my $template  = $cmd2func{$cmd->basename};
+
+  $self->cmd(sprintf($template, $self->management_interface, $self->management_interface));
+  return;
+}
 __PACKAGE__->meta->make_immutable;
 
 1;
