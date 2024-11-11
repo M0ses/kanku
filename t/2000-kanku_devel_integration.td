@@ -7,7 +7,7 @@ LOG=/tmp/kanku-up.log
 echo -n > $LOG
 
 [ -f $HOME/.ssh/id_rsa ] || ssh-keygen -t rsa -b 4086 -N '' -f $HOME/.ssh/id_rsa
-cp /tmp/kanku/KankuFile.examples/KankuFile.simple $TDIR/KankuFile
+cp /tmp/kanku/t/fixtures/KankuFile $TDIR/KankuFile
 set -e
 kanku help
 eval `ssh-agent`

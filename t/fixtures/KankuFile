@@ -1,0 +1,29 @@
+domain_name: kanku-test-simple
+default_job: tasks
+login_user: root
+login_pass: kankudai
+
+jobs:
+ tasks:
+  -
+    use_module: Kanku::Handler::OBSCheck
+    options:
+      project: devel:kanku:images
+      repository: images_leap_15_6
+      package: openSUSE-Leap-15.6-JeOS
+      use_oscrc: 0
+  -
+    use_module: Kanku::Handler::ImageDownload
+  -
+    use_module: Kanku::Handler::CreateDomain
+    options:
+      memory: 2097152
+      vcpu: 2
+      use_9p: 1
+  -
+    use_module: Kanku::Handler::PrepareSSH
+  -
+    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    options:
+      commands:
+        - echo "my test here" > /tmp/test.log
