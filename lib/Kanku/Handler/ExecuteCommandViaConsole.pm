@@ -28,6 +28,13 @@ has [qw/domain_name login_user login_pass/] => (is=>'rw',isa=>'Str',lazy=>1,defa
 has timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>3600);
 has commands => (is=>'rw',isa=>'ArrayRef',default=>sub { [] });
 
+has context2env => (
+  is      => 'rw',
+  isa     => 'HashRef',
+  lazy    => 1,
+  default => sub { {} },
+);
+
 sub prepare {
   my $self = shift;
   my $ctx  = $self->job()->context();
@@ -48,6 +55,9 @@ sub execute {
   my $con;
   my $results;
 
+  my %context2env;
+  $context2env{uc $_} = $ctx->{$_} for (keys %{$self->context2env});
+
   $con = Kanku::Util::VM::Console->new(
         domain_name => $self->domain_name,
         login_user  => $self->login_user(),
@@ -57,6 +67,7 @@ sub execute {
         log_file    => $ctx->{log_file} || q{},
         log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
         no_wait_for_bootloader => 1,
+	context2env => \%context2env,
   );
 
   $con->init();
