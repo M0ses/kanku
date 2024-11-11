@@ -50,12 +50,12 @@ sub run {
   my $logger  = $self->logger;
   my $config  = $self->kankufile_config;
 
-  if ($config->{info}) {
-    $self->print_formatted($config);
-  } else {
+  if (! exists $config->{info}) {
     $logger->error('Could not find description in KankuFile');
+    return 1;
   }
 
+  $self->print_formatted($config);
   return 0;
 }
 
