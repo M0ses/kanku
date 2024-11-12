@@ -45,7 +45,7 @@ parameter 'config' => (
 );
 
 
-option '+format' => (default => 'view');
+option '+format' => (default => 'none');
 
 has template => (
   is   => 'rw',
