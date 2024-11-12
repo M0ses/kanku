@@ -187,6 +187,7 @@ Requires:       perl(Archive::Cpio)
 Requires:       perl(LWP::Protocol::https)
 Requires:       perl(Mail::Sendmail)
 Requires:       perl(UUID)
+Requires:       perl(User::pwent)
 Requires:       tar
 Requires:       bsdtar
 Requires:       procps
