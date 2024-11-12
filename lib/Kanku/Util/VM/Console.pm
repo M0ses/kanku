@@ -218,7 +218,7 @@ sub login {
       ],
   );
   $exp->send("export TERM=dumb\n");
-  for my ($env, $val) (each %{$self->context2env}) {
+  while (my ($env, $val) = each %{$self->context2env}) {
     $val =~ s/'/\'/g;
     $exp->send("export $env='$val'\n");
   }
