@@ -33,7 +33,7 @@ my $defaults =    {
     host_interface => 'eth0',
     arch           => $arch,
     obsurl         => 'https://api.opensuse.org/public',
-    base_url       => 'https://cdn.opensuse.org/repositories/',
+    base_url       => 'http://download.opensuse.org/repositories/',
   },
   'Kanku::Util::IPTables' =>
   {
