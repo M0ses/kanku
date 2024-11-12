@@ -23,7 +23,7 @@ info:
 guest:
   url: https://[% ctx.ipaddress %]/kanku/#/job_history/1
 domain_name: kanku-devel
-default_job: devel
+default_job: dm
 
 jobs:
  sm: !include KankuFile.d/server-mode.yml
