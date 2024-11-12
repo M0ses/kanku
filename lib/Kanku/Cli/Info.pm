@@ -49,14 +49,14 @@ sub run {
   Kanku::Config->initialize(class=>'KankuFile', file=>$self->file);
   my $logger  = $self->logger;
   my $config  = $self->kankufile_config;
-
+  my $rc      = 0;
   if (! exists $config->{info}) {
-    $logger->error('Could not find description in KankuFile');
-    return 1;
+    $logger->warn('Could not find description in KankuFile');
+    $rc = 1;
   }
 
   $self->print_formatted($config);
-  return 0;
+  return $rc;
 }
 
 __PACKAGE__->meta->make_immutable;
