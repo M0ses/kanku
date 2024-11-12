@@ -32,6 +32,7 @@ use Template;
 
 with 'Kanku::Roles::Logger';
 
+use Kanku::Util;
 use Kanku::Util::VM::Console;
 use Kanku::Util::VM::Image;
 
