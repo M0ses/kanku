@@ -55,7 +55,7 @@ has 'context2env' => (
 
 has 'network_tooling' => (
   is      => 'rw',
-  isa     => 'Str',
+  isa     => 'Object',
   lazy    => 1,
   builder => 'guess_network_tooling'
 );
