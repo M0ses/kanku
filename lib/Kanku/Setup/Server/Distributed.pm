@@ -3,6 +3,7 @@ package Kanku::Setup::Server::Distributed;
 use Moose;
 use Path::Tiny;
 use Net::Domain qw/hostfqdn/;
+use Kanku::Util;
 
 with 'Kanku::Setup::Roles::Common';
 with 'Kanku::Setup::Roles::Server';

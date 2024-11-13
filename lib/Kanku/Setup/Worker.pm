@@ -52,8 +52,6 @@ sub setup {
 
   $self->_create_ssh_keys;
 
-  #$self->_setup_rabbitmq;
-
   $self->_setup_nested_kvm;
 
   my $gconf = "/etc/kanku/kanku-config.yml";
@@ -71,24 +69,17 @@ sub setup {
        rabbitmq_pass  => $self->mq_pass,
        rabbitmq_vhost => $self->mq_vhost,
        rabbitmq_host  => $self->mq_host || 'localhost',
-       #cacertfile     => $self->cacertfile,
-       #ovs_ip_prefix  => $self->ovs_ip_prefix,
        cache_dir      => '/var/cache/kanku',
     }
   );
 
   $logger->info("Created $gconf!");
 
-  #$self->_create_default_pool;
-
-  #$self->_create_default_network;
-
   $self->_setup_ovs_hooks;
 
   $logger->info("Server mode setup successfully finished!");
   $logger->info("To make sure libvirtd is coming up properly we recommend a reboot");
 
-  #$self->logger->fatal("PLEASE REMEMBER YOUR CA PASSWORD: ".$self->ca_pass) if $self->ca_pass;
   $logger->warn('TODO: create kanku-config.yml');
   $logger->warn('TODO: get ovs networks from master');
   $logger->warn('TODO: install keys in /root/.ssh/authorized keys');

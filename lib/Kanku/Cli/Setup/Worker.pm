@@ -14,7 +14,7 @@
 # Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA
 #
-package Kanku::Cli::Setup;
+package Kanku::Cli::Setup::Worker;
 
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
@@ -29,38 +29,13 @@ use Sys::Hostname;
 use Net::Domain qw/hostfqdn/;
 
 use Kanku::Schema;
-use Kanku::Setup::Devel;
-use Kanku::Setup::Server::Distributed;
-use Kanku::Setup::Server::Standalone;
 use Kanku::Setup::Worker;
 
-command_short_description  'Setup local environment to work as server or developer mode.';
+command_short_description  'Setup local environment as kanku worker';
 
 command_long_description   '
-Setup local environment to work as server or developer mode:
-Installation wizard which asks you several questions,
-how to configure your machine.
-
+Setup local environment as kanku worker.
 ';
-
-option 'server' => (
-    isa           => 'Bool',
-    is            => 'rw',
-    cmd_aliases   => ['distributed'],
-    documentation => 'Run setup in server mode',
-);
-
-option 'devel' => (
-    isa           => 'Bool',
-    is            => 'rw',
-    documentation => 'Run setup in developer mode',
-);
-
-option 'worker' => (
-    isa           => 'Bool',
-    is            => 'rw',
-    documentation => 'Run setup in worker mode',
-);
 
 option 'user' => (
     isa           => 'Str',
@@ -80,24 +55,6 @@ option 'apiurl' => (
     is            => 'rw',
     documentation => 'url to your obs api',
     default       => 'https://api.opensuse.org',
-);
-
-option 'osc_user' => (
-    isa           => 'Str',
-    is            => 'rw',
-    #cmd_aliases   => 'X',
-    documentation => 'login user for obs api',
-    lazy          => 1,
-    default       => q{},
-);
-
-option 'osc_pass' => (
-    isa           => 'Str',
-    is            => 'rw',
-    #cmd_aliases   => 'X',
-    documentation => 'login password obs api',
-    lazy          => 1,
-    default       => q{},
 );
 
 option 'dsn' => (
@@ -183,12 +140,6 @@ option 'ovs_ip_prefix' => (
     documentation => 'IP network prefix for openVSwitch setup (default 192.168.199)',
 );
 
-option 'master' => (
-    isa           => 'Str|Undef',
-    is            => 'rw',
-    documentation => 'IP address of the master server',
-);
-
 option 'host_interface' => (
     isa           => 'Str',
     is            => 'rw',
@@ -206,89 +157,29 @@ sub run {
     return 1;
   }
 
-  ### Get information
-  # ask for mode
-  $self->_ask_for_install_mode() unless ($self->devel or $self->server or $self->worker);
-
-  my $setup;
-
-  if ($self->server) {
-    $setup = Kanku::Setup::Server::Distributed->new(
-      images_dir      => $self->images_dir,
-      apiurl          => $self->apiurl,
-      _ssl            => $self->ssl,
-      _apache         => $self->apache,
-      _devel          => 0,
-      mq_user         => $self->mq_user,
-      mq_vhost        => $self->mq_vhost,
-      mq_pass         => $self->mq_pass,
-      dns_domain_name => $self->dns_domain_name,
-      host_interface  => $self->host_interface,
-    );
-    $setup->ovs_ip_prefix($self->ovs_ip_prefix) if $self->ovs_ip_prefix;
-  } elsif ($self->devel) {
-    $setup = Kanku::Setup::Devel->new(
-      user            => $self->user,
-      images_dir      => $self->images_dir,
-      apiurl          => $self->apiurl,
-      osc_user        => $self->osc_user,
-      osc_pass        => $self->osc_pass,
-      _ssl            => $self->ssl,
-      _apache         => $self->apache,
-      _devel          => 1,
-      interactive     => $self->interactive,
-      dns_domain_name => $self->dns_domain_name,
-      host_interface  => $self->host_interface,
-    );
-  } elsif ($self->worker) {
-    $setup = Kanku::Setup::Worker->new(
-      master          => $self->master,
-    );
-  } else {
-    croak('No valid setup mode found');
-  }
+  $logger->fatal('Not completly implemented! Use on your own risk!');
+  $logger->warn('If you like to proceed type "yes" and press <ENTER>!');
+  my $ask = <STDIN>;
+  return 1 unless $ask =~ /^yes/i;
+  my $setup = Kanku::Setup::Worker->new(
+    images_dir      => $self->images_dir,
+    apiurl          => $self->apiurl,
+    _ssl            => $self->ssl,
+    _apache         => $self->apache,
+    _devel          => 0,
+    mq_user         => $self->mq_user,
+    mq_vhost        => $self->mq_vhost,
+    mq_pass         => $self->mq_pass,
+    dns_domain_name => $self->dns_domain_name,
+    host_interface  => $self->host_interface,
+  );
+  $setup->ovs_ip_prefix($self->ovs_ip_prefix) if $self->ovs_ip_prefix;
 
   $setup->dsn($self->dsn) if $self->dsn;
 
   return $setup->setup();
 }
 
-sub _ask_for_install_mode {
-  my $self  = shift;
-
-  print <<'EOF';
-Please select installation mode :
-
-(1) server
-(2) devel
-(3) worker
-
-(9) Quit setup
-EOF
-
-  while (1) {
-    my $answer = <STDIN>;
-    chomp $answer;
-    exit 0 if ( $answer == 9 );
-
-    if ( $answer == 1 ) {
-      $self->server(1);
-      last;
-    }
-
-    if ( $answer == 2 ) {
-      $self->devel(1);
-      last;
-    }
-
-    if ( $answer == 3 ) {
-      $self->worker(1);
-      last;
-    }
-  }
-  return;
-}
-
-__PACKAGE__->meta->make_immutable();
+#__PACKAGE__->meta->make_immutable();
 
 1;
