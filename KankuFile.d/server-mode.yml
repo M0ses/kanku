@@ -49,7 +49,7 @@
         - zypper -n in rabbitmq-server rabbitmq-server-plugins openvswitch kanku openssh-clients
         - rm -rf /usr/lib/kanku/lib
         - make -C /tmp/kanku install 2>&1 |tee /tmp/make.log
-        - /usr/bin/kanku setup --apache --distributed --ssl > /tmp/setup-server.log 2>&1 || { cat /tmp/setup-server.log; exit 1; }
+        - kanku setup server --apache --ssl > /tmp/setup.log 2>&1 || { cat /tmp/setup.log; exit 1; }
         - cp -r /tmp/kanku/etc/jobs/examples/* /etc/kanku/jobs/
         - cp /tmp/kanku/etc/job_groups/examples/* /etc/kanku/job_groups/
         - systemctl enable --now kanku-iptables
@@ -63,3 +63,4 @@
         - rcapache2 restart
         - systemctl enable --now kanku-worker
         - /tmp/kanku/contrib/wait_for_job.sh
+        - prove -v /tmp/kanku/t/*.ts
