@@ -647,6 +647,18 @@ kanku guests which are using the 'autostart' flag.
 %{_unitdir}/kanku-iptables.service
 %{_sbindir}/rckanku-iptables
 
+%package tests
+Summary:        Test cases for kanku
+Requires:       kanku-common = %{version}
+
+%description tests
+Test cases for kanku to run in a installed and configured kanku environment
+SEE README.md for further information.
+
+%files tests
+%dir /usr/share/kanku
+/usr/share/kanku/t/
+
 %changelog
 
 %changelog cli
@@ -668,3 +680,5 @@ kanku guests which are using the 'autostart' flag.
 %changelog iptables
 
 %changelog worker
+
+%changelog tests

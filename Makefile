@@ -58,7 +58,7 @@ all:
 install_arch_templates:
 	install -m 644 etc/templates/default-vm.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/default-vm.tt2
 
-install: install_dirs install_full_dirs install_services install_docs configs templates public views bashcomp urlwrapper install_arch_templates
+install: install_dirs install_full_dirs install_services install_docs configs templates public views bashcomp urlwrapper install_arch_templates install_tests
 	install -m 644 dist/profile.d-kanku.sh $(DESTDIR)/etc/profile.d/kanku.sh
 	install -m 644 dist/tmpfiles.d-kanku $(DESTDIR)/usr/lib/tmpfiles.d/kanku.conf
 	install -m 644 dist/_etc_apache2_conf.d_kanku-worker.conf $(DESTDIR)/etc/apache2/conf.d/kanku-worker.conf
@@ -165,6 +165,9 @@ install_docs:
 	install -m 644 docs/README.setup-ovs.md $(_DOCDIR)/contrib/
 	install -m 644 docs/README.setup-worker.md $(_DOCDIR)/contrib/
 
+install_tests:
+	cp -rv ./t/ $(DESTDIR)/usr/share/kanku/
+
 clean:
 	rm -rf kanku-*.tar.xz
 
@@ -194,4 +197,4 @@ urlwrapper:
 test-kankufiles:
 	make -C KankuFile.examples/ test-kankufiles
 
-.PHONY: dist install lib cover check test public views bin sbin
+.PHONY: dist install lib cover check test public views bin sbin install_tests
