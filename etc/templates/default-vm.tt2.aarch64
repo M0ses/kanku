@@ -8,9 +8,8 @@
     <partition>/machine</partition>
   </resource>
   <os>
-    <type arch='aarch64' machine='virt-5.1'>hvm</type>
+    <type arch='[% domain.arch || 'aarch64' %]' machine='virt-8.2'>hvm</type>
     <loader readonly='yes' type='pflash'>/usr/share/qemu/aavmf-aarch64-code.bin</loader>
-    <bios useserial='yes'/>
   </os>
   <features>
     <acpi/>
@@ -26,9 +25,7 @@
     <controller type='pci' index='0' model='pcie-root'/>
     [% domain.disk_controllers_xml %]
     <controller type='usb' index='0' model='qemu-xhci'/>
-    <controller type='virtio-serial' index='0'/>
     <controller type='pci' index='1' model='pcie-root-port'/>
-    </controller>
     <interface type='network'>
       <source network='[% domain.network_name %]' bridge='[% domain.network_bridge %]'/>
       <model type='virtio'/>
