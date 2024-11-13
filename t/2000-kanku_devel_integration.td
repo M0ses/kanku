@@ -8,11 +8,9 @@ echo -n > $LOG
 
 [ -f $HOME/.ssh/id_rsa ] || ssh-keygen -t rsa -b 4086 -N '' -f $HOME/.ssh/id_rsa
 cp /tmp/kanku/t/fixtures/KankuFile $TDIR/KankuFile
-set -e
-kanku help
+cd $TDIR
 eval `ssh-agent`
 ssh-add
-cd $TDIR
 
 KOPTS="--ll TRACE"
 tests=0
@@ -20,14 +18,17 @@ tests=0
 function test_kanku_cli {
   test=$(($test+1))
   not=''
-  kanku $@ $KOPTS 2>&1 >> $LOG
+  cmd="kanku $@ $KOPTS"
+  [ -n "$TEST_VERBOSE" ] && echo "COMMAND: >>$cmd<<" >&2
+  $cmd 2>&1 >> $LOG
   [ $? -gt 0 ] && not=not
   echo $not"ok $test - Checking '$@'" |tee -a $LOG
   return 0
 }
 
-echo "1..6"
+echo "1..7"
 
+test_kanku_cli help
 test_kanku_cli destroy
 test_kanku_cli up
 test_kanku_cli ip
