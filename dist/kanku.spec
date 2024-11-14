@@ -311,14 +311,6 @@ Command line client for kanku, mainly used for setup tasks
 and in developer mode.
 
 %post cli
-    cat >> %{_localstatedir}/adm/update-messages/%{name}-%{version}-%{release}-something << EOF
-
-WARNING: kankus iptables/ss/netstat handling changed.
-
-Please re-run "kanku setup --devel" if you are using kanku in developer mode.
-
-
-EOF
 
 %files cli
 %dir /usr/share/kanku/views/cli/
