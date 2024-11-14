@@ -10,13 +10,13 @@ use Path::Tiny qw/path tempdir/;
 
 my $basename = path($0)->basename;
 my $basedir  = $FindBin::Bin;
-my $logdir   = path("$basedir/log");
-my $logfile  = path("$logdir/$basename.log");
-my $tempbase = path("$basedir/tmp");
+my $tempbase = tempdir();
+my $logdir   = path($tempbase, 'log');
+my $logfile  = path($logdir, "$basename.log");
 my $cwd      = Path::Tiny->cwd;
 
 $logdir->mkdir unless $logdir->exists;
-$tempbase->mkdir unless $tempbase->mkdir;
+$tempbase->mkdir unless $tempbase->exists;
 
 $logfile->spew(q{});
 
@@ -35,7 +35,7 @@ my @tcs = (
 
 plan tests => scalar(@tcs);
 
-my $tmpdir = tempdir(DIR=>$tempbase);
+my $tmpdir = path($tempbase, 'tmp');
 chdir $tmpdir;
 
 for my $tc (@tcs) {

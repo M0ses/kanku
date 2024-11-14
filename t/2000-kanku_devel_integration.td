@@ -8,6 +8,7 @@ echo -n > $LOG
 
 [ -f $HOME/.ssh/id_rsa ] || ssh-keygen -t rsa -b 4086 -N '' -f $HOME/.ssh/id_rsa
 cp /tmp/kanku/t/fixtures/KankuFile $TDIR/KankuFile
+chmod 777 $TDIR
 cd $TDIR
 eval `ssh-agent`
 ssh-add

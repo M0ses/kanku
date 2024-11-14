@@ -48,7 +48,7 @@
   use_module: Kanku::Handler::ExecuteCommandViaSSH
   options:
     commands:
-      - zypper -n in kanku-cli
+      - zypper -n in kanku-cli kanku-tests
       - make -C /tmp/kanku install configs
       - "systemctl stop libvirtd;perl -p -i -e 's/192.168.122/192.168.128/g' /etc/libvirt/qemu/networks/default.xml ; systemctl start libvirtd"
       - kanku setup devel --traceback --ll TRACE --user kanku > /tmp/setup.log 2>&1 || { cat /tmp/setup.log; exit 1; }
@@ -58,4 +58,4 @@
   options:
     username: kanku
     commands:
-      - prove -v /tmp/kanku/t/*.td
+      - prove -v /usr/share/kanku/t/*.td
