@@ -3,11 +3,12 @@
 [ -d /tmp/prj ] || mkdir -p /tmp/prj
 TDIR=`mktemp -d -p /tmp/prj`
 LOG=/tmp/kanku-up.log
+BASEDIR=`dirname $0`
 
 echo -n > $LOG
 
 [ -f $HOME/.ssh/id_rsa ] || ssh-keygen -t rsa -b 4086 -N '' -f $HOME/.ssh/id_rsa
-cp /tmp/kanku/t/fixtures/KankuFile $TDIR/KankuFile
+cp $BASEDIR/fixtures/KankuFile $TDIR/KankuFile
 chmod 777 $TDIR
 cd $TDIR
 eval `ssh-agent`
