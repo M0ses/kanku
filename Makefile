@@ -71,7 +71,7 @@ bashcomp:
 	#PERL5LIB=./lib ./bin/kanku bash_completion > $(DESTDIR)/etc/bash_completion.d/kanku.sh
 	cp dist/_etc_bash_completion.d_kanku.sh $(DESTDIR)/etc/bash_completion.d/kanku.sh
 
-configs: config_dirs config_files
+configs: config_dirs config_files config_examples
 
 config_dirs:
 	#
@@ -84,6 +84,9 @@ config_files:
 	for i in $(CONFIG_FILES);do \
 		cp -rv ./etc/$$i $(DESTDIR)/etc/kanku/$$i ;\
 	done
+
+config_examples:
+	cp -rv ./etc/jobs/examples/* $(DESTDIR)/etc/kanku/jobs/
 
 templates: template_dirs template_files
 

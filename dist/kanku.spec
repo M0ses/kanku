@@ -651,6 +651,48 @@ SEE README.md for further information.
 %dir /usr/share/kanku
 /usr/share/kanku/t/
 
+%package config-example-jobs
+Summary:        Example server job configs
+Requires:       kanku-common = %{version}
+
+%description config-example-jobs
+Example server job configs
+
+%post config-example-jobs
+
+%files config-example-jobs
+%dir /etc/kanku/jobs/include.d
+/etc/kanku/jobs/include.d/mtu-1450.yml
+/etc/kanku/jobs/dki-debian-10.yml
+/etc/kanku/jobs/dki-debian-unstable.yml
+/etc/kanku/jobs/dki-fedora_32.yml
+/etc/kanku/jobs/dki-fedora_33.yml
+/etc/kanku/jobs/dki-fedora_34.yml
+/etc/kanku/jobs/dki-fedora_35.yml
+/etc/kanku/jobs/dki-opensuse-15_0.yml
+/etc/kanku/jobs/dki-opensuse-15_1.yml
+/etc/kanku/jobs/dki-opensuse-15_2.yml
+/etc/kanku/jobs/dki-opensuse-15_3.yml
+/etc/kanku/jobs/dki-opensuse-42_1.yml
+/etc/kanku/jobs/dki-opensuse-42_2.yml
+/etc/kanku/jobs/dki-opensuse-42_3.yml
+/etc/kanku/jobs/dki-opensuse-tumbleweed-btrfs.yml
+/etc/kanku/jobs/dki-opensuse-tumbleweed-ext4.yml
+/etc/kanku/jobs/dki-sles-12_2.yml
+/etc/kanku/jobs/dki-sles-12_3.yml
+/etc/kanku/jobs/dki-sles-12_4.yml
+/etc/kanku/jobs/dki-sles-12_5.yml
+/etc/kanku/jobs/dki-ubuntu-focal.yml
+/etc/kanku/jobs/kanku-devel-debian-unstable.yml
+/etc/kanku/jobs/kanku-devel-fedora.yml
+/etc/kanku/jobs/kanku-devel-ubuntu.yml
+/etc/kanku/jobs/kanku-devel.yml
+/etc/kanku/jobs/kanku-server.yml
+/etc/kanku/jobs/multi-network.yml
+/etc/kanku/jobs/obs-server-26.yml
+/etc/kanku/jobs/obs-server.yml
+/etc/kanku/jobs/sles11sp3.yml
+
 %changelog
 
 %changelog cli
@@ -674,3 +716,5 @@ SEE README.md for further information.
 %changelog worker
 
 %changelog tests
+
+%changelog config-example-jobs
