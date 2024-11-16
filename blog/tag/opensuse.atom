@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://m0ses.github.io/kanku/blog/tag/opensuse/</id>
+    <id>https://kanku.info/blog/tag/opensuse/</id>
     <title>Kanku</title>
     <updated>2024-04-25T09:40:24Z</updated>
-    <link href="https://m0ses.github.io/kanku/blog/tag/opensuse.atom" rel="self" />
-    <link href="https://m0ses.github.io/kanku/blog/tag/opensuse/" rel="alternate" />
+    <link href="https://kanku.info/blog/tag/opensuse.atom" rel="self" />
+    <link href="https://kanku.info/blog/tag/opensuse/" rel="alternate" />
     <generator version="0.098">Statocles</generator>
 
     <entry>
-        <id>https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</id>
+        <id>https://kanku.info/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</id>
         <title>HowTo use &#39;official&#39; openSUSE Images with kanku</title>
         <author><name>M0ses</name></author>
-        <link href="https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/" rel="alternate" />
+        <link href="https://kanku.info/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/" rel="alternate" />
         <content type="html"><![CDATA[
 	      <p>In this blog post we will describe the steps to create a KankuFile using a &#39;official&#39; openSUSE Image.</p>
 
@@ -19,12 +19,12 @@
 
 <p>SEE our <a href="https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.openSUSE-Leap-15.5-official">example KankuFile</a></p>
 
-                <p><a href="https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/#section-2">Continue reading...</a></p>
+                <p><a href="https://kanku.info/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/#section-2">Continue reading...</a></p>
 
                 <p>Tags:
-                    <a href="https://m0ses.github.io/kanku/blog/tag/howto/">howto</a>
-                    <a href="https://m0ses.github.io/kanku/blog/tag/kankufile/">KankuFile</a>
-                    <a href="https://m0ses.github.io/kanku/blog/tag/opensuse/">openSUSE</a>
+                    <a href="https://kanku.info/blog/tag/howto/">howto</a>
+                    <a href="https://kanku.info/blog/tag/kankufile/">KankuFile</a>
+                    <a href="https://kanku.info/blog/tag/opensuse/">openSUSE</a>
                 </p>
 
         ]]></content>

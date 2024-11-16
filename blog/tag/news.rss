@@ -2,14 +2,14 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Kanku</title>
-        <link>https://m0ses.github.io/kanku/blog/tag/news/</link>
-        <atom:link href="https://m0ses.github.io/kanku/blog/tag/news.rss" rel="self" type="application/rss+xml" />
+        <link>https://kanku.info/blog/tag/news/</link>
+        <atom:link href="https://kanku.info/blog/tag/news.rss" rel="self" type="application/rss+xml" />
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
             <title>Kanku Project Page refurbished</title>
-            <link>https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/</guid>
+            <link>https://kanku.info/blog/2022/07/12/kanku-project-page-refurbished/</link>
+            <guid>https://kanku.info/blog/2022/07/12/kanku-project-page-refurbished/</guid>
             <description><![CDATA[
                   <p><strong>Welcome to the new project page</strong></p>
 
@@ -17,10 +17,10 @@
 
 <p>We decided to switch from plain HTML to a Static Site Generator for the following reasons:</p>
 
-                    <p><a href="https://m0ses.github.io/kanku/blog/2022/07/12/kanku-project-page-refurbished/#section-2">Continue reading...</a></p>
+                    <p><a href="https://kanku.info/blog/2022/07/12/kanku-project-page-refurbished/#section-2">Continue reading...</a></p>
 
                     <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/news/">news</a>
+                        <a href="https://kanku.info/blog/tag/news/">news</a>
                     </p>
 
             ]]></description>

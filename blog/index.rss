@@ -2,64 +2,29 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Kanku</title>
-        <link>https://m0ses.github.io/kanku/blog/</link>
-        <atom:link href="https://m0ses.github.io/kanku/blog/index.rss" rel="self" type="application/rss+xml" />
+        <link>https://kanku.info/blog/</link>
+        <atom:link href="https://kanku.info/blog/index.rss" rel="self" type="application/rss+xml" />
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
-            <title>Howto use my own VM XML template in kanku</title>
-            <link>https://m0ses.github.io/kanku/blog/2024/05/17/howto-use-my-own-vm-xml-template-in-kanku/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2024/05/17/howto-use-my-own-vm-xml-template-in-kanku/</guid>
-            <description><![CDATA[
-                  <p><strong>Problem:</strong></p>
-
-<p>I would like to customize the libvirt XML description for my new kanku VM.</p>
-
-<p><strong>TL;DR</strong></p>
-
-<p>Only two steps are required to use your own XML template</p>
-
-<ul>
-<li>Create a new VM XML template</li>
-<li>Configure your kanku job to use your new template in your
-<ul>
-<li>KankuFile</li>
-<li>or /etc/kanku/jobs/<myjob>.yml</myjob></li>
-</ul></li>
-</ul>
-
-                    <p><a href="https://m0ses.github.io/kanku/blog/2024/05/17/howto-use-my-own-vm-xml-template-in-kanku/#section-2">Continue reading...</a></p>
-
-                    <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/howto/">howto</a>
-                        <a href="https://m0ses.github.io/kanku/blog/tag/kankufile/">KankuFile</a>
-                        <a href="https://m0ses.github.io/kanku/blog/tag/template/">template</a>
-                    </p>
-
-            ]]></description>
-            <pubDate>
-                Fri, 17 May 2024 15:40:24 +0000
-            </pubDate>
-        </item>
-        <item>
             <title>RELEASE 0.17.1</title>
-            <link>https://m0ses.github.io/kanku/blog/2024/05/16/release-0.17.1/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2024/05/16/release-0.17.1/</guid>
+            <link>https://kanku.info/blog/2024/05/03/release-0.17.1/</link>
+            <guid>https://kanku.info/blog/2024/05/03/release-0.17.1/</guid>
             <description><![CDATA[
 
                     <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
+                        <a href="https://kanku.info/blog/tag/release/">release</a>
                     </p>
 
             ]]></description>
             <pubDate>
-                Thu, 16 May 2024 09:07:39 +0000
+                Fri, 03 May 2024 15:07:39 +0000
             </pubDate>
         </item>
         <item>
             <title>HowTo use &#39;official&#39; openSUSE Images with kanku</title>
-            <link>https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</guid>
+            <link>https://kanku.info/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</link>
+            <guid>https://kanku.info/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/</guid>
             <description><![CDATA[
                   <p>In this blog post we will describe the steps to create a KankuFile using a &#39;official&#39; openSUSE Image.</p>
 
@@ -67,12 +32,12 @@
 
 <p>SEE our <a href="https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.openSUSE-Leap-15.5-official">example KankuFile</a></p>
 
-                    <p><a href="https://m0ses.github.io/kanku/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/#section-2">Continue reading...</a></p>
+                    <p><a href="https://kanku.info/blog/2024/04/25/howto-use-official-opensuse-images-with-kanku/#section-2">Continue reading...</a></p>
 
                     <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/howto/">howto</a>
-                        <a href="https://m0ses.github.io/kanku/blog/tag/kankufile/">KankuFile</a>
-                        <a href="https://m0ses.github.io/kanku/blog/tag/opensuse/">openSUSE</a>
+                        <a href="https://kanku.info/blog/tag/howto/">howto</a>
+                        <a href="https://kanku.info/blog/tag/kankufile/">KankuFile</a>
+                        <a href="https://kanku.info/blog/tag/opensuse/">openSUSE</a>
                     </p>
 
             ]]></description>
@@ -82,12 +47,12 @@
         </item>
         <item>
             <title>RELEASE 0.17.0</title>
-            <link>https://m0ses.github.io/kanku/blog/2024/04/12/release-0.17.0/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2024/04/12/release-0.17.0/</guid>
+            <link>https://kanku.info/blog/2024/04/12/release-0.17.0/</link>
+            <guid>https://kanku.info/blog/2024/04/12/release-0.17.0/</guid>
             <description><![CDATA[
 
                     <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
+                        <a href="https://kanku.info/blog/tag/release/">release</a>
                     </p>
 
             ]]></description>
@@ -97,17 +62,32 @@
         </item>
         <item>
             <title>RELEASE 0.16.2</title>
-            <link>https://m0ses.github.io/kanku/blog/2024/02/13/release-0.16.2/</link>
-            <guid>https://m0ses.github.io/kanku/blog/2024/02/13/release-0.16.2/</guid>
+            <link>https://kanku.info/blog/2024/02/13/release-0.16.2/</link>
+            <guid>https://kanku.info/blog/2024/02/13/release-0.16.2/</guid>
             <description><![CDATA[
 
                     <p>Tags:
-                        <a href="https://m0ses.github.io/kanku/blog/tag/release/">release</a>
+                        <a href="https://kanku.info/blog/tag/release/">release</a>
                     </p>
 
             ]]></description>
             <pubDate>
                 Tue, 13 Feb 2024 17:28:18 +0000
+            </pubDate>
+        </item>
+        <item>
+            <title>RELEASE 0.16.1</title>
+            <link>https://kanku.info/blog/2024/02/05/release-0.16.1/</link>
+            <guid>https://kanku.info/blog/2024/02/05/release-0.16.1/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="https://kanku.info/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Mon, 05 Feb 2024 09:46:39 +0000
             </pubDate>
         </item>
     </channel>
