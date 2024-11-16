@@ -113,7 +113,7 @@ theme:
 deploy:
     class: 'Statocles::Deploy::Git'
     args:
-      base_url: 'https://m0ses.github.io/kanku/'
+      base_url: 'https://kanku.info/'
       path:   '.'
       branch: 'gh-pages'
 
