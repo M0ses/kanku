@@ -104,6 +104,9 @@ NE5OgEXk2wVfZczCZpigBKbKZHNYcelXtTt/nP3rsCuGcM4h53s=
   'Kanku::Cli::Lsi' => {
     project => 'devel:kanku:images',
   },
+  'Kanku::Cli::Hub::Test' => {
+    exclude_dirs =>  ['^[.]$', '^[.]/JFT/.*$'],
+  },
   'Kanku::Util::DoD' => {
     use_oscrrc => 0,
   },
