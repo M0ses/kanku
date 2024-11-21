@@ -45,7 +45,7 @@ has 'kankufiles' => (
   is      => 'rw',
   isa     => 'ArrayRef',
   lazy    => 1,
-  default => sub {[]},
+  builder => 'build_kankufiles',
 );
 
 has 'dirs2test' => (
@@ -71,9 +71,7 @@ has 'no_of_tests' => (
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
-  #my $config  = Kanku::Config::Defaults->get('Kanku::Cli::Hub::Test');
 
-  $logger->debug(Dumper($self->find_kankufiles));
   $self->prepare_gnupghome;
   $self->prepare_tc_list;
 
@@ -85,6 +83,7 @@ sub run {
   } else{
     $logdir->mkdir;
   }
+
 
   my $cwd    = path($self->dir)->realpath;
   for my $d (sort keys(%{$self->dirs2test})) {
@@ -114,15 +113,26 @@ sub prepare_gnupghome {
   my @gpgimport = `gpg --import $dir/_maintainers/*.asc 2>&1`;
 }
 
-sub find_kankufiles {
+sub build_kankufiles {
   my ($self)  = @_;
+  my @files;
+
+  if ($self->extra_argv) {
+    for my $kf (@{$self->extra_argv}) {
+      if (!path($kf)->is_file) {
+        croak("KankuFile $kf not found or is not a regular file");
+      }
+      push @files, $kf;
+    }
+    return $self->kankufiles([sort @files]);
+  }
+
   my $logger  = $self->logger;
   my $excl    = Kanku::Config::Defaults->get(
     'Kanku::Cli::Hub::Test', 
     'exclude_dirs',
   );
   my $dir     = $self->dir;
-  my @files;
 
   find(
     sub {
