@@ -24,13 +24,14 @@ my @kanku_opts=qw/--loglevel TRACE/;
 
 my @tcs = (
   # noopts, sudo, @cmd
-  [qw{0 0 db status}],
-  [qw{1 0 bash_completion}],
-  [qw{0 0 init}],
-  [qw{0 0 init -t vagrant --box debian/bullseye64 --kankufile KankuFile.bullseye64}],
+  [qw{0 0 db status --server}],
   [qw{0 1 ca create -p ./ca}],
-  [qw{0 0 check_configs devel}],
-  [qw{0 0 db install -d --dsn dbi:SQLite:dbname=./test.db}],
+  [qw{0 0 check_configs server}],
+  [qw{0 0 login -a http://localhost:5000/kanku -u admin -p opensuse}],
+  [qw{0 0 rworker list}],
+  [qw{0 0 api gui_config/job.json}],
+  [qw{0 0 rjob list}],
+  [qw{0 0 logout}],
 );
 
 plan tests => scalar(@tcs);
@@ -58,10 +59,6 @@ sub test_kanku_cli {
 
 __END__
 
-#    login                 login to your remote kanku instance
-#    logout                logout from your remote kanku instance
-#    api                   make (GET) requests to api with arbitrary (sub) uri
-#    check_configs server  Check kanku config files
 #    pfwd                  Create port forwards for VM
 #    rabbit                test rabbitmq
 #    rcomment create       list job history on your remote kanku instance
@@ -79,7 +76,3 @@ __END__
 #    rjob list             show result of tasks from a specified remote job
 #    rr                    remove remote from your config
 #    rtrigger              trigger a remote job or job group
-#    rworker list          information about worker
-
-
-exit 0
