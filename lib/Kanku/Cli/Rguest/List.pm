@@ -22,10 +22,7 @@ extends qw(Kanku::Cli);
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
 use Try::Tiny;
-
-use Kanku::YAML;
 
 command_short_description  "list guests on your remote kanku instance";
 
@@ -61,6 +58,7 @@ option 'state' => (
 );
 
 option '+format' => (default => 'view');
+
 has 'template' => (
   is            => 'rw',
   isa           => 'Str',
@@ -68,19 +66,15 @@ has 'template' => (
 );
 
 sub run {
-  my $self  = shift;
-
-  Kanku::Config->initialize;
-
+  my ($self)  = @_;
   return $self->_list;
 }
 
 sub _list {
   my ($self) = @_;
-
   my $data = $self->_get_filtered_guest_list();
-
   $self->print_formatted($data);
+  return scalar(@{$data->{errors}});
 }
 
 sub _get_filtered_guest_list {
@@ -92,7 +86,10 @@ sub _get_filtered_guest_list {
   push @filters, "domain:".$self->domain.".*" if $self->domain;
   push @filters, "state:".$self->state if $self->state;
   $params->{filter} = \@filters if @filters;
-  return $kr->get_json(path => "guest/list", params => $params);
+  return $kr->get_json(
+    path => "guest/list",
+    params => $params,
+  );
 }
 __PACKAGE__->meta->make_immutable;
 
