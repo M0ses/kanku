@@ -117,7 +117,7 @@ sub build_kankufiles {
   my ($self)  = @_;
   my @files;
 
-  if ($self->extra_argv) {
+  if (@{$self->extra_argv}) {
     for my $kf (@{$self->extra_argv}) {
       if (!path($kf)->is_file) {
         croak("KankuFile $kf not found or is not a regular file");
