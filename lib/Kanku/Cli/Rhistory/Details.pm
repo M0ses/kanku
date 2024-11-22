@@ -19,12 +19,9 @@ package Kanku::Cli::Rhistory::Details;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
-use POSIX qw/floor/;
 use Try::Tiny;
 
 command_short_description  'list job history on your remote kanku instance';
@@ -40,46 +37,19 @@ option 'full' => (
   documentation => 'show full output of error messages',
 );
 
-option 'limit' => (
-  isa           => 'Int',
-  is            => 'rw',
-  documentation => 'limit output to X rows',
-);
-
-option 'page' => (
-  isa           => 'Int',
-  is            => 'rw',
-  documentation => 'show page X of job history',
-);
-
-option 'state' => (
-  isa           => 'ArrayRef',
-  is            => 'rw',
-  documentation => 'filter for states',
-);
-
-option 'latest' => (
-  isa           => 'Bool',
-  is            => 'rw',
-  documentation => 'show only the latest result of each job',
-);
-
-option 'job_name' => (
-  isa           => 'Str',
-  is            => 'rw',
-  documentation => 'filter list by job_name (wildcard %)',
-);
-
-option 'worker' => (
-  isa           => 'Str',
-  is            => 'rw',
-  documentation => 'filter list by workerinfo (wildcard %)',
-);
 option '+format' => (default=>'view');
+
 has template => (
   isa           => 'Str',
   is            => 'rw',
   default       => 'job.tt',
+);
+
+parameter 'job_id' => (
+    is            => 'rw',
+    isa           => 'Str',
+    required      => 1,
+    documentation => q[Job id to show details],
 );
 
 sub run {
@@ -94,10 +64,6 @@ sub run {
 sub _details {
   my ($self) = @_;
   my $logger = $self->logger;
-  if ( ! $self->details ) {
-    $logger->error('No job id given');
-    exit 1;
-  }
 
   my $kr;
   try {
@@ -106,7 +72,7 @@ sub _details {
     exit 1;
   };
 
-  my $data = $kr->get_json( path => 'job/'.$self->details );
+  my $data = $kr->get_json(path => 'job/'.$self->job_id);
 
   $self->_truncate_result($data) if ! $self->full;
 
@@ -137,7 +103,6 @@ sub _truncate_result {
   }
   return;
 }
-
 
 __PACKAGE__->meta->make_immutable;
 

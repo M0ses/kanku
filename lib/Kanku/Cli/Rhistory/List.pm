@@ -76,11 +76,13 @@ option 'worker' => (
 );
 
 option '+format' => (default=>'view');
+
 has template => (
   isa           => 'Str',
   is            => 'rw',
   default       => 'jobs.tt',
 );
+
 sub run {
   my ($self)  = @_;
   my $logger  =	$self->logger;
