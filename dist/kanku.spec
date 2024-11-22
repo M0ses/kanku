@@ -316,9 +316,11 @@ and in developer mode.
 %dir /usr/share/kanku/views/cli/
 %dir /usr/share/kanku/views/cli/rjob
 %dir /usr/share/kanku/views/cli/rguest
+%dir /usr/share/kanku/views/cli/rcomment
 /usr/share/kanku/views/cli/*.tt
 /usr/share/kanku/views/cli/rjob/*.tt
 /usr/share/kanku/views/cli/rguest/*.tt
+/usr/share/kanku/views/cli/rcomment/*.tt
 /usr/lib/kanku/lib/MooseX/App/
 /usr/lib/kanku/lib/Kanku/Cli/
 /usr/lib/kanku/lib/Kanku/Cli.pm
