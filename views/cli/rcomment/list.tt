@@ -1,0 +1,9 @@
+[% FOREACH c IN comments %]
+User:  [% c.user.name %] ([% c.user.username %]) <[% c.user.email %]>
+Message:
+
+[% c.comment %]
+
+###############################################################################
+
+[% END %]

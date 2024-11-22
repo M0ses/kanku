@@ -6,14 +6,10 @@ use warnings;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-
 with 'Kanku::Cli::Roles::Remote';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
-use POSIX;
 use Try::Tiny;
-use Data::Dumper;
 
 command_short_description 'list job history on your remote kanku instance';
 
@@ -23,43 +19,25 @@ on your remote kanku instance.
 
 ";
 
-option 'job_id' => (
-  isa           => 'Int',
-  is            => 'rw',
-  cmd_aliases   => 'j',
-  documentation => 'job id',
-);
-
-option 'comment_id' => (
-  isa           => 'Int',
-  is            => 'rw',
-  cmd_aliases   => 'C',
-  documentation => 'comment id',
-);
-
-option 'message' => (
-  isa           => 'Str',
-  is            => 'rw',
-  cmd_aliases   => 'm',
-  documentation => 'message',
-);
-
-option '+format' => (default => 'pjson');
+option '+format' => (default => 'view');
 
 has template => (
   is   => 'rw',
   isa  => 'Str',
-  default => 'todo.tt',
+  default => 'rcomment/list.tt',
 );
 
+parameter 'job_id' => (
+    is            => 'rw',
+    isa           => 'Int',
+    required      => 1,
+    documentation => q[Job id to create a comment for],
+);
 
 sub run {
   my ($self)  = @_;
-  Kanku::Config->initialize;
   my $res = $self->_list;
-
-  $self->print_formatted($self->list);
-
+  $self->print_formatted($res);
   return 0;
 }
 
@@ -68,19 +46,12 @@ sub _list {
   my $logger  =	$self->logger;
   my $res     = 0;
 
-  if (! $self->job_id ) {
-    $logger->warn('Please specify a job_id');
-    return 1;
-  }
-
   my $kr;
   try {
     $kr = $self->connect_restapi();
 
     my $path = 'job/comment/'.$self->job_id;
-    $logger->debug("Using path: $path");
-
-    $res =  $kr->get_json( path => $path );
+    $res =  $kr->get_json(path => $path);
   } catch {
     $logger->error($_);
     $res = 1;

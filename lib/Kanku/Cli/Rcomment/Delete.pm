@@ -8,13 +8,9 @@ extends qw(Kanku::Cli);
 
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
-use POSIX;
 use Try::Tiny;
-use Data::Dumper;
 
 command_short_description 'list job history on your remote kanku instance';
 
@@ -24,18 +20,11 @@ on your remote kanku instance.
 
 ";
 
-option 'job_id' => (
-  isa           => 'Int',
-  is            => 'rw',
-  cmd_aliases   => 'j',
-  documentation => 'job id',
-);
-
-option 'comment_id' => (
-  isa           => 'Int',
-  is            => 'rw',
-  cmd_aliases   => 'C',
-  documentation => 'comment id',
+parameter 'comment_id' => (
+    is            => 'rw',
+    isa           => 'Int',
+    required      => 1,
+    documentation => q[Comment id to modify a comment for],
 );
 
 option 'message' => (
@@ -45,22 +34,17 @@ option 'message' => (
   documentation => 'message',
 );
 
-option '+format' => (default => 'pjson');
+option '+format' => (default => 'view');
 
 has template => (
   is   => 'rw',
   isa  => 'Str',
-  default => 'todo.tt',
+  default => 'rcomment/delete.tt',
 );
-
 
 sub run {
   my ($self)  = @_;
-  Kanku::Config->initialize;
-  my $logger  =	$self->logger;
-
-  my $res = $self->_delete();
-
+  my $res     = $self->_delete();
   $self->print_formatted($res) if $res;
 
   return !$res;
@@ -71,14 +55,11 @@ sub _delete {
   my $logger  =	$self->logger;
   my $res     = 0;
 
-  if (! $self->comment_id ) {
-    $logger->warn('Please specify a comment_id (-C <comment_id>)');
-    return 0;
-  }
-
   try {
     my $kr = $self->connect_restapi();
-    $res = $kr->delete_json( path => 'job/comment/'.$self->comment_id);
+    $res = $kr->delete_json(
+      path => 'job/comment/'.$self->comment_id
+    );
   } catch {
     $logger->fatal($_);
     $res = 0;
