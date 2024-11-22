@@ -31,6 +31,17 @@ my @tcs = (
   [qw{0 0 rworker list}],
   [qw{0 0 api gui_config/job.json}],
   [qw{0 0 rjob list}],
+  [qw{0 0 rjob details --filter remove-domain}],
+  [qw{0 0 rjob config remove-domain}],
+  [qw{0 0 rguest list}],
+  [qw{0 0 rhistory list}],
+  [qw{0 0 rhistory details 1}],
+  [qw{0 0 rcomment create 1 -m}, 'Comment 1'],
+  [qw{0 0 rcomment create 1 -m}, 'Comment 2'],
+  [qw{0 0 rcomment create 1 -m}, 'Comment 3'],
+  [qw{0 0 rcomment list 1}],
+  [qw{0 0 rcomment modify 2 -m}, "New comment 2"],
+  [qw{0 0 rcomment delete 1}],
   [qw{0 0 logout}],
 );
 
@@ -69,10 +80,5 @@ __END__
 #    rguest console        open console to guest on kanku worker via ssh
 #    rguest list           list guests on your remote kanku instance
 #    rguest ssh            ssh to kanku guest on your remote kanku instance
-#    rhistory details      list job history on your remote kanku instance
-#    rhistory list         list job history on your remote kanku instance
-#    rjob config           show result of tasks from a specified remote job
-#    rjob details          show result of tasks from a specified remote job
-#    rjob list             show result of tasks from a specified remote job
 #    rr                    remove remote from your config
 #    rtrigger              trigger a remote job or job group
