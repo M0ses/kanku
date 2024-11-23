@@ -20,7 +20,6 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
 use Try::Tiny;
@@ -32,33 +31,31 @@ This command retriggers a specified job on your remote instance
 
 ";
 
-option 'job' => (
-  isa           => 'Int',
-  is            => 'rw',
-  cmd_aliases	=> 'j',
-  documentation => '(*) Remote job id - mandatory',
+parameter 'job_id' => (
+    is            => 'rw',
+    isa           => 'Int',
+    required      => 1,
+    documentation => q[Job id to create a comment for],
 );
+
 option '+format' => (default => 'view');
+
 has 'template' => (
   is            => 'rw',
   isa           => 'Str',
   default       => 'retrigger.tt',
 );
+
 sub run {
   my ($self) = @_;
   my $logger = $self->logger;
   my $ret    = 0;
 
-  if (!$self->job) {
-    $logger->error('You must at least specify a job name to trigger');
-    return 1;
-  }
-
   try {
     my $kr = $self->connect_restapi();
     my $rdata = $kr->post_json(
       # path is only subpath, rest is added by post_json
-      path => 'job/retrigger/'.$self->job,
+      path => 'job/retrigger/'.$self->job_id,
       data => {is_admin => 1},
     );
 

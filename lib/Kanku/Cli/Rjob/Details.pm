@@ -23,13 +23,9 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
-use POSIX;
 use Try::Tiny;
-use Data::Dumper;
 
 command_short_description  'show result of tasks from a specified remote job';
 

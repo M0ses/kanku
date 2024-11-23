@@ -20,7 +20,6 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
 use Try::Tiny;
@@ -89,18 +88,19 @@ sub run {
     $ret = 1;
   }
 
-  try {
-    $rdata = $kr->post_json(
-      # path is only subpath, rest is added by post_json
-      path => $path,
-      data => $json->encode($data),
-    );
-  } catch {
+  if ($path) {
+    try {
+      $rdata = $kr->post_json(
+	# path is only subpath, rest is added by post_json
+	path => $path,
+	data => $json->encode($data),
+      );
+    } catch {
       $logger->error($_);
       $ret = 1;
-  };
-
-  $self->print_formatted($rdata);
+    };
+    $self->print_formatted($rdata);
+  }
 
   return $ret;
 }

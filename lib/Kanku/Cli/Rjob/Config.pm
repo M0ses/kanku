@@ -23,13 +23,9 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
-use Term::ReadKey;
-use POSIX;
 use Try::Tiny;
-use Data::Dumper;
 
 command_short_description  'show result of tasks from a specified remote job';
 
@@ -38,10 +34,11 @@ show result of tasks from a specified job on your remote instance
 
 ';
 
-parameter 'config' => (
+parameter 'job_name' => (
   isa           => 'Str',
   is            => 'rw',
-  documentation => 'show config of remote job. Remote job name mandatory',
+  required      => 1,
+  documentation => 'name of remote job.',
 );
 
 
@@ -53,7 +50,6 @@ has template => (
   default => 'rjob/details.tt',
 );
 
-
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
@@ -62,7 +58,7 @@ sub run {
 
   try {
     my $kr = $self->connect_restapi();
-    $data = $kr->get_json( path => 'job/config/'.$self->config);
+    $data = $kr->get_json( path => 'job/config/'.$self->job_name);
   } catch {
     $logger->fatal($_);
     $ret = 1;

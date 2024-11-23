@@ -20,13 +20,10 @@ use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::Remote';
-with 'Kanku::Cli::Roles::RemoteCommand';
 with 'Kanku::Cli::Roles::View';
 
 use Term::ReadKey;
 use Try::Tiny;
-
-use Kanku::YAML;
 
 command_short_description  "open console to guest on kanku worker via ssh";
 
@@ -62,6 +59,7 @@ option 'domain' => (
 );
 
 option '+format' => (default => 'view');
+
 has 'template' => (
   is            => 'rw',
   isa           => 'Str',
