@@ -705,6 +705,8 @@ Here is an example how to configure the module in your jobs file or KankuFile
       additional_disks:		# list of additional disk images to use in VM
         -
           file: storage.qcow2   # filename for disk image
+	  format: raw		# can be one of the following list
+                                # qcow2, raw, vmdk, vdi, iso, img, vhdfixed
           reuse: 1		# do not overwrite existing image in libvirt,
                                 # but reuse it in new VM
 
@@ -758,6 +760,14 @@ If configured a port_forward_list, it tries to find the next free port and confi
     noauto_9p		  : set noauto option for 9p directory in fstab.
 
     root_disk_size        : define size of root disk (WARNING: only availible with raw images)
+
+    additional_disks      : Array of additional disk images to use in VM
+
+                            * file   - filename for disk image
+
+			    * format - qcow2, raw, vmdk, vdi, iso, img, vhdfixed
+
+                            * reuse  - do not overwrite existing image in libvirt pool
 
     empty_disks           : Array of empty disks to be created
 
