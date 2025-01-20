@@ -1,0 +1,15 @@
+=head1 NAME
+
+Kanku::Intro - Introduction into kanku
+
+=head1 DESCRIPTION
+
+This is a brief introduction how to get started with kanku.
+
+=head1 TODO
+
+Provide a useful introduction into kanku like you can find on
+
+https://kanku.info/page/getting_started/
+
+=cut

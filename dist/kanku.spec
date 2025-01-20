@@ -262,6 +262,7 @@ common config and lib files used in kanku
 %dir /usr/lib/kanku/lib/Kanku/Config/
 /usr/lib/kanku/lib/Kanku/Config/Defaults.pm
 /usr/lib/kanku/lib/Kanku/Handler.pod
+/usr/lib/kanku/lib/Kanku/Intro.pod
 /usr/lib/kanku/lib/Kanku/Notifier
 /usr/lib/kanku/lib/Kanku/Job.pm
 /usr/lib/kanku/lib/Kanku/RabbitMQ.pm
