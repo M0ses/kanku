@@ -45,7 +45,7 @@ option 'outdir' => (
   cmd_aliases   => 'd',
   documentation => 'Output directory (default: temporary directory)',
   default       => sub {
-    my $dir = $_[0]->_outdir->dirname;
+    my $dir = $_[0]->_outdir;
     return "$dir";
   },
 );
@@ -54,7 +54,8 @@ has '_outdir' => (
   isa           => 'Object',
   is            => 'rw',
   default       => sub {
-    return tempdir(CLEANUP=>1);
+    my $t = tempdir(CLEANUP=>1);
+    return $t;
   },
 );
 
@@ -282,7 +283,7 @@ sub get_file {
  my $fh;
  open($fh, '>', $outfile) || die "Could not open $outfile: $!\n";
  my $ua = Net::OBS::LWP::UserAgent->new();
- print "Downloading $url\n";
+ print "Downloading $url to $outfile\n";
  my $response = $ua->get($url);
   if ($response->is_success) {
     print $fh $response->decoded_content;
