@@ -26,6 +26,10 @@ TEMPLATE_DIRS = \
 TEMPLATE_FILES = \
 	templates/with-spice.tt2\
 	templates/vm-x86_64-uefi-tpm2.0.tt2\
+	templates/qlx-spice.tt2\
+   	templates/virtio-spice.tt2\
+      	templates/vm-x86_64-uefi.tt2\
+      	templates/vga-vnc.tt2\
 	templates/cmd/init/default.tt2\
 	templates/cmd/init/vagrant.tt2\
 	templates/cmd/setup/kanku.conf.mod_perl.tt2\

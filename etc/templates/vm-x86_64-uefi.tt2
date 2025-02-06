@@ -63,9 +63,6 @@
     <input type='tablet' bus='usb'/>
     <input type='mouse' bus='ps2'/>
     <input type='keyboard' bus='ps2'/>
-    <tpm model='tpm-crb'>
-      <backend type='emulator' version='2.0'/>
-    </tpm>
     <graphics type='spice'/>
     <sound model='ich9'/>
     <audio id="1" type='spice'/>
