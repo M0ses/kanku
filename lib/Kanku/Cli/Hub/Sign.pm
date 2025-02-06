@@ -27,10 +27,10 @@ use Path::Tiny;
 use Kanku::Util;
 use Kanku::Config::Defaults;
 
-command_short_description  'Test Kankufile\'s in kanku-hub';
+command_short_description  'Sign Kankufile\'s in kanku-hub';
 
 command_long_description '
-This command tests all KankuFile\'s found in the current directory 
+This command signs all KankuFile\'s found in the current directory 
 and subdirectories.
 ';
 
@@ -78,7 +78,7 @@ sub run {
     my $rc = $?;
     ok($rc == 0, "Checking $kf");
     if ($rc && !$self->dryrun) {
-      my @out = `GNUPGHOME= gpg -b -a $kf`; 
+      my @out = `GNUPGHOME= gpg -b -a $kf`;
     }
   }
 }
@@ -96,7 +96,7 @@ sub find_kankufiles {
   my ($self)  = @_;
   my $logger  = $self->logger;
   my $excl    = Kanku::Config::Defaults->get(
-    'Kanku::Cli::Hub::Sign', 
+    'Kanku::Cli::Hub::Sign',
     'exclude_dirs',
   );
 
@@ -115,48 +115,10 @@ sub find_kankufiles {
     },
     $dir
   );
-  
+
   return $self->kankufiles([sort @files]);
 }
 
 __PACKAGE__->meta->make_immutable;
 
 1;
-
-__END__
-#!/usr/bin/bash
-BD=$(dirname $0)/
-FL=$(find -name KankuFile|sort)
-case $1 in 
-  check)
-    for kf in $FL;do
-      P=`dirname $kf`
-      F=`basename $kf`
-      T=$(echo $P|perl -p -e "s#$BD##"|perl -p -e 's#/#.#g')
-      cd $P
-      gpg --verify $F.asc >> /dev/null 2>&1 \
-	&& echo "ok - $T" \
-	|| echo "not ok - $T"
-      cd - 1>/dev/null
-    done
-  ;;
-  sign)
-    for kf in $FL;do
-      P=`dirname $kf`
-      F=`basename $kf`
-      cd $P
-      gpg --verify $F.asc >> /dev/null 2>&1 \
-	&& echo "ok - $P" \
-	|| {
-	  echo "not ok - $P";
-          rm -f $F.asc
-	  gpg -b -a $F
-        }
-      cd - 1>/dev/null
-    done
-  ;;
-  *)
-    echo "Usage: "`basename $0`" <check|sign>"
-    exit 1
-  ;;
-esac
