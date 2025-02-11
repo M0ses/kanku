@@ -164,8 +164,14 @@ sub execute {
   my $res    = $ua->get($url, 'Accept' => 'application/json');
   croak($res->status_line) unless $res->code == 200;
 
-  my $json = decode_json($res->content);
+  my $content = $res->content;
 
+  my $json;
+  try {
+    $json = decode_json($res->content);
+  } catch {
+    croak("Error while decoding document from $url: @_\n$content");
+  };
   my $box_data = $self->_get_data_by_version($json);
   my $provider = $self->_get_provider('libvirt', $box_data);
 
