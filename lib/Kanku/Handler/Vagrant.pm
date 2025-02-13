@@ -158,7 +158,7 @@ sub execute {
 
   # FIXME: offline needs to be implemented
   my $ua     = LWP::UserAgent->new();
-  my $url    = $self->base_url.'/'.$self->box;
+  my $url    = $self->base_url.'/api/v2/box/'.$self->box;
   $logger->debug("Searching for libvirt provider in $url");
 
   my $res    = $ua->get($url, 'Accept' => 'application/json');
@@ -182,11 +182,11 @@ sub execute {
     );
   }
 
-  my $uri  = URI->new($provider->{url});
-  my $path = $uri->path;
-
   my $code = 0;
-  my $durl = $provider->{url};
+  my $durl = $provider->{download_url};
+
+  my $uri  = URI->new($durl);
+  my $path = $uri->path;
 
   $logger->debug("Download URL for libvirt provider: $durl");
 
