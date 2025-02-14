@@ -1,0 +1,48 @@
+<domain type='kvm'>
+  <name>[% domain.domain_name %]</name>
+  <memory unit='KiB'>[% domain.memory %]</memory>
+  <currentMemory unit='KiB'>[% domain.memory %]</currentMemory>
+  <vcpu placement='static'>[% domain.vcpu %]</vcpu>
+  <cpu mode='host-passthrough' check='none'/>
+  <resource>
+    <partition>/machine</partition>
+  </resource>
+  <os>
+    <type arch='[% domain.arch || 'aarch64' %]' machine='virt-8.2'>hvm</type>
+    <loader readonly='yes' type='pflash'>/usr/share/qemu/aavmf-aarch64-code.bin</loader>
+  </os>
+  <features>
+    <acpi/>
+    <gic version='2'/>
+  </features>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+  <devices>
+    <emulator>/usr/bin/qemu-system-aarch64</emulator>
+    [% domain.disk_xml %]
+    <controller type='pci' index='0' model='pcie-root'/>
+    [% domain.disk_controllers_xml %]
+    <controller type='usb' index='0' model='qemu-xhci'/>
+    <controller type='pci' index='1' model='pcie-root-port'/>
+    <interface type='network'>
+      <source network='[% domain.network_name %]' bridge='[% domain.network_bridge %]'/>
+      <model type='virtio'/>
+    </interface>
+    <serial type='pty'>
+      <target type='system-serial' port='0'/>
+    </serial>
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+    [% domain.hostshare %]
+    <channel type='unix'>
+      <target type='virtio' name='org.qemu.guest_agent.0'/>
+    </channel>
+    <memballoon model='virtio'/>
+    <rng model='virtio'>
+      <backend model='random'>/dev/urandom</backend>
+    </rng>
+  </devices>
+</domain>

@@ -28,6 +28,7 @@
     <interface type='network'>
       <source network='[% domain.network_name %]' bridge='[% domain.network_bridge %]'/>
       <model type='virtio'/>
+      <alias name='net0'/>
     </interface>
     <serial type='pty'>
       <target port='0'/>

@@ -25,8 +25,8 @@
     [% domain.disk_xml %]
     <controller type='pci' index='0' model='pci-root'/>
     [% domain.disk_controllers_xml %]
-    <interface type='network'>
-      <source network='[% domain.network_name %]' bridge='[% domain.network_bridge %]'/>
+    <interface type='bridge'>
+      <source bridge='[% domain.network_bridge %]'/>
       <model type='virtio'/>
     </interface>
     <serial type='pty'>
