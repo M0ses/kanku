@@ -227,6 +227,8 @@ common config and lib files used in kanku
 %dir /etc/kanku/templates/cmd/init
 %dir /etc/kanku/templates/cmd/setup
 %config /etc/kanku/templates/default-vm.tt2
+%config /etc/kanku/templates/bios-serial-network.tt2
+%config /etc/kanku/templates/bios-serial-bridge.tt2
 %config /etc/kanku/templates/with-spice.tt2
 %config /etc/kanku/templates/vm-x86_64-uefi-tpm2.0.tt2
 %config /etc/kanku/templates/cmd/init/default.tt2

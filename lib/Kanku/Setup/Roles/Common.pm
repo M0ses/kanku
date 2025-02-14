@@ -111,6 +111,15 @@ sub _build_host_interface {
   return Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'host_interface');
 }
 
+has connect_uri => (
+    isa           => 'Str',
+    is            => 'rw',
+    lazy          => 1,
+    builder       => '_build_connect_uri',
+);
+sub _build_connect_uri { return Kanku::Config::Defaults->get('Kanku::Roles::SYSVirt')->{connect_uri} }
+
+
 sub _configure_libvirtd_access { ## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
   my ($self, %opts) = @_;
   my $logger        = $self->logger;
@@ -221,7 +230,7 @@ EOF
 sub _create_default_pool {    ## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
   my $self    = shift;
   my $logger  = $self->logger;
-  my $vmm     = Sys::Virt->new(uri => 'qemu:///system');
+  my $vmm     = Sys::Virt->new(uri => $self->connect_uri);
   my @pools   = $vmm->list_storage_pools();
   my $choice;
 
@@ -266,7 +275,7 @@ EOF
 sub _create_default_network {    ## no critic (Subroutines::ProhibitUnusedPrivateSubroutines)
   my $self     = shift;
   my $logger   = $self->logger;
-  my $vmm      = Sys::Virt->new(uri => 'qemu:///system');
+  my $vmm      = Sys::Virt->new(uri => $self->connect_uri);
   my @networks = $vmm->list_all_networks;
   my $nn       = $self->network_name();
 

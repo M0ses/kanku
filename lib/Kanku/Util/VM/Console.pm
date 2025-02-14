@@ -23,6 +23,7 @@ use Data::Dumper;
 use Time::HiRes qw/usleep/;
 use Path::Tiny;
 use Kanku::Config;
+use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Logger';
 
@@ -31,7 +32,8 @@ has 'prompt' => (is=>'rw', isa=>'Str',default=>'Kanku-prompt: ');
 has 'prompt_regex' => (is=>'rw', isa=>'Object',default=>sub { qr/^Kanku-prompt: /m });
 has _expect_object  => (is=>'rw', isa => 'Object');
 has [qw/bootloader_seen grub_seen user_is_logged_in console_connected log_stdout no_wait_for_bootloader/] => (is=>'rw', isa => 'Bool');
-has 'connect_uri' => (is=>'rw', isa=>'Str', default=>'qemu:///system');
+has 'connect_uri' => (is=>'rw', isa=>'Str', 'builder'=>'_build_connect_uri');
+sub _build_connect_uri { return Kanku::Config::Defaults->get('Kanku::Roles::SYSVirt')->{connect_uri}; }
 has ['job_id'] => (is=>'rw', isa=>'Int|Undef');
 
 has ['cmd_timeout'] => (is=>'rw', isa=>'Int', default => 600);
@@ -75,6 +77,7 @@ sub init {
   my $exp = Expect->new;
   $exp->restart_timeout_upon_receive(1);
   $exp->debug($cfg->{$pkg}->{debug} || 0);
+  $exp->raw_pty(1);
 
   if ($self->log_file) {
     $exp->log_file($self->log_file);

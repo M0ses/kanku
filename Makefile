@@ -61,6 +61,8 @@ all:
 
 install_arch_templates:
 	install -m 644 etc/templates/default-vm.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/default-vm.tt2
+	install -m 644 etc/templates/bios-serial-network.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/bios-serial-network.tt2
+	install -m 644 etc/templates/bios-serial-bridge.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/bios-serial-bridge.tt2
 
 install: install_dirs install_full_dirs install_services install_docs configs templates public views bashcomp urlwrapper install_arch_templates install_tests
 	install -m 644 dist/profile.d-kanku.sh $(DESTDIR)/etc/profile.d/kanku.sh
@@ -92,7 +94,7 @@ config_files:
 config_examples:
 	cp -rv ./etc/jobs/examples/* $(DESTDIR)/etc/kanku/jobs/
 
-templates: template_dirs template_files
+templates: template_dirs template_files install_arch_templates
 
 template_dirs:
 	#

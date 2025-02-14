@@ -30,6 +30,7 @@ use Net::Domain qw/hostfqdn/;
 
 use Kanku::Schema;
 use Kanku::Setup::Devel;
+use Kanku::Config::Defaults;
 
 command_short_description  'Setup local environment to work in developer mode.';
 
@@ -101,6 +102,16 @@ option 'dns_domain_name' => (
     default       => 'kanku.site',
 );
 
+option 'connect_uri' => (
+    isa           => 'Str',
+    is            => 'rw',
+    lazy          => 1,
+    documentation => 'libvirt connect uri',
+    builder       => '_build_connect_uri',
+);
+
+sub _build_connect_uri { return Kanku::Config::Defaults->get('Kanku::Roles::SYSVirt')->{connect_uri} }
+
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
@@ -119,6 +130,7 @@ sub run {
     osc_pass        => $self->osc_pass,
     interactive     => $self->interactive,
     dns_domain_name => $self->dns_domain_name,
+    connect_uri     => $self->connect_uri,
   );
 
   $setup->dsn($self->dsn) if $self->dsn;

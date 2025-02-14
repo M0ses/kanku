@@ -55,7 +55,8 @@ has empty_disks      => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has additional_disks => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has keep_volumes     => ( is => 'rw', isa => 'ArrayRef', default => sub {[]});
 has '+domain_name'   => ( required => 1);
-has '+uri'           => ( default => 'qemu:///system');
+has '+uri'           => ( 'builder' => '_build_uri');
+sub _build_uri { return Kanku::Config::Defaults->get('Kanku::Roles::SYSVirt')->{connect_uri}; }
 has '+template_file' => ( default => q{});
 has '+snapshot_name' => ( default => 'current');
 #has "+ipaddress"  => ( lazy => 1, default => sub { $self->get_ipaddress } );
@@ -407,7 +408,7 @@ sub create_domain {
 
   # connect to libvirtd
   try {
-    $vmm = Sys::Virt->new(uri => 'qemu:///system');
+    $vmm = Sys::Virt->new(uri => $self->uri);
   }
   catch {
     my ($e) = @_;

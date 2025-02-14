@@ -19,6 +19,8 @@ package Kanku::Cli::Console;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
+use Kanku::Config::Defaults;
+
 with 'Kanku::Cli::Roles::VM';
 
 command_short_description  'Open a serial console to vm';
@@ -30,13 +32,17 @@ With this command you can open a serial console to the domain specified
 ';
 
 option 'virt_uri' => (
-  is     => 'rw',
-  isa    => 'Str',
-  lazy   => 1,
-  default => 'qemu:///system',
+  is            => 'rw',
+  isa           => 'Str',
+  lazy          => 1,
+  builder       => "_build_virt_uri",
   documentation => 'libvirt connection uri',
   cmd_aliases   => [qw/v virt-uri/],
 );
+
+sub _build_virt_uri {
+  return Kanku::Config::Defaults->get('Kanku::Roles::SYSVirt')->{connect_uri};
+}
 
 sub run {
   my ($self) = @_;

@@ -47,9 +47,13 @@ has '_temp_source_file' => (
   default => sub { return tempfile(SUFFIX => '.img' ) },
 );
 
-has '+uri'       => ( default => 'qemu:///system');
+has '+uri'       => ( builder => '_build_uri');
 has '+pool_name' => ( default => 'default');
 has '+format'    => ( default => 'qcow2');
+
+sub _build_uri {
+  return Kanku::Config::Defaults->get('Kanku::Roles::SYSVirt')->{connect_uri};
+}
 
 has pool => (
   is => 'rw',

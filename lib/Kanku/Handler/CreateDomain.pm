@@ -80,7 +80,7 @@ has [qw/
       forward_port_list     ipaddress
       management_interface  management_network
       short_hostname	    memory
-      network_bridge        template
+      template
 /] => (is => 'rw',isa=>'Str');
 
 has 'network_name' => (
@@ -93,6 +93,30 @@ sub _build_network_name {
   return
     $_[0]->job->context->{network_name}
     || Kanku::Config::Defaults->get(__PACKAGE__,'network_name');
+}
+
+has 'network_bridge' => (
+  is      => 'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  builder => '_build_network_bridge',
+);
+sub _build_network_bridge {
+  return
+    $_[0]->job->context->{network_bridge}
+    || Kanku::Config::Defaults->get(__PACKAGE__,'network_bridge');
+}
+
+has 'template' => (
+  is      => 'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  builder => '_build_template',
+);
+sub _build_template {
+  return
+    $_[0]->job->context->{vm_template_file}
+    || Kanku::Config::Defaults->get(__PACKAGE__,'template');
 }
 
 has 'pool_name' => (
@@ -123,13 +147,21 @@ has '+management_interface' => ( default => q{});
 has '+management_network'   => ( default => q{});
 
 has [qw/
-        use_9p
         skip_network
         skip_login
         skip_memory_checks
 	domain_autostart
 	no_wait_for_bootloader
 /]      => (is => 'rw',isa=>'Bool',default => 0);
+
+has use_9p => (
+  is      => 'rw',
+  isa     => 'Bool',
+  builder => '_build_use_9p',
+);
+sub _build_use_9p {
+  return Kanku::Config::Defaults->get(__PACKAGE__, 'use_9p');
+}
 
 has "images_dir"     => (
   is      => 'rw',
@@ -289,12 +321,7 @@ sub execute {
 
   $self->logger->debug("Using memory: '$mem'");
 
-  if ($self->network_bridge) {
-    $logger->debug("Using option network_bridge : '".$self->network_bridge."'");
-  } else {
-    $self->network_bridge($cfg->{'Kanku::Handler::CreateDomain'}->{bridge} || 'virbr0'),
-    $logger->debug("Using default network_bridge : '".$self->network_bridge."'");
-  }
+  $logger->debug("Using default network_bridge : '".$self->network_bridge."'");
 
   $logger->debug("additional_disks:".Kanku::Helpers->dump_it($self->additional_disks));
 
@@ -348,18 +375,11 @@ sub execute {
       log_file              => $ctx->{log_file} || q{},
       log_stdout            => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
       no_wait_for_bootloader => $self->no_wait_for_bootloader,
+      template_file         => $self->template,
   );
 
   $vm->host_dir_9p($self->host_dir_9p) if ($self->host_dir_9p);
   $vm->accessmode_9p($self->accessmode_9p) if ($self->accessmode_9p);
-
-  my $vmt = $self->template || $ctx->{vm_template_file};
-  if ($vmt) {
-    $logger->info("using template file: $vmt");
-    $vm->template_file($vmt);
-  }
-
-  $vm->template_file($self->template) if ($self->template);
 
   $logger->info("Creating domain ".$self->domain_name);
   $vm->create_domain();

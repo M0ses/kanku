@@ -41,13 +41,16 @@ my $defaults =    {
     'start_port'     => 49001,
   },
   'Kanku::Handler::CreateDomain' => {
-    network_name  => 'kanku-devel',
-    pool_name     => 'default',
-    image_type    => 'kanku',
-    memory        => '2G',
-    vcpu          => 1,
-    mnt_dir_9p    => '/tmp/kanku',
-    root_disk_bus => 'virtio',
+    network_name   => 'kanku-devel',
+    network_bridge => 'virbr0',
+    pool_name      => 'default',
+    image_type     => 'kanku',
+    memory         => '2G',
+    vcpu           => 1,
+    mnt_dir_9p     => '/tmp/kanku',
+    root_disk_bus  => 'virtio',
+    template       => 'bios-serial-network',
+    use_9p         => 0,
   },
   'Kanku::Handler::CopyProfile' => {
     users => [],
@@ -130,6 +133,9 @@ NE5OgEXk2wVfZczCZpigBKbKZHNYcelXtTt/nP3rsCuGcM4h53s=
     privatekey_path => q{},
     publickey_path  => q{},
     auth_type       => 'agent',
+  },
+  'Kanku::Roles::SYSVirt' => {
+    connect_uri => 'qemu:///system',
   },
 };
 
