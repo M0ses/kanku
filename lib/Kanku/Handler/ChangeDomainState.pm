@@ -65,7 +65,7 @@ has 'management_interface' => (
 sub _build_management_interface {
   my ($self) = @_;
   my $ctx    = $self->job()->context();
-  return $ctx->{management_interface};
+  return ($ctx->{management_interface} || q{eth0});
 }
 
 has 'action' => (
