@@ -19,13 +19,10 @@ package Kanku::Cli::Hub::Sign;
 use MooseX::App::Command;
 extends qw(Kanku::Cli);
 
-use YAML::PP;
 use Test::More;
-use File::Find;
-use Data::Dumper;
-use Path::Tiny;
-use Kanku::Util;
 use Kanku::Config::Defaults;
+
+with 'Kanku::Cli::Roles::Hub';
 
 command_short_description  'Sign Kankufile\'s in kanku-hub';
 
@@ -46,11 +43,13 @@ option 'dryrun' => (
   default => 0,
 );
 
-has 'kankufiles' => (
-  is      => 'rw',
-  isa     => 'ArrayRef',
-  lazy    => 1,
-  builder => 'find_kankufiles',
+option 'force' => (
+  is            => 'rw',
+  isa           => 'Bool',
+  documentation => 'force overwrite of existing signatures',
+  cmd_aliases   => [qw/f/],
+  lazy          => 1,
+  default       => 0,
 );
 
 has 'tmpdir' => (
@@ -60,63 +59,24 @@ has 'tmpdir' => (
   default => sub { Path::Tiny->tempdir },
 );
 
-has 'no_of_tests' => (
-  is      => 'rw',
-  isa     => 'Int',
-  default => 0,
-);
-
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
-  #my $config  = Kanku::Config::Defaults->get('Kanku::Cli::Hub::Test');
-  $self->prepare_gnupghome;
   my $kfl = $self->kankufiles;
   plan tests => scalar(@$kfl);
   for my $kf (@{$kfl}) {
-    my @out = `gpg --verify $kf.asc 2>&1`;
+    my $asc = "$kf.asc";
+    my @out = `gpg --verify $asc 2>&1`;
     my $rc = $?;
     ok($rc == 0, "Checking $kf");
     if ($rc && !$self->dryrun) {
+      if (-f $asc && $self->force) {
+	$logger->debug("Removing $asc");
+        unlink $asc || croak("Error while unlinking file `$asc`: $!");
+      }
       my @out = `GNUPGHOME= gpg -b -a $kf`;
     }
   }
-}
-
-sub prepare_gnupghome {
-  my ($self) = @_;
-  my $dir    = $self->dir;
-
-  $::ENV{GNUPGHOME} = $self->tmpdir->stringify;
-
-  my @gpgimport = `gpg --import $dir/_maintainers/*.asc 2>&1`;
-}
-
-sub find_kankufiles {
-  my ($self)  = @_;
-  my $logger  = $self->logger;
-  my $excl    = Kanku::Config::Defaults->get(
-    'Kanku::Cli::Hub::Sign',
-    'exclude_dirs',
-  );
-
-  my $dir     = $self->dir;
-  my @files;
-
-  find(
-    sub {
-      my $found;
-      for my $d (@{$excl}) {
-        $logger->debug("$d ::: $File::Find::dir");
-	if ($File::Find::dir =~ /$d/) { $found = 1; }
-      }
-      return if $found;
-      $_ =~ m/^KankuFile$/ && push @files, $File::Find::name;
-    },
-    $dir
-  );
-
-  return $self->kankufiles([sort @files]);
 }
 
 __PACKAGE__->meta->make_immutable;
