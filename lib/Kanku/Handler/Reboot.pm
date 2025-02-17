@@ -104,9 +104,12 @@ sub execute {
     $con->logout();
   }
 
+  $self->logger->warn("DEPRECATED: THIS HANDLER MAY BE REMOVED FROM FUTURE VERSIONS\n").
   return {
     code    => 0,
-    message => 'Rebooted domain '. $self->domain_name ." successfully. $new_ip",
+    message =>
+      "DEPRECATED: THIS HANDLER MAY BE REMOVED FROM FUTURE VERSIONS\n".
+        'Rebooted domain '. $self->domain_name ." successfully. $new_ip",
   };
 }
 
@@ -121,6 +124,8 @@ __END__
 Kanku::Handler::Reboot
 
 =head1 SYNOPSIS
+
+DEPRECATED: THIS HANDLER MAY BE REMOVED FROM FUTURE VERSIONS
 
 Here is an example how to configure the module in your jobs file or KankuFile
 

@@ -29,7 +29,23 @@ sub gui_config {
       type  => 'checkbox',
       label => 'Wait for console'
     },
+    {
+      param => 'wait_for_network',
+      type  => 'checkbox',
+      label => 'Wait for network'
+    },
+    {
+      param => 'allow_ip_change',
+      type  => 'checkbox',
+      label => 'Allow ip to change (e.g. at reboot)'
+    },
+    {
+      param => 'management_interface',
+      type  => 'text',
+      label => 'Allow ip to change (e.g. at reboot)'
+    },
   ];
+
 }
 
 sub distributable { 1 }
@@ -41,6 +57,17 @@ has [qw/domain_name login_user login_pass/] => (
   isa=>'Str'
 );
 
+has 'management_interface' => (
+  'is'      => 'rw',
+  'isa'     => 'Str',
+  'builder' => '_build_management_interface',
+);
+sub _build_management_interface {
+  my ($self) = @_;
+  my $ctx    = $self->job()->context();
+  return $ctx->{management_interface};
+}
+
 has 'action' => (
   is => 'ro',
   isa => 'DomainAction',
@@ -51,6 +78,13 @@ has [qw/wait_for_network wait_for_console/] => (
   isa     => 'Bool',
   lazy    => 1,
   default => 1,
+);
+
+has [qw/allow_ip_change/] => (
+  is      => 'rw',
+  isa     => 'Bool',
+  lazy    => 1,
+  default => 0,
 );
 
 has 'timeout' => (
@@ -79,7 +113,7 @@ sub prepare {
 }
 
 sub execute {
-  my $self   = shift;
+  my ($self) = @_;
   my $ctx    = $self->job()->context();
   my $action = $self->action;
   my $cfg    = Kanku::Config->instance()->config();
@@ -97,13 +131,19 @@ sub execute {
       my ($vm) = @_;
       my $con   = $vm->console;
       $con->login();
-      $con->logout();
-    },
-    create => sub {
-      my ($vm) = @_;
-      my $con   = $vm->console;
-      $con->login();
-      $con->logout();
+      if ($self->allow_ip_change) {
+        $ctx->{ipaddress} = $con->get_ipaddress(
+         interface => $self->management_interface,
+         timeout   => $self->timeout,
+       );
+     }
+     $con->logout();
+   },
+   create => sub {
+     my ($vm) = @_;
+     my $con   = $vm->console;
+     $con->login();
+     $con->logout();
     },
   };
 
@@ -165,9 +205,17 @@ This handler triggers an action on a VM and waits for the final state.
 
 =head1 OPTIONS
 
-    action  :          <create|reboot|shutdown|destroy|undefine>
+    action  :             <create|reboot|shutdown|destroy|undefine>
 
-    timeout :          wait only <seconds>
+    timeout :             wait only <seconds>
+
+    wait_for_console:     wait for console (e.g. after reboot) [DEFAULT: true]
+
+    wait_for_network:     wait for network (e.g. after reboot) [DEFAULT: true]
+
+    allow_ip_change:      wait for console and store new ip in job context [DEFAULT: false]
+
+    management_interface: interface to read new ip from (required by allow_ip_change)
 
 =head1 CONTEXT
 
@@ -176,6 +224,8 @@ This handler triggers an action on a VM and waits for the final state.
  domain_name
 
 =head2 setters
+
+ ipaddress      (in case of allow_ip_change enabled)
 
 =head1 DEFAULTS
 
