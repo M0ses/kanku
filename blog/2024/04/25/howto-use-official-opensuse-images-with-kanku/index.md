@@ -13,7 +13,7 @@ In this blog post we will describe the steps to create a KankuFile using a 'offi
 
 **TL;DR**
 
-SEE our [example KankuFile](https://raw.githubusercontent.com/M0ses/kanku/master/KankuFile.examples/KankuFile.openSUSE-Leap-15.5-official)
+SEE our [example KankuFile](https://hub.kanku.info/opensuse/leap-15.5/KankuFile)
 
 ---
 
