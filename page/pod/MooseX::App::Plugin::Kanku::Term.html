@@ -1,4 +1,4 @@
-<html><head><title>Kanku::Handler::Reboot        </title>
+<html><head><title>MooseX::App::Plugin::Term        </title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="../../theme/css/normalize.css" />
@@ -49,73 +49,51 @@
 name="NAME"
 >NAME</a></h1>
 
-<p>Kanku::Handler::Reboot</p>
+<p>MooseX::App::Plugin::Term - Allows one to specify options/parameters via terminal prompts</p>
 
 <h1><a class='u'
 name="SYNOPSIS"
 >SYNOPSIS</a></h1>
 
-<p>DEPRECATED: THIS HANDLER MAY BE REMOVED FROM FUTURE VERSIONS</p>
+<p>In your base class:</p>
 
-<p>Here is an example how to configure the module in your jobs file or KankuFile</p>
+<pre> package MyApp;
+ use MooseX::App qw(Term);</pre>
 
-<pre>  -
-    use_module: Kanku::Handler::Reboot
-    options:
-      wait_for_console: 1
-      wait_for_network: 1
-      timeout:          600
-      login_timeout:    900
-      allow_ip_change:  1
-      ....</pre>
+<p>In your command class:</p>
+
+<pre> package MyApp::SomeCommand;
+ use MooseX::App::Command;
+ 
+ option &#39;some_option&#39; =&#62; (
+     is             =&#62; &#39;rw&#39;,
+     isa            =&#62; &#39;Int&#39;,
+     documentation  =&#62; &#39;Something&#39;,
+     cmd_term       =&#62; 1,
+ );
+ 
+ sub run {
+     my ($self) = @_;
+     say &#34;Some option is &#34;.$self-&#62;some_option;
+ }</pre>
+
+<p>In your shell</p>
+
+<pre> bash$ myapp some_command
+ Something (Required, an integer):
+ test
+ Value must be an integer (not &#39;test&#39;)
+ 1
+ 
+ Some option is 1</pre>
 
 <h1><a class='u'
 name="DESCRIPTION"
 >DESCRIPTION</a></h1>
 
-<p>This handler reboots the VM and optional waits for network and console.</p>
+<p>This plugin can prompt the user for missing options/parameters on the terminal. The user will only be promted if the parameter were not provided by different means (parameter and option or config files and environment values if the respectice plugins have been loaded before this plugin) and if the script is connected to an interactive terminal.</p>
 
-<h1><a class='u'
-name="OPTIONS"
->OPTIONS</a></h1>
-
-<pre>    wait_for_console : wait for console login
-
-    wait_for_network : wait until network is up again
-
-    timeout :          wait only &#60;seconds&#62;
-
-    allow_ip_change:   allow VM to change ip address on reboot
-
-    login_timeout:     console login timeout</pre>
-
-<h1><a class='u'
-name="CONTEXT"
->CONTEXT</a></h1>
-
-<h2><a class='u'
-name="getters"
->getters</a></h2>
-
-<pre> domain_name</pre>
-
-<h2><a class='u'
-name="setters"
->setters</a></h2>
-
-<h1><a class='u'
-name="DEFAULTS"
->DEFAULTS</a></h1>
-
-<pre>    wait_for_console : 1 (true)
-
-    wait_for_network : 1 (true)
-
-    timeout          : 600 seconds
-
-    allow_ip_change  : 0 (false)
-
-    login_timout     : defaults to Kanku::Util::VM::Console</pre>
+<p>Term input has basic editing capabilities (cursor, del, backspace and history)</p>
                     </main>
                 </div>
 

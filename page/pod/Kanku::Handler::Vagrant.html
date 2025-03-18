@@ -1,4 +1,4 @@
-<html><head><title>Kanku::Handler::Reboot        </title>
+<html><head><title>Kanku::Handler::Vagrant        </title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="../../theme/css/normalize.css" />
@@ -49,45 +49,37 @@
 name="NAME"
 >NAME</a></h1>
 
-<p>Kanku::Handler::Reboot</p>
+<p>Kanku::Handler::Vagrant</p>
 
 <h1><a class='u'
 name="SYNOPSIS"
 >SYNOPSIS</a></h1>
 
-<p>DEPRECATED: THIS HANDLER MAY BE REMOVED FROM FUTURE VERSIONS</p>
-
 <p>Here is an example how to configure the module in your jobs file or KankuFile</p>
 
 <pre>  -
-    use_module: Kanku::Handler::Reboot
+    use_module: Kanku::Handler::Vagrant
     options:
-      wait_for_console: 1
-      wait_for_network: 1
-      timeout:          600
-      login_timeout:    900
-      allow_ip_change:  1
-      ....</pre>
+      box: opensuse/Tumbleweed.x86_64</pre>
 
 <h1><a class='u'
 name="DESCRIPTION"
 >DESCRIPTION</a></h1>
 
-<p>This handler reboots the VM and optional waits for network and console.</p>
+<p>This handler downloads a file from a given url to the local filesystem and sets vm_image_file.</p>
 
 <h1><a class='u'
 name="OPTIONS"
 >OPTIONS</a></h1>
 
-<pre>    wait_for_console : wait for console login
+<pre>  base_url            : API url to search for boxes
 
-    wait_for_network : wait until network is up again
+  box                 : Vagrant box name like specified in Vagrantfile
 
-    timeout :          wait only &#60;seconds&#62;
+  box_version         : Optional version for vagrant box (default: latest)
 
-    allow_ip_change:   allow VM to change ip address on reboot
-
-    login_timeout:     console login timeout</pre>
+  offline             : proceed in offline mode (skip download and lookup last
+                        downloaded image in database)</pre>
 
 <h1><a class='u'
 name="CONTEXT"
@@ -97,25 +89,27 @@ name="CONTEXT"
 name="getters"
 >getters</a></h2>
 
-<pre> domain_name</pre>
+<pre>  offline</pre>
 
 <h2><a class='u'
 name="setters"
 >setters</a></h2>
 
+<pre>  image_type
+
+  vm_image_url
+
+  vm_image_file
+
+  login_user
+
+  login_pass</pre>
+
 <h1><a class='u'
 name="DEFAULTS"
 >DEFAULTS</a></h1>
 
-<pre>    wait_for_console : 1 (true)
-
-    wait_for_network : 1 (true)
-
-    timeout          : 600 seconds
-
-    allow_ip_change  : 0 (false)
-
-    login_timout     : defaults to Kanku::Util::VM::Console</pre>
+<p>NONE</p>
                     </main>
                 </div>
 

@@ -1,4 +1,4 @@
-<html><head><title>Kanku::Handler::Reboot        </title>
+<html><head><title>MooseX::App::Plugin::Config        </title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="../../theme/css/normalize.css" />
@@ -49,73 +49,69 @@
 name="NAME"
 >NAME</a></h1>
 
-<p>Kanku::Handler::Reboot</p>
+<p>MooseX::App::Plugin::Config - Config files your MooseX::App applications</p>
 
 <h1><a class='u'
 name="SYNOPSIS"
 >SYNOPSIS</a></h1>
 
-<p>DEPRECATED: THIS HANDLER MAY BE REMOVED FROM FUTURE VERSIONS</p>
+<p>In your base class:</p>
 
-<p>Here is an example how to configure the module in your jobs file or KankuFile</p>
+<pre> package MyApp;
+ use MooseX::App qw(Config);
+ 
+ option &#39;global_option&#39; =&#62; (
+     is          =&#62; &#39;rw&#39;,
+     isa         =&#62; &#39;Int&#39;,
+ );</pre>
 
-<pre>  -
-    use_module: Kanku::Handler::Reboot
-    options:
-      wait_for_console: 1
-      wait_for_network: 1
-      timeout:          600
-      login_timeout:    900
-      allow_ip_change:  1
-      ....</pre>
+<p>In your command class:</p>
+
+<pre> package MyApp::Some_Command;
+ use MooseX::App::Command;
+ extends qw(MyApp);
+ 
+ option &#39;some_option&#39; =&#62; (
+     is          =&#62; &#39;rw&#39;,
+     isa         =&#62; &#39;Str&#39;,
+ );</pre>
+
+<p>Now create a config file (see <a href="https://metacpan.org/pod/Config%3A%3AAny" class="podlinkpod"
+>Config::Any</a>) eg. a yaml file:</p>
+
+<pre> ---
+ global:
+   global_option: 123
+ some_command:
+   global_option: 234
+   some_option: &#34;hello world&#34;</pre>
+
+<p>The user can now call the program with a config file:</p>
+
+<pre> bash$ myapp some_command --config /path/to/config.yml</pre>
 
 <h1><a class='u'
-name="DESCRIPTION"
->DESCRIPTION</a></h1>
-
-<p>This handler reboots the VM and optional waits for network and console.</p>
-
-<h1><a class='u'
-name="OPTIONS"
->OPTIONS</a></h1>
-
-<pre>    wait_for_console : wait for console login
-
-    wait_for_network : wait until network is up again
-
-    timeout :          wait only &#60;seconds&#62;
-
-    allow_ip_change:   allow VM to change ip address on reboot
-
-    login_timeout:     console login timeout</pre>
-
-<h1><a class='u'
-name="CONTEXT"
->CONTEXT</a></h1>
+name="METHODS"
+>METHODS</a></h1>
 
 <h2><a class='u'
-name="getters"
->getters</a></h2>
+name="config"
+>config</a></h2>
 
-<pre> domain_name</pre>
+<p>Read the config filename</p>
 
 <h2><a class='u'
-name="setters"
->setters</a></h2>
+name="_config_data"
+>_config_data</a></h2>
+
+<p>The full content of the loaded config file</p>
 
 <h1><a class='u'
-name="DEFAULTS"
->DEFAULTS</a></h1>
+name="SEE_ALSO"
+>SEE ALSO</a></h1>
 
-<pre>    wait_for_console : 1 (true)
-
-    wait_for_network : 1 (true)
-
-    timeout          : 600 seconds
-
-    allow_ip_change  : 0 (false)
-
-    login_timout     : defaults to Kanku::Util::VM::Console</pre>
+<p><a href="https://metacpan.org/pod/Config%3A%3AAny" class="podlinkpod"
+>Config::Any</a></p>
                     </main>
                 </div>
 
