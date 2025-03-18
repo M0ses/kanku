@@ -1,4 +1,4 @@
-<html><head><title>Kanku::Handler::ExecuteCommandViaSSH        </title>
+<html><head><title>Kanku::Handler::CopyProfile        </title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="../../theme/css/normalize.css" />
@@ -49,7 +49,7 @@
 name="NAME"
 >NAME</a></h1>
 
-<p>Kanku::Handler::ExecuteCommandViaSSH</p>
+<p>Kanku::Handler::CopyProfile</p>
 
 <h1><a class='u'
 name="SYNOPSIS"
@@ -58,34 +58,66 @@ name="SYNOPSIS"
 <p>Here is an example how to configure the module in your jobs file or KankuFile</p>
 
 <pre>  -
-    use_module: Kanku::Handler::ExecuteCommandViaSSH
+    use_module: Kanku::Handler::CopyProfile
     options:
-      context2env:
-        ipaddress:
-      environment:
-        test: value
-      publickey_path: /home/m0ses/.ssh/id_rsa.pub
-      privatekey_path: /home/m0ses/.ssh/id_rsa
-      passphrase: MySecret1234
-      username: kanku
-      ipaddress: 192.168.199.17
-      commands:
-        - rm /etc/shadow</pre>
+      users:
+        - root
+        - kanku
+      tasks:
+        - cmd: cp
+          src: ~/.gitconfig
+        - cmd: cp
+          src: ~/.vimrc
+        - cmd: cp
+          src: ~/.vim/
+          recursive: 1
+        - cmd: mkdir
+          path: ~/.config/
+        - cmd: cp
+          src: ~/.config/osc/
+          dst: ~/.config/osc/
+          recursive: 1
+        - cmd: chown
+          owner: kanku:users
+          recursive: 1
+          path: ~/.config/
+        - cmd: chmod
+          mode: 700
+          path: ~/.config/</pre>
 
 <h1><a class='u'
 name="DESCRIPTION"
 >DESCRIPTION</a></h1>
 
-<p>This handler will connect to the ipaddress stored in job context and excute the configured commands</p>
+<p>This handler could help to configure your environment by copying files, creating directories and change permissions.</p>
+
+<p>Its recommended to create a config section named &#39;Kanku::Handler::CopyProfile&#39; in your kanku-config.yml and set the defaults there.</p>
+
+<p>In a KankuFile it should be used without and options.</p>
 
 <h1><a class='u'
 name="OPTIONS"
 >OPTIONS</a></h1>
 
-<pre>      commands          : array of commands to execute</pre>
+<pre>      users             : array of users to deploy your Profile
 
-<p>SEE ALSO <a href="Kanku%3A%3ARoles%3A%3ASSH.html" class="podlinkpod"
->Kanku::Roles::SSH</a></p>
+      tasks             : array of tasks to execute for profle deployment. Each
+                          task requires a &#39;cmd&#39;. &#39;cmd&#39; can be one of the following
+                          * cp (uses scp)
+                            * src
+                            * dst
+                            * recursive
+                          * chmod
+                            * mode
+                            * path
+                            * recursive
+                          * chown
+                            * owner
+                            * path
+                            * recursive
+                          * mkdir
+                            * path
+      commands          : array of commands to execute</pre>
 
 <h1><a class='u'
 name="CONTEXT"
@@ -95,8 +127,7 @@ name="CONTEXT"
 name="getters"
 >getters</a></h2>
 
-<p>SEE ALSO <a href="Kanku%3A%3ARoles%3A%3ASSH.html" class="podlinkpod"
->Kanku::Roles::SSH</a></p>
+<p>NONE</p>
 
 <h2><a class='u'
 name="setters"
@@ -109,7 +140,8 @@ name="DEFAULTS"
 >DEFAULTS</a></h1>
 
 <p>SEE ALSO <a href="Kanku%3A%3ARoles%3A%3ASSH.html" class="podlinkpod"
->Kanku::Roles::SSH</a></p>
+>Kanku::Roles::SSH</a> AND <a href="https://metacpan.org/pod/kanku-config.yml" class="podlinkpod"
+>kanku-config.yml</a></p>
                     </main>
                 </div>
 

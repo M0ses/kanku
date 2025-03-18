@@ -7,6 +7,21 @@
         <description>Blog feed of Kanku</description>
         <generator>Statocles 0.098</generator>
         <item>
+            <title>RELEASE 1.0.0</title>
+            <link>https://kanku.info/blog/2025/03/18/release-1.0.0/</link>
+            <guid>https://kanku.info/blog/2025/03/18/release-1.0.0/</guid>
+            <description><![CDATA[
+
+                    <p>Tags:
+                        <a href="https://kanku.info/blog/tag/release/">release</a>
+                    </p>
+
+            ]]></description>
+            <pubDate>
+                Tue, 18 Mar 2025 08:31:33 +0000
+            </pubDate>
+        </item>
+        <item>
             <title>RELEASE 0.17.1</title>
             <link>https://kanku.info/blog/2024/05/03/release-0.17.1/</link>
             <guid>https://kanku.info/blog/2024/05/03/release-0.17.1/</guid>
@@ -73,21 +88,6 @@
             ]]></description>
             <pubDate>
                 Tue, 13 Feb 2024 17:28:18 +0000
-            </pubDate>
-        </item>
-        <item>
-            <title>RELEASE 0.16.1</title>
-            <link>https://kanku.info/blog/2024/02/05/release-0.16.1/</link>
-            <guid>https://kanku.info/blog/2024/02/05/release-0.16.1/</guid>
-            <description><![CDATA[
-
-                    <p>Tags:
-                        <a href="https://kanku.info/blog/tag/release/">release</a>
-                    </p>
-
-            ]]></description>
-            <pubDate>
-                Mon, 05 Feb 2024 09:46:39 +0000
             </pubDate>
         </item>
     </channel>

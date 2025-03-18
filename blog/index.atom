@@ -2,11 +2,25 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://kanku.info/blog/</id>
     <title>Kanku</title>
-    <updated>2024-05-03T15:07:39Z</updated>
+    <updated>2025-03-18T08:31:33Z</updated>
     <link href="https://kanku.info/blog/index.atom" rel="self" />
     <link href="https://kanku.info/blog/" rel="alternate" />
     <generator version="0.098">Statocles</generator>
 
+    <entry>
+        <id>https://kanku.info/blog/2025/03/18/release-1.0.0/</id>
+        <title>RELEASE 1.0.0</title>
+        <link href="https://kanku.info/blog/2025/03/18/release-1.0.0/" rel="alternate" />
+        <content type="html"><![CDATA[
+
+                <p>Tags:
+                    <a href="https://kanku.info/blog/tag/release/">release</a>
+                </p>
+
+        ]]></content>
+        <updated>2025-03-18T08:31:33Z</updated>
+        <category term="release" />
+    </entry>
     <entry>
         <id>https://kanku.info/blog/2024/05/03/release-0.17.1/</id>
         <title>RELEASE 0.17.1</title>
@@ -73,20 +87,6 @@
 
         ]]></content>
         <updated>2024-02-13T17:28:18Z</updated>
-        <category term="release" />
-    </entry>
-    <entry>
-        <id>https://kanku.info/blog/2024/02/05/release-0.16.1/</id>
-        <title>RELEASE 0.16.1</title>
-        <link href="https://kanku.info/blog/2024/02/05/release-0.16.1/" rel="alternate" />
-        <content type="html"><![CDATA[
-
-                <p>Tags:
-                    <a href="https://kanku.info/blog/tag/release/">release</a>
-                </p>
-
-        ]]></content>
-        <updated>2024-02-05T09:46:39Z</updated>
         <category term="release" />
     </entry>
 </feed>

@@ -1,4 +1,4 @@
-<html><head><title>Kanku::Handler::Reboot        </title>
+<html><head><title>Kanku::Notifier::Console        </title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="stylesheet" href="../../theme/css/normalize.css" />
@@ -49,73 +49,34 @@
 name="NAME"
 >NAME</a></h1>
 
-<p>Kanku::Handler::Reboot</p>
+<p>Kanku::Notifier::Console</p>
 
 <h1><a class='u'
 name="SYNOPSIS"
 >SYNOPSIS</a></h1>
 
-<p>DEPRECATED: THIS HANDLER MAY BE REMOVED FROM FUTURE VERSIONS</p>
-
-<p>Here is an example how to configure the module in your jobs file or KankuFile</p>
-
-<pre>  -
-    use_module: Kanku::Handler::Reboot
-    options:
-      wait_for_console: 1
-      wait_for_network: 1
-      timeout:          600
-      login_timeout:    900
-      allow_ip_change:  1
-      ....</pre>
+<pre>  notifiers:
+    -
+      use_module: Kanku::Notifier::Console
+      options:
+        template: |+
+          Hello M0ses,
+          Please visit our new website http://[% context.ipaddress %]
+        loglevel: info
+      states: succeed</pre>
 
 <h1><a class='u'
 name="DESCRIPTION"
 >DESCRIPTION</a></h1>
 
-<p>This handler reboots the VM and optional waits for network and console.</p>
+<p>This notifier module allows you to print a message on the consoel</p>
 
 <h1><a class='u'
-name="OPTIONS"
->OPTIONS</a></h1>
+name="SEE_ALSO"
+>SEE ALSO</a></h1>
 
-<pre>    wait_for_console : wait for console login
-
-    wait_for_network : wait until network is up again
-
-    timeout :          wait only &#60;seconds&#62;
-
-    allow_ip_change:   allow VM to change ip address on reboot
-
-    login_timeout:     console login timeout</pre>
-
-<h1><a class='u'
-name="CONTEXT"
->CONTEXT</a></h1>
-
-<h2><a class='u'
-name="getters"
->getters</a></h2>
-
-<pre> domain_name</pre>
-
-<h2><a class='u'
-name="setters"
->setters</a></h2>
-
-<h1><a class='u'
-name="DEFAULTS"
->DEFAULTS</a></h1>
-
-<pre>    wait_for_console : 1 (true)
-
-    wait_for_network : 1 (true)
-
-    timeout          : 600 seconds
-
-    allow_ip_change  : 0 (false)
-
-    login_timout     : defaults to Kanku::Util::VM::Console</pre>
+<p><a href="https://metacpan.org/pod/Template%3A%3AToolkit" class="podlinkpod"
+>Template::Toolkit</a></p>
                     </main>
                 </div>
 

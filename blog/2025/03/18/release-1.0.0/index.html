@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta content="width=device-width, initial-scale=1" name="viewport">
+        <link href="/theme/css/normalize.css" rel="stylesheet">
+        <link href="/theme/css/skeleton.css" rel="stylesheet">
+        <link href="/theme/css/statocles-default.css" rel="stylesheet">
+        <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+	<link href="/page/favicon.ico" rel="shortcut icon" type="image/x-icon">
+        <title>RELEASE 1.0.0 - Kanku</title>
+        <meta content="Statocles 0.098" name="generator">
+        <link href="/blog/2024/05/03/release-0.17.1/index.html" rel="next">
+        
+    </head>
+    <body>
+        <header>
+            <nav class="navbar">
+                <div class="container">
+                    <a class="brand" href="/">Kanku</a>
+                    <ul>
+                        <li>
+                            <a href="/page/getting_started">Getting Started</a>
+                        </li>
+                        <li>
+                            <a href="/page/overview">Overview</a>
+                        </li>
+                        <li>
+                            <a href="/page/faq">FAQ</a>
+                        </li>
+                        <li>
+                            <a href="/page/download">Download</a>
+                        </li>
+                        <li>
+                            <a href="/blog">News</a>
+                        </li>
+                    </ul>
+                    
+                </div>
+            </nav>
+            
+        </header>
+        <div class="main container">
+            <div class="row">
+                <div class="nine columns">
+                    <main>
+                        
+<header>
+    <h1>Release 1.0.0</h1>
+
+    <aside>
+        <time datetime="2025-03-18">
+            Posted on 2025-03-18
+        </time>
+    </aside>
+
+    <p class="tags">Tags:
+        <a href="/blog/tag/release/" rel="tag">release</a>
+    </p>
+
+
+</header>
+
+<h2>Attention:</h2>
+
+<p>See the following table for changed commands</p>
+
+<p><code>
+ +-------------------+-------------------------------+----------------------------------------------------------------+ <br>
+ |  version &gt; 0.17.x |  version &lt; 0.99               |  Comment                                                       | 
+ +-------------------+-------------------------------+----------------------------------------------------------------+ <br>
+ |  browser          |  NEW                          |  open url for guest vm with xdg-open                           | 
+ |  db install       |  db --install                 |                                                                | 
+ |  db status        |  db --status                  |                                                                | 
+ |  db upgrade       |  db --upgrade                 |                                                                | 
+ |  doc              |  NEW                          |  Show documenation for kanku libraries                         | 
+ |  hub gpgimport    |  NEW                          |  Import gpg keys of kanku-hub maintainers                      | 
+ |  hub sign         |  NEW                          |  Sign Kankufile&#39;s in kanku-hub                                 | 
+ |  hub test         |  NEW                          |  Test Kankufile&#39;s in kanku-hub                                 | 
+ |  info             |  NEW                          |  Show info from KankuFile                                      | 
+ |  rcomment create  |  rcomment &lt;--create|-c&gt;       |  list job history on your remote kanku instance                | 
+ |  rcomment delete  |  rcomment &lt;--delete|-D&gt;       |  list job history on your remote kanku instance                | 
+ |  rcomment list    |  rcomment &lt;--list|-l&gt;         |  list job history on your remote kanku instance                | 
+ |  rcomment modify  |  rcomment &lt;--modify|-M&gt;       |  list job history on your remote kanku instance                | 
+ |  rguest console   |  NEW                          |  open console to guest on kanku worker via ssh                 | 
+ |  rguest list      |  rguest   &lt;--list|-l&gt;         |  list guests on your remote kanku instance                     | 
+ |  rguest ssh       |  NEW                          |  ssh to kanku guest on your remote kanku instance              | 
+ |  rhistory details |  rhistory &lt;--details|-d&gt;      |  list job history on your remote kanku instance                | 
+ |  rhistory list    |  rhistory &lt;--list|-l&gt;         |  list job history on your remote kanku instance                | 
+ |  rjob config      |  rjob     &lt;--config|-c&gt;       |  show result of tasks from a specified remote job              | 
+ |  rjob details     |  rjob     &lt;--details|-d&gt;      |  show result of tasks from a specified remote job              | 
+ |  rjob list        |  rjob     &lt;--list|-l&gt;         |  show result of tasks from a specified remote job              | 
+ |  rworker list     |                               |  information about worker                                      | 
+ |  setup devel      |  setup --devel                |  Setup local environment to work in developer mode.            | 
+ |  setup server     |  setup --server               |  Setup local environment to work as server or developer mode.  | 
+ |  setup worker     |  NOT IMPLEMENTED              |  Setup local environment as kanku worker                       | 
+ |  snapshot create  |  snapshot &lt;--create|-c&gt;       |  Create snapshot of kanku vm                                   | 
+ |  snapshot list    |  snapshot &lt;--list|-l&gt;         |  list snapshots of kanku vms                                   | 
+ |  snapshot remove  |  snapshot &lt;--remove|-r&gt;       |  manage snapshots for kanku vms                                | 
+ |  snapshot revert  |  snapshot &lt;--revert|-R&gt;       |  revert snapshots of kanku vms                                 | 
+ |  verify           |                               |  verify gpg signature of KankuFile in your current             | 
+ +-------------------+-------------------------------+----------------------------------------------------------------+ 
+</code></p>
+
+
+<h2>FEATURES</h2>
+
+<ul><li>[handler] new handler Kanku::Handler::Vagrant
+</li><li><p>[templates] new VM templates
+- bios-serial-bridge.tt2
+- bios-serial-network.tt2</p>
+</li><li><p>[cli] up - new aliases for option <code>--skip_all_checks</code>
+- <code>--sac</code>
+- <code>--skip-all-checks</code></p>
+</li></ul>
+
+
+
+<h2>UNSORTED</h2>
+
+<ul><li>[cli] change default loglevel to <code>INFO</code>
+</li><li>[examples] deleted KankuFile examples (migrated to https://hub.kanku.info)
+</li><li>[util] new method Kanku::Util::get_arch
+</li><li>[web] add filter <code>state</code> to guest list filter
+</li><li>[cli] use Kanku::Config::Defaults in Kanku::Cli 
+</li><li>[util] VM::Console - fallback to wicked/nmcli if &#39;ip&#39; not installed
+</li><li>[defaults] <code>use_9p</code> default setting now configurable in kanku-config.yml
+</li></ul>
+
+
+<ul class="pager">
+    <li class="prev">
+            <a class="button button-primary" href="/blog/2024/05/03/release-0.17.1/index.html" rel="prev">
+                ← Older
+            </a>
+    </li>
+    <li class="next">
+            <button disabled>
+                Newer →
+            </button>
+    </li>
+</ul>
+
+
+
+                    </main>
+                </div>
+
+                <div class="three columns sidebar">
+                    
+                        <nav id="tags">
+        <h1>Tags</h1>
+        <ul class="list-inline">
+            <li><a href="/blog/tag/howto/">howto</a></li>
+            <li><a href="/blog/tag/kankufile/">KankuFile</a></li>
+            <li><a href="/blog/tag/news/">news</a></li>
+            <li><a href="/blog/tag/opensuse/">openSUSE</a></li>
+            <li><a href="/blog/tag/release/">release</a></li>
+        </ul>
+    </nav>
+
+                    
+                </div>
+            </div>
+        </div>
+        <footer>
+            
+        </footer>
+    </body>
+</html>

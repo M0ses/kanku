@@ -61,7 +61,7 @@ name="SYNOPSIS"
     use_module: Kanku::Handler::ChangeDomainState
     options:
       action: shutdown
-      timeout:          600 </pre>
+      timeout:          600</pre>
 
 <h1><a class='u'
 name="DESCRIPTION"
@@ -73,9 +73,17 @@ name="DESCRIPTION"
 name="OPTIONS"
 >OPTIONS</a></h1>
 
-<pre>    action  :          &#60;create|reboot|shutdown|destroy|undefine&#62;
+<pre>    action  :             &#60;create|reboot|shutdown|destroy|undefine&#62;
 
-    timeout :          wait only &#60;seconds&#62;</pre>
+    timeout :             wait only &#60;seconds&#62;
+
+    wait_for_console:     wait for console (e.g. after reboot) [DEFAULT: true]
+
+    wait_for_network:     wait for network (e.g. after reboot) [DEFAULT: true]
+
+    allow_ip_change:      wait for console and store new ip in job context [DEFAULT: false]
+
+    management_interface: interface to read new ip from (required by allow_ip_change)</pre>
 
 <h1><a class='u'
 name="CONTEXT"
@@ -90,6 +98,8 @@ name="getters"
 <h2><a class='u'
 name="setters"
 >setters</a></h2>
+
+<pre> ipaddress      (in case of allow_ip_change enabled)</pre>
 
 <h1><a class='u'
 name="DEFAULTS"
