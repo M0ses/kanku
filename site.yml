@@ -115,7 +115,7 @@ deploy:
     args:
       base_url: 'https://kanku.info/'
       path:   '.'
-      branch: 'gh-pages'
+      branch: 'kanku-pages'
 
 #----------------------------------------------------------------------------
 # Applications
