@@ -9,6 +9,7 @@ data:
             <h2>Attention:</h2>
             <p>See the following table for changed commands</p>
             <code>
+             <pre>
              +-------------------+-------------------------------+----------------------------------------------------------------+  
              |  version > 0.17.x |  version < 0.99               |  Comment                                                       | 
              +-------------------+-------------------------------+----------------------------------------------------------------+  
@@ -43,6 +44,7 @@ data:
              |  snapshot revert  |  snapshot <--revert|-R>       |  revert snapshots of kanku vms                                 | 
              |  verify           |                               |  verify gpg signature of KankuFile in your current             | 
              +-------------------+-------------------------------+----------------------------------------------------------------+ 
+             </pre>
             </code>
   features:
     - |-
