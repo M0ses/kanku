@@ -15,7 +15,7 @@ use Kanku::RabbitMQ;
 use Kanku::WebSocket::Session;
 use Kanku::WebSocket::Notification;
 
-our $VERSION = '0.99.0';
+our $VERSION = '1.0.0';
 
 Kanku::Config->initialize();
 

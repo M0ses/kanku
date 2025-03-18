@@ -22,7 +22,7 @@
 
 Name:           kanku
 # Version gets set by obs-service-tar_scm
-Version:        0.17.1
+Version:        1.0.0
 Release:        0
 License:        GPL-3.0-only
 Summary:        Development and continuous integration

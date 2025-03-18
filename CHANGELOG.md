@@ -1,3 +1,16 @@
+# [1.0.0] - 2025-03-18
+
+ ## FEATURES
+
+ * [handler] new handler Kanku::Handler::Vagrant
+ * [templates] new VM templates
+   - bios-serial-bridge.tt2
+   - bios-serial-network.tt2
+ * [cli] up - new aliases for option `--skip_all_checks`
+   - `--sac`
+   - `--skip-all-checks`
+
+
 # [0.17.1] - 2024-05-16
 
  ## FEATURES
