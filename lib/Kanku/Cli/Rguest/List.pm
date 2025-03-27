@@ -72,7 +72,7 @@ sub run {
 
 sub _list {
   my ($self) = @_;
-  my $data = $self->_get_filtered_guest_list();
+  my $data = {%{$self->_get_filtered_guest_list()}, user => 'root'};
   $self->print_formatted($data);
   return scalar(@{$data->{errors}});
 }

@@ -48,7 +48,6 @@ option 'user' => (
   required      => 1,
 );
 
-
 option 'password' => (
   isa           => 'Password',
   is            => 'rw',
