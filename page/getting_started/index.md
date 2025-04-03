@@ -42,7 +42,7 @@ As you might have read already in the [introduction](/) kanku offers two modes a
 
 ## Setup your environment
 
-    sudo kanku setup --devel
+    sudo kanku setup devel
 
     # if you would like to have more control about the modifications on your system
     # please use:
