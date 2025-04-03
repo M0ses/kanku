@@ -46,7 +46,7 @@ As you might have read already in the [introduction](/) kanku offers two modes a
 
     # if you would like to have more control about the modifications on your system
     # please use:
-    # sudo kanku setup --devel --interactive
+    # sudo kanku setup devel --interactive
 
     sudo shutdown -r now
 
