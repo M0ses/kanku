@@ -107,6 +107,9 @@ NE5OgEXk2wVfZczCZpigBKbKZHNYcelXtTt/nP3rsCuGcM4h53s=
   'Kanku::Cli::Lsi' => {
     project => 'devel:kanku:images',
   },
+  'Kanku::Cli::Up' => {
+    'log_stdout' => 1
+  },
   'Kanku::Cli::Hub::Test' => {
     exclude_dirs =>  ['^[.]$', '^[.]/JFT/.*$'],
   },

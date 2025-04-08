@@ -9,6 +9,7 @@ use Carp;
 
 use Kanku::YAML;
 use Kanku::File;
+use Kanku::Config::Defaults;
 
 ###############################################################################
 # BUILDER METHODS
@@ -23,6 +24,10 @@ sub _build_kankufile_config {
   return Kanku::YAML::LoadFile(Kanku::File::lookup_file($self->file));
 }
 
+sub _build_log_stdout {
+  my ($self) = @_;
+  return Kanku::Config::Defaults->get(ref($self), 'log_stdout');
+}
 ###############################################################################
 # OPTIONS
 ###############################################################################
@@ -60,7 +65,8 @@ option 'log_stdout' => (
   is            => 'rw',
   cmd_aliases   => [qw/log-stdout/],
   documentation => 'Log Expect output to stdout - (default: 1)',
-  default       => 1,
+  builder       => '_build_log_stdout',
+  lazy          => 1,
 );
 
 ###############################################################################
