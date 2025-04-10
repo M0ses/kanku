@@ -72,30 +72,17 @@ sub prepare {
   my $file_counter = 0;
 
   if ( ! @{$self->public_keys} and ! @{$self->public_key_files} ) {
-    $self->logger->debug("No public_keys found, checking home dir");
-    for my $kf (
-      "$ENV{HOME}/.ssh/id_dsa.pub",
-      "$ENV{HOME}/.ssh/id_ecdsa.pub",
-      "$ENV{HOME}/.ssh/id_ecdsa_sk.pub",
-      "$ENV{HOME}/.ssh/id_ed25519.pub",
-      "$ENV{HOME}/.ssh/id_ed25519_sk.pub",
-      "$ENV{HOME}/.ssh/id_rsa.pub",
-      "/etc/kanku/ssh/id_dsa.pub",
-      "/etc/kanku/ssh/id_ecdsa.pub",
-      "/etc/kanku/ssh/id_ecdsa_sk.pub",
-      "/etc/kanku/ssh/id_ed25519.pub",
-      "/etc/kanku/ssh/id_ed25519_sk.pub",
-      "/etc/kanku/ssh/id_rsa.pub",
-    ) {
-      $self->logger->debug("-- Checking $kf");
-      if ( -f $kf) {
-        $self->logger->debug("-- Using $kf");
-        push @{$self->public_key_files}, $kf;
+    $self->logger->debug("No public_keys found, checking default places");
+    my @found_pubkey_files;
+    foreach (@{
+        Kanku::Config::Defaults->get(__PACKAGE__, 'default_public_key_files')
       }
+    ) {
+      push @{$self->public_key_files}, glob($_);
     }
   }
 
-  if ( $self->public_key_files ) {
+  if ($self->public_key_files) {
     foreach my $file ( @{ $self->public_key_files } ) {
       $self->logger->debug("-- Reading public_key_files: $file");
       $file_counter++;

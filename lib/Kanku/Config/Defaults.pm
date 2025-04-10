@@ -140,6 +140,12 @@ NE5OgEXk2wVfZczCZpigBKbKZHNYcelXtTt/nP3rsCuGcM4h53s=
   'Kanku::Roles::SYSVirt' => {
     connect_uri => 'qemu:///system',
   },
+  'Kanku::Handler::PrepareSSH' => {
+    default_public_key_files => [
+      "~/.ssh/id_*.pub",
+      "/etc/kanku/ssh/id_*.pub",
+    ],
+  },
 };
 
 has 'rcfile' => (
