@@ -171,12 +171,13 @@ sub _prepare_mirror {
 
   my $remote_uri = URI->new($self->remote_url);
   my $mirror_dir = path($self->cache_dir(), 'git', $remote_uri->host, $remote_uri->path);
+  my $md = $mirror_dir->stringify;
 
   my @io;
   my @cmd;
 
   if ( $mirror_dir->is_dir ) {
-    @cmd = ('git', '-C', $mirror_dir->stringify, 'remote', 'update');
+    @cmd = ('git', '-C', $md, 'remote', 'update');
   } else {
     if (!$mirror_dir->parent->is_dir) {
       $self->logger->info(
@@ -186,13 +187,25 @@ sub _prepare_mirror {
     }
     @cmd = ( 'git', 'clone');
     push @cmd, '--recursive' if $self->recursive;
-    push @cmd, '--mirror', $self->_calc_giturl($remote_uri->as_string), $mirror_dir->stringify;
+    push @cmd, '--mirror', $self->_calc_giturl($remote_uri->as_string), $md;
   }
 
   $self->logger->info("Running command '@cmd'");
   run \@cmd , \$io[0], \$io[1], \$io[2] || die "git $?\n";
   $self->logger->debug("STDOUT: $io[1]");
   $self->logger->debug("STDERR: $io[2]");
+
+  my @sd_cmd = qw/git config --system --get-all safe.directory/;
+  run \@sd_cmd , \$io[0], \$io[1], \$io[2] || die "GIT ERROR: $?\n";
+  $self->logger->debug("safe.directory STDOUT: $io[1]");
+  $self->logger->debug("safe.directory STDERR: $io[2]");
+
+  if ($io[1] !~ m#$md#smx) {
+    my @ad_cmd = qw/git config --system --add safe.directory/, $md;
+    run \@ad_cmd , \$io[0], \$io[1], \$io[2] || die "GIT ERROR: $?\n";
+    $self->logger->debug("STDOUT: $io[1]");
+    $self->logger->debug("STDERR: $io[2]");
+  }
 }
 
 sub execute {
