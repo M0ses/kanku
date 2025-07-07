@@ -49,13 +49,15 @@ with 'Kanku::Roles::Handler';
 has timeout       => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
 with 'Kanku::Roles::SSH';
 
-has environment   => (is=>'rw', isa=>'HashRef', default => sub {{}});
-has context2env   => (is=>'rw', isa=>'HashRef', default => sub {{}});
-has jump_host     => (is=>'rw', isa=>'Str');
-has git_url       => (is=>'rw', isa=>'Str', default => 'https://github.com/openSUSE/open-build-service.git');
-has git_revision  => (is=>'rw', isa=>'Str', default => 'master');
-has ruby_version  => (is=>'rw', isa=>'Str', default => '2.5');
-has verbose       => (is=>'rw', isa=>'Bool', default => 1);
+has environment      => (is=>'rw', isa=>'HashRef', default => sub {{}});
+has context2env      => (is=>'rw', isa=>'HashRef', default => sub {{}});
+has jump_host        => (is=>'rw', isa=>'Str');
+has git_url          => (is=>'rw', isa=>'Str', 
+                         default => 'https://github.com/openSUSE/open-build-service.git');
+has git_revision     => (is=>'rw', isa=>'Str',  default => 'master');
+has ruby_version     => (is=>'rw', isa=>'Str',  default => '2.5');
+has verbose          => (is=>'rw', isa=>'Bool', default => 1);
+has rspec_result_dir => (is=>'rw', isa=>'Str');
 
 sub execute {
   my $self    = shift;
@@ -81,6 +83,7 @@ sub execute {
   }
 
   $self->ENV->{SMOKETEST_HOST} = 'https://'.$ctx->{ipaddress};
+  $self->ENV->{RSPEC_RESULT_DIR} = $self->rspec_result_dir if $self->rspec_result_dir;
   my $job_id       = $self->job->id;
   my $ruby_version = $self->ruby_version || '2.5';
   my $git_revision = $self->git_revision||'master';
