@@ -185,7 +185,7 @@ EOF
   }
 
   if (
-    $self->_run_system_cmd('systemctl', 'enable', 'libvirtd')->{return_code}
+    $self->_run_system_cmd('systemctl', 'enable', '--now', 'libvirtd')->{return_code}
   ) {
     die "Error while enabling libvirtd\n";
   }
