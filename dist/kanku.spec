@@ -20,6 +20,10 @@
 %define kanku_group  kanku
 %define kanku_vardir /var/lib/kanku/
 
+%if 0%{?fedora}
+%define _sbindir %{_exec_prefix}/sbin
+%endif
+
 Name:           kanku
 # Version gets set by obs-service-tar_scm
 Version:        1.0.0
