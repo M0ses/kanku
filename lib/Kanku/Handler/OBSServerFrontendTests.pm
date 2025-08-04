@@ -83,8 +83,8 @@ sub execute {
   }
 
   $self->ENV->{SMOKETEST_HOST} = 'https://'.$ctx->{ipaddress};
-  $self->ENV->{RSPEC_RESULT_DIR} = $self->rspec_result_dir if $self->rspec_result_dir;
   my $job_id       = $self->job->id;
+  $self->ENV->{RSPEC_RESULT_DIR} = $self->rspec_result_dir."/$job_id" if $self->rspec_result_dir;
   my $ruby_version = $self->ruby_version || '2.5';
   my $git_revision = $self->git_revision||'master';
   my $git_url      = $self->git_url||'https://github.com/openSUSE/open-build-service.git';
