@@ -90,6 +90,7 @@ has [qw/
 sub execute {
   my $self = shift;
   my $ctx  = $self->job()->context();
+  $ctx->{job_id} = $self->job->id;
   for my $var (qw/
     domain_name vm_template_file host_interface images_dir cache_dir ipaddress
     login_user login_pass
