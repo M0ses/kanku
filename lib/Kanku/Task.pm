@@ -60,6 +60,12 @@ has 'scheduler'  => (is=>'rw',isa=>'Object');
 
 has 'module'     => (is=>'rw',isa=>'Str');
 
+=head2 description    - name of the Kanku::Handler::* module to be executed
+
+=cut
+
+has 'description'     => (is=>'rw', isa=>'Str', default => q{});
+
 =head2 result      - Result of task in text form json encoded
 
 =cut
@@ -100,10 +106,10 @@ sub run {
                       $job->name,
                       $handler
                     );
-
+  my $task_name = $handler.($self->description ? '('.$self->description.')' : q{});
   my $task = $schema->resultset('JobHistorySub')->create({
     job_id     => $job->id,
-    name       => $handler,
+    name       => $task_name,
     state      => 'running',
     start_time => time(),
   });
