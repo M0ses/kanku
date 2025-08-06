@@ -272,14 +272,14 @@ sub run_job {
   try {
     foreach my $sub_task (@{$job_definition->{tasks}}) {
       my $task_args = shift(@$args) || {};
-      #$self->logger->debug("ROUTING_KEY: ".$rmq->routing_key." QUEUE: ".$rmq->queue_name);
       $last_task = $self->run_task(
-	job       => $job,
-	options   => $sub_task->{options} || {},
-	module    => $sub_task->{use_module},
-	scheduler => $self,
-	args      => $task_args,
-	kmq       => $rmq,
+	job         => $job,
+	options     => $sub_task->{options} || {},
+	module      => $sub_task->{use_module},
+	description => $sub_task->{description},
+	scheduler   => $self,
+	args        => $task_args,
+	kmq         => $rmq,
 	routing_key => $self->job_local_routing_key,
       );
 
@@ -328,6 +328,7 @@ sub run_task {
   my %defaults = (
     job         => $opts{job},
     module      => $opts{module},
+    description => $opts{description}||q{},
     final_args  => {%{$opts{options} || {}},%{$opts{args} || {}}},
   );
 

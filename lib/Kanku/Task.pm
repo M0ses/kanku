@@ -106,7 +106,7 @@ sub run {
                       $job->name,
                       $handler
                     );
-  my $task_name = $handler.($self->description ? '('.$self->description.')' : q{});
+  my $task_name = $handler.($self->description ? ' ('.$self->description.')' : q{});
   my $task = $schema->resultset('JobHistorySub')->create({
     job_id     => $job->id,
     name       => $task_name,
