@@ -5,6 +5,7 @@ use Moose;
 with 'Kanku::Roles::REST';
 
 use Try::Tiny;
+use Template::Tiny;
 use Kanku::Config;
 
 sub list {
@@ -81,7 +82,7 @@ sub list {
   my $rv = [];
 
   my $allow_comments = ($self->has_role('User') || $self->has_role('Admin'));
-
+  my $TEMPL = $self->app->config->{plugins}->{'REST::Job'}->{console_log_link_template};
   while ( my $ds = $rs->next ) {
     my $data = $ds->TO_JSON();
 
@@ -99,6 +100,8 @@ sub list {
     $data->{workerhost}  = $workerhost;
     $data->{workerpid}   = $workerpid;
     $data->{workerqueue} = $workerqueue;
+    ($data->{workershortname}, undef) = split /[.]/smx, $data->{workerhost};
+    $data->{loglink} = Template::Tiny->new(TRIM=>1)->process(\$TEMPL, $data);
     push @{$rv}, $data;
   }
 

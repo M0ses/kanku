@@ -41,6 +41,8 @@ engines:
       end_tag:   '[% end_tag %]'
 
 plugins:
+  REST::Job:
+    console_log_link_template: "/[% workershortname %]/logs/job-[% job_id %]-console.log"
 #  GitLab::Webhook:
 #    routes:
 #      ^/job_group/webhook/kanku.json$:

@@ -303,7 +303,7 @@ Vue.component('job-history-card',{
         host:  tmp[0] || 'localhost',
         pid:   tmp[1] || 0,
         queue: tmp[2] || '',
-        loglink: 'http://'+tmp[0]+'/kanku-console-logs/job-'+this.job.id+'-console.log',
+        loglink: this.job.loglink || 'http://'+tmp[0]+'/kanku-console-logs/job-'+this.job.id+'-console.log',
       }
     },
     show_pwrand: function() {
