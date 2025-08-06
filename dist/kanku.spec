@@ -227,7 +227,6 @@ common config and lib files used in kanku
 %dir /etc/kanku/logging/
 %config(noreplace) /etc/kanku/logging/console.conf
 %config(noreplace) /etc/kanku/logging/network-setup.conf
-%config(noreplace) /etc/kanku/logging/default.conf
 
 %dir /etc/kanku/templates
 %dir /etc/kanku/templates/cmd
