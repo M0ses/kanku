@@ -16,7 +16,7 @@ use Kanku::REST;
 
 my $conf_dir = $::ENV{KANKU_ETC_DIR} || '/etc/kanku';
 
-Log::Log4perl->init("$conf_dir/logging/default.conf");
+Log::Log4perl->init("$conf_dir/logging/console.conf");
 
 my $logger = Log::Log4perl->get_logger();
 
