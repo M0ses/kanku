@@ -402,11 +402,14 @@ sub get_ipaddress {
   my $cmd          = $self->guess_network_tooling;
   my $cmd_short    = $cmd->basename;
 
+  #
+  # using `|cat` to suppress colorized output
+  # 
   my %cmd2func = (
     ip => sub {
       my ($self, $bin, $int) = @_;
       my $ipaddress;
-      my $result = $self->cmd("LANG=C \\ip addr show $int 2>&1");
+      my $result = $self->cmd("LANG=C \\ip addr show $int 2>&1|cat");
 
       $logger->trace("  -- Output:\n".Dumper($result));
 
@@ -416,7 +419,7 @@ sub get_ipaddress {
     wicked => sub {
       my ($self, $bin, $int) = @_;
       my $ipaddress;
-      my $result = $self->cmd("LANG=C $bin ifstatus $int 2>&1");
+      my $result = $self->cmd("LANG=C $bin ifstatus $int 2>&1|cat");
 
       $logger->debug("  -- Output:\n".Dumper($result));
       my @lines = split /\r\n/, $result->[0];
@@ -426,7 +429,7 @@ sub get_ipaddress {
     nmcli => sub {
       my ($self, $bin, $int) = @_;
       my $ipaddress;
-      my $result = $self->cmd("LANG=C $bin device show $int 2>&1");
+      my $result = $self->cmd("LANG=C $bin device show $int 2>&1|cat");
 
       $logger->debug("  -- Output:\n".Dumper($result));
       my @lines = split /\r\n/, $result->[0];
