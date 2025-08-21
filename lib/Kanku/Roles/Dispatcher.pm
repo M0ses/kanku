@@ -23,6 +23,7 @@ use Data::Dumper;
 use Try::Tiny;
 
 use Kanku::Config;
+use Kanku::Config::Defaults;
 use Kanku::Job;
 
 with 'Kanku::Roles::ModLoader';
@@ -235,7 +236,7 @@ sub execute_notifier {
     job_id    => $job->id,
     state     => $state,
     duration  => ($job->end_time > $job->start_time) ? $job->end_time - $job->start_time : 0,
-    kanku_url => $cfg->{'kanku_url'} || "http://localhost/kanku",
+    kanku_url => Kanku::Config::Defaults->get('Kanku::Notifier', 'kanku_url'),
     context   => $job->context,
   );
 

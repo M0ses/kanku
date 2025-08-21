@@ -20,11 +20,12 @@ use Moose;
 use Try::Tiny;
 use Kanku::Config;
 use Config;
+use Net::Domain qw/hostfqdn/;
 
 my ($arch, undef) = split(/-/, $Config{archname});
 
 my $home = $::ENV{HOME} || (getpwuid($<))[7];
-
+my $hostname = hostfqdn() || 'localhost';
 my $defaults =    {
   'Kanku::Config::GlobalVars' => {
     cache_dir      => "$home/.cache/kanku",
@@ -145,6 +146,9 @@ NE5OgEXk2wVfZczCZpigBKbKZHNYcelXtTt/nP3rsCuGcM4h53s=
       "~/.ssh/id_*.pub",
       "/etc/kanku/ssh/id_*.pub",
     ],
+  },
+  'Kanku::Notifier' => {
+    kanku_url      => "https://$hostname/kanku",
   },
 };
 
