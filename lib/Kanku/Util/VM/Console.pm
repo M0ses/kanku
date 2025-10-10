@@ -128,6 +128,7 @@ sub init {
           $logger->debug("Seen bootloader");
           $self->bootloader_seen(1);
 	  my $qr = qr{(
+	    Welcome\ to\ GRUB!|
 	    GNU\ GRUB\ \ version\ [\d.]+|
             Press\ any\ key\ to\ continue\.|
             The\ highlighted\ entry\ will\ be\ executed\ automatically\ in
@@ -140,8 +141,7 @@ sub init {
       ]
     );
 
-    if ( $self->grub_seen ) {
-      $exp->send("\n\n");
+    if ( $self->bootloader_seen ) {
       $exp->clear_accum();
     } else {
       $logger->warn("No bootloader seen - this might be a bug in your OS!");
@@ -150,7 +150,7 @@ sub init {
     }
   }
 
-  die "Could not open virsh console within $timeout seconds" if ( ! ( $self->console_connected or $self->grub_seen ));
+  die "Could not open virsh console within $timeout seconds" if ( ! ( $self->console_connected or $self->bootloader_seen ));
 
   return 0;
 }
