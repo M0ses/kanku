@@ -424,10 +424,10 @@ sub _handle_installation {
   $logger->debug("Handling installation");
 
   my $cursor = {
-    up    => "\x00\x48",
-    down  => "\x00\x50",
-    left  => "\x00\x4b",
-    right => "\x00\x4d",
+    up    => "\e[A",
+    down  => "\e[B",
+    right => "\e[C",
+    left  => "\e[D",
   };
 
   for my $step (@{$self->installation}) {
