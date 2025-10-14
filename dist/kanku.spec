@@ -40,7 +40,7 @@ BuildRequires:  systemd-rpm-macros
 %if 0%{?suse_version}
 BuildRequires:  sysuser-tools
 %endif
-BuildArch:      noarch
+#BuildArch:      noarch
 # Build only for supported arch. See 'etc/templates/default-vm.tt2.$ARCH'
 ExclusiveArch:  aarch64 x86_64 powerpc64le ppc64le %{ix86}
 
