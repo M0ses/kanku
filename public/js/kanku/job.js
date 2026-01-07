@@ -94,6 +94,7 @@ Vue.component('task-card',{
     + '<div class=task-card>'
     + ' <h4><span class="badge badge-secondary" style="display:block;" v-on:click="showValues()">{{ task.use_module }}</span></h4>'
     + '  <input type=hidden name="use_module" :value="task.use_module">'
+    + '  <div v-if="(task.description)" class="alert alert-info">{{ task.description }}</div>'
     + ' <div v-for="c in task.gui_config">'
     + '  <text-input v-if="c.type == \'text\'" v-bind:gui_config=c :is_admin="is_admin"></text-input>'
     + '  <checkbox-input v-if="c.type == \'checkbox\'" v-bind:gui_config=c></checkbox-input>'

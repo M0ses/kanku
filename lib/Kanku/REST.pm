@@ -360,8 +360,8 @@ get '/gui_config/job.:format' => sub {
 
     my $job_object = Kanku::Job->new();
 
-    foreach my $sub_tasks ( @{$job_cfg}) {
-        my $mod = $sub_tasks->{use_module};
+    foreach my $task ( @{$job_cfg}) {
+        my $mod = $task->{use_module};
         my $defaults = {};
         my $mod2require = $mod;
         $mod2require =~ s{::}{/}smxg;
@@ -379,15 +379,16 @@ get '/gui_config/job.:format' => sub {
 
         foreach my $opt (@{$tmp}) {
           my $param   = $opt->{param};
-          my $default =  $sub_tasks->{options}->{$param}
-            || $mod->new(%{$sub_tasks->{options}}, job=>$job_object)->$param;
+          my $default =  $task->{options}->{$param}
+            || $mod->new(%{$task->{options}}, job=>$job_object)->$param;
           $opt->{default} = $defaults->{$param} = (!$opt->{secure}) ? $default : q{};
         }
         push @{$job_config->{sub_tasks}},
             {
-              use_module => $mod,
-              gui_config => $tmp,
-              defaults   => $defaults,
+              use_module  => $mod,
+              gui_config  => $tmp,
+              defaults    => $defaults,
+              description => $task->{description} || q{},
             },
         ;
     }
