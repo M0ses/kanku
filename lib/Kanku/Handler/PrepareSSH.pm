@@ -183,7 +183,10 @@ sub execute {
     );
     $con->cmd('test -n "$SSHD_SERVICE" && systemctl restart $SSHD_SERVICE || echo "SSHD_SERVICE empty"');
 
-    $con->cmd('test -n "$SSHD_SERVICE" && systemctl enable --now $SSHD_SERVICE || echo "SSHD_SERVICE empty"');
+    ## Do not run "systemctl enable --now", because '--now' may not be implemented by systemctl avaliable on the guest
+    ## and on the other hand the "systemctl restart ..." the line above should have covered the start of the service
+    ## already
+    $con->cmd('test -n "$SSHD_SERVICE" && systemctl enable $SSHD_SERVICE || echo "SSHD_SERVICE empty"');
 
     $con->logout();
   }
