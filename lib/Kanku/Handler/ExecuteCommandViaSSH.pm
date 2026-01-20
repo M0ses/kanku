@@ -67,10 +67,18 @@ has disabled => (
 sub execute {
   my $self    = shift;
   my $results = [];
+  my $ip      = $self->ipaddress;
+
+  if ($self->disabled) {
+    return {
+      code        => 0,
+      message     => "Skipped all commands on $ip because parameter disabled was set",
+      subresults  => $results,
+    };
+  }
 
   $self->connect();
 
-  my $ip      = $self->ipaddress;
   my $ssh     = $self->ssh;
   my $ctx     = $self->job->context;
 
