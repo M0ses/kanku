@@ -19,17 +19,50 @@ package Kanku::Handler::ExecuteCommandViaSSH;
 use Moose;
 use Carp;
 
-sub gui_config {[]}
+sub gui_config {[
+    {
+      param => 'disabled',
+      type  => 'checkbox',
+      label => 'Disabled',
+    },
+]}
+
 sub distributable { 1 }
 with 'Kanku::Roles::Handler';
 
-has timeout => (is=>'rw',isa=>'Int',lazy=>1,default=>60*60*4);
+has timeout => (
+  is      => 'rw',
+  isa     => 'Int',
+  lazy    => 1,
+  default => 60*60*4
+);
+
 with 'Kanku::Roles::SSH';
 
-has commands => (is=>'rw', isa=>'ArrayRef', default => sub {[]});
+has commands => (
+  is      => 'rw',
+  isa     => 'ArrayRef',
+  default => sub {[]},
+);
 
-has environment => (is=>'rw', isa=>'HashRef', default => sub {{}});
-has context2env => (is=>'rw', isa=>'HashRef', default => sub {{}});
+has environment => (
+  is      => 'rw',
+  isa     => 'HashRef',
+  default => sub {{}},
+);
+
+has context2env => (
+  is      => 'rw',
+  isa     => 'HashRef',
+  default => sub {{}},
+);
+
+has disabled => (
+  is      => 'rw',
+  isa     => 'Bool',
+  default => 0,
+);
+
 
 sub execute {
   my $self    = shift;
