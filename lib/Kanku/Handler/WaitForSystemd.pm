@@ -19,6 +19,8 @@ package Kanku::Handler::WaitForSystemd;
 use Moose;
 use Kanku::Util::VM;
 use Kanku::Util::VM::Console;
+use Kanku::Util::NSpawn::Console;
+use Kanku::Config::Defaults;
 
 sub gui_config {[]}
 sub distributable { 1 }
@@ -46,16 +48,30 @@ sub execute {
   my $logger = $self->logger;
   my $con;
 
-  $con = Kanku::Util::VM::Console->new(
-        domain_name => $self->domain_name,
-        login_user  => $self->login_user(),
-        login_pass  => $self->login_pass(),
-        job_id      => $self->job->id,
-        cmd_timeout => $self->timeout,
-        log_file    => $ctx->{log_file} || q{},
-        log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
-	no_wait_for_bootloader => 1,
-  );
+  my $vm_type = Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type')
+             || $ctx->{vm_type}
+             || 'kvm';
+
+  if ($vm_type eq 'nspawn') {
+    $con = Kanku::Util::NSpawn::Console->new(
+      domain_name => $self->domain_name,
+      login_user  => $self->login_user(),
+      login_pass  => $self->login_pass(),
+      job_id      => $self->job->id,
+      cmd_timeout => $self->timeout,
+    );
+  } else {
+    $con = Kanku::Util::VM::Console->new(
+      domain_name => $self->domain_name,
+      login_user  => $self->login_user(),
+      login_pass  => $self->login_pass(),
+      job_id      => $self->job->id,
+      cmd_timeout => $self->timeout,
+      log_file    => $ctx->{log_file} || q{},
+      log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
+      no_wait_for_bootloader => 1,
+    );
+  }
 
   $con->init();
   $con->login();

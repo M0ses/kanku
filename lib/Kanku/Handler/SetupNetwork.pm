@@ -21,7 +21,9 @@ use Data::Dumper;
 use JSON::XS;
 use Kanku::Util::VM;
 use Kanku::Util::VM::Console;
+use Kanku::Util::NSpawn::Console;
 use Kanku::Config;
+use Kanku::Config::Defaults;
 use Try::Tiny;
 
 sub gui_config {[]}
@@ -72,15 +74,29 @@ has '_con' => (
 sub _build__con {
   my ($self) = @_;
   my $ctx    = $self->job()->context();
-  return Kanku::Util::VM::Console->new(
-    domain_name => $self->domain_name,
-    login_user  => $self->login_user(),
-    login_pass  => $self->login_pass(),
-    job_id      => $self->job->id,
-    log_file    => $ctx->{log_file} || q{},
-    log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
-    no_wait_for_bootloader => 1,
-  );
+
+  my $vm_type = Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type')
+             || $ctx->{vm_type}
+             || 'kvm';
+
+  if ($vm_type eq 'nspawn') {
+    return Kanku::Util::NSpawn::Console->new(
+      domain_name => $self->domain_name,
+      login_user  => $self->login_user(),
+      login_pass  => $self->login_pass(),
+      job_id      => $self->job->id,
+    );
+  } else {
+    return Kanku::Util::VM::Console->new(
+      domain_name => $self->domain_name,
+      login_user  => $self->login_user(),
+      login_pass  => $self->login_pass(),
+      job_id      => $self->job->id,
+      log_file    => $ctx->{log_file} || q{},
+      log_stdout  => defined ($ctx->{log_stdout}) ? $ctx->{log_stdout} : 1,
+      no_wait_for_bootloader => 1,
+    );
+  }
 }
 
 has '_requires_restart'       => (is=>'rw', isa=>'Bool', default=>0);

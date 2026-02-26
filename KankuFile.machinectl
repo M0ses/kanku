@@ -1,0 +1,82 @@
+---
+###############################################################################
+info:
+  summary: Create VM based on openSUSE Tumbleweed (ext4) and install kanku in devel mode
+  description: |+
+               This KankuFile executes the following steps:
+               
+               * create a VM 
+               * install kanku-cli
+               * setup kanku in developer mode
+
+###############################################################################
+domain_name: kanku-devel-opensuse
+login_user: root
+login_pass: kankudai
+default_job: tasks
+
+###############################################################################
+jobs:
+  tasks:
+    -
+      use_module: Kanku::Handler::OBSCheck
+      options:
+        project: devel:kanku:images
+        package: openSUSE-Tumbleweed-JeOS:btrfs
+        repository: images_tumbleweed
+    -
+      use_module: Kanku::Handler::ImageDownload
+      options:
+        url: http://download.opensuse.org/tumbleweed/appliances/opensuse-tumbleweed-image.x86_64-networkd.tar.xz
+    -
+      use_module: Kanku::Handler::CreateDomain
+      options:
+        memory: 4G
+        vcpu: 2
+        use_9p: 1
+    -
+      use_module: Kanku::Handler::PrepareSSH
+    -
+      use_module: Kanku::Handler::ExecuteCommandViaSSH
+      options:
+        commands:
+          - zypper -n ar https://download.opensuse.org/tumbleweed/repo/oss/ repo-oss
+          - zypper -n ar https://download.opensuse.org/update/tumbleweed/ repo-oss-update
+          - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/perl/openSUSE_Tumbleweed/devel:kanku:perl.repo
+          - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/staging/openSUSE_Tumbleweed/devel:kanku:staging.repo
+          - zypper -n --gpg-auto-import-keys ref -s
+          - zypper -n in kanku-cli kanku-tests systemd-container system-group-wheel polkit
+          - usermod -a -G wheel kanku
+          - cp /tmp/kanku/dist/10-kanku.rules /usr/share/polkit-1/rules.d
+          - systemctl restart polkit.service
+          #- kanku setup devel --ll TRACE --user kanku > /tmp/setup.log 2>&1 || { cat /tmp/setup.log; exit 1; }
+          #- 'echo "kanku ALL=(ALL:ALL) NOPASSWD: ALL" > /usr/etc/sudoers.d/kanku'
+    -
+      use_module: Kanku::Handler::ExecuteCommandViaSSH
+      options:
+        username: kanku
+        commands:
+          -  machinectl pull-tar --verify=no http://download.opensuse.org/tumbleweed/appliances/opensuse-tumbleweed-image.x86_64-networkd.tar.xz tumbleweed
+          -  machinectl read-only tumbleweed false
+          -  machinectl start tumbleweed
+          -  machinectl shell tumbleweed /bin/true
+          -  machinectl stop tumbleweed
+
+
+###############################################################################
+job_groups:
+  all:
+    - tasks
+
+###############################################################################
+notifiers:
+  tasks:
+    -
+      use_module: Kanku::Notifier::Console
+      options:
+        template: |+
+          [% USE Filter::ANSIColor 'color' %]
+          ****
+          **** Your text for [% context.ipaddress | color 'red' %] goes here
+          ****
+      states: succeed

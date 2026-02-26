@@ -29,6 +29,7 @@ jobs:
  sm: !include KankuFile.d/server-mode.yml
  dm: !include KankuFile.d/developer-mode.yml
  tm: !include KankuFile.d/test.yml
+ ma: !include KankuFile.d/machine.yml
  cl:
    -
     use_module: Kanku::Handler::SetJobContext

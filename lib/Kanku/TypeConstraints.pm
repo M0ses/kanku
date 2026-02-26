@@ -23,6 +23,8 @@ enum 'KeyringBackend' => [qw/KDEWallet Gnome Memory None/];
 
 enum 'ImageType' => [qw/kanku vagrant/];
 
+enum 'VMType' => ['kvm', 'nspawn', ''];
+
 enum 'DomainAction' => [qw[reboot shutdown create destroy undefine]];
 
 1;

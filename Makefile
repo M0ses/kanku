@@ -63,10 +63,14 @@ install_arch_templates:
 	install -m 644 etc/templates/bios-serial-network.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/bios-serial-network.tt2
 	install -m 644 etc/templates/bios-serial-bridge.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/bios-serial-bridge.tt2
 
-install: install_dirs install_full_dirs install_services install_docs configs templates public views bashcomp urlwrapper install_arch_templates install_tests
+install: install_dirs install_full_dirs install_services install_docs configs templates public views bashcomp urlwrapper install_arch_templates install_tests polkit
 	install -m 644 dist/profile.d-kanku.sh $(DESTDIR)/etc/profile.d/kanku.sh
 	install -m 644 dist/tmpfiles.d-kanku $(DESTDIR)/usr/lib/tmpfiles.d/kanku.conf
 	install -m 644 dist/_etc_apache2_conf.d_kanku-worker.conf $(DESTDIR)/etc/apache2/conf.d/kanku-worker.conf
+
+polkit:
+	[ -d $(DESTDIR)/usr/share/polkit-1/rules.d ] || mkdir -p $(DESTDIR)/usr/share/polkit-1/rules.d
+	install -m 644 dist/10-kanku.rules $(DESTDIR)/usr/share/polkit-1/rules.d/10-kanku.rules
 
 bashcomp:
 	# FIXME: This is only a temporary workaround until we got upstream
@@ -161,6 +165,7 @@ install_services: install_dirs
 	install -m 644 ./dist/systemd/kanku-web.service $(DESTDIR)/usr/lib/systemd/system/kanku-web.service
 	install -m 644 ./dist/systemd/kanku-dispatcher.service $(DESTDIR)/usr/lib/systemd/system/kanku-dispatcher.service
 	install -m 644 ./dist/systemd/kanku-iptables.service $(DESTDIR)/usr/lib/systemd/system/kanku-iptables.service
+	install -m 644 ./dist/systemd/kanku-nspawn@.service $(DESTDIR)/usr/lib/systemd/system/kanku-nspawn@.service
 
 install_docs:
 	install -m 644 README.md $(_DOCDIR)

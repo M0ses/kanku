@@ -21,7 +21,12 @@ extends qw(Kanku::Cli);
 
 with 'Kanku::Cli::Roles::VM';
 
+use Carp;
+use Try::Tiny;
+
 use Kanku::Util::VM;
+use Kanku::Config::Defaults;
+use Kanku::Util::NSpawn::VM;
 
 # timeout must be defined before consuming role
 #
@@ -128,22 +133,14 @@ sub run {
     $vars->{term} = q{ -t} if ($self->pseudo_terminal eq 'force');
     $vars->{term} = q{ -T} if ($self->pseudo_terminal eq 'disable');
   }
-  if (!$vars->{ip}) {
-    my $vm     = Kanku::Util::VM->new(
-     domain_name => $self->domain_name || $config->{domain_name},
-     management_network  => $config->{management_network} || q{}
-    );
-    my $state = $vm->state;
 
-    if ( $state eq 'on' && !$self->ipaddress ) {
-      $vars->{ip} = $self->ipaddress($config->{ipaddress} || $vm->get_ipaddress);
-    } elsif ($state eq 'off') {
-      $logger->warn('VM is off - use \'kanku startvm\' to start VM and try again');
+  if (!$vars->{ip}) {
+    try {
+      $vars->{ip} = $self->_get_ipaddress($config);
+    } catch {
+      $logger->error("Error while trying to get IP: $_");
       $ret = 1;
-    } else {
-      $logger->fatal('No VM found or VM in state \'unknown\'');
-      $ret = 2;
-    }
+    };
   }
 
   if(!$ret) {
@@ -157,6 +154,39 @@ sub run {
     }
   }
   return $ret;
+}
+
+sub _get_ipaddress {
+  my ($self, $config) = @_;
+
+  return $config->{ipaddress} if $config->{ipaddress};
+
+  my $logger = $self->logger;
+  my $vm;
+
+  if (Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type') eq 'nspawn') {
+    $vm = Kanku::Util::NSpawn::VM->new(
+      vm_name         => $self->domain_name,
+      management_network  => $config->{management_network} || q{}
+    );
+  } else {
+    $vm = Kanku::Util::VM->new(
+      domain_name         => $self->domain_name,
+      management_network  => $config->{management_network} || q{}
+    );
+
+    my $state = $vm->state;
+
+    if ($state eq 'off') {
+      croak "VM is off - use 'kanku startvm' to start VM and try again\n";
+    }
+  }
+
+  $self->ipaddress($vm->get_ipaddress);
+
+  croak 'No IP address found' unless $self->ipaddress;
+
+  return $self->ipaddress;
 }
 
 __PACKAGE__->meta->make_immutable;

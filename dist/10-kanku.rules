@@ -1,0 +1,24 @@
+polkit.addRule(function(action, subject) {
+  const allowedActions = [
+      "org.freedesktop.systemd1.manage-units",
+      "org.freedesktop.import1.pull",
+      "org.freedesktop.import1.import",
+      "org.freedesktop.import1.Manager.ListImages",
+      "org.freedesktop.machine1.manage-images",
+      "org.freedesktop.machine1.manage-machines",
+      "org.freedesktop.machine1.shell",
+      "org.freedesktop.machine1.create-machine",
+      "org.freedesktop.machine1.login",
+      "org.freedesktop.machine1.Manager.GetMachineAddresses",
+      "org.freedesktop.machine1.Manager.OpenMachineShell",
+      "org.freedesktop.machine1.Manager.OpenMachineLogin",
+      "org.freedesktop.machine1.Manager.OpenMachinePTY"
+  ];
+
+  polkit.log("DEBUG: Action Details: " + action);
+
+  if (allowedActions.indexOf(action.id) >= 0  && subject.isInGroup("wheel")) {
+    return polkit.Result.YES;
+  }
+});
+

@@ -20,6 +20,10 @@ use Moose;
 
 use Kanku::Config;
 use Kanku::Util::VM;
+use Kanku::Util::VM::Console;
+use Kanku::Util::NSpawn::Console;
+use Kanku::Util::NSpawn::VM;
+use Kanku::Config::Defaults;
 use Kanku::TypeConstraints;
 
 sub gui_config {
@@ -118,6 +122,10 @@ sub execute {
   my $action = $self->action;
   my $cfg    = Kanku::Config->instance()->config();
 
+  my $vm_type = Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type')
+             || $ctx->{vm_type}
+             || 'kvm';
+
   my $final_state = {
     reboot   => 1,
     create   => 1,
@@ -125,6 +133,60 @@ sub execute {
     destroy  => 5,
     undefine => 0
   };
+
+  if ($vm_type eq 'nspawn') {
+    my $vm = Kanku::Util::NSpawn::VM->new(vm_name => $self->domain_name);
+
+    if ($action eq 'create') {
+      $vm->create_machine();
+      $vm->wait_for_state('active');
+
+      if ($self->wait_for_console) {
+        my $con = Kanku::Util::NSpawn::Console->new(
+          domain_name => $self->domain_name,
+          login_user  => $self->login_user,
+          login_pass  => $self->login_pass,
+          job_id      => $self->job->id,
+        );
+        $con->init();
+        $con->login();
+        $con->logout();
+      }
+    } elsif ($action eq 'shutdown' || $action eq 'destroy') {
+      $vm->destroy_machine();
+      $vm->wait_for_state('inactive');
+    } elsif ($action eq 'reboot') {
+      my $con = Kanku::Util::NSpawn::Console->new(
+        domain_name => $self->domain_name,
+        login_user  => $self->login_user,
+        login_pass  => $self->login_pass,
+        job_id      => $self->job->id,
+      );
+      $con->init();
+      $con->login();
+      $con->cmd("systemctl reboot");
+      $con->logout();
+
+      sleep 5;
+      $vm->wait_for_state('active');
+
+      if ($self->allow_ip_change) {
+        $con->login();
+        $ctx->{ipaddress} = $con->get_ipaddress(
+          interface => $self->management_interface || 'eth0',
+          timeout   => $self->timeout,
+        );
+        $con->logout();
+      }
+    } elsif ($action eq 'undefine') {
+      $vm->destroy_machine();
+    }
+
+    return {
+      code    => 0,
+      message => "Action '$action' on nspawn container ". $self->domain_name ." finished successfully"
+    };
+  }
 
   my $cb = {
     reboot => sub {
@@ -135,7 +197,7 @@ sub execute {
         $ctx->{ipaddress} = $con->get_ipaddress(
          interface => $self->management_interface,
          timeout   => $self->timeout,
-       );
+        );
      }
      $con->logout();
    },

@@ -18,6 +18,8 @@ package Kanku::Handler::PrepareSSH;
 
 use Moose;
 use Kanku::Util::VM::Console;
+use Kanku::Util::NSpawn::Console;
+use Kanku::Util::NSpawn::VM;
 use Kanku::Config;
 use Path::Tiny qw/path tempfile/;
 
@@ -130,6 +132,46 @@ sub execute {
       "EOF\n"
     );
     $tpub->remove;
+  } elsif (Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type') eq 'nspawn') {
+    my $default_user = 'kanku';
+    my $con = Kanku::Util::NSpawn::Console->new(
+      domain_name => $self->domain_name,
+      login_user  => $self->login_user(),
+      login_pass  => $self->login_pass(),
+      job_id      => $self->job->id,
+    );
+    $con->init();
+    $con->login();
+
+    $con->cmd('rpm -q openssh-server || zypper -n in openssh-server');
+
+    $con->cmd('[ -d $HOME/.ssh ] || mkdir $HOME/.ssh');
+    $con->cmd(
+      "cat <<EOF >> \$HOME/.ssh/authorized_keys\n" .
+      "$str\n" .
+      "EOF\n"
+    );
+
+    $con->cmd("id $default_user || useradd -m $default_user");
+    $con->cmd("[ -d /home/$default_user/.ssh ] || mkdir /home/$default_user/.ssh");
+    $con->cmd(
+      "cat <<EOF >> /home/$default_user/.ssh/authorized_keys\n" .
+      "$str\n" .
+      "EOF\n"
+    );
+    $con->cmd("chown $default_user:users -R /home/$default_user/.ssh/");
+
+    my $crypto_cfg = '/etc/crypto-policies/back-ends/opensshserver.config';
+    $con->cmd("[ ! -f $crypto_cfg ] || sed -i -E 's/(PubkeyAcceptedKeyTypes .*)/\\1,ssh-rsa/' $crypto_cfg");
+
+    if ($self->enable_daemon_debug) {
+      $con->cmd('[ ! -d /etc/ssh/sshd_config.d ] || echo "LogLevel DEBUG3" > /etc/ssh/sshd_config.d/loglevel.conf');
+    }
+
+    $con->cmd('systemctl enable --now sshd || true');
+
+    $con->logout();
+
   } else {
     my $default_user = 'kanku';
     my $con = Kanku::Util::VM::Console->new(

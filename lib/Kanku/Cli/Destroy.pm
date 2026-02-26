@@ -22,7 +22,11 @@ extends qw(Kanku::Cli);
 use Try::Tiny;
 
 use Kanku::Util::VM;
+use Kanku::Util::NSpawn;
+use Kanku::Util::NSpawn::VM;
 use Kanku::Util::IPTables;
+use Kanku::Config::Defaults;
+use Kanku::Helpers;
 
 with 'Kanku::Cli::Roles::VM';
 
@@ -44,10 +48,35 @@ sub _build_keep_volumes {[]}
 
 sub run {
   my ($self)  = @_;
-  my $ret     = 0;
+ 
+  my $vm_type = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'vm_type');
+
+  if ($vm_type eq 'nspawn') {
+    return $self->_destroy_nspawn();
+  } else {
+    return $self->_destroy_kvm();
+  }
+}
+
+sub _destroy_nspawn {
+  my ($self)  = @_;
   my $logger  = $self->logger;
   my $dn      = $self->domain_name;
 
+  $logger->info("Deleting $dn");
+
+  my $vm = Kanku::Util::NSpawn::VM->new(vm_name=>$dn);
+  $vm->destroy_machine($dn);
+
+  $logger->info("Removed domain `$dn` successfully");
+  return 1;
+}
+
+sub _destroy_kvm {
+  my ($self)  = @_;
+  my $ret     = 0;
+  my $logger  = $self->logger;
+  my $dn      = $self->domain_name;
   my $vm      = Kanku::Util::VM->new(
     domain_name  => $dn,
     keep_volumes => $self->keep_volumes,

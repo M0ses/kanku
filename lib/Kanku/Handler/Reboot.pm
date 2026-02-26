@@ -19,6 +19,10 @@ package Kanku::Handler::Reboot;
 use Moose;
 use Kanku::Config;
 use Kanku::Util::VM;
+use Kanku::Util::VM::Console;
+use Kanku::Util::NSpawn::Console;
+use Kanku::Util::NSpawn::VM;
+use Kanku::Config::Defaults;
 
 sub gui_config {
   [
@@ -68,6 +72,51 @@ sub execute {
   my ($self) = @_;
   my $ctx    = $self->job()->context();
   my $cfg    = Kanku::Config->instance()->config();
+
+  my $vm_type = Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type')
+             || $ctx->{vm_type}
+             || 'kvm';
+
+  if ($vm_type eq 'nspawn') {
+    my $con = Kanku::Util::NSpawn::Console->new(
+      domain_name => $self->domain_name,
+      login_user  => $self->login_user,
+      login_pass  => $self->login_pass,
+      job_id      => $self->job->id,
+    );
+    $con->init();
+    $con->login();
+    $con->cmd_timeout(-1);
+    $con->cmd("systemctl reboot");
+    $con->cmd_timeout($self->timeout);
+
+    $self->logger->debug("Waiting for nspawn container to restart");
+    sleep 5;
+
+    my $vm = Kanku::Util::NSpawn::VM->new(vm_name => $self->domain_name);
+    $vm->wait_for_state('active');
+
+    if ($self->wait_for_console) {
+      $con->login();
+      $con->logout();
+    }
+
+    my $new_ip = '';
+    if ($self->allow_ip_change) {
+      $con->login();
+      $ctx->{ipaddress} = $con->get_ipaddress(
+        interface => $ctx->{management_interface} || 'eth0',
+        timeout   => $self->timeout,
+      );
+      $new_ip = " New IP: $ctx->{ipaddress}";
+      $con->logout();
+    }
+
+    return {
+      code    => 0,
+      message => "Rebooted nspawn container ". $self->domain_name ." successfully. $new_ip",
+    };
+  }
 
   my $vm = Kanku::Util::VM->new(
       domain_name => $self->domain_name,
