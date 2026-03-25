@@ -287,7 +287,7 @@ sub _build_vm_type {
   my ($self) = @_;
   my $ctx  = $self->job()->context();
   my $d    = Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type');
-  return $ctx->{image_type} || $d;
+  return $ctx->{image_type} || $d || q{};
 }
 
 sub prepare {

@@ -49,7 +49,7 @@ sub _build_keep_volumes {[]}
 sub run {
   my ($self)  = @_;
  
-  my $vm_type = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'vm_type');
+  my $vm_type = Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', 'vm_type') || q{};
 
   if ($vm_type eq 'nspawn') {
     return $self->_destroy_nspawn();

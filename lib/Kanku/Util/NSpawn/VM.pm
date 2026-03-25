@@ -32,6 +32,8 @@ use Carp;
 
 with 'Kanku::Roles::Logger';
 
+use Kanku::Util::NSpawn::Console;
+
 has '_bus' => (
   is      => 'rw',
   isa     => 'Object',
@@ -90,6 +92,46 @@ has mnt_dir_9p => (
   default => '/tmp/kanku',
 );
 
+sub _create_nspawn_config {
+  my ($self) = @_;
+  my $logger = $self->logger;
+
+  my $machine_name = $self->vm_name;
+  my $source = $self->host_dir_9p;
+  my $dest   = $self->mnt_dir_9p;
+
+  $logger->warn("use_9p: Shared folders with nspawn containers require running without user namespaces");
+  $logger->warn("use_9p: This is a known limitation - see https://github.com/systemd/systemd/issues/36470");
+
+  my $config_dir = Path::Tiny->new("/etc/systemd/nspawn");
+
+  eval {
+    $config_dir->mkpath unless -d $config_dir;
+  };
+  if ($@ || ! -d $config_dir) {
+    $logger->warn("Cannot create nspawn config directory: $@");
+    return 0;
+  }
+
+  my $config_file = $config_dir->child("$machine_name.nspawn");
+
+  my $config = "[Files]\nBind=$source:$dest\n";
+
+  $logger->debug("Creating nspawn config file: $config_file");
+  
+  eval {
+    $config_file->spew($config);
+  };
+  if ($@) {
+    $logger->warn("Cannot write nspawn config file: $@");
+    return 0;
+  }
+
+  $logger->debug("nspawn config created: $config");
+
+  return 1;
+}
+
 sub bind_mount {
   my ($self) = @_;
   my $logger = $self->logger;
@@ -108,11 +150,36 @@ sub bind_mount {
     "org.freedesktop.machine1.Manager"
   );
 
-  $machine_manager->BindMountMachine($machine_name, $source, $dest, 0, 1);
+  eval {
+    $machine_manager->BindMountMachine($machine_name, $source, $dest, 0, 1);
+  };
+  if ($@) {
+    my $err = $@;
+    $logger->debug("D-Bus bind mount failed (expected with user namespaces): $err");
+    $logger->debug("Bind mount will be created via console in PrepareSSH handler instead");
+    return 0;
+  }
 
   $logger->debug("Bind mount created successfully");
 
   return 1;
+}
+
+sub bind_mount_via_console {
+  my ($self) = @_;
+  my $logger = $self->logger;
+
+  return unless $self->use_9p;
+
+  my $machine_name = $self->vm_name;
+  my $source = $self->host_dir_9p;
+  my $dest   = $self->mnt_dir_9p;
+
+  $logger->warn("bind_mount_via_console: Shared folders not supported with user namespaces");
+  $logger->warn("bind_mount_via_console: Container '$machine_name' is running with user namespaces");
+  $logger->warn("bind_mount_via_console: To use shared folders, run container without user namespaces");
+
+  return 0;
 }
 
 sub create_machine {
@@ -127,6 +194,11 @@ sub create_machine {
   my $service = $self->_bus->get_service("org.freedesktop.systemd1");
   my $manager = $service->get_object("/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager");
   my $unit_name = $self->_unit_name;
+
+  if ($self->use_9p) {
+    $self->_create_nspawn_config();
+  }
+
   my $job_path = $manager->StartUnit($unit_name, "replace");
 
   # 2. Wait for the Job object to disappear (Job completion)
@@ -141,7 +213,6 @@ sub create_machine {
   }
   $logger->info("Job completed ... Checking state");
   $self->wait_for_state('active');
-  $self->bind_mount();
 
   my $machine_service = $self->_bus->get_service("org.freedesktop.machine1");
   my $machine_manager = $machine_service->get_object("/org/freedesktop/machine1", "org.freedesktop.machine1.Manager");

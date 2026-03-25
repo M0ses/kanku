@@ -470,9 +470,9 @@ sub guess_management_interface {
   my $logger = $self->logger;
 
   my $out = $self->cmd("ls -1 /sys/class/net/");
-  my @lines = split(/\r?\n/, $out->[0]);
+  my @lines = split(/\R/, $out->[0]);
   # remove command line 'ls -1 /sys/class/net/'
-  shift @lines;
+  #shift @lines;
 
   $self->management_interface(
     [map { $_ =~ /^(em\d+|lan\d+|eth\d+|en.*)/ } @lines]->[0] ||
@@ -486,7 +486,7 @@ sub guess_management_interface {
 
 sub guess_network_tooling {
   my ($self) = @_;
-  my $type_output  = $self->cmd("type -P ip wicked nmcli||true");
+  my $type_output  = $self->cmd("type -P networkctl ip wicked nmcli||true");
   my @tmp          = split /\r\n/, $type_output->[0], 3;
   # use index no. 1 because 0 contains the command `type -P ...`
   my $cmd          = path($tmp[1]);
@@ -496,9 +496,10 @@ sub guess_network_tooling {
 sub network_restart {
   my ($self) = @_;
   my %cmd2func = (
-    ip     => "ifdown %s;ifup %s",
-    wicked => "ifdown %s;ifup %s",
-    nmcli  => "nmcli device disconnect %s;nmcli device connect %s",
+    networkctl => "networkctl down %s;networkctl up %s",
+    ip         => "ifdown %s;ifup %s",
+    wicked     => "ifdown %s;ifup %s",
+    nmcli      => "nmcli device disconnect %s;nmcli device connect %s",
   );
   my $cmd      = $self->network_tooling;
   my $template  = $cmd2func{$cmd->basename};
