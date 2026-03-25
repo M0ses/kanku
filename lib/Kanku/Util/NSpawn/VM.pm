@@ -68,6 +68,53 @@ has 'state_change_timeout' => (
   default  => 300,
 );
 
+has use_9p => (
+  is      => 'rw',
+  isa     => 'Bool',
+  default => 0,
+);
+
+has host_dir_9p => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  builder => '_build_host_dir_9p',
+);
+sub _build_host_dir_9p {
+  return Path::Tiny->cwd->stringify
+}
+
+has mnt_dir_9p => (
+  is      => 'rw',
+  isa     => 'Str',
+  default => '/tmp/kanku',
+);
+
+sub bind_mount {
+  my ($self) = @_;
+  my $logger = $self->logger;
+
+  return unless $self->use_9p;
+
+  my $machine_name = $self->vm_name;
+  my $source = $self->host_dir_9p;
+  my $dest   = $self->mnt_dir_9p;
+
+  $logger->debug("Creating bind mount: $source -> $dest for machine $machine_name");
+
+  my $machine_service = $self->_bus->get_service("org.freedesktop.machine1");
+  my $machine_manager = $machine_service->get_object(
+    "/org/freedesktop/machine1",
+    "org.freedesktop.machine1.Manager"
+  );
+
+  $machine_manager->BindMountMachine($machine_name, $source, $dest, 0, 1);
+
+  $logger->debug("Bind mount created successfully");
+
+  return 1;
+}
+
 sub create_machine {
   my ($self) = @_;
   my $logger = $self->logger;
@@ -94,6 +141,8 @@ sub create_machine {
   }
   $logger->info("Job completed ... Checking state");
   $self->wait_for_state('active');
+  $self->bind_mount();
+
   my $machine_service = $self->_bus->get_service("org.freedesktop.machine1");
   my $machine_manager = $machine_service->get_object("/org/freedesktop/machine1", "org.freedesktop.machine1.Manager");
   my $addresses = [];
@@ -128,6 +177,7 @@ sub get_ipaddress {
            if ($addr->[1]->[0] != 169) {
  	     return join('.', @{$addr->[1]});
 	   }
+	   sleep 1;
         }
       }
     }

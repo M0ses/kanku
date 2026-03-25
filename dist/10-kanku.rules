@@ -12,7 +12,8 @@ polkit.addRule(function(action, subject) {
       "org.freedesktop.machine1.Manager.GetMachineAddresses",
       "org.freedesktop.machine1.Manager.OpenMachineShell",
       "org.freedesktop.machine1.Manager.OpenMachineLogin",
-      "org.freedesktop.machine1.Manager.OpenMachinePTY"
+      "org.freedesktop.machine1.Manager.OpenMachinePTY",
+      "org.freedesktop.machine1.Manager.BindMountMachine"
   ];
 
   polkit.log("DEBUG: Action Details: " + action);

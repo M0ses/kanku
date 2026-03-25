@@ -40,7 +40,7 @@ jobs:
       use_module: Kanku::Handler::ExecuteCommandViaSSH
       options:
         commands:
-          - zypper -n ar https://download.opensuse.org/tumbleweed/repo/oss/ repo-oss
+          #- zypper -n ar https://download.opensuse.org/tumbleweed/repo/oss/ repo-oss
           - zypper -n ar https://download.opensuse.org/update/tumbleweed/ repo-oss-update
           - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/perl/openSUSE_Tumbleweed/devel:kanku:perl.repo
           - zypper -n ar https://download.opensuse.org/repositories/devel:/kanku:/staging/openSUSE_Tumbleweed/devel:kanku:staging.repo

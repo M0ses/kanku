@@ -191,7 +191,16 @@ sub _build_mnt_dir_9p {
   return Kanku::Config::Defaults->get(__PACKAGE__, 'mnt_dir_9p');
 }
 
-has ['host_dir_9p']    => (is => 'rw', isa => 'Str');
+has host_dir_9p => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  builder => '_build_host_dir_9p',
+);
+sub _build_host_dir_9p {
+  return Path::Tiny->cwd->stringify
+}
+
 
 has ['accessmode_9p']  => (is => 'rw', isa => 'Str');
 
@@ -356,7 +365,10 @@ sub _execute_machinectl {
     qw/machinectl read-only/, $self->domain_name, "false"
   ], $logger);
   my $vm = Kanku::Util::NSpawn::VM->new(
-    vm_name => $self->domain_name,
+    vm_name     => $self->domain_name,
+    use_9p      => $self->use_9p,
+    host_dir_9p => $self->host_dir_9p,
+    mnt_dir_9p  => $self->mnt_dir_9p,
   );
   my $vm_result = $vm->create_machine;
 
