@@ -163,8 +163,9 @@ sub _get_ipaddress {
 
   my $logger = $self->logger;
   my $vm;
+  my $vm_type = Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type') || q{};
 
-  if (Kanku::Config::Defaults->get("Kanku::Config::GlobalVars", 'vm_type') eq 'nspawn') {
+  if ($vm_type eq 'nspawn') {
     $vm = Kanku::Util::NSpawn::VM->new(
       vm_name         => $self->domain_name,
       management_network  => $config->{management_network} || q{}
