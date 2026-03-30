@@ -495,6 +495,11 @@ sub guess_network_tooling {
 
 sub network_restart {
   my ($self) = @_;
+  my $logger = $self->logger;
+  if (!$self->management_interface) {
+    $logger->warn("No management_interface found");
+    return;
+  }
   my %cmd2func = (
     networkctl => "networkctl down %s;networkctl up %s",
     ip         => "ifdown %s;ifup %s",
