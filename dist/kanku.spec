@@ -192,7 +192,7 @@ Requires:       perl(LWP::Protocol::https)
 Requires:       perl(Mail::Sendmail)
 Requires:       perl(UUID)
 Requires:       perl(User::pwent)
-Requires:       perl(Net::DBUS)
+Requires:       perl(Net::DBus)
 Requires:       tar
 Requires:       bsdtar
 Requires:       procps
