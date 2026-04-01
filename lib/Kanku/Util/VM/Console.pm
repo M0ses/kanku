@@ -469,10 +469,10 @@ sub guess_management_interface {
   my ($self) = @_;
   my $logger = $self->logger;
 
-  my $out = $self->cmd("ls -1 /sys/class/net/");
+  my $out = $self->cmd('\ls -1 /sys/class/net/');
   my @lines = split(/\R/, $out->[0]);
   # remove command line 'ls -1 /sys/class/net/'
-  #shift @lines;
+  shift @lines;
 
   $self->management_interface(
     [map { $_ =~ /^(em\d+|lan\d+|eth\d+|en.*)/ } @lines]->[0] ||
