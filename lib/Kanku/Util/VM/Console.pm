@@ -486,7 +486,7 @@ sub guess_management_interface {
 
 sub guess_network_tooling {
   my ($self) = @_;
-  my $type_output  = $self->cmd("type -P networkctl ip wicked nmcli||true");
+  my $type_output  = $self->cmd("type -P networkctl nmcli ip wicked||true");
   my @tmp          = split /\r\n/, $type_output->[0], 3;
   # use index no. 1 because 0 contains the command `type -P ...`
   my $cmd          = path($tmp[1]);
