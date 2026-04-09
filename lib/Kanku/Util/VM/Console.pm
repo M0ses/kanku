@@ -486,7 +486,7 @@ sub guess_management_interface {
 
 sub guess_network_tooling {
   my ($self) = @_;
-  my $type_output  = $self->cmd("type -P networkctl nmcli ip wicked||true");
+  my $type_output  = $self->cmd("type -P networkctl nmcli wicked ifdown ip||true");
   my @tmp          = split /\r\n/, $type_output->[0], 3;
   # use index no. 1 because 0 contains the command `type -P ...`
   my $cmd          = path($tmp[1]);
@@ -502,9 +502,10 @@ sub network_restart {
   }
   my %cmd2func = (
     networkctl => "networkctl down %s;networkctl up %s",
-    ip         => "ifdown %s;ifup %s",
+    ip         => "ip link dev %s down;ip link dev %s up",
     wicked     => "ifdown %s;ifup %s",
     nmcli      => "nmcli device disconnect %s;nmcli device connect %s",
+    ifdown     => "ifdown %s;ifup %s",
   );
   my $cmd      = $self->network_tooling;
   my $template  = $cmd2func{$cmd->basename};
