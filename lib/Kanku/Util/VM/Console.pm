@@ -71,27 +71,45 @@ sub init {
 
 
   $ENV{"LANG"} = "C";
+  $ENV{"TERM"} = "dumb";
   my $command = "virsh";
   my @parameters = ("-c",$self->connect_uri,"console",$self->domain_name);
 
   my $exp = Expect->new;
+  my $log_fh;
+  my $lf = $self->log_file;
   $exp->restart_timeout_upon_receive(1);
   $exp->debug($cfg->{$pkg}->{debug} || 0);
   $exp->raw_pty(1);
 
-  if ($self->log_file) {
+  if ($lf) {
     $exp->log_file($self->log_file);
+    open($log_fh, '>>', $lf) || croak "Could  not open $lf: $!\n";
   } elsif ($cfg->{$pkg}->{log_to_file} && $self->job_id) {
     $logger->debug("Config -> $pkg (log_to_file): $cfg->{$pkg}->{log_to_file}");
 
     my $lf = path($cfg->{$pkg}->{log_dir},"job-".$self->job_id."-console.log");
     $lf->parent->mkdir;
     $logger->debug("Setting logfile '".$lf->stringify()."'");
-    $exp->log_file($lf->stringify());
-    $self->log_stdout(0);
+    open($log_fh, '>>', $lf->stringify()) || croak "Could  not open $lf: $!\n";
+  } else {
+    $log_fh = \*STDOUT;
   }
 
-  $exp->log_stdout($self->log_stdout);
+  $log_fh->autoflush(1);
+  $exp->log_file(sub {
+    my ($data) = @_;
+    # 1. Strip standard ANSI escape sequences (colors, CSI, movements)
+    $data =~ s/\e\[[\d;]*[a-zA-Z]//g;
+
+    # 2. Strip orphaned or fragmented Cursor Position Reports (like ;1R, ;11R, ;9R)
+    #    The regex targets numbers preceded by a semicolon and ending in 'R'
+    $data =~ s/;\d+R//g;
+
+    print $log_fh $data;
+  });
+
+  $exp->log_stdout(0);
 
   $self->_expect_object($exp);
   $exp->spawn($command, @parameters)
