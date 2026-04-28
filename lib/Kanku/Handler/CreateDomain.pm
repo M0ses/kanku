@@ -506,9 +506,6 @@ sub _execute_libvirt {
       $self->_prepare_vm_via_console($con, $vm);
     }
 
-    if (!$self->management_interface) {
-      $ctx->{management_interface} = $con->guess_management_interface; 
-    }
   } else {
     $logger->info('Image Type "'.$self->image_type.'". Skipping VM preparation via console');
     $ctx->{ipaddress} = $vm->get_ipaddress();
@@ -616,6 +613,11 @@ sub _prepare_vm_via_console {
   $con->network_restart;
 
   if ( ! $self->skip_network ) {
+
+    if (!$self->management_interface) {
+      $ctx->{management_interface} = $con->guess_management_interface; 
+    }
+
     %opts = (mode => 'console') if $self->management_interface or $self->running_remotely;
 
     $ip = $vm->get_ipaddress(%opts);
