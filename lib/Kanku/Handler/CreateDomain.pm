@@ -505,6 +505,10 @@ sub _execute_libvirt {
     } else {
       $self->_prepare_vm_via_console($con, $vm);
     }
+
+    if (!$self->management_interface) {
+      $ctx->{management_interface} = $con->guess_management_interface; 
+    }
   } else {
     $logger->info('Image Type "'.$self->image_type.'". Skipping VM preparation via console');
     $ctx->{ipaddress} = $vm->get_ipaddress();
