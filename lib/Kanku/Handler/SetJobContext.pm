@@ -141,35 +141,53 @@ This handler will set the given variables in the job context
 
 For further explaination of these options please have a look at the corresponding modules.
 
+      accessmode_9p
+
+      cache_dir
+
+      domain_name
+
+      gitlab_merge_request_id
+
+      gitpass
+
+      git_revision
+
+      giturl
+
+      gituser
+
+      host_dir_9p
+
+      host_interface
+
+      images_dir
+
+      ipaddress
+
+      login_pass
+
+      login_user
+
+      management_interface
+
       obsurl
+
+      package
+
+      privatekey_path
 
       project
 
-      package
+      publickey_path
+
+      snapshot_name
 
       vm_image_file
 
       vm_image_url
 
       vm_template_file
-
-      domain_name
-
-      host_interface
-
-      skip_all_checks
-
-      skip_check_project
-
-      skip_check_package
-
-      skip_download
-
-      cache_dir
-
-      images_dir
-
-      domain_autostart
 
 
 =head1 CONTEXT
