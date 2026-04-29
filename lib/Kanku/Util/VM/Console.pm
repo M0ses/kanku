@@ -458,6 +458,8 @@ sub get_ipaddress {
 
   my $cmd_ref  = $cmd2func{$cmd_short};
 
+  croak "Could not find cmd_ref for $cmd_short" unless $cmd_ref;
+
   while ( $wait > 0) {
     # use cat for disable colors
     $ipaddress = $cmd_ref->($self, $cmd, $opts{interface});
