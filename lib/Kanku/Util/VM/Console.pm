@@ -454,6 +454,16 @@ sub get_ipaddress {
       my @addr = map {$_ =~ qr{^IP4.ADDRESS\[1\]:\s+([\d.]+)/?.*$} ? $1 : ()} @lines;
       return $addr[0];
     },
+    networkctl => sub {
+      my ($self, $bin, $int) = @_;
+      my $ipaddress;
+      my $result = $self->cmd("LANG=C $bin status $int 2>&1|cat");
+
+      $logger->debug("  -- Output:\n".Dumper($result));
+      my @lines = split /\r\n/, $result->[0];
+      my @addr = map {$_ =~ qr{^\s*Address:\s+([\d.]+)$} ? $1 : ()} @lines;
+      return $addr[0];
+    },
   );
 
   my $cmd_ref  = $cmd2func{$cmd_short};
