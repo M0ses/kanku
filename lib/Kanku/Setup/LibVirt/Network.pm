@@ -369,8 +369,9 @@ sub cleanup_iptables {
         if ($ipt->chain_exists($table, $chain)) {
           my @rules = $ipt->_get_rules_from_chain($table, $chain);
 	  for my $rule (@rules) {
-	    $logger->debug("Cleaning chain $chain in table $table  $rule->{comment}");
-            push @{$rules_to_delete->{$table}->{$chain}}, $rule->{line_number} if $rule->{comment} eq "Kanku:net:$name";
+	    my $comment = $rule->{comment} || q{};
+	    $logger->debug("Cleaning chain $chain in table $table  $comment");
+            push @{$rules_to_delete->{$table}->{$chain}}, $rule->{line_number} if $comment eq "Kanku:net:$name";
 	  }
         }
       }
