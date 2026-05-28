@@ -59,7 +59,7 @@ has 'logconf'  => (
 sub _build_logconf {
   my ($self) = @_;
   for my $c (
-    "$ENV{HOME}/.kanku/logging.conf",
+    ($ENV{HOME}||q{})."/.kanku/logging.conf",
     "/etc/kanku/logging/console.conf",
     "$FindBin::Bin/../etc/logging/console.conf",
   ) {
