@@ -245,10 +245,11 @@ sub restore_iptables_autostart {
   for my $table (keys %{$restore}) {
     for my $rule (@{$restore->{$table}}) {
       my $cmd;
+      $rule->{dest} = ($rule->{dest} =~ m#/#) ? $rule->{dest} : "$rule->{dest}/32";
       if ($rule->{target} eq 'DNAT') {
-	$cmd = "$wrapper I:$table:$chain:$rule->{dest}/32:$rule->{proto}:$rule->{dpt}:$rule->{to_host}:$rule->{to_port}:$rule->{comment}";
+	$cmd = "$wrapper I:$table:$chain:$rule->{dest}:$rule->{proto}:$rule->{dpt}:$rule->{to_host}:$rule->{to_port}:$rule->{comment}";
       } elsif ($rule->{target} eq 'ACCEPT'){
-	$cmd = "$wrapper I:$table:$chain:$rule->{dest}/32:$rule->{proto}:$rule->{dpt}:$rule->{comment}";
+	$cmd = "$wrapper I:$table:$chain:$rule->{dest}:$rule->{proto}:$rule->{dpt}:$rule->{comment}";
       }
 
       $self->logger->debug("Executing command '$cmd'");
