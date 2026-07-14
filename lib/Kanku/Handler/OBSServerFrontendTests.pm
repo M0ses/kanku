@@ -127,9 +127,15 @@ sub execute {
       };
   }
 
+  my $verbose_str = $self->verbose ? 'true' : 'false';
+  my $status_msg = "All commands on $ip executed successfully (" .
+                   "git_url: $git_url, " .
+                   "git_revision: $git_revision, " .
+                   "ruby_version: $ruby_version, " .
+                   "verbose: $verbose_str)";
   return {
     code        => 0,
-    message     => "All commands on $ip executed successfully",
+    message     => $status_msg,
     subresults  => $results
   };
 }
