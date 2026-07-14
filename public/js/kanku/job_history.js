@@ -86,6 +86,12 @@ const jobHistoryPage = {
     this.$root.$on('toggle_show_only_latest_results', value => {
       this.show_only_latest_results = !this.show_only_latest_results;
     });
+    this.$root.$on('to-top-clicked', this.refreshPage);
+  },
+  beforeDestroy: function() {
+    this.$root.$off('toggle_state');
+    this.$root.$off('toggle_show_only_latest_results');
+    this.$root.$off('to-top-clicked', this.refreshPage);
   },
   methods: {
     refreshPage: function() {

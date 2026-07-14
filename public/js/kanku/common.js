@@ -113,6 +113,7 @@ Vue.component('to-top-button',{
   methods: {
     toTop: function() {
       window.scrollTo(0,0);
+      this.$root.$emit('to-top-clicked');
     }
   },
   template: ''

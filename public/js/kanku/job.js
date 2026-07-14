@@ -220,6 +220,12 @@ const jobPage = {
       });
     }
   },
+  created: function() {
+    this.$root.$on('to-top-clicked', this.refreshPage);
+  },
+  beforeDestroy: function() {
+    this.$root.$off('to-top-clicked', this.refreshPage);
+  },
   mounted: function() {
       this.refreshPage();
   },
