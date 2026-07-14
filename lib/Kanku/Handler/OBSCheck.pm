@@ -290,15 +290,19 @@ sub execute {
 
   $self->update_history();
 
+  my $pref_ext = $self->preferred_extension || 'none';
+  my $status_msg = "Successfully checked project " . $self->project . " " .
+                   "under URL " . $self->obsurl . "\n (" .
+                   "package: " . ($self->package || 'all') . ", " .
+                   "repository: " . ($self->repository || 'all') . ", " .
+                   "preferred_extension: $pref_ext, " .
+                   "vm_image_url: $ctx->{vm_image_url}, " .
+                   "obs_direct_url: $ctx->{obs_direct_url})";
+
   return {
     code    => 0,
     state   => 'succeed',
-    message => 'Sucessfully checked project '.$self->project.' under url '
-                 .$self->obsurl ."\n"
-                 .' ('
-                 .    "vm_image_url: $ctx->{vm_image_url}, "
-                 .    "obs_direct_url: $ctx->{obs_direct_url}"
-                 .')',
+    message => $status_msg,
   };
 }
 

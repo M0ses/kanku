@@ -182,9 +182,13 @@ sub execute {
       $vm->destroy_machine();
     }
 
+    my $status_msg = "Action '$action' on nspawn container " .
+                     $self->domain_name . " finished successfully (" .
+                     "wait_console: " . ($self->wait_for_console ? '1':'0') . ", " .
+                     "wait_network: " . ($self->wait_for_network ? '1':'0') . ")";
     return {
       code    => 0,
-      message => "Action '$action' on nspawn container ". $self->domain_name ." finished successfully"
+      message => $status_msg
     };
   }
 
@@ -235,9 +239,13 @@ sub execute {
   }
   $cb->{$action}->($vm) if ($cb->{$action});
 
+  my $status_msg = "Action '$action' on " . $self->domain_name .
+                   " finished successfully (" .
+                   "wait_console: " . ($self->wait_for_console ? '1':'0') . ", " .
+                   "wait_network: " . ($self->wait_for_network ? '1':'0') . ")";
   return {
     code    => 0,
-    message => "Action '$action' on ". $self->domain_name ." finished successfully"
+    message => $status_msg
   };
 }
 

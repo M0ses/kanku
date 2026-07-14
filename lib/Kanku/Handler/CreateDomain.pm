@@ -395,9 +395,14 @@ sub _execute_machinectl {
     $ctx->{ipaddress} = $vm_result->{ipaddress};
   }
  
+  my $status_msg = "Create machine " . $self->domain_name . " successfully (" .
+                   "IP: " . ($ctx->{ipaddress} || 'none') . ", " .
+                   "vcpu: " . $self->vcpu . ", " .
+                   "memory: " . $self->memory . ", " .
+                   "template: " . $self->template . ")";
   return {
     state => 'succeed',
-    message => "Create machine " . $self->domain_name ." (".( $ctx->{ipaddress} || 'no ip found' ).") successfully"
+    message => $status_msg
   };
 }
 
@@ -511,9 +516,14 @@ sub _execute_libvirt {
     $ctx->{ipaddress} = $vm->get_ipaddress();
   }
 
+  my $status_msg = "Create domain " . $self->domain_name . " successfully (" .
+                   "IP: " . ($ctx->{ipaddress} || 'none') . ", " .
+                   "vcpu: " . $self->vcpu . ", " .
+                   "memory: " . $self->memory . ", " .
+                   "template: " . $self->template . ")";
   return {
     code    => 0,
-    message => "Create domain " . $self->domain_name ." (".( $ctx->{ipaddress} || 'no ip found' ).") successfully"
+    message => $status_msg
   };
 }
 

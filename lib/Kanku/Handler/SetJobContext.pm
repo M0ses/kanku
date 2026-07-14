@@ -105,10 +105,17 @@ sub execute {
     }
   }
 
+  my $offline_str = $self->offline ? 'yes' : 'no';
+  my $auto_start  = $self->domain_autostart ? 'yes' : 'no';
+  my $status_msg  = "Successfully prepared job context (" .
+                    "domain: " . ($self->domain_name || 'none') . ", " .
+                    "template: " . ($self->vm_template_file || 'none') . ", " .
+                    "offline: $offline_str, " .
+                    "autostart: $auto_start)";
   return {
     code    => 0,
     state   => 'succeed',
-    message => "Sucessfully prepared job context"
+    message => $status_msg
   };
 }
 

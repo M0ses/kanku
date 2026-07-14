@@ -253,10 +253,16 @@ sub execute {
 
   $self->update_history;
 
+  my $offline_str = $self->offline ? 'true' : 'false';
+  my $box_version = $self->box_version || 'latest';
+  my $status_msg = "Successfully downloaded Vagrant box: " . $self->box . " " .
+                   "(version: $box_version, " .
+                   "base_url: " . $self->base_url . ", " .
+                   "offline: $offline_str)";
   return {
     code    => 0,
     state   => 'succeed',
-    message => "Downloaded $durl ->\n $outfile ->\n  $box",
+    message => $status_msg,
   };
 }
 

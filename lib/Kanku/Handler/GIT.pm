@@ -257,9 +257,18 @@ sub execute {
     croak($ret->{stderr}) if $ret->{exit_code};
   }
 
+  my $git_url     = $self->giturl;
+  my $revision    = $self->revision    || 'master';
+  my $destination = $self->destination || 'default';
+  my $submodules  = $self->submodules  ? 'yes' : 'no';
+
+  my $status_msg = "Successfully cloned git URL: $git_url (" .
+                   "revision: $revision, " .
+                   "destination: $destination, " .
+                   "submodules: $submodules)";
   return {
     code        => 0,
-    message     => "git clone from url ".$self->giturl." and checkout of revision ". ( $self->revision || '' ) ." was successful",
+    message     => $status_msg,
   };
 }
 
