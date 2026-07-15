@@ -368,6 +368,10 @@ const notifyPage = {
        this.resetFilters();
     });
   },
+  beforeDestroy: function() {
+    this.$root.$off('updated-filters');
+    this.$root.$off('reset-filters');
+  },
   methods: {
     updateFilters: function () {
       g_update_filters(this.$root.sock);
