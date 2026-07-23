@@ -45,35 +45,43 @@ if ($current_network_name eq '-') {
   }
 }
 
-for my $ncfg (@net_cfg) {
-  my $setup = Kanku::Setup::LibVirt::Network->new(net_cfg=>$ncfg,name=>$ncfg->{name});
-  try {
-    if ( $action eq 'start' ) {
-      $setup->prepare_ovs();
-    }
+my $lock = path("/run/lock/kanku-network-setup.lock");
+if ($lock->is_file) {
+   $logger->warn("File $path already exists. Skipping configuration");
+} else {
+  $lock->touch();
+  for my $ncfg (@net_cfg) {
+    my $setup = Kanku::Setup::LibVirt::Network->new(net_cfg=>$ncfg,name=>$ncfg->{name});
+    try {
+      if ( $action eq 'start' ) {
+	$setup->prepare_ovs();
+      }
 
-    if ( $action eq 'started' ) {
-      $setup->prepare_dns();
-      $setup->start_dhcp();
-    }
+      if ( $action eq 'started' ) {
+	$setup->prepare_dns();
+	$setup->start_dhcp();
+      }
 
-    if ( $action eq 'stopped' ) {
-      $setup->kill_dhcp();
-      $setup->bridge_down;
-    }
+      if ( $action eq 'stopped' ) {
+	$setup->kill_dhcp();
+	$setup->bridge_down;
+      }
 
-    if ( $action eq 'cleanup_iptables' ) {
-      $setup->cleanup_iptables;
-    }
+      if ( $action eq 'cleanup_iptables' ) {
+	$setup->cleanup_iptables;
+      }
 
-    if ( $action eq 'configure_iptables' ) {
-      $setup->configure_iptables;
-    }
-  } catch {
-    $logger->error("$0 $current_network_name $action failed:");
-    $logger->error($_);
-    die "Died because of previous errors - have a look into /var/log/kanku/network-setup.log for detailed information.\n";
-  };
+      if ( $action eq 'configure_iptables' ) {
+	 $setup->configure_iptables;
+      }
+    } catch {
+      $logger->error("$0 $current_network_name $action failed:");
+      $logger->error($_);
+      $lock->remove;
+      die "Died because of previous errors - have a look into /var/log/kanku/network-setup.log for detailed information.\n";
+    };
+  }
+  $lock->remove;
 }
 
 exit 0;
