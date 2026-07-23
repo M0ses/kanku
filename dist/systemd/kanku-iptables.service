@@ -1,7 +1,7 @@
 [Unit]
 Description=Store and restore kanku iptables rules
 After=local-fs.target network.target
-ConditionPathNotExists=/run/lock/kanku-network-setup.lock
+ConditionPathExists=!/run/lock/kanku-network-setup.lock
 
 [Service]
 Type=oneshot
