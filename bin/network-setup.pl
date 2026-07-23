@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Log::Log4perl;
 use Try::Tiny;
+use Path::Tiny qw/path/;
 
 BEGIN {
   unshift @::INC, ($ENV{KANKU_LIB_DIR} || '/usr/lib/kanku/lib');
@@ -47,7 +48,7 @@ if ($current_network_name eq '-') {
 
 my $lock = path("/run/lock/kanku-network-setup.lock");
 if ($lock->is_file) {
-   $logger->warn("File $path already exists. Skipping configuration");
+   $logger->warn("File $lock already exists. Skipping configuration");
 } else {
   $lock->touch();
   for my $ncfg (@net_cfg) {
