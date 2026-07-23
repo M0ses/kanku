@@ -1,6 +1,7 @@
 [Unit]
 Description=Store and restore kanku iptables rules
 After=local-fs.target network.target
+ConditionPathExists=/var/lib/kanku/iptables_autostart.json
 
 [Service]
 Type=oneshot

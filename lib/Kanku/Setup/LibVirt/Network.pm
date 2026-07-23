@@ -241,10 +241,23 @@ sub start_dhcp {
 sub configure_iptables {
   my ($self)       = @_;
   my $logger       = $self->logger;
+  my $json_file    = $self->iptables_autostart_json;
+
+  # Prevent start if no JSON file exists to avoid unneeded execution
+  if (! -f $json_file) {
+    $logger->debug("Could not find $json_file. Skipping configuration.");
+    return 0;
+  }
+
+  my $ipt          = Kanku::Util::IPTables->new;
+
+  # Read and restore first, then delete immediately to avoid race conditions
+  $ipt->restore_iptables_autostart($json_file);
+  unlink $json_file;
+
   my $net_cfg      = $self->net_cfg;
   my $bridges      = $self->bridges;
   my $name         = $self->name;
-  my $ipt          = Kanku::Util::IPTables->new;
   my $chain        = $self->iptables_chain;
 
   my $forward;
@@ -312,13 +325,6 @@ sub configure_iptables {
   }
   `sysctl net.ipv4.ip_forward=1` if $forward;
 
-  my $json_file = $self->iptables_autostart_json;
-  if (-f $json_file) {
-    $ipt->restore_iptables_autostart($json_file);
-    unlink $json_file;
-  } else {
-    $logger->debug("Could not find $json_file");
-  }
   return 0;
 }
 
