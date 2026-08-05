@@ -79,7 +79,7 @@ if ($lock->is_file) {
       $logger->error("$0 $current_network_name $action failed:");
       $logger->error($_);
       $lock->remove;
-      die "Died because of previous errors - have a look into /var/log/kanku/network-setup.log for detailed information.\n";
+      die "Died because of previous errors. Check the logs.\n";
     };
   }
   $lock->remove;
