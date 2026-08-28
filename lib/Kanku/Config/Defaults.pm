@@ -35,6 +35,7 @@ my $defaults =    {
     arch           => $arch,
     obsurl         => 'https://api.opensuse.org/public',
     base_url       => 'http://download.opensuse.org/repositories/',
+    use_oscrc      => 0,
   },
   'Kanku::Util::IPTables' =>
   {
@@ -113,9 +114,6 @@ NE5OgEXk2wVfZczCZpigBKbKZHNYcelXtTt/nP3rsCuGcM4h53s=
   },
   'Kanku::Cli::Hub::Test' => {
     exclude_dirs =>  ['^[.]$', '^[.]/JFT/.*$'],
-  },
-  'Kanku::Util::DoD' => {
-    use_oscrrc => 0,
   },
   'Net::OBS::Client' => {
     credentials => {},

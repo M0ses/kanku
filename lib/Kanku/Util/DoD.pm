@@ -159,7 +159,12 @@ has auth_config => (
 sub _build_auth_config {
   my ($self)     = @_;
   my $cfg        = {};
-  my $use_oscrc  = Kanku::Config::Defaults->get(__PACKAGE__, 'use_oscrc') || $self->use_oscrc;
+  my $use_oscrc  =
+    Kanku::Config::Defaults->get(__PACKAGE__, 'use_oscrc')
+    // Kanku::Config::Defaults->get(
+         'Kanku::Config::GlobalVars', 'use_oscrc'
+       )
+    // $self->use_oscrc;
   $self->logger->debug("use_oscrc: $use_oscrc");
 
   if (defined $use_oscrc) {

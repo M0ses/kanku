@@ -104,8 +104,17 @@ has 'use_oscrc' => (
   is      => 'rw',
   isa     => 'Bool',
   lazy    => 1,
-  default => 1,
+  builder => '_build_use_oscrc',
 );
+
+sub _build_use_oscrc {
+  my ($self) = @_;
+  return $self->job->context->{use_oscrc}
+      // Kanku::Config::Defaults->get(
+           'Kanku::Config::GlobalVars', 'use_oscrc'
+         )
+      // 0;
+}
 
 has auth_config => (
   is      => 'rw',
@@ -371,12 +380,12 @@ It polls until all builds succeeded and the repository is published.
   timeout       : Seconds to wait before timing out
                   (0 for infinite, default 3600)
   poll_interval : Seconds to sleep between polls (default 30)
-  use_oscrc     : Use local oscrc config for authentication (default 1)
+  use_oscrc     : Use local oscrc config for authentication (default 0)
 
 =head1 DEFAULTS
 
   timeout       : 3600
   poll_interval : 30
-  use_oscrc     : 1
+  use_oscrc     : 0
 
 =cut
