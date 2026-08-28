@@ -163,8 +163,8 @@ sub _build_default_bool_zero {
   return $self->job->context->{$v} if exists $self->job->context->{$v};
   my $l = join('::', @p);
   my $val =    Kanku::Config::Defaults->get($l, $v)
-            || Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', $v)
-            || 0;
+            // Kanku::Config::Defaults->get('Kanku::Config::GlobalVars', $v)
+            // 0;
 
   return $val;
 }
