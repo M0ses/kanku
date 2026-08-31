@@ -39,7 +39,7 @@ my $defaults =    {
   },
   'Kanku::Util::IPTables' =>
   {
-    'iptables_chain' => 'KANKU_HOSTS',
+    'iptables_chain_prefix' => 'KANKU_HOSTS_',
     'start_port'     => 49001,
   },
   'Kanku::Handler::CreateDomain' => {

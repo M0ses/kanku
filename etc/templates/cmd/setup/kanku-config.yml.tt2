@@ -22,9 +22,9 @@ plugins:
       dsn: dbi:SQLite:dbname=[% db_file %]
       schema_class: Kanku::Schema
 
-Kanku::Util::IPTables:
-  start_port: 49001
-  iptables_chain:       KANKU_HOSTS
+# Kanku::Util::IPTables:
+#   start_port: 49001
+#   iptables_chain_prefix:       KANKU_HOSTS
 
 Kanku::Util::VM::Console:
   debug: 0
@@ -49,7 +49,7 @@ Kanku::Roles::SSH:
 Kanku::Handler::CreateDomain:
   name:   kanku-ovs
   bridge: kanku-br0
-  iptables_chain:      KANKU_HOSTS
+  # iptables_chain_prefix:      KANKU_HOSTS
   network_name: [% network_name %]
 
 Kanku::LibVirt::HostList:
@@ -75,7 +75,7 @@ Kanku::LibVirt::HostList:
 Kanku::LibVirt::Network::OpenVSwitch:
   -
     name:                 kanku-ovs
-    iptables_chain:       KANKU_HOSTS
+    # iptables_chain_prefix:       KANKU_HOSTS
     bridges:
       -
         bridge:           kanku-br0

@@ -9,6 +9,7 @@ use IPC::Run qw/run/;
 use Carp qw/confess/;
 use Kanku::LibVirt::HostList;
 use Kanku::Util::IPTables;
+use Kanku::Config::Defaults;
 
 with 'Kanku::Roles::Logger';
 
@@ -28,11 +29,10 @@ has cfg => (
 );
 
 has iptables_chain => (
-	is => 'rw',
-	isa => 'Str',
-	lazy => 1,
-	default => sub { $_[0]->net_cfg->{iptables_chain} || 'KANKU_HOSTS' }
-
+  is => 'rw',
+  isa => 'Str',
+  lazy => 1,
+  builder => '_build_iptables_chain',
 );
 
 has net_cfg => (
@@ -53,6 +53,14 @@ has iptables_autostart_json => (
   isa     => 'Str',
   default => '/var/lib/kanku/iptables_autostart.json',
 );
+
+sub _build_iptables_chain {
+  my ($self) = @_;
+  return
+    $self->net_cfg->{iptables_chain} ||
+    Kanku::Config::Defaults->get('Kanku::Util::IPTables', 'iptables_chain_prefix').$self->name)
+  ;
+}
 
 sub dnsmasq_cfg_file {
   my ($self, $name) = @_;
@@ -245,7 +253,7 @@ sub configure_iptables {
   my $bridges      = $self->bridges;
   my $name         = $self->name;
   my $ipt          = Kanku::Util::IPTables->new;
-  my $chain        = $self->iptables_chain;
+  my $iptables_chain        = $self->iptables_chain;
 
   my $forward;
 
@@ -284,18 +292,18 @@ sub configure_iptables {
       ["-t","nat","-I","POSTROUTING","-s",$prefix,"-d","224.0.0.0/24","-j","RETURN",@comment],
     ];
 
-    if (!$ipt->chain_exists('filter', $chain)) {
+    if (!$ipt->chain_exists('filter', $iptables_chain)) {
       unshift @$rules,
-        ["-N", $chain],
-        ["-I", $chain, "-j", "RETURN", @comment],
-        ["-I", "FORWARD", "1", "-j", $chain, @comment];
+        ["-N", $iptables_chain],
+        ["-I", $iptables_chain, "-j", "RETURN", @comment],
+        ["-I", "FORWARD", "1", "-j", $iptables_chain, @comment];
     }
 
-    if (!$ipt->chain_exists('nat', $chain)) {
+    if (!$ipt->chain_exists('nat', $iptables_chain)) {
       unshift @$rules,
-        ['-t', 'nat', '-N', $chain],
-        ['-t', 'nat', '-I', $chain, "-j", "RETURN", @comment],
-        ["-t", "nat", "-I", "PREROUTING", "1", "-j", $chain, @comment];
+        ['-t', 'nat', '-N', $iptables_chain],
+        ['-t', 'nat', '-I', $iptables_chain, "-j", "RETURN", @comment],
+        ["-t", "nat", "-I", "PREROUTING", "1", "-j", $iptables_chain, @comment];
     }
 
 
@@ -365,13 +373,13 @@ sub cleanup_iptables {
     };
 
     for my $table (keys %$rules_to_delete) {
-      for my $chain (keys %{$rules_to_delete->{$table}}) {
-        if ($ipt->chain_exists($table, $chain)) {
-          my @rules = $ipt->_get_rules_from_chain($table, $chain);
+      for my $iptables_chain (keys %{$rules_to_delete->{$table}}) {
+        if ($ipt->chain_exists($table, $iptables_chain)) {
+          my @rules = $ipt->_get_rules_from_chain($table, $iptables_chain);
 	  for my $rule (@rules) {
 	    my $comment = $rule->{comment} || q{};
-	    $logger->debug("Cleaning chain $chain in table $table  $comment");
-            push @{$rules_to_delete->{$table}->{$chain}}, $rule->{line_number} if $comment eq "Kanku:net:$name";
+	    $logger->debug("Cleaning chain $iptables_chain in table $table  $comment");
+            push @{$rules_to_delete->{$table}->{$iptables_chain}}, $rule->{line_number} if $comment eq "Kanku:net:$name";
 	  }
         }
       }
@@ -379,35 +387,35 @@ sub cleanup_iptables {
 
     $logger->info("Cleaning iptables rules");
     for my $table (keys(%{$rules_to_delete})) {
-      for my $chain (keys(%{$rules_to_delete->{$table}}) ) {
+      for my $iptables_chain (keys(%{$rules_to_delete->{$table}}) ) {
 	# cleanup from the highest number to keep numbers consistent
-	$logger->debug("Cleaning chain $chain in table $table");
-	for my $number ( reverse @{$rules_to_delete->{$table}->{$chain}} ) {
-	  $logger->debug("... deleting from chain $chain rule number $number");
+	$logger->debug("Cleaning chain $iptables_chain in table $table");
+	for my $number ( reverse @{$rules_to_delete->{$table}->{$iptables_chain}} ) {
+	  $logger->debug("... deleting from chain $iptables_chain rule number $number");
 	  # security not relevant here because we have trusted input
 	  # from 'iptables -L ...'
-	  my @cmd_output = `iptables -t $table -D $chain $number 2>&1`;
+	  my @cmd_output = `iptables -t $table -D $iptables_chain $number 2>&1`;
 	  if ( $? ) {
-            $logger->error("An error occured while deleting rule $number from chain $chain : @cmd_output");
+            $logger->error("An error occured while deleting rule $number from chain $iptables_chain : @cmd_output");
 	  }
 	}
       }
     }
-    my $chain = $self->iptables_chain;
-    if ($ipt->chain_exists('filter', $chain)) {
-      my @f_rules = $ipt->_get_rules_from_chain('filter', $chain);
+    my $iptables_chain = $self->iptables_chain;
+    if ($ipt->chain_exists('filter', $iptables_chain)) {
+      my @f_rules = $ipt->_get_rules_from_chain('filter', $iptables_chain);
       if (@f_rules <= 1) {
-        $logger->debug("Removing filter/$chain");
-	`iptables -F $chain`;
-	`iptables -X $chain`;
+        $logger->debug("Removing filter/$iptables_chain");
+	`iptables -F $iptables_chain`;
+	`iptables -X $iptables_chain`;
       }
     }
-    if ($ipt->chain_exists('nat', $chain)) {
-      my @n_rules = $ipt->_get_rules_from_chain('nat', $chain);
+    if ($ipt->chain_exists('nat', $iptables_chain)) {
+      my @n_rules = $ipt->_get_rules_from_chain('nat', $iptables_chain);
       if (@n_rules <= 1) {
-        $logger->debug("Removing nat/$chain");
-	`iptables -t nat -F $chain`;
-	`iptables -t nat -X $chain`;
+        $logger->debug("Removing nat/$iptables_chain");
+	`iptables -t nat -F $iptables_chain`;
+	`iptables -t nat -X $iptables_chain`;
       }
     }
   }

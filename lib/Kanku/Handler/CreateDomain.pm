@@ -643,7 +643,7 @@ sub _prepare_vm_via_console {
 			      || q{},
 	  guest_ipaddress  => $ip,
 	  iptables_chain   => Kanku::Config::Defaults->get('Kanku::Util::IPTables',
-	                                                   'iptables_chain'),
+	                                                   'iptables_chain_prefix').$self->network_name,
 	  domain_autostart => $self->domain_autostart,
 	);
 

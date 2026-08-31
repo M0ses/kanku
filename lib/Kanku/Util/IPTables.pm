@@ -27,19 +27,23 @@ with 'Kanku::Roles::Logger';
 # For future use: we could also get the ip from the serial login
 # but therefore we need the domain_name
 has [qw/domain_name/] => (is=>'rw',isa=>'Str');
-has [qw/guest_ipaddress forward_port_list iptables_chain iptables_wrapper/] => (is=>'rw',isa=>'Str');
+has [qw/guest_ipaddress forward_port_list iptables_wrapper/] => (is=>'rw',isa=>'Str');
 has forward_ports => (is=>'rw',isa=>'ArrayRef',default=>sub { [] });
-has '+iptables_chain' => (lazy=>1, default => 'KANKU_HOSTS');
+has 'iptables_chain' => (
+  is=>'rw',
+  isa=>'Str',
+  lazy=>1, 
+  builder => '_build_iptables_chain',
+);
+sub _build_iptables_chain {
+  my ($self) = @_;
+}
+ 
 has '+iptables_wrapper' => (lazy=>1, default => '/usr/lib/kanku/iptables_wrapper');
 
 has 'host_interface' => (
   is      => 'rw',
   isa     => 'Str',
-);
-
-has host_ipaddress => (
-  is      =>'rw',
-  isa     =>'Str',
   lazy    => 1,
   builder => '_build_host_interface',
 );
@@ -50,6 +54,17 @@ sub _build_host_interface {
 	 'Kanku::Config::GlobalVars',
 	 'host_interface'
        );
+}
+
+has host_ipaddress => (
+  is      =>'rw',
+  isa     =>'Str',
+  lazy    => 1,
+  builder => '_build_host_ipaddress',
+);
+sub _build_host_ipaddress {
+  my ($self) = @_;
+  my $host_interface = $self->host_interface;
 
   die "No host_interface given. Can not determine host_ipaddress" if (! $host_interface );
 
@@ -105,15 +120,15 @@ sub get_forwarded_ports_for_domain {
 sub get_active_rules_for_domain {
   my ($self, $domain_name) = @_;
   $domain_name           ||= $self->domain_name;
-  my $chain                = $self->iptables_chain;
-  my $result               = {filter =>{$chain=>[]}, nat=>{$chain=>[]}};
+  my $iptables_chain                = $self->iptables_chain;
+  my $result               = {filter =>{$iptables_chain=>[]}, nat=>{$iptables_chain=>[]}};
 
   die "No domain_name given. Cannot procceed\n" if (! $domain_name);
 
   for my $table ('nat', 'filter') {
     if ($self->chain_exists($table)) {
       for my $rule ($self->_get_rules_from_chain($table)) {
-        push(@{$result->{$table}->{$chain}},$rule->{line_number}) if (($rule->{domain_name}||q{}) eq $domain_name);
+        push(@{$result->{$table}->{$iptables_chain}},$rule->{line_number}) if (($rule->{domain_name}||q{}) eq $domain_name);
       }
     }
   }
@@ -130,9 +145,9 @@ sub cleanup_rules_for_domain {
   my $logger               = $self->logger;
 
   foreach my $table (keys(%{$rules})) {
-    foreach my $chain (keys(%{$rules->{$table}})) {
-      foreach my $line_number (reverse(@{$rules->{$table}->{$chain}})) {
-        my $cmd = $sudo."$wrapper D:$table:$chain:$line_number 2>&1";
+    foreach my $iptables_chain (keys(%{$rules->{$table}})) {
+      foreach my $line_number (reverse(@{$rules->{$table}->{$iptables_chain}})) {
+        my $cmd = $sudo."$wrapper D:$table:$iptables_chain:$line_number 2>&1";
         $logger->debug("executing `$cmd`");
         my @out = `$cmd`;
         if ($?) {
@@ -153,7 +168,7 @@ sub add_forward_rules_for_domain {
   my $portlist      = { tcp =>[],udp=>[] };
   my $host_ip       = $self->host_ipaddress;
   my $wrapper       = $self->iptables_wrapper;
-  my $chain         = $self->iptables_chain;
+  my $iptables_chain         = $self->iptables_chain;
 
   if (! $host_ip ) {
       $self->logger->warn("No ipaddress found for host_interface '".$self->host_interface."'");
@@ -193,8 +208,8 @@ sub add_forward_rules_for_domain {
     my $comment = "Kanku:host:".$self->domain_name.":".($port->[1]||q{}).":".($self->domain_autostart||0);
 
     my @cmds = (
-      "$wrapper I:nat:$chain:$host_ip:$proto:$host_port:$guest_ip:$port->[0]:$comment",
-      "$wrapper I:filter:$chain:$guest_ip/32:$proto:$port->[0]:$comment"
+      "$wrapper I:nat:$iptables_chain:$host_ip:$proto:$host_port:$guest_ip:$port->[0]:$comment",
+      "$wrapper I:filter:$iptables_chain:$guest_ip/32:$proto:$port->[0]:$comment"
     );
 
     for my $cmd (@cmds) {
@@ -230,7 +245,7 @@ sub restore_iptables_autostart {
   my ($self, $file) = @_;
   my $sudo          = $self->sudo || q{};
   my $wrapper       = $self->iptables_wrapper;
-  my $chain         = $self->iptables_chain;
+  my $iptables_chain         = $self->iptables_chain;
   my $lines;
   if(-f $file) {
     open(my $fh, '<', $file) || die "Could not open $file: $!\n";
@@ -247,9 +262,9 @@ sub restore_iptables_autostart {
       my $cmd;
       $rule->{dest} = ($rule->{dest} =~ m#/#) ? $rule->{dest} : "$rule->{dest}/32";
       if ($rule->{target} eq 'DNAT') {
-	$cmd = "$wrapper I:$table:$chain:$rule->{dest}:$rule->{proto}:$rule->{dpt}:$rule->{to_host}:$rule->{to_port}:$rule->{comment}";
+	$cmd = "$wrapper I:$table:$iptables_chain:$rule->{dest}:$rule->{proto}:$rule->{dpt}:$rule->{to_host}:$rule->{to_port}:$rule->{comment}";
       } elsif ($rule->{target} eq 'ACCEPT'){
-	$cmd = "$wrapper I:$table:$chain:$rule->{dest}:$rule->{proto}:$rule->{dpt}:$rule->{comment}";
+	$cmd = "$wrapper I:$table:$iptables_chain:$rule->{dest}:$rule->{proto}:$rule->{dpt}:$rule->{comment}";
       }
 
       $self->logger->debug("Executing command '$cmd'");
@@ -262,13 +277,13 @@ sub restore_iptables_autostart {
 }
 
 sub chain_exists {
-  my ($self, $table, $chain) = @_;
+  my ($self, $table, $iptables_chain) = @_;
   my $sudo    = $self->sudo();
   my $wrapper = $self->iptables_wrapper;
   my @rules;
   $table  ||= 'filter';
-  $chain  ||= $self->iptables_chain;
-  my $cmd  = "$sudo $wrapper L:$table:$chain 2>&1";
+  $iptables_chain  ||= $self->iptables_chain;
+  my $cmd  = "$sudo $wrapper L:$table:$iptables_chain 2>&1";
   my @lines = `$cmd`;
 
   return 1 unless $?;
@@ -278,13 +293,13 @@ sub chain_exists {
 
 
 sub _get_rules_from_chain {
-  my ($self, $table, $chain) = @_;
+  my ($self, $table, $iptables_chain) = @_;
   my $sudo                   = $self->sudo();
   my $logger                 = $self->logger;
   $table                   ||= 'filter';
-  $chain                   ||= $self->iptables_chain;
+  $iptables_chain                   ||= $self->iptables_chain;
   my $wrapper                = $self->iptables_wrapper;
-  my $cmd                    = "$sudo $wrapper L:$table:$chain 2>&1";
+  my $cmd                    = "$sudo $wrapper L:$table:$iptables_chain 2>&1";
   my @rules;
   $logger->debug("Executing `$cmd`");
   my @lines = `$cmd`;
@@ -351,14 +366,14 @@ sub _check_chain {
   my $logger  = $self->logger;
   my $wrapper = $self->iptables_wrapper;
   my $sudo    = $self->sudo();
-  my $chain   = $self->iptables_chain;
+  my $iptables_chain   = $self->iptables_chain;
 
-  my $cmd     = "$sudo$wrapper L:filter:$chain 2>&1";
+  my $cmd     = "$sudo$wrapper L:filter:$iptables_chain 2>&1";
   $logger->debug("Executing `$cmd`");
   my $out     = `$cmd`;
 
   if ($out =~ /iptables: No chain\/target\/match by that name./ ) {
-    $cmd = "$wrapper N:filter:$chain";
+    $cmd = "$wrapper N:filter:$iptables_chain";
     $out  = `$sudo$cmd 2>&1`;
     if ($?) {
       die "Error while creating iptables chain($?):\n\t$cmd\n\n$out\n";
