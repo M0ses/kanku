@@ -19,6 +19,8 @@ package Kanku::Util::IPTables;
 use Moose;
 use JSON::MaybeXS;
 use Carp;
+use Path::Tiny qw/path/;
+use Try::Tiny;
 
 use Kanku::Config::Defaults;
 
@@ -223,49 +225,46 @@ sub add_forward_rules_for_domain {
 
 }
 
-sub store_iptables_autostart {
+sub read_iptables_rules_from_file {
   my ($self, $file) = @_;
-  my $rules2store = {nat=>[],filter=>[]};
+  my $rules2restore;
+
+  try {
+    my $content = path($file)->slurp;
+    $rules2restore = decode_json($content);
+  } catch {
+    $self->logger->warn("Error while reading or decoding rules from $file: $_");
+    $rules2restore = {nat=>{},filter=>{}};
+  };  
+  return $rules2restore;
+}
+
+sub store_iptables_autostart {
+  my ($self, $file, $rules2store) = @_;
+  my $stored_rules = $self->read_iptables_rules_from_file($file);
 
   for my $table (keys %$rules2store) {
-    if ($self->chain_exists($table)) {
-      my @rules =  $self->_get_rules_from_chain($table);
-      for my $rule (@rules) {
-	push @{$rules2store->{$table}}, $rule if $rule->{domain_autostart};
-      }
+    $self->logger->debug("Checking table $table");
+    for my $chain (keys %{$rules2store->{$table}}) {
+      $stored_rules->{$table}->{$chain} = $rules2store->{$table}->{$chain}
     }
   }
   $self->logger->debug("Writing rules2store to $file");
-  open(my $fh, '>', $file) || die "Could not open $file: $!\n";
-  print $fh encode_json($rules2store);
-  close $fh;
+  path($file)->spew(encode_json($stored_rules));
 }
 
 sub restore_iptables_autostart {
-  my ($self, $file) = @_;
-  my $sudo          = $self->sudo || q{};
-  my $wrapper       = $self->iptables_wrapper;
-  my $iptables_chain         = $self->iptables_chain;
-  my $lines;
-  if(-f $file) {
-    open(my $fh, '<', $file) || die "Could not open $file: $!\n";
-    $lines = <$fh>;
-    close $fh;
-  } else {
-    $self->logger->debug("$file not found");
-  }
+  my ($self, $file, $name)  = @_;
+  my $sudo           = $self->sudo || q{};
+  my $wrapper        = $self->iptables_wrapper;
+  my $iptables_chain = $self->iptables_chain;
+  my $rules2restore = $self->read_iptables_rules_from_file($file);
 
-  my $restore = decode_json($lines);
-
-  for my $table (keys %{$restore}) {
-    for my $rule (@{$restore->{$table}}) {
-      my $cmd;
-      $rule->{dest} = ($rule->{dest} =~ m#/#) ? $rule->{dest} : "$rule->{dest}/32";
-      if ($rule->{target} eq 'DNAT') {
-	$cmd = "$wrapper I:$table:$iptables_chain:$rule->{dest}:$rule->{proto}:$rule->{dpt}:$rule->{to_host}:$rule->{to_port}:$rule->{comment}";
-      } elsif ($rule->{target} eq 'ACCEPT'){
-	$cmd = "$wrapper I:$table:$iptables_chain:$rule->{dest}:$rule->{proto}:$rule->{dpt}:$rule->{comment}";
-      }
+  $self->logger->debug("Restoring rules for $iptables_chain form $file");
+  for my $table (keys %{$rules2restore}) {
+    $self->logger->debug("Checking table $table");
+    for my $rule (@{$rules2restore->{$table}->{$iptables_chain}||[]}) {
+      my $cmd = "iptables -t $table $rule";
 
       $self->logger->debug("Executing command '$cmd'");
       my @out = `$sudo$cmd 2>&1`;
@@ -360,6 +359,23 @@ sub _get_rules_from_chain {
   }
   return @rules;
 }
+sub _get_raw_rules_from_chain {
+  my ($self, $table, $iptables_chain) = @_;
+  my $sudo                   = $self->sudo();
+  my $logger                 = $self->logger;
+  $table                   ||= 'filter';
+  $iptables_chain                   ||= $self->iptables_chain;
+  my $wrapper                = $self->iptables_wrapper;
+  my $cmd                    = "$sudo $wrapper S:$table:$iptables_chain 2>&1";
+  my @rules;
+  $logger->debug("Executing `$cmd`");
+  my @lines = `$cmd`;
+
+  confess "Error while creating iptables chain($?):\n\t$cmd\n\n@lines\n" if $?;
+
+  return @lines;
+}
+
 
 sub _check_chain {
   my ($self)  = @_;

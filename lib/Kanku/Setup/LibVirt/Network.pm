@@ -10,6 +10,7 @@ use Carp qw/confess/;
 use Kanku::LibVirt::HostList;
 use Kanku::Util::IPTables;
 use Kanku::Config::Defaults;
+use Kanku::Helpers;
 
 with 'Kanku::Roles::Logger';
 
@@ -58,7 +59,7 @@ sub _build_iptables_chain {
   my ($self) = @_;
   return
     $self->net_cfg->{iptables_chain} ||
-    Kanku::Config::Defaults->get('Kanku::Util::IPTables', 'iptables_chain_prefix').$self->name)
+    Kanku::Config::Defaults->get('Kanku::Util::IPTables', 'iptables_chain_prefix').$self->name
   ;
 }
 
@@ -252,13 +253,15 @@ sub configure_iptables {
   my $net_cfg      = $self->net_cfg;
   my $bridges      = $self->bridges;
   my $name         = $self->name;
-  my $ipt          = Kanku::Util::IPTables->new;
+  my $ipt          = Kanku::Util::IPTables->new(iptables_chain=>$self->iptables_chain);
   my $iptables_chain        = $self->iptables_chain;
 
   my $forward;
 
+  $logger->debug("Starting configuration of iptables for network $name");
+
   for my $ncfg (@$bridges) {
-    $logger->debug("Starting configuration of iptables");
+    $logger->debug("Starting configuration of iptables for $name/$ncfg->{bridge}");
 
     next if (! $ncfg->{is_gateway} );
 
@@ -320,13 +323,8 @@ sub configure_iptables {
   }
   `sysctl net.ipv4.ip_forward=1` if $forward;
 
-  my $json_file = $self->iptables_autostart_json;
-  if (-f $json_file) {
-    $ipt->restore_iptables_autostart($json_file);
-    unlink $json_file;
-  } else {
-    $logger->debug("Could not find $json_file");
-  }
+  $ipt->restore_iptables_autostart($self->iptables_autostart_json);
+
   return 0;
 }
 
@@ -353,8 +351,6 @@ sub cleanup_iptables {
 
   my $ipt = Kanku::Util::IPTables->new;
   my $json_file = $self->iptables_autostart_json;
-  $logger->debug("Storing $json_file");
-  $ipt->store_iptables_autostart($json_file);
 
   for my $ncfg (@$bridges) {
     my $ncfg = $self->net_cfg;
@@ -372,31 +368,62 @@ sub cleanup_iptables {
       }
     };
 
+    my $rules_to_restore = {
+      'filter' => {
+	$self->iptables_chain => [],
+      },
+      'nat' => {
+	$self->iptables_chain => [],
+      }
+    };
+
     for my $table (keys %$rules_to_delete) {
       for my $iptables_chain (keys %{$rules_to_delete->{$table}}) {
+        $logger->debug("Checking chain $iptables_chain in table $table");  
         if ($ipt->chain_exists($table, $iptables_chain)) {
-          my @rules = $ipt->_get_rules_from_chain($table, $iptables_chain);
+          $logger->debug("Cleaning $iptables_chain in table $table");  
+          my @rules = $ipt->_get_raw_rules_from_chain($table, $iptables_chain);
 	  for my $rule (@rules) {
-	    my $comment = $rule->{comment} || q{};
-	    $logger->debug("Cleaning chain $iptables_chain in table $table  $comment");
-            push @{$rules_to_delete->{$table}->{$iptables_chain}}, $rule->{line_number} if $comment eq "Kanku:net:$name";
+            if ($rule =~ / --comment "([^"]*)" / ) {
+	      my $comment = $1;
+	      $logger->debug("Cleaning chain $iptables_chain in table $table  $comment");
+	      if ($comment eq "Kanku:net:$name") {
+		 $logger->debug("Rule to delete $table/$iptables_chain: ".Kanku::Helpers->dump_it($rule));
+                 $rule =~ s/^-A/-D/;
+                 $rule = "-t $table $rule";
+		 push @{$rules_to_delete->{$table}->{$iptables_chain}},
+			$rule;
+	      }
+	      if ($comment =~ /Kanku:host:.*:1/) {
+		 $logger->debug("Rule to store $table/$iptables_chain: ".Kanku::Helpers->dump_it($rule));
+                 $rule =~ s/^-A (\S*)/-I $1 1/;
+		 push @{$rules_to_restore->{$table}->{$iptables_chain}}, $rule;
+	      }
+            }
 	  }
+        } else {
+	  $logger->debug("Could not find chain $iptables_chain in table $table");
         }
+
       }
     }
+
+    $logger->debug("Storing $json_file ... ".Kanku::Helpers->dump_it($rules_to_restore));
+    $ipt->store_iptables_autostart($json_file, $rules_to_restore);
 
     $logger->info("Cleaning iptables rules");
     for my $table (keys(%{$rules_to_delete})) {
       for my $iptables_chain (keys(%{$rules_to_delete->{$table}}) ) {
 	# cleanup from the highest number to keep numbers consistent
 	$logger->debug("Cleaning chain $iptables_chain in table $table");
-	for my $number ( reverse @{$rules_to_delete->{$table}->{$iptables_chain}} ) {
-	  $logger->debug("... deleting from chain $iptables_chain rule number $number");
+	for my $rule ( reverse @{$rules_to_delete->{$table}->{$iptables_chain}} ) {
+	  $logger->debug("... executing 'iptables $rule'");
 	  # security not relevant here because we have trusted input
 	  # from 'iptables -L ...'
-	  my @cmd_output = `iptables -t $table -D $iptables_chain $number 2>&1`;
+          
+	  my @cmd_output = `iptables $rule 2>&1`;
 	  if ( $? ) {
-            $logger->error("An error occured while deleting rule $number from chain $iptables_chain : @cmd_output");
+            $logger->error("An error occured while deleting rule from chain $iptables_chain : @cmd_output");
 	  }
 	}
       }

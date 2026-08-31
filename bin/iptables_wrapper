@@ -29,6 +29,9 @@ if ($action eq 'D') {
 } elsif ($action eq 'L') {
   # L:<table>:<chain>
   @cmd = (@iptables,'-t', $table, '-L', $chain, qw{-v -n --line-numbers});
+} elsif ($action eq 'S') {
+  # S:<table>:<chain>
+  @cmd = (@iptables,'-t', $table, '-S', $chain);
 } elsif ($action eq 'N') {
   # N:<table>:<chain>
   @cmd = (@iptables,'-t',$table,'-N', $chain);

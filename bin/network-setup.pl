@@ -53,27 +53,32 @@ if ($lock->is_file) {
   $lock->touch();
   for my $ncfg (@net_cfg) {
     my $setup = Kanku::Setup::LibVirt::Network->new(net_cfg=>$ncfg,name=>$ncfg->{name});
+
+   $logger->info("Trying to run $action for $ncfg->{name}");
     try {
       if ( $action eq 'start' ) {
 	$setup->prepare_ovs();
       }
 
-      if ( $action eq 'started' ) {
+      elsif ( $action eq 'started' ) {
 	$setup->prepare_dns();
 	$setup->start_dhcp();
       }
 
-      if ( $action eq 'stopped' ) {
+      elsif ( $action eq 'stopped' ) {
 	$setup->kill_dhcp();
 	$setup->bridge_down;
       }
 
-      if ( $action eq 'cleanup_iptables' ) {
+      elsif ( $action eq 'cleanup_iptables' ) {
 	$setup->cleanup_iptables;
       }
 
-      if ( $action eq 'configure_iptables' ) {
+      elsif ( $action eq 'configure_iptables' ) {
+         $logger->info("In $action for $ncfg->{name}");
 	 $setup->configure_iptables;
+      } else {
+        die "Action $action not known"; 
       }
     } catch {
       $logger->error("$0 $current_network_name $action failed:");
