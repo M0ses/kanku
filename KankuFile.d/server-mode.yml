@@ -45,7 +45,7 @@
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
-        - rcnetwork restart
+        - systemctl restart network.service
         - zypper -n in rabbitmq-server rabbitmq-server-plugins openvswitch kanku openssh-clients
         - rm -rf /usr/lib/kanku/lib
         - make -C /tmp/kanku install 2>&1 |tee /tmp/make.log

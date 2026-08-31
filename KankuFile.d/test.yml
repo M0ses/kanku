@@ -43,6 +43,6 @@
     use_module: Kanku::Handler::ExecuteCommandViaSSH
     options:
       commands:
-        - rcnetwork restart
+        - systemctl restart network.service
         - zypper -n in kanku
         - make -C /tmp/kanku test 2>&1 |tee /tmp/make.log
