@@ -100,8 +100,12 @@ sub _destroy_kvm {
     $logger->fatal("Error while removing domain: '$dn'");
     $ret = 1;
   };
-
-  my $ipt = Kanku::Util::IPTables->new(domain_name=>$dn);
+  my $ipt = Kanku::Util::IPTables->new(
+    domain_name    => $dn,
+    iptables_chain =>
+      Kanku::Config::Defaults->get('Kanku::Util::IPTables', 'iptables_chain_prefix').
+        Kanku::Config::Defaults->get('Kanku::Handler::CreateDomain', 'network_name')
+  );
   $ipt->cleanup_rules_for_domain();
 
   $logger->info("Removed domain `$dn` successfully");
