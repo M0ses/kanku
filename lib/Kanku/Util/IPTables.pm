@@ -39,6 +39,29 @@ has 'iptables_chain' => (
 );
 sub _build_iptables_chain {
   my ($self) = @_;
+  my $domain_name = $self->domain_name;
+  my $prefix = Kanku::Config::Defaults->get('Kanku::Util::IPTables', 'iptables_chain_prefix') || 'KANKU_HOSTS_';
+
+  if ($domain_name) {
+    eval {
+      require Sys::Virt;
+      require XML::XPath;
+      my $vmm = Sys::Virt->new(uri => 'qemu:///system');
+      my $dom = $vmm->lookup_domain_by_name($domain_name);
+      if ($dom) {
+        my $xml = $dom->get_xml_description;
+        my $xp = XML::XPath->new(xml => $xml);
+        my $net_node = $xp->find('//interface[@type="network"]/source/@network')->shift;
+        if ($net_node) {
+          return $prefix . $net_node->getData;
+        }
+      }
+    };
+  }
+
+  # Fallback (e.g. during kanku destroy when domain is already deleted)
+  my $default_net = Kanku::Config::Defaults->get('Kanku::Handler::CreateDomain', 'network_name') || 'kanku-devel';
+  return $prefix . $default_net;
 }
  
 has '+iptables_wrapper' => (lazy=>1, default => '/usr/lib/kanku/iptables_wrapper');
