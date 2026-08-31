@@ -24,7 +24,7 @@ plugins:
 
 # Kanku::Util::IPTables:
 #   start_port: 49001
-#   iptables_chain_prefix:       KANKU_HOSTS
+#   iptables_chain_prefix:       KANKU_HOSTS_
 
 Kanku::Util::VM::Console:
   debug: 0
