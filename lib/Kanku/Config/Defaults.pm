@@ -126,10 +126,7 @@ NE5OgEXk2wVfZczCZpigBKbKZHNYcelXtTt/nP3rsCuGcM4h53s=
     network_name => 'kanku-ovs',
     dns_domain_name => 'kanku.ovs',
   },
-  'Kanku::Setup::Server::Standalone' => {
-    network_name => 'kanku-server',
-    dns_domain_name => 'kanku.server',
-  },
+
   'Kanku::Roles::SSH' => {
     logverbosity    => 0,
     privatekey_path => q{},
