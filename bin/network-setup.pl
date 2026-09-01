@@ -78,7 +78,7 @@ if ($lock->is_file) {
          $logger->info("In $action for $ncfg->{name}");
 	 $setup->configure_iptables;
       } else {
-        die "Action $action not known"; 
+        warn "Action $action not known"; 
       }
     } catch {
       $logger->error("$0 $current_network_name $action failed:");
