@@ -105,9 +105,9 @@ sub execute {
     "mkdir -p $tmp_dir",
     $verbose."git clone $git_url $tmp_dir/",
     "git -C $tmp_dir checkout $git_revision",
-    "cd $tmp_dir/dist/t && bundle.ruby$ruby_version config set --local path 'vendor/bundle' $log_to_file",
-    "cd $tmp_dir/dist/t && bundle.ruby$ruby_version install $log_to_file",
-    "cd $tmp_dir/dist/t && bundle.ruby$ruby_version exec rspec $log_to_file",
+    "cd $tmp_dir/dist/t && bundler.ruby$ruby_version config set --local path 'vendor/bundle' $log_to_file",
+    "cd $tmp_dir/dist/t && bundler.ruby$ruby_version install $log_to_file",
+    "cd $tmp_dir/dist/t && bundler.ruby$ruby_version exec rspec $log_to_file",
     "rm -r $tmp_dir",
     "rm $logfile",
   );
