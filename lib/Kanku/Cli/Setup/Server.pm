@@ -150,6 +150,12 @@ option 'host_interface' => (
     default       => 'eth0',
 );
 
+option 'hostname' => (
+    isa           => 'Str',
+    is            => 'rw',
+    documentation => 'FQHN to use for setup',
+);
+
 sub run {
   my ($self)  = @_;
   my $logger  = $self->logger;
@@ -175,6 +181,8 @@ sub run {
   $setup->ovs_ip_prefix($self->ovs_ip_prefix) if $self->ovs_ip_prefix;
 
   $setup->dsn($self->dsn) if $self->dsn;
+
+  $setup->host($self->hostname) if $self->hostname;
 
   return $setup->setup();
 }

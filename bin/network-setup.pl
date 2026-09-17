@@ -31,8 +31,8 @@ if (ref($cfg->{'Kanku::LibVirt::Network::OpenVSwitch'}) eq 'ARRAY') {
 } elsif (ref($cfg->{'Kanku::LibVirt::Network::OpenVSwitch'}) eq 'HASH') {
   push @net_list, $cfg->{'Kanku::LibVirt::Network::OpenVSwitch'};
 } else {
-   $logger->warn("No valid config found for Kanku::LibVirt::Network::OpenVSwitch");
-   exit 0;
+  $logger->warn("No valid config found for Kanku::LibVirt::Network::OpenVSwitch");
+  exit 0;
 }
 
 if ($current_network_name eq '-') {
@@ -59,24 +59,22 @@ if ($lock->is_file) {
       if ( $action eq 'start' ) {
 	$setup->prepare_ovs();
       }
-
       elsif ( $action eq 'started' ) {
-	$setup->prepare_dns();
-	$setup->start_dhcp();
+        $setup->prepare_dns();
+        $setup->start_dhcp();
+        $setup->configure_iptables;
       }
-
       elsif ( $action eq 'stopped' ) {
 	$setup->kill_dhcp();
 	$setup->bridge_down;
+	$setup->cleanup_iptables;
       }
-
       elsif ( $action eq 'cleanup_iptables' ) {
 	$setup->cleanup_iptables;
       }
-
       elsif ( $action eq 'configure_iptables' ) {
-         $logger->info("In $action for $ncfg->{name}");
-	 $setup->configure_iptables;
+        $logger->info("In $action for $ncfg->{name}");
+        $setup->configure_iptables;
       } else {
         warn "Action $action not known"; 
       }

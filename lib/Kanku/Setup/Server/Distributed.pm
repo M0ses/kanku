@@ -404,6 +404,10 @@ sub _setup_ovs_hooks {
   $self->_run_system_cmd("systemctl", "start", "openvswitch");
   $self->_run_system_cmd("systemctl", "enable", "openvswitch");
 
+  my $hook_script = path("/etc/libvirt/hooks/network");
+
+  $hook_script->parent()->mkdir() unless $hook_script->parent()->is_dir();
+
   path("/etc/libvirt/hooks/network")->spew("#!/bin/bash
 
 /usr/bin/perl /usr/lib/kanku/network-setup.pl \$@

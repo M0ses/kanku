@@ -422,7 +422,7 @@ sub get_ipaddress {
 
   #
   # using `|cat` to suppress colorized output
-  # 
+  #
   my %cmd2func = (
     ip => sub {
       my ($self, $bin, $int) = @_;
@@ -498,20 +498,25 @@ sub get_ipaddress {
 sub guess_management_interface {
   my ($self) = @_;
   my $logger = $self->logger;
+  my $ifname;
 
-  my $out = $self->cmd('\ls -1 /sys/class/net/');
+  my $out   = $self->cmd('\cut -d: -f1 /proc/net/dev');
   my @lines = split(/\R/, $out->[0]);
-  # remove command line 'ls -1 /sys/class/net/'
+  # remove command line itself
+  shift @lines;
   shift @lines;
 
-  $self->management_interface(
-    [map { $_ =~ /^(em\d+|lan\d+|eth\d+|en.*)/ } @lines]->[0] ||
-    q{}
-  );
+  for my $line (@lines){
+    $logger->debug("line: $line");
+    if ($line =~ /^\s*(em\d+|lan\d+|eth\d+|en[a-z0-9]+)/) {
+      $ifname = $1;
+      last;
+    }
+  }
 
-  $logger->debug("Guessed management_interface: ".($self->management_interface||'NONE'));
+  $logger->debug("Guessed management_interface: ".($ifname||'NONE'));
 
-  return $self->management_interface;
+  return $ifname;
 }
 
 sub guess_network_tooling {
