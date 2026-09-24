@@ -132,7 +132,7 @@ sub prepare_ovs {
     # Set ip address for bridge interface
     my @cmd;
     my $ip = new Net::IP ($ncfg->{network});
-    @cmd = ("ip", "addr", "add", "$ncfg->{host_ip}/".$ip->mask, 'dev', $br);
+    @cmd = ("ip", "addr", "add", "$ncfg->{host_ip}/".$ip->prefixlen, 'dev', $br);
     $logger->debug("Configuring interface with command '@cmd'");
     system(@cmd);
 
