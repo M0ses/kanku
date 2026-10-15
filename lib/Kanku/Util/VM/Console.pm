@@ -461,7 +461,7 @@ sub get_ipaddress {
 
       $logger->debug("  -- Output:\n".Dumper($result));
       my @lines = split /\r\n/, $result->[0];
-      my @addr = map {$_ =~ qr{^\s*Address:\s+([\d.]+)$} ? $1 : ()} @lines;
+      my @addr = map {$_ =~ qr{^\s*Address:\s+([\d.]+)} ? $1 : ()} @lines;
       return $addr[0];
     },
   );
