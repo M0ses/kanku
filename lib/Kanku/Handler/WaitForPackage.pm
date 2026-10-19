@@ -259,7 +259,7 @@ sub execute {
 
         $logger->debug("  Package '$pname' status: $code");
 
-        if ($code eq 'succeeded') {
+	if ($code =~ /^(succeeded|disabled|excluded)$/) {
           # This package completed building successfully.
           next;
         } elsif ($code =~ /^(failed|broken|unresolvable)$/) {
