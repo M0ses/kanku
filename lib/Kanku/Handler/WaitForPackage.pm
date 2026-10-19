@@ -249,6 +249,7 @@ sub execute {
     # Now verify the build state of each target package.
     my $all_built_successfully = 1;
     my $has_terminal_failure   = 0;
+    my $has_unresolvables      = 0;
     my @terminal_fail_packages;
     my @pending_packages;
 
@@ -262,11 +263,17 @@ sub execute {
 	if ($code =~ /^(succeeded|disabled|excluded)$/) {
           # This package completed building successfully.
           next;
-        } elsif ($code =~ /^(failed|broken|unresolvable)$/) {
+        } elsif ($code =~ /^(failed|broken)$/) {
           # These indicate hard build errors on OBS. We abort early
           # rather than waiting for a hopeless timeout.
           $all_built_successfully = 0;
           $has_terminal_failure   = 1;
+          push @terminal_fail_packages, "$pname ($code)";
+        } elsif ($code eq "unresolvable") {
+          # An `unresolvable` package could be resolvable if its
+          # dependencies are built in the same package (e.g. multibuild)
+          $all_built_successfully = 0;
+          $has_unresolvables      = 1;
           push @terminal_fail_packages, "$pname ($code)";
         } else {
           # Any other state (building, scheduled, blocked, queued)
@@ -280,6 +287,14 @@ sub execute {
       $logger->debug("  No build status found yet for package '$package'.");
       $all_built_successfully = 0;
       push @pending_packages, "$package (not_scheduled_yet)";
+    }
+
+    if ($has_unresolvables) {
+      if ($all_built_successfully) {
+        $has_terminal_failure   = 1;
+      } else {
+        $has_terminal_failure   = 0;
+      }
     }
 
     # If any package has failed terminal build, raise an error immediately.
