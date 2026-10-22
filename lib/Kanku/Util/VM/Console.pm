@@ -29,7 +29,7 @@ with 'Kanku::Roles::Logger';
 
 has ['domain_name','short_hostname','log_file','login_user','login_pass'] => (is=>'rw', isa=>'Str');
 has 'prompt' => (is=>'rw', isa=>'Str',default=>'Kanku-prompt: ');
-has 'prompt_regex' => (is=>'rw', isa=>'Object',default=>sub { qr/^Kanku-prompt: /m });
+has 'prompt_regex' => (is=>'rw', isa=>'Object', default=>sub { qr/\r\n(?:\x1b\][^\x1b]*\x1b\\)*Kanku-prompt: /m });
 has _expect_object  => (is=>'rw', isa => 'Object');
 has [qw/bootloader_seen grub_seen user_is_logged_in console_connected log_stdout no_wait_for_bootloader/] => (is=>'rw', isa => 'Bool');
 has 'connect_uri' => (is=>'rw', isa=>'Str', 'builder'=>'_build_connect_uri');
@@ -190,6 +190,7 @@ sub login {
     $exp->send_slow(1,"\003","\004");
   }
   $logger->debug("Waiting $timeout for login: prompt");
+  my $prompt_regex = $self->prompt_regex;
   $exp->expect(
     $timeout,
       [ '^\S+ login: ' =>
@@ -239,6 +240,8 @@ sub login {
       ],
   );
   $exp->send("export TERM=dumb\n");
+  $exp->send("unset PS0\n");
+  $exp->send("unset PROMPT_COMMAND\n");
   while (my ($env, $val) = each %{$self->context2env}) {
     $val =~ s/'/\'/g;
     $exp->send("export $env='$val'\n");
@@ -257,7 +260,8 @@ sub login {
   );
   $self->user_is_logged_in(1);
   $exp->send("export PS1=\"".$self->prompt."\"\n");
-  $self->prompt_regex(qr/\r\nKanku-prompt: /m);
+  $self->prompt_regex($prompt_regex);
+
   my $count;
   $exp->expect(
       5,
@@ -461,7 +465,7 @@ sub get_ipaddress {
 
       $logger->debug("  -- Output:\n".Dumper($result));
       my @lines = split /\r\n/, $result->[0];
-      my @addr = map {$_ =~ qr{^\s*Address:\s+([\d.]+)} ? $1 : ()} @lines;
+      my @addr = map {$_ =~ qr{^\s*Address:\s+([\d.]+)$} ? $1 : ()} @lines;
       return $addr[0];
     },
   );
