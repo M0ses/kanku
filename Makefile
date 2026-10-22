@@ -23,12 +23,6 @@ TEMPLATE_DIRS = \
 	etc/kanku/templates/examples-vm/\
 
 TEMPLATE_FILES = \
-	templates/with-spice.tt2\
-	templates/vm-x86_64-uefi-tpm2.0.tt2\
-	templates/qlx-spice.tt2\
-   	templates/virtio-spice.tt2\
-      	templates/vm-x86_64-uefi.tt2\
-      	templates/vga-vnc.tt2\
 	templates/cmd/init/default.tt2\
 	templates/cmd/init/vagrant.tt2\
 	templates/cmd/setup/kanku.conf.mod_perl.tt2\
@@ -54,14 +48,40 @@ _DOCDIR = $(DESTDIR)/$(DOCDIR)
 
 PERL_CRITIC_READY := bin/*
 
-ARCH = $(shell uname -m)
+UNAME_M := $(shell uname -m)
+ARCH ?= $(UNAME_M)
+
+# Normalize architecture names to match physical template suffixes.
+# e.g., i586/i386 -> i686, powerpc64le -> ppc64le
+ifeq ($(ARCH),i586)
+  ARCH_NORM = i686
+else ifeq ($(ARCH),i386)
+  ARCH_NORM = i686
+else ifeq ($(ARCH),powerpc64le)
+  ARCH_NORM = ppc64le
+else
+  ARCH_NORM = $(ARCH)
+endif
 
 all:
 
 install_arch_templates:
-	install -m 644 etc/templates/default-vm.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/default-vm.tt2
-	install -m 644 etc/templates/bios-serial-network.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/bios-serial-network.tt2
-	install -m 644 etc/templates/bios-serial-bridge.tt2.$(ARCH) $(DESTDIR)/etc/kanku/templates/bios-serial-bridge.tt2
+	install -m 644 etc/templates/bios-serial-network.tt2.$(ARCH_NORM) $(DESTDIR)/etc/kanku/templates/bios-serial-network.tt2
+	install -m 644 etc/templates/bios-serial-bridge.tt2.$(ARCH_NORM) $(DESTDIR)/etc/kanku/templates/bios-serial-bridge.tt2
+	[ -f etc/templates/uefi-serial-network.tt2.$(ARCH_NORM) ] && install -m 644 etc/templates/uefi-serial-network.tt2.$(ARCH_NORM) $(DESTDIR)/etc/kanku/templates/uefi-serial-network.tt2 || true
+	[ -f etc/templates/uefi_tpm-serial-network.tt2.$(ARCH_NORM) ] && install -m 644 etc/templates/uefi_tpm-serial-network.tt2.$(ARCH_NORM) $(DESTDIR)/etc/kanku/templates/uefi_tpm-serial-network.tt2 || true
+	[ -f etc/templates/bios-qxl_spice-network.tt2.$(ARCH_NORM) ] && install -m 644 etc/templates/bios-qxl_spice-network.tt2.$(ARCH_NORM) $(DESTDIR)/etc/kanku/templates/bios-qxl_spice-network.tt2 || true
+	[ -f etc/templates/bios-spice-network.tt2.$(ARCH_NORM) ] && install -m 644 etc/templates/bios-spice-network.tt2.$(ARCH_NORM) $(DESTDIR)/etc/kanku/templates/bios-spice-network.tt2 || true
+	[ -f etc/templates/bios-vnc-network.tt2.$(ARCH_NORM) ] && install -m 644 etc/templates/bios-vnc-network.tt2.$(ARCH_NORM) $(DESTDIR)/etc/kanku/templates/bios-vnc-network.tt2 || true
+	[ -f etc/templates/bios-cirrus-spice-network.tt2.$(ARCH_NORM) ] && install -m 644 etc/templates/bios-cirrus-spice-network.tt2.$(ARCH_NORM) $(DESTDIR)/etc/kanku/templates/bios-cirrus-spice-network.tt2 || true
+	# Legacy backward-compatibility symlinks (only created if target template exists in DESTDIR)
+	[ -f $(DESTDIR)/etc/kanku/templates/bios-serial-network.tt2 ] && ln -sf bios-serial-network.tt2 $(DESTDIR)/etc/kanku/templates/default-vm.tt2 || true
+	[ -f $(DESTDIR)/etc/kanku/templates/bios-cirrus-spice-network.tt2 ] && ln -sf bios-cirrus-spice-network.tt2 $(DESTDIR)/etc/kanku/templates/with-spice.tt2 || true
+	[ -f $(DESTDIR)/etc/kanku/templates/uefi-serial-network.tt2 ] && ln -sf uefi-serial-network.tt2 $(DESTDIR)/etc/kanku/templates/vm-x86_64-uefi.tt2 || true
+	[ -f $(DESTDIR)/etc/kanku/templates/uefi_tpm-serial-network.tt2 ] && ln -sf uefi_tpm-serial-network.tt2 $(DESTDIR)/etc/kanku/templates/vm-x86_64-uefi-tpm2.0.tt2 || true
+	[ -f $(DESTDIR)/etc/kanku/templates/bios-spice-network.tt2 ] && ln -sf bios-spice-network.tt2 $(DESTDIR)/etc/kanku/templates/virtio-spice.tt2 || true
+	[ -f $(DESTDIR)/etc/kanku/templates/bios-vnc-network.tt2 ] && ln -sf bios-vnc-network.tt2 $(DESTDIR)/etc/kanku/templates/vga-vnc.tt2 || true
+	[ -f $(DESTDIR)/etc/kanku/templates/bios-qxl_spice-network.tt2 ] && ln -sf bios-qxl_spice-network.tt2 $(DESTDIR)/etc/kanku/templates/qlx-spice.tt2 || true
 
 install: install_dirs install_full_dirs install_services install_docs configs templates public views bashcomp urlwrapper install_arch_templates install_tests polkit
 	install -m 644 dist/profile.d-kanku.sh $(DESTDIR)/etc/profile.d/kanku.sh

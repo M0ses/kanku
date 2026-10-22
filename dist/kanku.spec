@@ -121,7 +121,7 @@ e.g. to prepare development environments or run simple tests.
 %endif
 
 %install
-%make_install DOCDIR=%{_defaultdocdir}/kanku/
+%make_install ARCH=%{_target_cpu} DOCDIR=%{_defaultdocdir}/kanku/
 mkdir -p %{buildroot}/%{_sysusersdir}
 cp dist/system-user-%{kanku_user}.conf %{buildroot}/%{_sysusersdir}/system-user-%{kanku_user}.conf
 %fdupes %{buildroot}/opt/kanku/share
@@ -236,8 +236,20 @@ common config and lib files used in kanku
 %config /etc/kanku/templates/default-vm.tt2
 %config /etc/kanku/templates/bios-serial-network.tt2
 %config /etc/kanku/templates/bios-serial-bridge.tt2
-%config /etc/kanku/templates/with-spice.tt2
+%config /etc/kanku/templates/uefi-serial-network.tt2
+%config /etc/kanku/templates/uefi_tpm-serial-network.tt2
+%config /etc/kanku/templates/vm-x86_64-uefi.tt2
 %config /etc/kanku/templates/vm-x86_64-uefi-tpm2.0.tt2
+%ifarch %{ix86} x86_64
+%config /etc/kanku/templates/bios-cirrus-spice-network.tt2
+%config /etc/kanku/templates/bios-qxl_spice-network.tt2
+%config /etc/kanku/templates/bios-spice-network.tt2
+%config /etc/kanku/templates/bios-vnc-network.tt2
+%config /etc/kanku/templates/virtio-spice.tt2
+%config /etc/kanku/templates/vga-vnc.tt2
+%config /etc/kanku/templates/qlx-spice.tt2
+%config /etc/kanku/templates/with-spice.tt2
+%endif
 %config /etc/kanku/templates/cmd/init/default.tt2
 %config /etc/kanku/templates/cmd/init/vagrant.tt2
 %config /etc/kanku/templates/cmd/setup/*
