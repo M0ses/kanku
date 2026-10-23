@@ -55,11 +55,32 @@ has 'context2env' => (
   default => sub { {} },
 );
 
+#
+# Active network framework managing the guest network
+# (e.g. systemd-networkd, wicked, NetworkManager, ifupdown, sysconfig).
+#
+has 'network_framework' => (
+  is      => 'rw',
+  isa     => 'Str',
+  lazy    => 1,
+  builder => 'detect_network_framework',
+);
+
+#
+# Pluggable network adapter handling framework-specific commands
+#
+has 'network_adapter' => (
+  is      => 'rw',
+  isa     => 'Object',
+  lazy    => 1,
+  builder => '_build_network_adapter',
+);
+
 has 'network_tooling' => (
   is      => 'rw',
   isa     => 'Object',
   lazy    => 1,
-  builder => 'guess_network_tooling'
+  builder => 'guess_network_tooling',
 );
 
 sub init {
@@ -419,68 +440,18 @@ sub get_ipaddress {
     $logger->debug("User already logged in.");
   }
 
-  my $wait         = $opts{timeout};
-  my $ipaddress    = undef;
-  my $cmd          = $self->guess_network_tooling;
-  my $cmd_short    = $cmd->basename;
-
-  #
-  # using `|cat` to suppress colorized output
-  #
-  my %cmd2func = (
-    ip => sub {
-      my ($self, $bin, $int) = @_;
-      my $ipaddress;
-      my $result = $self->cmd("LANG=C \\ip addr show $int 2>&1|cat");
-
-      $logger->trace("  -- Output:\n".Dumper($result));
-
-      map { $ipaddress = $1 if m/^\s+inet\s+([0-9\.]+)\// } split /\n/, $result->[0];
-      return $ipaddress
-    },
-    wicked => sub {
-      my ($self, $bin, $int) = @_;
-      my $ipaddress;
-      my $result = $self->cmd("LANG=C $bin ifstatus $int 2>&1|cat");
-
-      $logger->debug("  -- Output:\n".Dumper($result));
-      my @lines = split /\r\n/, $result->[0];
-      my @addr = map { ($_ =~ /^\s+addr:\s+ipv4\s+([0-9.]+)\//) ? $1 : ()  } @lines;
-      return $addr[0];
-    },
-    nmcli => sub {
-      my ($self, $bin, $int) = @_;
-      my $ipaddress;
-      my $result = $self->cmd("LANG=C $bin device show $int 2>&1|cat");
-
-      $logger->debug("  -- Output:\n".Dumper($result));
-      my @lines = split /\r\n/, $result->[0];
-      my @addr = map {$_ =~ qr{^IP4.ADDRESS\[1\]:\s+([\d.]+)/?.*$} ? $1 : ()} @lines;
-      return $addr[0];
-    },
-    networkctl => sub {
-      my ($self, $bin, $int) = @_;
-      my $ipaddress;
-      my $result = $self->cmd("LANG=C $bin status $int 2>&1|cat");
-
-      $logger->debug("  -- Output:\n".Dumper($result));
-      my @lines = split /\r\n/, $result->[0];
-      my @addr = map {$_ =~ qr{^\s*Address:\s+([\d.]+)(\s.*)?$} ? $1 : ()} @lines;
-      return $addr[0];
-    },
-  );
-
-  my $cmd_ref  = $cmd2func{$cmd_short};
-
-  croak "Could not find cmd_ref for $cmd_short" unless $cmd_ref;
+  my $wait      = $opts{timeout};
+  my $ipaddress = undef;
 
   while ( $wait > 0) {
-    # use cat for disable colors
-    $ipaddress = $cmd_ref->($self, $cmd, $opts{interface});
+    # Query IP address via pluggable network adapter
+    $ipaddress = $self->network_adapter->get_ipaddress($opts{interface});
     if ($ipaddress) {
-      last
+      last;
     } else {
-      $logger->debug("Could not get ip address form interface $opts{interface}.");
+      $logger->debug(
+        "Could not get ip address from interface $opts{interface}."
+      );
       $logger->debug("Waiting another $wait seconds for network to come up");
       $wait--;
       sleep 1;
@@ -496,7 +467,7 @@ sub get_ipaddress {
 
   $self->cmd_timeout($save_timeout);
 
-  return $ipaddress
+  return $ipaddress;
 }
 
 sub guess_management_interface {
@@ -523,15 +494,38 @@ sub guess_management_interface {
   return $ifname;
 }
 
-sub guess_network_tooling {
+#
+# Builder for network_framework: probes guest VM via Factory
+#
+sub detect_network_framework {
   my ($self) = @_;
-  my $type_output  = $self->cmd("type -P networkctl nmcli wicked ifdown ip||true");
-  my @tmp          = split /\r\n/, $type_output->[0], 3;
-  # use index no. 1 because 0 contains the command `type -P ...`
-  my $cmd          = path($tmp[1]);
-  return $cmd;
+  require Kanku::Util::VM::Network::Factory;
+  return Kanku::Util::VM::Network::Factory->detect($self);
 }
 
+#
+# Builder for network_adapter: instantiates adapter matching framework
+#
+sub _build_network_adapter {
+  my ($self) = @_;
+  require Kanku::Util::VM::Network::Factory;
+  return Kanku::Util::VM::Network::Factory->create(
+    console   => $self,
+    framework => $self->network_framework,
+  );
+}
+
+#
+# Builder for network_tooling: delegates to active adapter's resolved tool
+#
+sub guess_network_tooling {
+  my ($self) = @_;
+  return $self->network_adapter->tool;
+}
+
+#
+# Restart network interface using active network adapter
+#
 sub network_restart {
   my ($self) = @_;
   my $logger = $self->logger;
@@ -539,17 +533,7 @@ sub network_restart {
     $logger->warn("No management_interface found");
     return;
   }
-  my %cmd2func = (
-    networkctl => "networkctl down %s;networkctl up %s",
-    ip         => "ip link dev %s down;ip link dev %s up",
-    wicked     => "ifdown %s;ifup %s",
-    nmcli      => "nmcli device disconnect %s;nmcli device connect %s",
-    ifdown     => "ifdown %s;ifup %s",
-  );
-  my $cmd      = $self->network_tooling;
-  my $template  = $cmd2func{$cmd->basename};
-
-  $self->cmd(sprintf($template, $self->management_interface, $self->management_interface));
+  $self->network_adapter->restart($self->management_interface);
   return;
 }
 __PACKAGE__->meta->make_immutable;
